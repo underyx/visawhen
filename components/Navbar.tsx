@@ -12,6 +12,9 @@ export default function Navbar() {
       <div className="navbar-brand">
         <Link href="/">
           <a className="navbar-item">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.svg" alt="Logo for VisaWhen" />
+            &nbsp;
             <b>VisaWhen</b>
           </a>
         </Link>
