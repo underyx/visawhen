@@ -9,14 +9,14 @@ export default function Navbar() {
       role="navigation"
       aria-label="main navigation"
     >
-      <div className="container is-size-6 is-max-desktop">
+      <div className="container is-size-6 is-max-desktop px-2">
         <div className="navbar-brand">
           <Link href="/">
             <a className="navbar-item">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo.svg" alt="Logo for VisaWhen" />
               &nbsp;
-              <b>VisaWhen</b>
+              <b className="is-hidden-mobile">VisaWhen</b>
             </a>
           </Link>
 
@@ -55,7 +55,8 @@ export default function Navbar() {
                     <span className="icon">
                       <FontAwesomeIcon icon={faHeart} />
                     </span>
-                    <span>Buy Bence a coffee</span>
+                    <span className="is-hidden-tablet">Donate</span>
+                    <span className="is-hidden-mobile">Buy Bence a coffee</span>
                   </a>
                 </div>
               </div>
