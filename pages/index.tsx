@@ -13,6 +13,12 @@ export default function Home() {
           content="Data on US visa wait times at the National Visa Center and at US consulates."
         />
         <link rel="canonical" href="https://visawhen.com" />
+        <meta property="og:title" content="US visa wait times" />
+        <meta
+          property="og:description"
+          content="Data on US visa wait times at the National Visa Center and at US consulates."
+        />
+        <meta property="og:url" content="https://visawhen.com" />
       </Head>
 
       <h1 className="title">Welcome to VisaWhen</h1>

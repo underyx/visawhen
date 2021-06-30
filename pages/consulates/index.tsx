@@ -37,6 +37,12 @@ export default function ConsulateSelect({ posts }: Props) {
           content={`See how long the visa backlog is at any of ${posts.length} consulates.`}
         />
         <link rel="canonical" href="https://visawhen.com/consulates" />
+        <meta property="og:title" content="Consulate visa backlogs" />
+        <meta
+          property="og:description"
+          content={`See how long the visa backlog is at any of ${posts.length} consulates.`}
+        />
+        <meta property="og:url" content="https://visawhen.com/consulates" />
       </Head>
       <p className="panel-heading">Select your consulate</p>
       <div className="panel-block">

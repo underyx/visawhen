@@ -99,6 +99,29 @@ export default function ConsulateStats({
           rel="canonical"
           href={`https://visawhen.com/consulates/${postSlug}/${visaClassSlug}`}
         />
+        <meta
+          property="og:title"
+          content={`${postName} ${visaClassName} visa backlog`}
+        />
+        <meta
+          property="og:description"
+          content={
+            `${postName} used to issue ${
+              Math.round(baselineRate * 10) / 10
+            } ${visaClassName} visas per month on average.` +
+            (monthsAhead !== null
+              ? ` Now they are ${Math.abs(
+                  Math.round(monthsAhead * 10) / 10
+                )} months ${
+                  monthsAhead >= 0 ? "ahead of" : "behind"
+                } expectations.`
+              : "")
+          }
+        />
+        <meta
+          property="og:url"
+          content={`https://visawhen.com/consulates/${postSlug}/${visaClassSlug}`}
+        />
       </Head>
       <div className="my-1">
         <Link href="/consulates">

@@ -97,6 +97,15 @@ export default function ConsulateSelect({
           rel="canonical"
           href={`https://visawhen.com/consulates/${postSlug}`}
         />
+        <meta property="og:title" content={`${postName} visa backlogs`} />
+        <meta
+          property="og:description"
+          content={`See how long the visa backlog is at ${postName} in any of ${availableVisaClasses.length} visa categories.`}
+        />
+        <meta
+          property="og:url"
+          content={`https://visawhen.com/consulates/${postSlug}`}
+        />
       </Head>
       <div className="my-1">
         <Link href="/consulates">

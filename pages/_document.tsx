@@ -29,6 +29,10 @@ class MyDocument extends Document {
     return (
       <Html lang="en" className="has-navbar-fixed-top">
         <Head>
+          <meta property="og:type" content="website" />
+          <meta property="og:site_name" content="VisaWhen" />
+          <meta property="twitter:creator" content="underyx" />
+          <meta property="twitter:creator:id" content="222041531" />
           <link
             rel="apple-touch-icon"
             sizes="180x180"

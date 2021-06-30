@@ -70,6 +70,18 @@ export default function NvcBacklog({ data }: Props) {
           )} days to respond to inquiries.`}
         />
         <link rel="canonical" href="https://visawhen.com/nvc" />
+        <meta property="og:title" content="NVC wait times" />
+        <meta
+          property="og:description"
+          content={`The National Visa Center is currently taking ${last(
+            Object.values(data.review)
+          )} days to review documents, ${last(
+            Object.values(data.creation)
+          )} days to create cases, and ${last(
+            Object.values(data.inquiry)
+          )} days to respond to inquiries.`}
+        />
+        <meta property="og:url" content="https://visawhen.com/nvc" />
       </Head>
       <h1 className="title">NVC wait times</h1>
       <p className="my-4">
