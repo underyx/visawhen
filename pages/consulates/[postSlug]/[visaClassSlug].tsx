@@ -1,3 +1,4 @@
+import Link from "next/link";
 import last from "lodash/last";
 import { GetStaticPaths, GetStaticProps } from "next";
 import React from "react";
@@ -12,6 +13,8 @@ import {
 import Head from "next/head";
 import ConsulateChart from "../../../components/ConsulateChart";
 import { useRouter } from "next/dist/client/router";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const rows = await getSlugPairs();
@@ -96,6 +99,24 @@ export default function ConsulateStats({
           href={`https://visawhen.com/consulates/${postSlug}/${visaClassSlug}`}
         />
       </Head>
+      <div className="my-1">
+        <Link href="/consulates">
+          <a className="button is-small is-link is-light">
+            <span className="icon">
+              <FontAwesomeIcon icon={faChevronLeft} />
+            </span>
+            &nbsp;&nbsp;Change consulate
+          </a>
+        </Link>{" "}
+        <Link href={`/consulates/${postSlug}`}>
+          <a className="button is-small is-link is-light">
+            <span className="icon">
+              <FontAwesomeIcon icon={faChevronLeft} />
+            </span>
+            &nbsp;&nbsp;Change visa class
+          </a>
+        </Link>
+      </div>
       <h1 className="title">
         {postName}&rsquo;s {visaClassName} visa backlog
       </h1>

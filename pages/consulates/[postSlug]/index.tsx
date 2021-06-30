@@ -86,7 +86,7 @@ export default function ConsulateSelect({
   if (typeof postSlug !== "string") return;
 
   return (
-    <nav className="panel">
+    <div>
       <Head>
         <title>{postName} visa backlog</title>
         <meta
@@ -98,7 +98,7 @@ export default function ConsulateSelect({
           href={`https://visawhen.com/consulates/${postSlug}`}
         />
       </Head>
-      <p className="panel-heading">
+      <div className="my-1">
         <Link href="/consulates">
           <a className="button is-small is-link is-light">
             <span className="icon">
@@ -106,45 +106,47 @@ export default function ConsulateSelect({
             </span>
             &nbsp;&nbsp;Change consulate
           </a>
-        </Link>{" "}
-        Select your visa type in {postName}
-      </p>
-      <div className="panel-block">
-        <p className="control has-icons-left">
-          <input
-            className="input"
-            type="text"
-            placeholder="DL6"
-            onInput={(event: React.ChangeEvent<HTMLInputElement>) => {
-              setTerm(event.target.value);
-            }}
-          />
-          <span className="icon is-left">
-            <FontAwesomeIcon icon={faSearch} />
-          </span>
-        </p>
+        </Link>
       </div>
-      {filteredVisas.map(({ visaClass, visaClassSlug }) =>
-        availableVisaClassesSet.has(visaClassSlug) ? (
-          <Link href={`/consulates/${postSlug}/${visaClassSlug}`}>
-            <a key={visaClassSlug} className="panel-block">
-              {visaClass}
+      <p className="panel-heading">{postName} › Select your visa type</p>
+      <nav className="panel">
+        <div className="panel-block">
+          <p className="control has-icons-left">
+            <input
+              className="input"
+              type="text"
+              placeholder="DL6"
+              onInput={(event: React.ChangeEvent<HTMLInputElement>) => {
+                setTerm(event.target.value);
+              }}
+            />
+            <span className="icon is-left">
+              <FontAwesomeIcon icon={faSearch} />
+            </span>
+          </p>
+        </div>
+        {filteredVisas.map(({ visaClass, visaClassSlug }) =>
+          availableVisaClassesSet.has(visaClassSlug) ? (
+            <Link href={`/consulates/${postSlug}/${visaClassSlug}`}>
+              <a key={visaClassSlug} className="panel-block">
+                {visaClass}
+              </a>
+            </Link>
+          ) : (
+            <a
+              key={visaClassSlug}
+              className="panel-block has-text-grey-light is-unclickable"
+            >
+              {visaClass} (none issued in past years)
             </a>
-          </Link>
-        ) : (
-          <a
-            key={visaClassSlug}
-            className="panel-block has-text-grey-light is-unclickable"
-          >
-            {visaClass} (none issued in past years)
-          </a>
-        )
-      )}
+          )
+        )}
+      </nav>
       <style jsx>{`
         .is-unclickable {
           cursor: initial;
         }
       `}</style>
-    </nav>
+    </div>
   );
 }
