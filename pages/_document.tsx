@@ -8,12 +8,15 @@ import Document, {
 import React from "react";
 import Navbar from "../components/Navbar";
 import PageWrapper from "../components/PageWrapper";
+import FullStory from "react-fullstory";
 
 // The following import prevents a Font Awesome icon server-side rendering bug,
 // where the icons flash from a very large icon down to a properly sized one:
 // Prevent fontawesome from adding its CSS since we did it manually.
 import { config } from "@fortawesome/fontawesome-svg-core";
 config.autoAddCss = false; /* eslint-disable import/first */
+
+const FULLSTORY_ORG_ID = "112R81";
 
 class MyDocument extends Document {
   static async getInitialProps(ctx: DocumentContext) {
@@ -51,6 +54,7 @@ class MyDocument extends Document {
             <Main />
           </PageWrapper>
           <NextScript />
+          <FullStory org={FULLSTORY_ORG_ID} />
         </body>
       </Html>
     );
