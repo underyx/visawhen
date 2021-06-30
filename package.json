@@ -13,6 +13,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.35",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/react-fontawesome": "^0.1.14",
+    "@fullstory/browser": "^1.4.9",
     "bulma": "^0.9.3",
     "date-fns": "^2.22.1",
     "echarts": "^5.1.2",
