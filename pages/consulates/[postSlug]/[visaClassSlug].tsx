@@ -83,14 +83,15 @@ export default function ConsulateStats({
         <meta
           name="description"
           content={
-            `${postName} used to issue
-        ${Math.round(baselineRate * 10) / 10} ${visaClassName}
-        visas per month on average.` +
+            `${postName} used to issue ${
+              Math.round(baselineRate * 10) / 10
+            } ${visaClassName} visas per month on average.` +
             (monthsAhead !== null
               ? ` Now they are ${Math.abs(
                   Math.round(monthsAhead * 10) / 10
-                )} months
-              ${monthsAhead >= 0 ? "ahead of" : "behind"} expectations.`
+                )} months ${
+                  monthsAhead >= 0 ? "ahead of" : "behind"
+                } expectations.`
               : "")
           }
         />

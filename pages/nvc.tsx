@@ -69,7 +69,7 @@ export default function NvcBacklog({ data }: Props) {
             Object.values(data.inquiry)
           )} days to respond to inquiries.`}
         />
-        <link rel="canonical" href={`https://visawhen.com/nvc`} />
+        <link rel="canonical" href="https://visawhen.com/nvc" />
       </Head>
       <h1 className="title">NVC wait times</h1>
       <p className="my-4">
