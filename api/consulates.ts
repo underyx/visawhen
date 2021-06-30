@@ -120,6 +120,7 @@ export async function getBacklog(
   );
   return rows.map((row) => ({
     ...row,
+    month: row.month.replace(" ", "T") + ".000Z",
     backlog: row.backlog ?? null,
     monthsAhead: row.monthsAhead ?? null,
   }));
