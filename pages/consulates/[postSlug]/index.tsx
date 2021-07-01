@@ -74,7 +74,7 @@ export default function ConsulateSelect({
   }, [availableVisaClasses, setAvailableVisaClassesSet]);
 
   useEffect(() => {
-    const normalizedTerm = deburr(term).replace(/\W/, "");
+    const normalizedTerm = deburr(term).toLowerCase().replace(/\W/, "");
     setFilteredVisas(
       visaClasses.filter(({ visaClassSlug }) =>
         visaClassSlug.includes(normalizedTerm)
