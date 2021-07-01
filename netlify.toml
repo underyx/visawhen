@@ -2,17 +2,17 @@
   command = "npm run export"
 
 [[plugins]]
-package = "netlify-plugin-cache-nextjs"
+  package = "netlify-plugin-cache-nextjs"
 
 [[plugins]]
   package = "@netlify/plugin-lighthouse"
 
 [[headers]]
-for = "/*"
-[headers.values]
-  Cache-Control = "public, max-age=3600"
+  for = "/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
 
 [[headers]]
-for = "/nvc"
-[headers.values]
-  Cache-Control = "public, max-age=600"
+  for = "/nvc"
+  [headers.values]
+    Cache-Control = "public, max-age=600"
