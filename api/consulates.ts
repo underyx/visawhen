@@ -53,6 +53,7 @@ export async function getAllPosts(): Promise<PostRow[]> {
 export interface VisaClassRow {
   visaClass: string;
   visaClassSlug: string;
+  description: string | null;
 }
 
 export async function getVisaClass(
@@ -61,7 +62,7 @@ export async function getVisaClass(
   const db = await openDb();
   return await db.get<VisaClassRow>(
     `
-      SELECT "Visa Class" AS visaClass, "Visa Class Slug" AS visaClassSlug
+      SELECT "Visa Class" AS visaClass, "Visa Class Slug" AS visaClassSlug, "Description" AS description
       FROM visa_slugs WHERE "Visa Class Slug" = ?
     `,
     visaClassSlug
@@ -72,7 +73,7 @@ export async function getAllVisaClasses(): Promise<VisaClassRow[]> {
   const db = await openDb();
   return await db.all<VisaClassRow[]>(
     `
-      SELECT "Visa Class" AS visaClass, "Visa Class Slug" AS visaClassSlug
+      SELECT "Visa Class" AS visaClass, "Visa Class Slug" AS visaClassSlug, "Description" AS description
       FROM visa_slugs
     `
   );

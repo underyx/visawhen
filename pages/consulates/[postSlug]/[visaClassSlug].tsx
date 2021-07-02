@@ -52,6 +52,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       backlog: backlog,
       postName: post.post,
       visaClassName: visaClass.visaClass,
+      visaClassDescription: visaClass.description,
     },
   };
 };
@@ -61,6 +62,7 @@ interface Props {
   backlog: BacklogRow[];
   postName: string;
   visaClassName: string;
+  visaClassDescription: string | null;
 }
 
 export default function ConsulateStats({
@@ -68,6 +70,7 @@ export default function ConsulateStats({
   backlog,
   postName,
   visaClassName,
+  visaClassDescription,
 }: Props) {
   const monthsAhead = (last(backlog) as BacklogRow).monthsAhead;
   const router = useRouter();
@@ -78,7 +81,8 @@ export default function ConsulateStats({
     <main>
       <Head>
         <title>
-          {postName} {visaClassName} visa backlog
+          Backlog in {postName} for {visaClassName} visas
+          {visaClassDescription !== null ? ` (${visaClassDescription})` : ""}
         </title>
         <meta
           name="description"
@@ -101,21 +105,32 @@ export default function ConsulateStats({
         />
         <meta
           property="og:title"
-          content={`${postName} ${visaClassName} visa backlog`}
+          content={
+            `Backlog in ${postName} for ${visaClassName} visas` +
+              visaClassDescription !==
+            null
+              ? ` (${visaClassDescription})`
+              : ""
+          }
         />
         <meta
           property="og:description"
           content={
             `${postName} used to issue ${
               Math.round(baselineRate * 10) / 10
-            } ${visaClassName} visas per month on average.` +
-            (monthsAhead !== null
-              ? ` Now they are ${Math.abs(
-                  Math.round(monthsAhead * 10) / 10
-                )} months ${
-                  monthsAhead >= 0 ? "ahead of" : "behind"
-                } expectations.`
-              : "")
+            } ${visaClassName}` +
+              visaClassDescription !==
+            null
+              ? ` (${visaClassDescription})`
+              : "" +
+                ` visas per month on average.` +
+                (monthsAhead !== null
+                  ? ` Now they are ${Math.abs(
+                      Math.round(monthsAhead * 10) / 10
+                    )} months ${
+                      monthsAhead >= 0 ? "ahead of" : "behind"
+                    } expectations.`
+                  : "")
           }
         />
         <meta
@@ -144,6 +159,9 @@ export default function ConsulateStats({
       <h1 className="title">
         {postName}&rsquo;s {visaClassName} visa backlog
       </h1>
+      {visaClassDescription !== null && (
+        <h2 className="subtitle">{visaClassDescription}</h2>
+      )}
       <p className="my-4">
         Before 2020 March, {postName} issued{" "}
         <strong>{Math.round(baselineRate * 10) / 10}</strong> {visaClassName}{" "}
