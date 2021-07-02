@@ -88,9 +88,8 @@ export default function ConsulateSelect({ posts, baselines }: Props) {
         </p>
       </div>
       {filteredPosts.map(({ post, postSlug }) => (
-        // eslint-disable-next-line react/jsx-key
-        <Link href={`/consulates/${postSlug}/`}>
-          <a key={postSlug} className="option panel-block">
+        <Link key={postSlug} href={`/consulates/${postSlug}/`}>
+          <a className="option panel-block">
             <div className="post">
               <strong className="tag is-medium is-link is-light mr-3">
                 {post}
