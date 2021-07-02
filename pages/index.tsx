@@ -28,7 +28,8 @@ export default function Home() {
           <div className="card">
             <header className="card-header">
               <p className="card-header-title has-text-grey-light">
-                Step 1: USCIS
+                <span className="tag is-light is-medium mr-2">Step 1</span>{" "}
+                USCIS
               </p>
             </header>
             <div className="card-content">
@@ -48,7 +49,10 @@ export default function Home() {
             <Link href="/nvc">
               <a>
                 <header className="card-header">
-                  <p className="card-header-title">Step 2: NVC</p>
+                  <p className="card-header-title">
+                    <span className="tag is-link is-medium mr-2">Step 2</span>{" "}
+                    NVC
+                  </p>
                   <span className="card-header-icon">
                     <span className="icon">
                       <FontAwesomeIcon icon={faChevronRight} />
@@ -76,7 +80,10 @@ export default function Home() {
             <Link href="/consulates">
               <a>
                 <header className="card-header">
-                  <p className="card-header-title">Step 3: Consulate</p>
+                  <p className="card-header-title">
+                    <span className="tag is-link is-medium mr-2">Step 3</span>{" "}
+                    Consulate
+                  </p>
                   <button className="card-header-icon" aria-label="open">
                     <span className="icon">
                       <FontAwesomeIcon icon={faChevronRight} />
