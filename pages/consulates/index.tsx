@@ -1,32 +1,48 @@
-import { GetStaticProps } from "next";
-import { getAllPosts, PostRow } from "../../api/consulates";
-import Link from "next/link";
-import React, { useEffect, useState } from "react";
-import { deburr, kebabCase } from "lodash";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { deburr, kebabCase, sortBy } from "lodash";
+import { GetStaticProps } from "next";
 import Head from "next/head";
+import Link from "next/link";
+import numeral from "numeral";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  ConsulateBaselineRow,
+  getAllPosts,
+  getConsulateBaselines,
+  PostRow,
+} from "../../api/consulates";
 
 export const getStaticProps: GetStaticProps = async () => ({
   props: {
     posts: await getAllPosts(),
+    baselines: await getConsulateBaselines(),
   },
 });
 
 interface Props {
   posts: PostRow[];
+  baselines: ConsulateBaselineRow[];
 }
 
-export default function ConsulateSelect({ posts }: Props) {
+export default function ConsulateSelect({ posts, baselines }: Props) {
   const [term, setTerm] = useState<string>("");
   const [filteredPosts, setFilteredPosts] = useState<PostRow[]>(posts);
+
+  const baselineMap = useMemo<Map<string, number>>(
+    () => new Map(baselines.map((row) => [row.postSlug, row.issuances])),
+    [baselines]
+  );
 
   useEffect(() => {
     const normalizedTerm = kebabCase(deburr(term.toLowerCase()));
     setFilteredPosts(
-      posts.filter(({ postSlug }) => postSlug.includes(normalizedTerm))
+      sortBy(
+        posts.filter(({ postSlug }) => postSlug.includes(normalizedTerm)),
+        ({ postSlug }) => -(baselineMap.get(postSlug) ?? -1)
+      )
     );
-  }, [posts, term, setFilteredPosts]);
+  }, [baselineMap, posts, term, setFilteredPosts]);
 
   return (
     <nav className="panel">
@@ -63,11 +79,36 @@ export default function ConsulateSelect({ posts }: Props) {
       {filteredPosts.map(({ post, postSlug }) => (
         // eslint-disable-next-line react/jsx-key
         <Link href={`/consulates/${postSlug}/`}>
-          <a key={postSlug} className="panel-block">
-            {post}
+          <a key={postSlug} className="option panel-block">
+            <div className="post">
+              <strong className="tag is-medium is-link is-light mr-3">
+                {post}
+              </strong>{" "}
+            </div>
+            <div>
+              <span className="ml-3 tag">
+                normally{" "}
+                {numeral(baselineMap.get(postSlug))
+                  .format((baselineMap.get(postSlug) ?? 0) > 10 ? "0a" : "0.0a")
+                  .toUpperCase()}
+                /mo
+              </span>
+            </div>
           </a>
         </Link>
       ))}
+      <style jsx>{`
+        .post {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .option {
+          display: flex;
+          justify-content: space-between;
+        }
+      `}</style>
     </nav>
   );
 }

@@ -19,6 +19,7 @@
     "echarts-for-react": "^3.0.1",
     "lodash": "^4.17.21",
     "next": "11.0.1",
+    "numeral": "^2.0.6",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "sass": "^1.35.1",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.14.170",
+    "@types/numeral": "^2.0.1",
     "@types/react": "17.0.13",
     "eslint": "^7.29.0",
     "eslint-config-next": "^11.0.1",

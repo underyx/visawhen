@@ -1,22 +1,21 @@
-import { GetStaticPaths, GetStaticProps } from "next";
-import Link from "next/link";
-import React, { useEffect, useState } from "react";
-import { deburr, kebabCase } from "lodash";
-import {
-  faCaretLeft,
-  faChevronLeft,
-  faSearch,
-} from "@fortawesome/free-solid-svg-icons";
+import { faChevronLeft, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { deburr, sortBy } from "lodash";
+import { GetStaticPaths, GetStaticProps } from "next";
+import { useRouter } from "next/dist/client/router";
+import Head from "next/head";
+import Link from "next/link";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   getAllPosts,
   getAllVisaClasses,
   getPost,
   getSlugPairs,
+  getVisaClassBaselines,
+  VisaClassBaselineRow,
   VisaClassRow,
 } from "../../../api/consulates";
-import { useRouter } from "next/dist/client/router";
-import Head from "next/head";
+import numeral from "numeral";
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = await getAllPosts();
@@ -46,6 +45,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       visaClasses: await getAllVisaClasses(),
       availableVisaClasses: Array.from(availableVisaClasses),
       postName: postInfo.post,
+      baselines: await getVisaClassBaselines(postSlug),
     },
   };
 };
@@ -54,14 +54,21 @@ interface Props {
   visaClasses: VisaClassRow[];
   availableVisaClasses: string[];
   postName: string;
+  baselines: VisaClassBaselineRow[];
 }
 
 export default function ConsulateSelect({
   visaClasses,
   availableVisaClasses,
   postName,
+  baselines,
 }: Props) {
   const router = useRouter();
+
+  const baselineMap = useMemo<Map<string, number>>(
+    () => new Map(baselines.map((row) => [row.visaClassSlug, row.issuances])),
+    [baselines]
+  );
 
   const [term, setTerm] = useState<string>("");
   const [filteredVisas, setFilteredVisas] = useState<VisaClassRow[]>([]);
@@ -76,11 +83,17 @@ export default function ConsulateSelect({
   useEffect(() => {
     const normalizedTerm = deburr(term).toLowerCase().replace(/\W/, "");
     setFilteredVisas(
-      visaClasses.filter(({ visaClassSlug }) =>
-        visaClassSlug.includes(normalizedTerm)
+      sortBy(
+        visaClasses.filter(({ visaClassSlug }) =>
+          visaClassSlug.includes(normalizedTerm)
+        ),
+        [
+          ({ visaClassSlug }) => -(baselineMap.get(visaClassSlug) ?? -1),
+          "visaClassSlug",
+        ]
       )
     );
-  }, [visaClasses, term, setFilteredVisas]);
+  }, [baselineMap, visaClasses, term, setFilteredVisas]);
 
   const { postSlug } = router.query;
   if (typeof postSlug !== "string") return;
@@ -134,38 +147,68 @@ export default function ConsulateSelect({
             </span>
           </p>
         </div>
-        {filteredVisas.map(({ visaClass, visaClassSlug, description }) =>
-          availableVisaClassesSet.has(visaClassSlug) ? (
+        {filteredVisas.map(({ visaClass, visaClassSlug, description }) => {
+          const hasAnyIssued = availableVisaClassesSet.has(visaClassSlug);
+          if (!hasAnyIssued) {
+            return (
+              <a
+                key={visaClassSlug}
+                className="option panel-block has-text-grey-light is-unclickable"
+              >
+                <div className="visa-type">
+                  <span className="tag is-medium is-light mr-3">
+                    {visaClass}
+                  </span>
+                  <span>{description}</span>
+                </div>
+                <div>
+                  <span className="ml-3 tag">never issued</span>
+                </div>
+              </a>
+            );
+          }
+          return (
+            // eslint-disable-next-line react/jsx-key
             <Link href={`/consulates/${postSlug}/${visaClassSlug}`}>
-              <a key={visaClassSlug} className="panel-block">
-                <strong className="tag is-medium is-link is-light mr-3">
-                  {visaClass}
-                </strong>{" "}
-                <span className="visa-description">{description}</span>
+              <a key={visaClassSlug} className="option panel-block">
+                <div className="visa-type">
+                  <strong className="tag is-medium is-link is-light mr-3">
+                    {visaClass}
+                  </strong>{" "}
+                  <span>{description}</span>
+                </div>
+                <div>
+                  <span className="ml-3 tag">
+                    normally{" "}
+                    {numeral(baselineMap.get(visaClassSlug))
+                      .format(
+                        (baselineMap.get(visaClassSlug) ?? 0) > 10
+                          ? "0a"
+                          : "0.0a"
+                      )
+                      .toUpperCase()}
+                    /mo
+                  </span>
+                </div>
               </a>
             </Link>
-          ) : (
-            <a
-              key={visaClassSlug}
-              className="panel-block has-text-grey-light is-unclickable"
-            >
-              <span className="tag is-medium is-light mr-3">
-                {visaClass} (never issued)
-              </span>
-              <span className="visa-description">{description}</span>
-            </a>
-          )
-        )}
+          );
+        })}
       </nav>
       <style jsx>{`
         .is-unclickable {
           cursor: not-allowed;
         }
 
-        .visa-description {
+        .visa-type {
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+        }
+
+        .option {
+          display: flex;
+          justify-content: space-between;
         }
       `}</style>
     </div>

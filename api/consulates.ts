@@ -97,6 +97,36 @@ export async function getBaseline(
     visaClassSlug
   );
 }
+export interface ConsulateBaselineRow extends BaselineRow {
+  postSlug: string;
+}
+export async function getConsulateBaselines(): Promise<ConsulateBaselineRow[]> {
+  const db = await openDb();
+  return await db.all<ConsulateBaselineRow[]>(
+    `
+    SELECT "Post Slug" AS postSlug, sum("Issuances") AS issuances
+    FROM baselines
+    GROUP BY 1
+  `
+  );
+}
+export interface VisaClassBaselineRow extends BaselineRow {
+  visaClassSlug: string;
+}
+
+export async function getVisaClassBaselines(
+  postSlug: string
+): Promise<VisaClassBaselineRow[]> {
+  const db = await openDb();
+  return await db.all<VisaClassBaselineRow[]>(
+    `
+    SELECT "Visa Class Slug" AS visaClassSlug, "Issuances" AS issuances
+    FROM baselines
+    WHERE "Post Slug" = ?
+  `,
+    postSlug
+  );
+}
 
 export interface BacklogRow {
   month: string;
