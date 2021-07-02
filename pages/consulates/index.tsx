@@ -26,13 +26,12 @@ interface Props {
 }
 
 export default function ConsulateSelect({ posts, baselines }: Props) {
-  const [term, setTerm] = useState<string>("");
-  const [filteredPosts, setFilteredPosts] = useState<PostRow[]>(posts);
-
   const baselineMap = useMemo<Map<string, number>>(
     () => new Map(baselines.map((row) => [row.postSlug, row.issuances])),
     [baselines]
   );
+  const [term, setTerm] = useState<string>("");
+  const [filteredPosts, setFilteredPosts] = useState<PostRow[]>([]);
 
   useEffect(() => {
     const normalizedTerm = kebabCase(deburr(term.toLowerCase()));
