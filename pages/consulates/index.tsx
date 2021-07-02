@@ -25,21 +25,33 @@ interface Props {
   baselines: ConsulateBaselineRow[];
 }
 
-export default function ConsulateSelect({ posts, baselines }: Props) {
-  const [term, setTerm] = useState<string>("");
-  const [filteredPosts, setFilteredPosts] = useState<PostRow[]>(posts);
+function sortItems(
+  posts: PostRow[],
+  baselineMap: Map<string, number>
+): PostRow[] {
+  return sortBy(posts, [
+    ({ postSlug }) => -(baselineMap.get(postSlug) ?? -1),
+    "post",
+  ]);
+}
 
+export default function ConsulateSelect({ posts, baselines }: Props) {
+  console.log(baselines);
   const baselineMap = useMemo<Map<string, number>>(
     () => new Map(baselines.map((row) => [row.postSlug, row.issuances])),
     [baselines]
+  );
+  const [term, setTerm] = useState<string>("");
+  const [filteredPosts, setFilteredPosts] = useState<PostRow[]>(
+    sortItems(posts, baselineMap)
   );
 
   useEffect(() => {
     const normalizedTerm = kebabCase(deburr(term.toLowerCase()));
     setFilteredPosts(
-      sortBy(
+      sortItems(
         posts.filter(({ postSlug }) => postSlug.includes(normalizedTerm)),
-        ({ postSlug }) => -(baselineMap.get(postSlug) ?? -1)
+        baselineMap
       )
     );
   }, [baselineMap, posts, term, setFilteredPosts]);
