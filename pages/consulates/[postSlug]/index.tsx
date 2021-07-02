@@ -146,7 +146,15 @@ export default function ConsulateSelect({
               key={visaClassSlug}
               className="panel-block has-text-grey-light is-unclickable"
             >
-              {visaClass} (none issued in past years)
+              <div className="tags has-addons">
+                <span className="tag">issued total</span>
+                <span className="tag is-primary">0</span>
+              </div>
+              <div className="tags has-addons">
+                <span className="tag">since COVID</span>
+                <span className="tag is-primary">0</span>
+              </div>
+              <code>{visaClass}</code>
             </a>
           )
         )}
