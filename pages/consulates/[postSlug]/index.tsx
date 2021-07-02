@@ -57,6 +57,16 @@ interface Props {
   baselines: VisaClassBaselineRow[];
 }
 
+function sortItems(
+  visaClasses: VisaClassRow[],
+  baselineMap: Map<string, number>
+): VisaClassRow[] {
+  return sortBy(visaClasses, [
+    ({ visaClassSlug }) => -(baselineMap.get(visaClassSlug) ?? -1),
+    "visaClass",
+  ]);
+}
+
 export default function ConsulateSelect({
   visaClasses,
   availableVisaClasses,
@@ -83,14 +93,11 @@ export default function ConsulateSelect({
   useEffect(() => {
     const normalizedTerm = deburr(term).toLowerCase().replace(/\W/, "");
     setFilteredVisas(
-      sortBy(
+      sortItems(
         visaClasses.filter(({ visaClassSlug }) =>
           visaClassSlug.includes(normalizedTerm)
         ),
-        [
-          ({ visaClassSlug }) => -(baselineMap.get(visaClassSlug) ?? -1),
-          "visaClassSlug",
-        ]
+        baselineMap
       )
     );
   }, [baselineMap, visaClasses, term, setFilteredVisas]);
