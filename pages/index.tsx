@@ -88,7 +88,8 @@ export default function Home() {
             <div className="card-content">
               <div className="content">
                 This is your step after the NVC said your case has been{" "}
-                <em>documentarily qualified</em>.
+                <em>documentarily qualified</em>, until you get your visa from
+                an embassy or consulate.
               </div>
             </div>
             <footer className="card-footer">
@@ -99,6 +100,11 @@ export default function Home() {
           </div>
         </li>
       </ul>
+      <style jsx>{`
+        .card {
+          height: 100%;
+        }
+      `}</style>
     </main>
   );
 }
