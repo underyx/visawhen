@@ -27,6 +27,7 @@
     "sqlite3": "^5.0.2"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^11.0.1",
     "@types/lodash": "^4.14.170",
     "@types/numeral": "^2.0.1",
     "@types/react": "17.0.13",
@@ -34,5 +35,10 @@
     "eslint-config-next": "^11.0.1",
     "next-sitemap": "^1.6.124",
     "typescript": "4.3.5"
-  }
+  },
+  "browserslist": [
+    ">1%",
+    "not ie 11",
+    "not op_mini all"
+  ]
 }
