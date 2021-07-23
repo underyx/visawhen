@@ -10,6 +10,7 @@ export default function ConsulateChart({ backlog }: Props) {
   const dateFormatter = new Intl.DateTimeFormat([], {
     month: "short",
     year: "numeric",
+    timeZone: "UTC",
   });
   return (
     <figure className="box my-3">
@@ -19,7 +20,7 @@ export default function ConsulateChart({ backlog }: Props) {
         option={{
           dataset: {
             source: [
-              ["month", "visas issued", "backlog (negative means behind)"],
+              ["month", "visas issued", "backlog"],
               ...backlog.map((row) => [
                 dateFormatter.format(new Date(row.month)),
                 Math.round(row.issuances * 10) / 10,
