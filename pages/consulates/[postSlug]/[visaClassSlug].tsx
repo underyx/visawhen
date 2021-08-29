@@ -107,10 +107,7 @@ export default function ConsulateStats({
           property="og:title"
           content={
             `Backlog in ${postName} for ${visaClassName} visas` +
-              visaClassDescription !==
-            null
-              ? ` (${visaClassDescription})`
-              : ""
+            (visaClassDescription !== null ? ` (${visaClassDescription})` : "")
           }
         />
         <meta
