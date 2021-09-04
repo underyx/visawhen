@@ -1,7 +1,23 @@
 import { NvcSeries } from "../api/nvc";
+import add from "date-fns/add";
+
+import * as echarts from "echarts/core";
+import { LineChart } from "echarts/charts";
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+} from "echarts/components";
+import { CanvasRenderer } from "echarts/renderers";
 import ReactEChartsCore from "echarts-for-react/lib/core";
-import * as echarts from "echarts";
-import { add } from "date-fns";
+
+echarts.use([
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LineChart,
+  CanvasRenderer,
+]);
 
 interface Props {
   series: NvcSeries;

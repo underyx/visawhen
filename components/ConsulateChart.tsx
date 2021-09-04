@@ -1,6 +1,27 @@
 import { BacklogRow } from "../api/consulates";
+
+import * as echarts from "echarts/core";
+import { BarChart, LineChart } from "echarts/charts";
+import {
+  DatasetComponent,
+  DataZoomComponent,
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+} from "echarts/components";
+import { CanvasRenderer } from "echarts/renderers";
 import ReactEChartsCore from "echarts-for-react/lib/core";
-import * as echarts from "echarts";
+
+echarts.use([
+  DatasetComponent,
+  DataZoomComponent,
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  BarChart,
+  LineChart,
+  CanvasRenderer,
+]);
 
 interface Props {
   backlog: BacklogRow[];
