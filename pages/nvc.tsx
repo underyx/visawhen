@@ -35,7 +35,7 @@ function getDaysTillNewDataText(data: NvcData): string {
       ? 0
       : 8 - getISODay(today);
 
-  return `New data expected ${
+  return `next update expected ${
     daysTillNewData === 0
       ? "later today"
       : daysTillNewData === 1
@@ -120,15 +120,14 @@ export default function NvcBacklog({ data }: Props) {
         />
         <meta property="og:url" content="https://visawhen.com/nvc" />
       </Head>
-      <header className="is-flex">
-        <h1 className="title">NVC wait times</h1>
-        <div className="tag is-success is-medium ml-2">
-          Last updated: {getLatestDate(data).toLocaleDateString()}
-        </div>
-      </header>
+      <h1 className="title">NVC wait times</h1>
+      <h2 className="subtitle">
+        Last updated {getLatestDate(data).toLocaleDateString()},{" "}
+        {getDaysTillNewDataText(data)}
+      </h2>
       <p className="my-4">
         Here&rsquo;s how long you should expect to wait until the National Visa
-        Center processes your case. <span>{getDaysTillNewDataText(data)}</span>
+        Center processes your case.
       </p>
       <ChartHeading series={data.review}>Document review</ChartHeading>
       <p>
