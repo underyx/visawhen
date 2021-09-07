@@ -25,6 +25,13 @@ interface Props {
 }
 
 function Tooltip([series]: any) {
+  const dateFormatter = new Intl.DateTimeFormat([], {
+    month: "short",
+    year: "numeric",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+
   const [dateString, backlogDays] = series.data;
   const date = new Date(dateString);
   const processingDate = add(date, {
@@ -33,13 +40,13 @@ function Tooltip([series]: any) {
   const tooltip = document.createElement("div");
   tooltip.appendChild(
     document.createTextNode(
-      `${backlogDays} days of backlog on ${date.toDateString()}`
+      `${backlogDays} days of backlog on ${dateFormatter.format(date)}`
     )
   );
   tooltip.appendChild(document.createElement("br"));
   tooltip.appendChild(
     document.createTextNode(
-      `(processed up to ${processingDate.toDateString()})`
+      `(processed up to ${dateFormatter.format(processingDate)})`
     )
   );
 
