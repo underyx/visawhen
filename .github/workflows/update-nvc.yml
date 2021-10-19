@@ -1,4 +1,5 @@
 name: update NVC data
+
 on:
   schedule:
     # check every 10 minutes on Monday in the update window
@@ -9,11 +10,15 @@ on:
     - cron: 38 8 * * 0,2-6
   push:
   workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: data/nvc
+
 jobs:
   update-data:
     name: update data
     runs-on: ubuntu-latest
-    working-directory: data/nvc
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
