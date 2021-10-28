@@ -10,8 +10,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      artifact-name: ${{ steps.name-artifact.outputs.artifact-name }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ inputs.ref }}
       - uses: actions/setup-node@v1
         with:
           node-version: "16"
@@ -28,7 +32,9 @@ jobs:
             ${{ runner.os }}-
       - run: npm ci
       - run: npm run build
+      - id: name-artifact
+        run: echo "::set-output name=artifact-name::website-${{ github.sha }}"
       - uses: actions/upload-artifact@v2
         with:
-          name: website-${{ github.sha }}
+          name: ${{ steps.name-artifact.outputs.artifact-name }}
           path: out/

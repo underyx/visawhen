@@ -20,7 +20,7 @@ jobs:
     name: update NVC data
     runs-on: ubuntu-latest
     outputs:
-      new_commit_sha: ${{ steps.commit.outputs.commit_sha }}
+      new-commit-sha: ${{ steps.commit.outputs.commit_sha }}
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -46,10 +46,10 @@ jobs:
     uses: underyx/visawhen/.github/workflows/build.yml@main
     needs: [update-nvc-data]
     with:
-      ref: ${{ needs.update-nvc-data.outputs.new_commit_sha }}
+      ref: ${{ needs.update-nvc-data.outputs.new-commit-sha }}
 
   deploy:
     uses: underyx/visawhen/.github/workflows/deploy.yml@main
-    needs: [update-nvc-data, build]
+    needs: [build]
     with:
-      ref: ${{ needs.update-nvc-data.outputs.new_commit_sha }}
+      artifact-name: ${{ needs.build.outputs.artifact-name }}

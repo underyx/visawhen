@@ -13,4 +13,4 @@ jobs:
     uses: underyx/visawhen/.github/workflows/deploy.yml@main
     needs: [build]
     with:
-      ref: ${{ github.sha }}
+      artifact-name: ${{ needs.build.outputs.artifact-name }}

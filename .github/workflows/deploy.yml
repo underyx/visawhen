@@ -2,8 +2,8 @@ name: Deploy
 
 on:
   workflow_call:
-    ref:
-      description: 'The git ref to deploy'
+    artifact-name:
+      description: 'The artifact to deploy'
       required: true
       type: string
 
@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v2
         with:
-          name: website-${{ github.sha }}
+          name: ${{ inputs.artifact-name }}
           path: out/
       - name: Publish
         uses: netlify/actions/cli
