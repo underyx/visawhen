@@ -16,9 +16,11 @@ defaults:
     working-directory: data/nvc
 
 jobs:
-  update-data:
-    name: update data
+  update-nvc-data:
+    name: update NVC data
     runs-on: ubuntu-latest
+    outputs:
+      new_commit_sha: ${{ steps.commit.outputs.commit_sha }}
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -37,4 +39,17 @@ jobs:
       - name: Run script
         run: poetry run python main.py
       - name: Commit changes
+        id: commit
         uses: EndBug/add-and-commit@v7
+
+  build:
+    uses: ${{ github.repository_owner }}/${{ github.repository }}/.github/workflows/build.yml@${{ github.sha }}
+    needs: [update-nvc-data]
+    with:
+      ref: ${{ needs.update-nvc-data.outputs.new_commit_sha }}
+
+  deploy:
+    uses: ${{ github.repository_owner }}/${{ github.repository }}/.github/workflows/deploy.yml@${{ github.sha }}
+    needs: [update-nvc-data, build]
+    with:
+      ref: ${{ needs.update-nvc-data.outputs.new_commit_sha }}

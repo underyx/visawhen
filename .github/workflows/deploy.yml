@@ -1,0 +1,24 @@
+name: Deploy
+
+on:
+  workflow_call:
+    ref:
+      description: 'The git ref to deploy'
+      required: true
+      type: string
+
+jobs:
+  deploy:
+    name: Deploy to Netlify
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: website-${{ github.sha }}
+          path: out/
+      - name: Publish
+        uses: netlify/actions/cli
+        with:
+          args: deploy --dir=out/
+        env:
+          NETLIFY_SITE_ID: e464072b-c4e2-4ca9-b6d5-317fd657ad16
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}

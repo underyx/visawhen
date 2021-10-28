@@ -1,0 +1,16 @@
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    uses: ${{ github.repository_owner }}/${{ github.repository }}/.github/workflows/build.yml@${{ github.sha }}
+    with:
+      ref: ${{ github.sha }}
+
+  deploy:
+    uses: ${{ github.repository_owner }}/${{ github.repository }}/.github/workflows/deploy.yml@${{ github.sha }}
+    needs: [build]
+    with:
+      ref: ${{ github.sha }}
