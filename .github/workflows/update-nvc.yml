@@ -43,13 +43,13 @@ jobs:
         uses: EndBug/add-and-commit@v7
 
   build:
-    uses: ${{ github.repository_owner }}/${{ github.repository }}/.github/workflows/build.yml@${{ github.sha }}
+    uses: underyx/visawhen/.github/workflows/build.yml@main
     needs: [update-nvc-data]
     with:
       ref: ${{ needs.update-nvc-data.outputs.new_commit_sha }}
 
   deploy:
-    uses: ${{ github.repository_owner }}/${{ github.repository }}/.github/workflows/deploy.yml@${{ github.sha }}
+    uses: underyx/visawhen/.github/workflows/deploy.yml@main
     needs: [update-nvc-data, build]
     with:
       ref: ${{ needs.update-nvc-data.outputs.new_commit_sha }}
