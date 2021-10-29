@@ -43,7 +43,7 @@ jobs:
 
       - id: name-artifact
         name: Set artifact name
-        run: echo "::set-output name=artifact-name::website-${{ github.sha }}"
+        run: echo "::set-output name=artifact-name::website-${{ github.sha }}.tar.gz"
 
       - name: Create tar archive
         run: tar czf out.tar.gz -C ${{ github.workspace }}/out .
