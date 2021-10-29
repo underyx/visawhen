@@ -8,14 +8,15 @@ on:
     secrets:
       semgrep-app-token:
         required: true
+
 name: Semgrep
 jobs:
   semgrep:
     name: Scan with Semgrep
     runs-on: ubuntu-latest
+    continue-on-error: ${{ inputs.continue-on-error }}
     steps:
     - uses: actions/checkout@v2
     - uses: returntocorp/semgrep-action@v1
       with:
         publishToken: ${{ secrets.semgrep-app-token }}
-      continue-on-error: ${{ inputs.continue-on-error }}
