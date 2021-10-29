@@ -1,10 +1,11 @@
+from ipaddress import ip_address
 from pathlib import Path
 import arrow
+import dns.resolver
 import re
 import json
 import requests
 from typing import Literal
-
 
 TimeframeName = Literal["creation", "review", "inquiry"]
 
@@ -28,8 +29,14 @@ with DATA_PATH.open() as data_file:
     data: Data = json.load(data_file)
 
 
+# manually resolving domain name cause of https://github.community/t/cannot-resolve-travel-state-gov-hostname-in-github-actions-with-default-dns-server/180625
+resolver = dns.resolver.Resolver()
+resolver.nameservers = ["1.1.1.1", "8.8.8.8"]
+ip_address = resolver.resolve("travel.state.gov", "A")[0].to_text()
 r = requests.get(
-    "https://travel.state.gov/content/travel/en/us-visas/immigrate/nvc-timeframes.html"
+    f"https://{ip_address}/content/travel/en/us-visas/immigrate/nvc-timeframes.html",
+    headers={"Host": "travel.state.gov"},
+    verify=False,
 )
 
 for timeframe_name, pattern in PATTERNS.items():
