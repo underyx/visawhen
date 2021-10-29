@@ -39,8 +39,11 @@ jobs:
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
 
       - run: npm ci
-      - run: npm run build
+      - run: next build
+      - run: next export
+
       - id: name-artifact
+        name: Set artifact name
         run: echo "::set-output name=artifact-name::website-${{ github.sha }}"
       - uses: actions/upload-artifact@v2
         with:
