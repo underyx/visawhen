@@ -1,5 +1,10 @@
 on:
   workflow_call:
+    inputs:
+      continue-on-error:
+        required: false
+        default: "false"
+        type: boolean
     secrets:
       semgrep-app-token:
         required: true
@@ -13,3 +18,4 @@ jobs:
     - uses: returntocorp/semgrep-action@v1
       with:
         publishToken: ${{ secrets.semgrep-app-token }}
+      continue-on-error: ${{ inputs.continue-on-error }}

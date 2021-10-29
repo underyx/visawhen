@@ -10,6 +10,8 @@ jobs:
     uses: underyx/visawhen/.github/workflows/semgrep.yml@main
     secrets:
       semgrep-app-token: ${{ secrets.SEMGREP_APP_TOKEN }}
+    with:
+      continue-on-error: true
 
   build:
     uses: underyx/visawhen/.github/workflows/build.yml@main
