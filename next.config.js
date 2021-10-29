@@ -1,6 +1,7 @@
 const withTM = require("next-transpile-modules")(["echarts", "zrender"]);
 
 const CONFIG = {
+  swcMinify: true,
   reactStrictMode: true,
   async headers() {
     return [
