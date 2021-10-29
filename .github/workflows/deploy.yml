@@ -18,7 +18,9 @@ jobs:
           name: ${{ inputs.artifact-name }}
 
       - name: Extract tar archive
-        run: tar -xvfz out.tar.gz
+        run: |
+          mkdir out
+          tar xf out.tar.gz -C out/
 
       - name: Publish
         uses: netlify/actions/cli@master

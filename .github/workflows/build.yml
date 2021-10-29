@@ -46,7 +46,7 @@ jobs:
         run: echo "::set-output name=artifact-name::website-${{ github.sha }}"
 
       - name: Create tar archive
-        run: tar -cvfz out.tar.gz ${{ github.workspace }}/out
+        run: tar czf out.tar.gz -C ${{ github.workspace }}/out .
 
       - name: Upload tar archive
         uses: actions/upload-artifact@v2
