@@ -6,7 +6,8 @@ import getISODay from "date-fns/getISODay";
 import React from "react";
 import NvcChart from "../components/NvcChart";
 import last from "lodash/last";
-import Script from "next/script";
+import { jsonLdScriptProps } from "react-schemaorg";
+import { Dataset } from "schema-dts";
 
 export const getStaticProps: GetStaticProps = async () => ({
   props: {
@@ -60,38 +61,6 @@ function ChartHeading({
 }
 
 export default function NvcBacklog({ data }: Props) {
-  const ldJson = {
-    "@context": "https://schema.org/",
-    "@type": "Dataset",
-    name: "NVC wait times",
-    distribution: {
-      "@context": "https://schema.org",
-      "@type": "DataDownload",
-      contentUrl:
-        "https://github.com/underyx/visawhen/blob/main/data/nvc/data.json",
-      encodingFormat: "application/json",
-      uploadDate: getLatestDate(data).toISOString(),
-      requiresSubscription: false,
-    },
-    dateModified: getLatestDate(data).toISOString(),
-    description:
-      "Here's how long you should expect to wait until the National Visa Center processes your case.",
-    accessMode: "chartOnVisual",
-    creator: {
-      "@context": "https://schema.org",
-      "@type": "Person",
-      familyName: "Nagy",
-      givenName: "Bence",
-      additionalName: "underyx",
-      url: "https://underyx.me",
-    },
-    inLanguage: "en",
-    isBasedOn:
-      "https://travel.state.gov/content/travel/en/us-visas/immigrate/nvc-timeframes.html",
-    license: "https://github.com/underyx/visawhen/blob/main/LICENSE",
-    temporalCoverage: "2020-11/..",
-  };
-
   return (
     <>
       <Head>
@@ -119,6 +88,37 @@ export default function NvcBacklog({ data }: Props) {
           )} days to respond to inquiries.`}
         />
         <meta property="og:url" content="https://visawhen.com/nvc" />
+        <script
+          {...jsonLdScriptProps<Dataset>({
+            "@context": "https://schema.org",
+            "@type": "Dataset",
+            name: "NVC wait times",
+            distribution: {
+              "@type": "DataDownload",
+              contentUrl:
+                "https://github.com/underyx/visawhen/blob/main/data/nvc/data.json",
+              encodingFormat: "application/json",
+              uploadDate: getLatestDate(data).toISOString(),
+              requiresSubscription: false,
+            },
+            dateModified: getLatestDate(data).toISOString(),
+            description:
+              "Here's how long you should expect to wait until the National Visa Center processes your case.",
+            accessMode: "chartOnVisual",
+            creator: {
+              "@type": "Person",
+              familyName: "Nagy",
+              givenName: "Bence",
+              additionalName: "underyx",
+              url: "https://underyx.me",
+            },
+            inLanguage: "en",
+            isBasedOn:
+              "https://travel.state.gov/content/travel/en/us-visas/immigrate/nvc-timeframes.html",
+            license: "https://github.com/underyx/visawhen/blob/main/LICENSE",
+            temporalCoverage: "2020-11/..",
+          })}
+        />
       </Head>
       <h1 className="title">NVC wait times</h1>
       <h2 className="subtitle">
@@ -159,10 +159,6 @@ export default function NvcBacklog({ data }: Props) {
         are answered.
       </p>
       <NvcChart id="inquiry" series={data.inquiry} />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJson) }}
-      />
     </>
   );
 }
