@@ -21,7 +21,5 @@ jobs:
   deploy:
     uses: underyx/visawhen/.github/workflows/deploy.yml@main
     needs: [build]
-    with:
-      artifact-name: ${{ needs.build.outputs.artifact-name }}
     secrets:
       netlify-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}

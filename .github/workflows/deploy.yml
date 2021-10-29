@@ -2,11 +2,6 @@ name: Deploy
 
 on:
   workflow_call:
-    inputs:
-      artifact-name:
-        description: 'The artifact to deploy'
-        required: true
-        type: string
     secrets:
       netlify-token:
         required: true
@@ -18,13 +13,11 @@ jobs:
     steps:
       - id: download
         uses: actions/download-artifact@v2
-        with:
-          name: ${{ inputs.artifact-name }}
 
       - name: Extract tar archive
         run: |
           mkdir out
-          tar xf ${{ inputs.artifact-name }} -C out/
+          tar xf website-*.tar.gz -C out/
 
       - uses: actions/setup-node@v1
         with:
