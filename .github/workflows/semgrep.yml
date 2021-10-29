@@ -1,12 +1,8 @@
-on:
-  pull_request: {}
-  push:
-    branches:
-    - main
+on: workflow_call
 name: Semgrep
 jobs:
   semgrep:
-    name: Scan
+    name: Scan with Semgrep
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
