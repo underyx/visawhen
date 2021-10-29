@@ -16,7 +16,7 @@ jobs:
           name: ${{ inputs.artifact-name }}
           path: out/
       - name: Publish
-        uses: netlify/actions/cli
+        uses: netlify/actions/cli@master
         with:
           args: deploy --dir=out/
         env:
