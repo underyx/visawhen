@@ -2,10 +2,11 @@ name: Deploy
 
 on:
   workflow_call:
-    artifact-name:
-      description: 'The artifact to deploy'
-      required: true
-      type: string
+    inputs:
+      artifact-name:
+        description: 'The artifact to deploy'
+        required: true
+        type: string
 
 jobs:
   deploy:
