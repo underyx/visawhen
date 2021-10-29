@@ -8,7 +8,6 @@ on:
     - cron: 38 0-13,17-23 * * 1
     # check every day for the rest of the week
     - cron: 38 8 * * 0,2-6
-  push:
   workflow_dispatch:
 
 defaults:
