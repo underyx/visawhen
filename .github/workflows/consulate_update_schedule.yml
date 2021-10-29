@@ -1,0 +1,52 @@
+name: Update consulates data
+
+on:
+  schedule:
+    # check every day
+    - cron: 19 14 * * *
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: data/consulates
+
+jobs:
+  update-consulates-data:
+    name: Update consulates data
+    runs-on: ubuntu-latest
+    outputs:
+      new-commit-sha: ${{ steps.commit.outputs.commit_sha }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+      - name: Set up poetry
+        uses: Gr1N/setup-poetry@v7
+      - name: Cache poetry virtualenv
+        uses: actions/cache@v2.1.6
+        with:
+          path: ~/.cache/pypoetry/virtualenvs
+          key: ${{ runner.os }}-poetry-data-nvc-${{ hashFiles('data/nvc/poetry.lock') }}
+      - name: Install dependencies
+        run: poetry install
+      - name: Run script
+        run: poetry run jupyter nbconvert --execute visa-issuances.ipynb
+      - name: Run other script
+        run: poetry run jupyter nbconvert --execute baselines.ipynb
+      - name: Commit changes
+        id: commit
+        uses: EndBug/add-and-commit@v7
+
+  build:
+    uses: underyx/visawhen/.github/workflows/build.yml@main
+    needs: [update-consulates-data]
+    with:
+      ref: ${{ needs.update-nvc-data.outputs.new-commit-sha }}
+
+  deploy:
+    uses: underyx/visawhen/.github/workflows/deploy.yml@main
+    needs: [build]
+    secrets:
+      netlify-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
