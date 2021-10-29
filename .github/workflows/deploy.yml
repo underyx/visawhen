@@ -17,8 +17,7 @@ jobs:
       - name: Extract tar archive
         run: |
           mkdir out
-          ls -R
-          tar xf website-*.tar.gz -C out/
+          tar xf website-*/out.tar.gz -C out/
 
       - uses: actions/setup-node@v1
         with:
