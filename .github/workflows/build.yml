@@ -44,7 +44,12 @@ jobs:
       - id: name-artifact
         name: Set artifact name
         run: echo "::set-output name=artifact-name::website-${{ github.sha }}"
-      - uses: actions/upload-artifact@v2
+
+      - name: Create tar archive
+        run: tar -cvfz out.tar.gz ${{ github.workspace }}/out
+
+      - name: Upload tar archive
+        uses: actions/upload-artifact@v2
         with:
           name: ${{ steps.name-artifact.outputs.artifact-name }}
-          path: out/
+          path: out.tar.gz

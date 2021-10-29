@@ -1,3 +1,5 @@
+name: Push to main branch
+
 on:
   push:
     branches:
