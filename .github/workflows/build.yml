@@ -39,8 +39,7 @@ jobs:
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
 
       - run: npm ci
-      - run: next build
-      - run: next export
+      - run: npm run export
 
       - id: name-artifact
         name: Set artifact name
