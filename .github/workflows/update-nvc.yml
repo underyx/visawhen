@@ -1,4 +1,4 @@
-name: update NVC data
+name: Update NVC data
 
 on:
   schedule:
@@ -17,7 +17,7 @@ defaults:
 
 jobs:
   update-nvc-data:
-    name: update NVC data
+    name: Update NVC data
     runs-on: ubuntu-latest
     outputs:
       new-commit-sha: ${{ steps.commit.outputs.commit_sha }}
