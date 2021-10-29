@@ -19,16 +19,30 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: ${{ inputs.artifact-name }}
+          path: out.tar.gz
 
       - name: Extract tar archive
         run: |
           mkdir out
           tar xf out.tar.gz -C out/
 
-      - name: Publish
-        uses: netlify/actions/cli@master
+      - uses: actions/setup-node@v1
         with:
-          args: deploy --dir=out/
+          node-version: "16"
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-cache-netlify-cli
+          restore-keys: |
+            ${{ runner.os }}-build-cache-netlify-cli
+
+      - name: Install Netlify CLI
+        run: npm install -g netlify-cli
+
+      - name: Deploy to netlify
+        run: netlify deploy --dir=out/
         env:
           NETLIFY_SITE_ID: e464072b-c4e2-4ca9-b6d5-317fd657ad16
           NETLIFY_AUTH_TOKEN: ${{ secrets.netlify-token }}
