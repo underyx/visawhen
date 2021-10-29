@@ -1,0 +1,8 @@
+name: Pull request
+
+on:
+  pull_request:
+
+jobs:
+  semgrep:
+    uses: underyx/visawhen/.github/workflows/semgrep.yml@main
