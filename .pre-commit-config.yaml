@@ -58,3 +58,8 @@ repos:
     rev: v2.4.1
     hooks:
       - id: prettier
+
+  - repo: https://github.com/roy-ht/pre-commit-jupyter
+    rev: v1.2.1
+    hooks:
+      - id: jupyter-notebook-cleanup
