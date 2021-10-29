@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { faHeart } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faDiscord } from "@fortawesome/free-brands-svg-icons";
 
 export default function Navbar() {
   return (
@@ -49,14 +50,16 @@ export default function Navbar() {
               <div className="field is-grouped">
                 <div className="control">
                   <a
-                    href="https://ko-fi.com/underyx"
-                    className="button is-success has-text-weight-semibold"
+                    href="https://discord.gg/zkf8w2QtQY"
+                    className="button is-link has-text-weight-semibold"
                   >
                     <span className="icon">
-                      <FontAwesomeIcon icon={faHeart} />
+                      <FontAwesomeIcon icon={faDiscord} />
                     </span>
-                    <span className="is-hidden-tablet">Donate</span>
-                    <span className="is-hidden-mobile">Buy Bence a coffee</span>
+                    <span className="is-hidden-tablet">Discord</span>
+                    <span className="is-hidden-mobile">
+                      Join the Discord community
+                    </span>
                   </a>
                 </div>
               </div>

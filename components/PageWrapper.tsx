@@ -4,9 +4,19 @@ import Footer from "./Footer";
 export default function PageWrapper({ children }: React.PropsWithChildren<{}>) {
   return (
     <section className="section has-background-white-bis has-text-dark">
-      <article className="container is-size-6 is-max-desktop">
-        {children}
-      </article>
+      <section className="container is-size-6 is-max-desktop">
+        <aside className="message is-info">
+          <div className="message-body">
+            <strong>News from Oct 28th:</strong> Hey, why does the immigration
+            community not have a place to chat? I wondered this and next thing I
+            know, I created a Discord community for ourselves!{" "}
+            <strong>
+              <a href="https://discord.gg/zkf8w2QtQY">Come say hi to us!</a>
+            </strong>
+          </div>
+        </aside>
+        <article>{children}</article>
+      </section>
       <Footer />
     </section>
   );
