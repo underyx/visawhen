@@ -6,3 +6,5 @@ on:
 jobs:
   semgrep:
     uses: underyx/visawhen/.github/workflows/semgrep.yml@main
+    secrets:
+      semgrep-app-token: ${{ secrets.SEMGREP_APP_TOKEN }}

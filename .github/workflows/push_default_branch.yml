@@ -8,6 +8,8 @@ on:
 jobs:
   semgrep:
     uses: underyx/visawhen/.github/workflows/semgrep.yml@main
+    secrets:
+      semgrep-app-token: ${{ secrets.SEMGREP_APP_TOKEN }}
 
   build:
     uses: underyx/visawhen/.github/workflows/build.yml@main
@@ -19,3 +21,5 @@ jobs:
     needs: [build]
     with:
       artifact-name: ${{ needs.build.outputs.artifact-name }}
+    secrets:
+      netlify-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}

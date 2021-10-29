@@ -1,4 +1,8 @@
-on: workflow_call
+on:
+  workflow_call:
+    secrets:
+      semgrep-app-token:
+        required: true
 name: Semgrep
 jobs:
   semgrep:
@@ -8,4 +12,4 @@ jobs:
     - uses: actions/checkout@v2
     - uses: returntocorp/semgrep-action@v1
       with:
-        publishToken: ${{ secrets.SEMGREP_APP_TOKEN }}
+        publishToken: ${{ secrets.semgrep-app-token }}

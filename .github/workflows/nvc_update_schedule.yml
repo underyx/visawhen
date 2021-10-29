@@ -52,3 +52,5 @@ jobs:
     needs: [build]
     with:
       artifact-name: ${{ needs.build.outputs.artifact-name }}
+    secrets:
+      netlify-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}

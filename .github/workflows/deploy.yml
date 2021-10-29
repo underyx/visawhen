@@ -7,6 +7,9 @@ on:
         description: 'The artifact to deploy'
         required: true
         type: string
+    secrets:
+      netlify-token:
+        required: true
 
 jobs:
   deploy:
@@ -28,4 +31,4 @@ jobs:
           args: deploy --dir=out/
         env:
           NETLIFY_SITE_ID: e464072b-c4e2-4ca9-b6d5-317fd657ad16
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.netlify-token }}
