@@ -24,7 +24,7 @@ jobs:
       - name: Extract tar archive
         run: |
           mkdir out
-          tar xf ${{ steps.download.outputs.download-path }} -C out/
+          tar xf ${{ inputs.artifact-name }} -C out/
 
       - uses: actions/setup-node@v1
         with:
