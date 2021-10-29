@@ -1,11 +1,12 @@
+import json
+import re
 from ipaddress import ip_address
 from pathlib import Path
+from typing import Literal
+
 import arrow
 import dns.resolver
-import re
-import json
 import requests
-from typing import Literal
 
 TimeframeName = Literal["creation", "review", "inquiry"]
 
