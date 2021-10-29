@@ -580,12 +580,7 @@ optional = false
 python-versions = ">=3.7.1"
 
 [package.dependencies]
-numpy = [
-    {version = ">=1.17.3", markers = "platform_machine != \"aarch64\" and platform_machine != \"arm64\" and python_version < \"3.10\""},
-    {version = ">=1.19.2", markers = "platform_machine == \"aarch64\" and python_version < \"3.10\""},
-    {version = ">=1.20.0", markers = "platform_machine == \"arm64\" and python_version < \"3.10\""},
-    {version = ">=1.21.0", markers = "python_version >= \"3.10\""},
-]
+numpy = {version = ">=1.21.0", markers = "python_version >= \"3.10\""}
 python-dateutil = ">=2.7.3"
 pytz = ">=2017.3"
 
@@ -1017,8 +1012,8 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 
 [metadata]
 lock-version = "1.1"
-python-versions = "^3.9"
-content-hash = "ba8d44ca1f52c86f21dd996e7fe0f2f386faf4ad5f5c47a10c4d78f4656abe35"
+python-versions = "^3.10"
+content-hash = "77517c135aef3dee6f200addde4c3e055168a09489fbd2e7b3fb1e1c4243121c"
 
 [metadata.files]
 appdirs = [
