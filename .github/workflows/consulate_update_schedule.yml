@@ -33,7 +33,7 @@ jobs:
       - name: Install required C libraries
         run: |
           apt-fast update
-          apt-fast install -y --no-install-recommends libxml2-dev ibxslt1-dev
+          apt-fast install -y --no-install-recommends libxml2-dev libxslt1-dev
       - name: Install dependencies
         run: poetry install
       - name: Run script
