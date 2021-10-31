@@ -30,6 +30,10 @@ jobs:
         with:
           path: ~/.cache/pypoetry/virtualenvs
           key: ${{ runner.os }}-poetry-data-consulates-${{ hashFiles('data/consulates/poetry.lock') }}
+      - name: Install required C libraries
+        run: |
+          apt-fast update
+          apt-fast install -y --no-install-recommends libxml2 libxslt
       - name: Install dependencies
         run: poetry install
       - name: Run script
