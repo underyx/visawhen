@@ -20,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       new-commit-sha: ${{ steps.commit.outputs.commit_sha }}
+      updated: ${{ steps.commit.outputs.pushed }}
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -42,6 +43,7 @@ jobs:
         uses: EndBug/add-and-commit@v7
 
   build:
+    if: ${{ needs.update-nvc-data.outputs.updated }}
     uses: underyx/visawhen/.github/workflows/build.yml@main
     needs: [update-nvc-data]
     with:
