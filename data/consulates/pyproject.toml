@@ -16,6 +16,7 @@ PyPDF2 = "^1.26.0"
 camelot-py = "^0.10.1"
 opencv-python = "^4.5.3"
 ghostscript = "^0.7"
+lxml = "^4.5"
 
 [tool.poetry.dev-dependencies]
 ipykernel = "^6.0.3"
