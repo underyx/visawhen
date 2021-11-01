@@ -46,6 +46,8 @@ jobs:
     if: ${{ needs.update-nvc-data.outputs.updated }}
     uses: underyx/visawhen/.github/workflows/build.yml@main
     needs: [update-nvc-data]
+    permissions:
+      contents: write
     with:
       ref: ${{ needs.update-nvc-data.outputs.new-commit-sha }}
 

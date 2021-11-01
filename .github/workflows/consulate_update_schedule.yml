@@ -48,6 +48,8 @@ jobs:
     if: ${{ needs.update-consulates-data.outputs.updated }}
     uses: underyx/visawhen/.github/workflows/build.yml@main
     needs: [update-consulates-data]
+    permissions:
+      contents: write
     with:
       ref: ${{ needs.update-consulates-data.outputs.new-commit-sha }}
 
