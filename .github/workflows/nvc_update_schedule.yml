@@ -10,6 +10,9 @@ on:
     - cron: 38 8 * * 0,2-6
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 defaults:
   run:
     working-directory: data/nvc
@@ -46,8 +49,6 @@ jobs:
     if: ${{ needs.update-nvc-data.outputs.updated }}
     uses: underyx/visawhen/.github/workflows/build.yml@main
     needs: [update-nvc-data]
-    permissions:
-      contents: write
     with:
       ref: ${{ needs.update-nvc-data.outputs.new-commit-sha }}
 
