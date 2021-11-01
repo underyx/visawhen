@@ -10,9 +10,6 @@ on:
     - cron: 38 8 * * 0,2-6
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 defaults:
   run:
     working-directory: data/nvc
@@ -21,6 +18,8 @@ jobs:
   update-nvc-data:
     name: Update NVC data
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       new-commit-sha: ${{ steps.commit.outputs.commit_sha }}
       updated: ${{ steps.commit.outputs.pushed }}

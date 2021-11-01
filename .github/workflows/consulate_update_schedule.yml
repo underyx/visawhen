@@ -20,6 +20,8 @@ jobs:
     outputs:
       new-commit-sha: ${{ steps.commit.outputs.commit_sha }}
       updated: ${{ steps.commit.outputs.pushed }}
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
