@@ -50,7 +50,7 @@ jobs:
         uses: EndBug/add-and-commit@v7
 
   build:
-    if: ${{ needs.update-consulates-data.outputs.updated }}
+    if: ${{ needs.update-consulates-data.outputs.updated == true }}
     uses: underyx/visawhen/.github/workflows/build.yml@main
     needs: [update-consulates-data]
     with:
