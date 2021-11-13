@@ -93,7 +93,7 @@ webencodings = "*"
 
 [[package]]
 name = "bokeh"
-version = "2.4.0"
+version = "2.4.1"
 description = "Interactive plots and applications in the browser from Python"
 category = "dev"
 optional = false
@@ -1277,7 +1277,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "12714e61cd354f91f28e26928140dbfea12d71456d4b0f6cf60141116675bc93"
+content-hash = "c89a0bb3ebfe5f37ed1bd2b724451bfaa3c9b305c9dc6d206eb94b468e28a971"
 
 [metadata.files]
 appdirs = [
@@ -1322,8 +1322,8 @@ bleach = [
     {file = "bleach-4.1.0.tar.gz", hash = "sha256:0900d8b37eba61a802ee40ac0061f8c2b5dee29c1927dd1d233e075ebf5a71da"},
 ]
 bokeh = [
-    {file = "bokeh-2.4.0-py3-none-any.whl", hash = "sha256:91a7c3b8a42d9275df26f13269859a1add82dc9e5dda316f7476ad76a5a10851"},
-    {file = "bokeh-2.4.0.tar.gz", hash = "sha256:6fa00ed8baab5cca33f4175792c309fa2536eaae7e90abee884501ba8c90fddb"},
+    {file = "bokeh-2.4.1-py3-none-any.whl", hash = "sha256:b270d6ef899598fe26e64b6ae08e30f8d67a177baa1f5bfe18e1979a81bb7c4d"},
+    {file = "bokeh-2.4.1.tar.gz", hash = "sha256:d0410717d743a0ac251e62480e2ea860a7341bdcd1dbe01499a904f233c90512"},
 ]
 bs4 = [
     {file = "bs4-0.0.1.tar.gz", hash = "sha256:36ecea1fd7cc5c0c6e4a1ff075df26d50da647b75376626cc186e2212886dd3a"},

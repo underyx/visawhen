@@ -20,7 +20,7 @@ notebook = "^6.4.5"
 
 [tool.poetry.dev-dependencies]
 ipykernel = "^6.0.3"
-bokeh = "<2.4.1"
+bokeh = "<2.4.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
