@@ -308,6 +308,21 @@ tornado = {version = ">=6.0.3", markers = "python_version >= \"3.8\""}
 zict = ">=0.1.3"
 
 [[package]]
+name = "dnspython"
+version = "2.1.0"
+description = "DNS toolkit"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.extras]
+dnssec = ["cryptography (>=2.6)"]
+doh = ["requests", "requests-toolbelt"]
+idna = ["idna (>=2.1)"]
+curio = ["curio (>=1.2)", "sniffio (>=1.1)"]
+trio = ["trio (>=0.14.0)", "sniffio (>=1.1)"]
+
+[[package]]
 name = "entrypoints"
 version = "0.3"
 description = "Discover and load entry points from installed packages."
@@ -1252,7 +1267,7 @@ heapdict = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "~3.10"
-content-hash = "5439562a9323ac14de91403042c9df9c94816c69d4918c558d397556745532a5"
+content-hash = "eeb7a67086432224ee861bf8cbeabc9035538ecb245be82d8af7180389c24dfa"
 
 [metadata.files]
 appdirs = [
@@ -1448,6 +1463,10 @@ defusedxml = [
 distributed = [
     {file = "distributed-2021.11.2-py3-none-any.whl", hash = "sha256:af1f7b98d85d43886fefe2354379c848c7a5aa6ae4d2313a7aca9ab9081a7e56"},
     {file = "distributed-2021.11.2.tar.gz", hash = "sha256:f86a01a2e1e678865d2e42300c47552b5012cd81a2d354e47827a1fd074cc302"},
+]
+dnspython = [
+    {file = "dnspython-2.1.0-py3-none-any.whl", hash = "sha256:95d12f6ef0317118d2a1a6fc49aac65ffec7eb8087474158f42f26a639135216"},
+    {file = "dnspython-2.1.0.zip", hash = "sha256:e4a87f0b573201a0f3727fa18a516b055fd1107e0e5477cded4a2de497df1dd4"},
 ]
 entrypoints = [
     {file = "entrypoints-0.3-py2.py3-none-any.whl", hash = "sha256:589f874b313739ad35be6e0cd7efde2a4e9b6fea91edcc34e58ecbb8dbe56d19"},

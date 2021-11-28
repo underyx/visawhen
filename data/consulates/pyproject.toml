@@ -18,6 +18,7 @@ opencv-python = "^4.5.4"
 ghostscript = "^0.7"
 notebook = "^6.4.5"
 websockets = "^10.1"
+dnspython = "^2.1.0"
 
 [tool.poetry.dev-dependencies]
 ipykernel = "^6.0.3"
