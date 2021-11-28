@@ -42,9 +42,9 @@ jobs:
       - name: Install dependencies
         run: poetry install
       - name: Run script
-        run: poetry run jupyter nbconvert --execute visa-issuances.ipynb
+        run: poetry run jupyter nbconvert --to notebook --execute visa-issuances.ipynb
       - name: Run other script
-        run: poetry run jupyter nbconvert --execute baselines.ipynb
+        run: poetry run jupyter nbconvert --to notebook --execute baselines.ipynb
       - name: Commit changes
         id: commit
         uses: EndBug/add-and-commit@v7
