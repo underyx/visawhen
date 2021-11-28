@@ -11,7 +11,9 @@ export default function PageWrapper({ children }: React.PropsWithChildren<{}>) {
             community not have a place to chat? I wondered this and next thing I
             know, I created a Discord community for ourselves!{" "}
             <strong>
-              <a href="https://discord.gg/zkf8w2QtQY">Come say hi to 92 members and counting!</a>
+              <a href="https://discord.gg/zkf8w2QtQY">
+                Come say hi to 92 members and counting!
+              </a>
             </strong>
           </div>
         </aside>
