@@ -20,6 +20,8 @@ jobs:
     uses: underyx/visawhen/.github/workflows/build.yml@main
     with:
       ref: ${{ github.sha }}
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
     uses: underyx/visawhen/.github/workflows/deploy.yml@main
