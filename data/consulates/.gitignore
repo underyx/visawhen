@@ -1,3 +1,4 @@
 dask-worker-space/
 pdfs/
 *.pkl
+*.nbconvert.ipynb
