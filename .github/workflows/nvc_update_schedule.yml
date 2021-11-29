@@ -21,7 +21,7 @@ jobs:
     permissions:
       contents: write
     outputs:
-      new-commit-sha: ${{ steps.commit.outputs.commit_sha }}
+      new-commit-sha: ${{ steps.head_commit.outputs.commit_sha }}
       updated: ${{ steps.commit.outputs.pushed }}
     steps:
       - uses: actions/checkout@v2
@@ -43,6 +43,8 @@ jobs:
       - name: Commit changes
         id: commit
         uses: EndBug/add-and-commit@v7
+      - id: head_commit
+        run: echo "::set-output name=commit_sha::$(git rev-parse HEAD)"
 
   build:
     if: ${{ needs.update-nvc-data.outputs.updated == true }}
