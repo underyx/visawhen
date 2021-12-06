@@ -15,7 +15,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@fortawesome/react-fontawesome": "^0.1.16",
     "bulma": "^0.9.3",
-    "date-fns": "^2.26.0",
+    "date-fns": "^2.27.0",
     "echarts": "^5.2.2",
     "echarts-for-react": "^3.0.2",
     "lodash": "^4.17.21",
