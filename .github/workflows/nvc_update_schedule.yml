@@ -47,7 +47,7 @@ jobs:
         run: echo "::set-output name=commit_sha::$(git rev-parse HEAD)"
 
   build:
-    if: ${{ needs.update-nvc-data.outputs.updated == true }}
+    if: needs.update-nvc-data.outputs.updated == "true"
     uses: underyx/visawhen/.github/workflows/build.yml@main
     needs: [update-nvc-data]
     with:
