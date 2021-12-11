@@ -8,7 +8,7 @@ import {
   TooltipComponent,
   GridComponent,
 } from "echarts/components";
-import { CanvasRenderer } from "echarts/renderers";
+import { SVGRenderer } from "echarts/renderers";
 import ReactEChartsCore from "echarts-for-react/lib/core";
 
 echarts.use([
@@ -16,7 +16,7 @@ echarts.use([
   TooltipComponent,
   GridComponent,
   LineChart,
-  CanvasRenderer,
+  SVGRenderer,
 ]);
 
 interface Props {
