@@ -9,7 +9,7 @@ license = "MIT"
 python = "^3.9"
 arrow = "^1.1.0"
 requests = "^2.25.1"
-dnspython = "^2.1.0"
+dnspython = "^2.2.1"
 types-requests = "^2.25.11"
 
 [tool.poetry.dev-dependencies]
