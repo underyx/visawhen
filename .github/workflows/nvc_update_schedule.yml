@@ -42,7 +42,7 @@ jobs:
         run: poetry run python main.py
       - name: Commit changes
         id: commit
-        uses: EndBug/add-and-commit@v7
+        uses: EndBug/add-and-commit@v9
       - id: head_commit
         run: echo "::set-output name=commit_sha::$(git rev-parse HEAD)"
 
