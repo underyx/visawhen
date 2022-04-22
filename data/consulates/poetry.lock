@@ -955,11 +955,11 @@ diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pypdf2"
-version = "1.26.0"
-description = "PDF toolkit"
+version = "1.27.5"
+description = "A pure-python PDF library capable of splitting, merging, cropping, and transforming PDF files"
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=2.7"
 
 [[package]]
 name = "pyppeteer"
@@ -1282,7 +1282,7 @@ heapdict = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "~3.10"
-content-hash = "eeb7a67086432224ee861bf8cbeabc9035538ecb245be82d8af7180389c24dfa"
+content-hash = "d9d8470f963ab7f5e0082e0a1e3b2cf836387dbb3d5a3a7d83ca1cd2a7c20543"
 
 [metadata.files]
 appdirs = [
@@ -1992,7 +1992,8 @@ pyparsing = [
     {file = "pyparsing-3.0.6.tar.gz", hash = "sha256:d9bdec0013ef1eb5a84ab39a3b3868911598afa494f5faa038647101504e2b81"},
 ]
 pypdf2 = [
-    {file = "PyPDF2-1.26.0.tar.gz", hash = "sha256:e28f902f2f0a1603ea95ebe21dff311ef09be3d0f0ef29a3e44a932729564385"},
+    {file = "PyPDF2-1.27.5-py3-none-any.whl", hash = "sha256:9c81fc06be50fbf2e6199e8c2eac05f3eaafae4b3905ecca41200f5b02ac43d7"},
+    {file = "PyPDF2-1.27.5.tar.gz", hash = "sha256:7c18c1d48e56547b1c33f772dc15d6adbd1f4020b62e64bb4a0bc0ee2ab94511"},
 ]
 pyppeteer = [
     {file = "pyppeteer-0.0.25.tar.gz", hash = "sha256:51fe769b722a1718043b74d12c20420f29e0dd9eeea2b66652b7f93a9ad465dd"},
