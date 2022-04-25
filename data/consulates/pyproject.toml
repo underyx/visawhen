@@ -16,7 +16,7 @@ PyPDF2 = "^1.26.0"
 camelot-py = "^0.10.1"
 opencv-python = "^4.5.4"
 ghostscript = "^0.7"
-notebook = "^6.4.5"
+notebook = "^6.4.11"
 websockets = "^10.1"
 dnspython = "^2.1.0"
 
