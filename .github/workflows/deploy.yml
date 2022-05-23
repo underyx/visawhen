@@ -19,7 +19,7 @@ jobs:
           mkdir out
           tar xf website-*/out.tar.gz -C out/
 
-      - uses: actions/setup-node@v2.5.0
+      - uses: actions/setup-node@v3.2.0
         with:
           node-version: "16"
 
