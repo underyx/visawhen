@@ -12,7 +12,7 @@ numpy = "^1.21.4"
 dask = {extras = ["distributed"], version = "^2021.7.0"}
 requests-html = "^0.10.0"
 arrow = "^1.1.1"
-PyPDF2 = "^1.26.0"
+PyPDF2 = "^1.28.1"
 camelot-py = "^0.10.1"
 opencv-python = "^4.5.4"
 ghostscript = "^0.7"
