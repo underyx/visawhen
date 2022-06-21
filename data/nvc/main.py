@@ -45,8 +45,8 @@ for timeframe_name, pattern in PATTERNS.items():
     match = pattern.search(r.text)
     if not match:
         continue
-    as_of_date = arrow.get(match.group("as_of_date"), "D-MMM-YYYY")
-    latest_date = arrow.get(match.group("latest_date"), "D-MMM-YYYY")
+    as_of_date = arrow.get(match.group("as_of_date"), "D-MMM-YY")
+    latest_date = arrow.get(match.group("latest_date"), "D-MMM-YY")
 
     timeframe_data[as_of_date.date().isoformat()] = (as_of_date - latest_date).days
 
