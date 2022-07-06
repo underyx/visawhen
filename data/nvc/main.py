@@ -22,6 +22,16 @@ PATTERNS: dict[TimeframeName, re.Pattern] = {
         r"As of (?P<as_of_date>\d+-\w+-\d+), we are responding to inquiries received on (?P<latest_date>\d+-\w+-\d+)."
     ),
 }
+DATE_FORMATS = [
+    "D-MMM-YYYY",
+    "D-MMMM-YYYY",
+    "D-MMM-YY",
+    "D-MMMM-YY",
+    "DD-MMM-YYYY",
+    "DD-MMMM-YYYY",
+    "DD-MMM-YY",
+    "DD-MMMM-YY",
+]
 Data = dict[TimeframeName, dict[str, int]]
 
 
@@ -45,8 +55,8 @@ for timeframe_name, pattern in PATTERNS.items():
     match = pattern.search(r.text)
     if not match:
         continue
-    as_of_date = arrow.get(match.group("as_of_date"), "D-MMM-YY")
-    latest_date = arrow.get(match.group("latest_date"), "D-MMM-YY")
+    as_of_date = arrow.get(match.group("as_of_date"), DATE_FORMATS)
+    latest_date = arrow.get(match.group("latest_date"), DATE_FORMATS)
 
     timeframe_data[as_of_date.date().isoformat()] = (as_of_date - latest_date).days
 
