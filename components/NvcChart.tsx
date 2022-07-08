@@ -7,11 +7,13 @@ import {
   TitleComponent,
   TooltipComponent,
   GridComponent,
+  DataZoomComponent,
 } from "echarts/components";
 import { SVGRenderer } from "echarts/renderers";
 import ReactEChartsCore from "echarts-for-react/lib/core";
 
 echarts.use([
+  DataZoomComponent,
   TitleComponent,
   TooltipComponent,
   GridComponent,
@@ -76,6 +78,13 @@ export default function NvcChart({ id, series }: Props) {
             type: "time",
           },
           yAxis: { type: "value", boundaryGap: [0, "100%"], name: "days" },
+          dataZoom: [
+            {
+              type: "slider",
+              start: 100 - 100 * (52 / Object.entries(series).length), // one year
+              end: 100,
+            },
+          ],
           series: [
             {
               name: id,
