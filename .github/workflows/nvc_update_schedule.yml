@@ -24,7 +24,7 @@ jobs:
       new-commit-sha: ${{ steps.head_commit.outputs.commit_sha }}
       updated: ${{ steps.commit.outputs.pushed }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
