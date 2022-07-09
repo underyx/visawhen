@@ -47,6 +47,7 @@ ip_address = resolver.resolve("travel.state.gov", "A")[0].to_text()
 r = requests.get(
     f"https://{ip_address}/content/travel/en/us-visas/immigrate/nvc-timeframes.html",
     headers={"Host": "travel.state.gov"},
+    timeout=300,
     verify=False,
 )
 
