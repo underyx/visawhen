@@ -20,7 +20,7 @@ notebook = "^6.4.5"
 websockets = "^10.1"
 dnspython = "^2.1.0"
 distributed = "^2022.7.0"
-mistune = "^2.0.3"
+mistune = "^2.0.4"
 pyee = "^9.0.4"
 
 [tool.poetry.dev-dependencies]
