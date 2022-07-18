@@ -28,7 +28,7 @@
     "sass": "^1.53.0",
     "schema-dts": "^1.1.0",
     "sqlite": "^4.1.1",
-    "sqlite3": "^5.0.8"
+    "sqlite3": "^5.0.9"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^12.2.1",
