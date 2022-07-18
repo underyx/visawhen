@@ -33,7 +33,7 @@
   "devDependencies": {
     "@next/bundle-analyzer": "^12.2.1",
     "@types/lodash": "^4.14.182",
-    "@types/node": "^18.0.3",
+    "@types/node": "^18.0.6",
     "@types/numeral": "^2.0.2",
     "@types/react": "18.0.15",
     "eslint": "^8.19.0",
