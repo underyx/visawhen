@@ -17,7 +17,7 @@ dnspython = "^2.1.0"
 nbconvert = "^6.5.0"
 
 # https://github.com/jupyter/nbconvert/issues/1742#issuecomment-1112438431
-Jinja2 = "<3.1"
+Jinja2 = "<3.2"
 
 # these two required per https://github.com/camelot-dev/camelot/blob/644bbe7c6d57b95aefa2f049a9aacdbc061cc04f/setup.py#L27
 ghostscript = ">=0.7"
