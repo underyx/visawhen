@@ -14,7 +14,7 @@ arrow = "^1.1.1"
 PyPDF2 = "^2.4.2"
 camelot-py = "^0.10.1"
 dnspython = "^2.1.0"
-nbconvert = "^6.5.0"
+nbconvert = "^6.5.3"
 
 # https://github.com/jupyter/nbconvert/issues/1742#issuecomment-1112438431
 Jinja2 = "<3.1"
