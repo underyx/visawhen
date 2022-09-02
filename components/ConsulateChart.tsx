@@ -41,11 +41,13 @@ export default function ConsulateChart({ backlog }: Props) {
         option={{
           dataset: {
             source: [
-              ["month", "visas issued", "backlog"],
+              ["month", "actual visas issued", "expected visas issued"],
               ...backlog.map((row) => [
                 dateFormatter.format(new Date(row.month)),
                 Math.round(row.issuances * 10) / 10,
-                row.backlog !== null ? Math.round(row.backlog * 10) / 10 : null,
+                row.expectedDelta !== null
+                  ? Math.round(row.expectedDelta * 10) / 10
+                  : null,
               ]),
             ],
           },
@@ -70,6 +72,7 @@ export default function ConsulateChart({ backlog }: Props) {
             },
             {
               type: "line",
+              step: "middle",
             },
           ],
         }}

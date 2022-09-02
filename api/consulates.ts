@@ -133,6 +133,7 @@ export interface BacklogRow {
   issuances: number;
   backlog: number | null;
   monthsAhead: number | null;
+  expectedDelta: number | null;
 }
 
 export async function getBacklog(
@@ -142,7 +143,7 @@ export async function getBacklog(
   const db = await openDb();
   const rows = await db.all<BacklogRow[]>(
     `
-    SELECT "Month" AS month, "Issuances" AS issuances, "Backlog" AS backlog, "Months Ahead" AS monthsAhead
+    SELECT "Month" AS month, "Issuances" AS issuances, "Backlog" AS backlog, "Months Ahead" AS monthsAhead, "Expected Delta" AS expectedDelta
     FROM backlogs
     WHERE "Post Slug" = ? AND "Visa Class Slug" = ?
   `,
@@ -154,5 +155,6 @@ export async function getBacklog(
     month: row.month.replace(" ", "T") + ".000Z",
     backlog: row.backlog ?? null,
     monthsAhead: row.monthsAhead ?? null,
+    expectedDelta: row.expectedDelta ?? null,
   }));
 }

@@ -72,68 +72,41 @@ export default function ConsulateStats({
   visaClassName,
   visaClassDescription,
 }: Props) {
-  const monthsAhead = (last(backlog) as BacklogRow).monthsAhead;
   const router = useRouter();
+
+  const lastMonth = last<BacklogRow>(backlog);
+  if (lastMonth === undefined) return "no data";
+  const lastMonthDate = new Date(lastMonth.month);
+  const lastMonthName = lastMonthDate.toLocaleDateString("default", {
+    month: "long",
+  });
+
+  const monthsAhead = lastMonth.monthsAhead;
   const { postSlug, visaClassSlug } = router.query;
   if (typeof postSlug !== "string" || typeof visaClassSlug !== "string") return;
+
+  let title = `The ${postName} consulate's ${visaClassName} visa issuance rate`;
+  if (visaClassDescription !== null) title += ` (${visaClassDescription})`;
+
+  let description = `${postName} used to issue ${
+    Math.round(baselineRate * 10) / 10
+  } ${visaClassName}`;
+  if (visaClassDescription !== null)
+    description += ` (${visaClassDescription})`;
+  description += ` visas in an average ${lastMonthName}.`;
+  description += ` This ${lastMonthName}, they issued ${lastMonth.issuances}.`;
+
+  let canonicalUrl = `https://visawhen.com/consulates/${postSlug}/${visaClassSlug}`;
 
   return (
     <main>
       <Head>
-        <title>
-          Backlog in {postName} for {visaClassName} visas
-          {visaClassDescription !== null ? ` (${visaClassDescription})` : ""}
-        </title>
-        <meta
-          name="description"
-          content={
-            `${postName} used to issue ${
-              Math.round(baselineRate * 10) / 10
-            } ${visaClassName} visas per month on average.` +
-            (monthsAhead !== null
-              ? ` Now they are ${Math.abs(
-                  Math.round(monthsAhead * 10) / 10
-                )} months ${
-                  monthsAhead >= 0 ? "ahead of" : "behind"
-                } expectations.`
-              : "")
-          }
-        />
-        <link
-          rel="canonical"
-          href={`https://visawhen.com/consulates/${postSlug}/${visaClassSlug}`}
-        />
-        <meta
-          property="og:title"
-          content={
-            `Backlog in ${postName} for ${visaClassName} visas` +
-            (visaClassDescription !== null ? ` (${visaClassDescription})` : "")
-          }
-        />
-        <meta
-          property="og:description"
-          content={
-            `${postName} used to issue ${
-              Math.round(baselineRate * 10) / 10
-            } ${visaClassName}` +
-              visaClassDescription !==
-            null
-              ? ` (${visaClassDescription})`
-              : "" +
-                ` visas per month on average.` +
-                (monthsAhead !== null
-                  ? ` Now they are ${Math.abs(
-                      Math.round(monthsAhead * 10) / 10
-                    )} months ${
-                      monthsAhead >= 0 ? "ahead of" : "behind"
-                    } expectations.`
-                  : "")
-          }
-        />
-        <meta
-          property="og:url"
-          content={`https://visawhen.com/consulates/${postSlug}/${visaClassSlug}`}
-        />
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:url" content={canonicalUrl} />
       </Head>
       <div className="my-1">
         <Link href="/consulates">
@@ -154,28 +127,28 @@ export default function ConsulateStats({
         </Link>
       </div>
       <h1 className="title">
-        {postName}&rsquo;s {visaClassName} visa backlog
+        {postName}&rsquo;s {visaClassName} visa issuance rate
       </h1>
       {visaClassDescription !== null && (
         <h2 className="subtitle">{visaClassDescription}</h2>
       )}
       <p className="my-4">
-        Before 2020 March, {postName} issued{" "}
-        <strong>{Math.round(baselineRate * 10) / 10}</strong> {visaClassName}{" "}
-        visas per month on average.{" "}
-        {monthsAhead !== null ? (
-          <span>
-            If we naively assume that the number of visa applications
-            didn&rsquo;t change during COVID, they are now{" "}
-            <strong>
-              {Math.abs(Math.round(monthsAhead * 10) / 10)} months{" "}
-              {monthsAhead >= 0 ? "ahead of" : "behind"} expectations
-            </strong>
-            .
-          </span>
-        ) : (
-          ""
-        )}
+        Before COVID, {postName} issued{" "}
+        <strong>{Math.round((lastMonth.expectedDelta ?? 0) * 10) / 10}</strong>{" "}
+        {visaClassName} visas in an average {lastMonthName}. This{" "}
+        {lastMonthName}, they issued <strong>{lastMonth.issuances}</strong>.{" "}
+        {lastMonth.expectedDelta !== null &&
+        lastMonth.issuances > lastMonth.expectedDelta * 1.2 &&
+        lastMonth.issuances >= 10
+          ? `It seems like ${postName} is hard at work catching up on their backlog from COVID.`
+          : lastMonth.expectedDelta !== null &&
+            lastMonth.issuances < lastMonth.expectedDelta * 0.8 &&
+            lastMonth.expectedDelta >= 10
+          ? `It seems like ${postName} is still not operating at full capacity.`
+          : lastMonth.expectedDelta !== null &&
+            (lastMonth.issuances < 10 || lastMonth.expectedDelta < 10)
+          ? `With so few visas ever issued, it's difficult to tell how well ${postName} is doing just by looking at this ${lastMonthName}.`
+          : `It seems like ${postName} is operating as normal.`}
       </p>
       <ConsulateChart backlog={backlog} />
     </main>
