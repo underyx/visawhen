@@ -10,7 +10,7 @@ requests = "^2.28.1"
 pandas = "^1.4.3"
 dask = {extras = ["distributed"], version = "^2022.8.1"}
 requests-html = "^0.10.0"
-arrow = "^1.2.2"
+arrow = "^1.2.3"
 PyPDF2 = "^2.4.2"
 camelot-py = "^0.10.1"
 dnspython = "^2.1.0"
