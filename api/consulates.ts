@@ -115,17 +115,28 @@ export interface VisaClassBaselineRow extends BaselineRow {
 }
 
 export async function getVisaClassBaselines(
-  postSlug: string
+  postSlug?: string
 ): Promise<VisaClassBaselineRow[]> {
   const db = await openDb();
-  return await db.all<VisaClassBaselineRow[]>(
-    `
-    SELECT "Visa Class Slug" AS visaClassSlug, "Issuances" AS issuances
+  if (postSlug === undefined) {
+    return await db.all<VisaClassBaselineRow[]>(
+      `
+    SELECT "Visa Class Slug" AS visaClassSlug, sum("Issuances") AS issuances
+    FROM baselines
+    GROUP BY 1
+  `
+    );
+  } else {
+    return await db.all<VisaClassBaselineRow[]>(
+      `
+    SELECT "Visa Class Slug" AS visaClassSlug, sum("Issuances") AS issuances
     FROM baselines
     WHERE "Post Slug" = ?
+    GROUP BY 1
   `,
-    postSlug
-  );
+      postSlug
+    );
+  }
 }
 
 export interface BacklogRow {

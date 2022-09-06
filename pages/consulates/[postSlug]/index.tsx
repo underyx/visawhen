@@ -1,6 +1,6 @@
 import { faChevronLeft, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { deburr, sortBy } from "lodash";
+import { deburr, kebabCase, sortBy } from "lodash";
 import { GetStaticPaths, GetStaticProps } from "next";
 import { useRouter } from "next/dist/client/router";
 import Head from "next/head";
@@ -94,8 +94,11 @@ export default function ConsulateSelect({
     const normalizedTerm = deburr(term).toLowerCase().replace(/\W/, "");
     setFilteredVisas(
       sortItems(
-        visaClasses.filter(({ visaClassSlug }) =>
-          visaClassSlug.includes(normalizedTerm)
+        visaClasses.filter(
+          ({ visaClassSlug, description }) =>
+            visaClassSlug.includes(normalizedTerm) ||
+            (description !== null &&
+              kebabCase(deburr(description)).includes(normalizedTerm))
         ),
         baselineMap
       )

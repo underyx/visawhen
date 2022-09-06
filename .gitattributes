@@ -1,1 +1,5 @@
 *.ipynb filter=jupyternotebook
+
+*.sqlite binary
+/.yarn/releases/** binary
+/.yarn/plugins/** binary

@@ -11,6 +11,7 @@ import {
 } from "echarts/components";
 import { SVGRenderer } from "echarts/renderers";
 import ReactEChartsCore from "echarts-for-react/lib/core";
+import { Button } from "@mantine/core";
 
 echarts.use([
   DatasetComponent,

@@ -1,11 +1,24 @@
-import "../styles/globals.scss";
 import type { AppProps } from "next/app";
 import Script from "next/script";
+import { MantineProvider } from "@mantine/core";
+import Head from "next/head";
+import Layout from "../components/Layout";
 
-function MyApp({ Component, pageProps }: AppProps) {
+export default function VisawhenApp({ Component, pageProps }: AppProps) {
   return (
     <>
-      <Component {...pageProps} />
+      <Head>
+        <title>VisaWhen</title>
+        <meta
+          name="viewport"
+          content="minimum-scale=1, initial-scale=1, width=device-width"
+        />
+      </Head>
+      <MantineProvider withGlobalStyles withNormalizeCSS>
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      </MantineProvider>
       <Script
         src="https://www.googletagmanager.com/gtag/js?id=G-3QQ9KQ0WCE"
         strategy="afterInteractive"
@@ -48,4 +61,3 @@ function MyApp({ Component, pageProps }: AppProps) {
     </>
   );
 }
-export default MyApp;

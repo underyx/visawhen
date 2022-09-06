@@ -1,7 +1,9 @@
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Title } from "@mantine/core";
 import Head from "next/head";
 import Link from "next/link";
+import VisawhenNavbar from "../components/VisawhenNavbar";
 
 export default function Home() {
   return (
@@ -21,8 +23,9 @@ export default function Home() {
         <meta property="og:url" content="https://visawhen.com" />
       </Head>
 
-      <h1 className="title">Welcome to VisaWhen</h1>
-      <h2 className="subtitle">What is your case waiting for right now?</h2>
+      <Title order={1}>Welcome to VisaWhen</Title>
+      <Title order={2}>What is your case waiting for right now?</Title>
+
       <ul className="columns">
         <li className="column">
           <div className="card">

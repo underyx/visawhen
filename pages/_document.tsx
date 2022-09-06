@@ -1,13 +1,6 @@
-import Document, {
-  Html,
-  Head,
-  Main,
-  NextScript,
-  DocumentContext,
-} from "next/document";
 import React from "react";
-import Navbar from "../components/Navbar";
-import PageWrapper from "../components/PageWrapper";
+import { createGetInitialProps } from "@mantine/next";
+import Document, { Head, Html, Main, NextScript } from "next/document";
 
 // The following import prevents a Font Awesome icon server-side rendering bug,
 // where the icons flash from a very large icon down to a properly sized one:
@@ -15,16 +8,14 @@ import PageWrapper from "../components/PageWrapper";
 import { config } from "@fortawesome/fontawesome-svg-core";
 config.autoAddCss = false; /* eslint-disable import/first */
 
-class MyDocument extends Document {
-  static async getInitialProps(ctx: DocumentContext) {
-    const initialProps = await Document.getInitialProps(ctx);
+const getInitialProps = createGetInitialProps();
 
-    return initialProps;
-  }
+export default class VisawhenDocument extends Document {
+  static getInitialProps = getInitialProps;
 
   render() {
     return (
-      <Html lang="en" className="has-navbar-fixed-top">
+      <Html lang="en">
         <Head>
           <meta property="og:type" content="website" />
           <meta property="og:site_name" content="VisaWhen" />
@@ -50,15 +41,10 @@ class MyDocument extends Document {
           <link rel="manifest" href="/site.webmanifest" />
         </Head>
         <body>
-          <Navbar />
-          <PageWrapper>
-            <Main />
-          </PageWrapper>
+          <Main />
           <NextScript />
         </body>
       </Html>
     );
   }
 }
-
-export default MyDocument;
