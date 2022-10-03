@@ -31,7 +31,7 @@ jobs:
       - name: Set up poetry
         uses: Gr1N/setup-poetry@v7
       - name: Cache poetry virtualenv
-        uses: actions/cache@v3.0.5
+        uses: actions/cache@v3.0.9
         with:
           path: ~/.cache/pypoetry/virtualenvs
           key: ${{ runner.os }}-poetry-data-consulates-${{ hashFiles('data/consulates/poetry.lock') }}
