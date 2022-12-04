@@ -101,7 +101,7 @@ export default function Home() {
             </div>
             <footer className="card-footer">
               <Link href="/consulates">
-                <a className="card-footer-item">Check consulate wait times</a>
+                <a className="card-footer-item">Check consulate visa issuance rates</a>
               </Link>
             </footer>
           </div>
