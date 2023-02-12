@@ -44,11 +44,13 @@ with DATA_PATH.open() as data_file:
 resolver = dns.resolver.Resolver()
 resolver.nameservers = ["1.1.1.1", "8.8.8.8"]
 ip_address = resolver.resolve("travel.state.gov", "A")[0].to_text()
+
+# nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
 r = requests.get(
     f"https://{ip_address}/content/travel/en/us-visas/immigrate/nvc-timeframes.html",
     headers={"Host": "travel.state.gov"},
     timeout=300,
-    verify=False,  # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
+    verify=False,
 )
 
 for timeframe_name, pattern in PATTERNS.items():
