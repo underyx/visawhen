@@ -48,7 +48,7 @@ r = requests.get(
     f"https://{ip_address}/content/travel/en/us-visas/immigrate/nvc-timeframes.html",
     headers={"Host": "travel.state.gov"},
     timeout=300,
-    verify=False,
+    verify=False,  # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
 )
 
 for timeframe_name, pattern in PATTERNS.items():
