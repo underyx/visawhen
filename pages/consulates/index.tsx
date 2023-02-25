@@ -88,23 +88,25 @@ export default function ConsulateSelect({ posts, baselines }: Props) {
         </p>
       </div>
       {filteredPosts.map(({ post, postSlug }) => (
-        <Link key={postSlug} href={`/consulates/${postSlug}/`}>
-          <a className="option panel-block">
-            <div className="post">
-              <strong className="tag is-medium is-link is-light mr-3">
-                {post}
-              </strong>{" "}
-            </div>
-            <div>
-              <span className="ml-3 tag">
-                normally{" "}
-                {numeral(baselineMap.get(postSlug))
-                  .format((baselineMap.get(postSlug) ?? 0) > 10 ? "0a" : "0.0a")
-                  .toUpperCase()}
-                /mo
-              </span>
-            </div>
-          </a>
+        <Link
+          className="option panel-block"
+          key={postSlug}
+          href={`/consulates/${postSlug}/`}
+        >
+          <div className="post">
+            <strong className="tag is-medium is-link is-light mr-3">
+              {post}
+            </strong>{" "}
+          </div>
+          <div>
+            <span className="ml-3 tag">
+              normally{" "}
+              {numeral(baselineMap.get(postSlug))
+                .format((baselineMap.get(postSlug) ?? 0) > 10 ? "0a" : "0.0a")
+                .toUpperCase()}
+              /mo
+            </span>
+          </div>
         </Link>
       ))}
       <style jsx>{`

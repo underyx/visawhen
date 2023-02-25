@@ -47,19 +47,16 @@ export default function Home() {
         <li className="column">
           <div className="card">
             <Link href="/nvc">
-              <a>
-                <header className="card-header">
-                  <p className="card-header-title">
-                    <span className="tag is-link is-medium mr-2">Step 2</span>{" "}
-                    NVC
-                  </p>
-                  <span className="card-header-icon">
-                    <span className="icon">
-                      <FontAwesomeIcon icon={faChevronRight} />
-                    </span>
+              <header className="card-header">
+                <p className="card-header-title">
+                  <span className="tag is-link is-medium mr-2">Step 2</span> NVC
+                </p>
+                <span className="card-header-icon">
+                  <span className="icon">
+                    <FontAwesomeIcon icon={faChevronRight} />
                   </span>
-                </header>
-              </a>
+                </span>
+              </header>
             </Link>
             <div className="card-content">
               <div className="content">
@@ -69,8 +66,8 @@ export default function Home() {
               </div>
             </div>
             <footer className="card-footer">
-              <Link href="/nvc">
-                <a className="card-footer-item">Check NVC wait times</a>
+              <Link className="card-footer-item" href="/nvc">
+                Check NVC wait times
               </Link>
             </footer>
           </div>
@@ -78,19 +75,17 @@ export default function Home() {
         <li className="column">
           <div className="card">
             <Link href="/consulates">
-              <a>
-                <header className="card-header">
-                  <p className="card-header-title">
-                    <span className="tag is-link is-medium mr-2">Step 3</span>{" "}
-                    Consulate
-                  </p>
-                  <button className="card-header-icon" aria-label="open">
-                    <span className="icon">
-                      <FontAwesomeIcon icon={faChevronRight} />
-                    </span>
-                  </button>
-                </header>
-              </a>
+              <header className="card-header">
+                <p className="card-header-title">
+                  <span className="tag is-link is-medium mr-2">Step 3</span>{" "}
+                  Consulate
+                </p>
+                <button className="card-header-icon" aria-label="open">
+                  <span className="icon">
+                    <FontAwesomeIcon icon={faChevronRight} />
+                  </span>
+                </button>
+              </header>
             </Link>
             <div className="card-content">
               <div className="content">
@@ -100,10 +95,8 @@ export default function Home() {
               </div>
             </div>
             <footer className="card-footer">
-              <Link href="/consulates">
-                <a className="card-footer-item">
-                  Check consulate visa issuance rates
-                </a>
+              <Link className="card-footer-item" href="/consulates">
+                Check consulate visa issuance rates
               </Link>
             </footer>
           </div>

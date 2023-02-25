@@ -19,23 +19,12 @@ jobs:
           mkdir out
           tar xf website-*/out.tar.gz -C out/
 
-      - uses: actions/setup-node@v3.4.1
+      - uses: actions/setup-node@v3
         with:
-          node-version: "16"
-
-      - name: Cache node modules
-        uses: actions/cache@v3.0.5
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-cache-netlify-cli
-          restore-keys: |
-            ${{ runner.os }}-build-cache-netlify-cli
-
-      - name: Install Netlify CLI
-        run: npm install -g netlify-cli
+          node-version: "19"
 
       - name: Deploy to netlify
-        run: netlify deploy --prod --dir=out/ --timeout=3600
+        run: npx -y netflify-cli deploy --prod --dir=out/ --timeout=3600
         env:
           NETLIFY_SITE_ID: e464072b-c4e2-4ca9-b6d5-317fd657ad16
           NETLIFY_AUTH_TOKEN: ${{ secrets.netlify-token }}
