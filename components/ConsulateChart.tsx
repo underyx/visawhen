@@ -1,4 +1,4 @@
-import { BacklogRow } from "../api/consulates";
+import { BacklogRow } from "../utils/consulates";
 
 import * as echarts from "echarts/core";
 import { BarChart, LineChart } from "echarts/charts";

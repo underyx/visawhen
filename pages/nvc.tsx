@@ -1,6 +1,6 @@
 import { GetStaticProps } from "next";
 import Head from "next/head";
-import { getData, NvcData, NvcSeries } from "../api/nvc";
+import { getData, NvcData, NvcSeries } from "../utils/nvc";
 import add from "date-fns/add";
 import getISODay from "date-fns/getISODay";
 import React from "react";

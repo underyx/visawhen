@@ -9,7 +9,7 @@ import {
   getPost,
   getVisaClass,
   BacklogRow,
-} from "../../../api/consulates";
+} from "../../../utils/consulates";
 import Head from "next/head";
 import ConsulateChart from "../../../components/ConsulateChart";
 import { useRouter } from "next/dist/client/router";

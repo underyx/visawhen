@@ -1,4 +1,4 @@
-import { NvcSeries } from "../api/nvc";
+import { NvcSeries } from "../utils/nvc";
 import add from "date-fns/add";
 
 import * as echarts from "echarts/core";

@@ -11,7 +11,7 @@ import {
   getAllPosts,
   getConsulateBaselines,
   PostRow,
-} from "../../api/consulates";
+} from "../../utils/consulates";
 
 export const getStaticProps: GetStaticProps = async () => ({
   props: {
