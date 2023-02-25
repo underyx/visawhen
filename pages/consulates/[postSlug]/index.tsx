@@ -14,7 +14,7 @@ import {
   getVisaClassBaselines,
   VisaClassBaselineRow,
   VisaClassRow,
-} from "../../../utils/consulates";
+} from "../../../api/consulates";
 import numeral from "numeral";
 
 export const getStaticPaths: GetStaticPaths = async () => {
