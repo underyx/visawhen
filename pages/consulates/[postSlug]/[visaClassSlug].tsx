@@ -109,21 +109,20 @@ export default function ConsulateStats({
         <meta property="og:url" content={canonicalUrl} />
       </Head>
       <div className="my-1">
-        <Link href="/consulates">
-          <a className="button is-small is-link is-light">
-            <span className="icon">
-              <FontAwesomeIcon icon={faChevronLeft} />
-            </span>
-            &nbsp;&nbsp;Change consulate
-          </a>
+        <Link className="button is-small is-link is-light" href="/consulates">
+          <span className="icon">
+            <FontAwesomeIcon icon={faChevronLeft} />
+          </span>
+          &nbsp;&nbsp;Change consulate
         </Link>{" "}
-        <Link href={`/consulates/${postSlug}`}>
-          <a className="button is-small is-link is-light">
-            <span className="icon">
-              <FontAwesomeIcon icon={faChevronLeft} />
-            </span>
-            &nbsp;&nbsp;Change visa class
-          </a>
+        <Link
+          className="button is-small is-link is-light"
+          href={`/consulates/${postSlug}`}
+        >
+          <span className="icon">
+            <FontAwesomeIcon icon={faChevronLeft} />
+          </span>
+          &nbsp;&nbsp;Change visa class
         </Link>
       </div>
       <h1 className="title">

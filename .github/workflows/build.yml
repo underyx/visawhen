@@ -19,31 +19,21 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
-      - uses: actions/setup-node@v3.4.1
+      - uses: actions/setup-node@v3
         with:
-          node-version: "16"
-
-      - name: Cache node modules
-        uses: actions/cache@v3.0.5
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-cache-node-modules-
+          node-version: "19"
 
       - name: Cache Next.js build
-        uses: actions/cache@v3.0.5
+        uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/.next/cache
           # Generate a new cache whenever packages or source files change.
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**.[jt]sx?') }}
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/yarn.lock') }}-${{ hashFiles('**.[jt]sx?') }}
           # If source files changed but packages didn't, rebuild from a prior cache.
           restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/yarn.lock') }}-
 
-      - run: npm ci
-
-      - run: npm run export
+      - run: yarn export
 
       - id: name-artifact
         name: Set artifact name

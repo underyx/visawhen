@@ -128,13 +128,11 @@ export default function ConsulateSelect({
         />
       </Head>
       <div className="my-1">
-        <Link href="/consulates">
-          <a className="button is-small is-link is-light">
-            <span className="icon">
-              <FontAwesomeIcon icon={faChevronLeft} />
-            </span>
-            &nbsp;&nbsp;Change consulate
-          </a>
+        <Link className="button is-small is-link is-light" href="/consulates">
+          <span className="icon">
+            <FontAwesomeIcon icon={faChevronLeft} />
+          </span>
+          &nbsp;&nbsp;Change consulate
         </Link>
       </div>
       <p className="panel-heading">{postName} › Select your visa type</p>
@@ -175,29 +173,28 @@ export default function ConsulateSelect({
             );
           }
           return (
-            // eslint-disable-next-line react/jsx-key
-            <Link href={`/consulates/${postSlug}/${visaClassSlug}`}>
-              <a key={visaClassSlug} className="option panel-block">
-                <div className="visa-type">
-                  <strong className="tag is-medium is-link is-light mr-3">
-                    {visaClass}
-                  </strong>{" "}
-                  <span>{description}</span>
-                </div>
-                <div>
-                  <span className="ml-3 tag">
-                    normally{" "}
-                    {numeral(baselineMap.get(visaClassSlug))
-                      .format(
-                        (baselineMap.get(visaClassSlug) ?? 0) > 10
-                          ? "0a"
-                          : "0.0a"
-                      )
-                      .toUpperCase()}
-                    /mo
-                  </span>
-                </div>
-              </a>
+            <Link
+              key={visaClassSlug}
+              className="option panel-block"
+              href={`/consulates/${postSlug}/${visaClassSlug}`}
+            >
+              <div className="visa-type">
+                <strong className="tag is-medium is-link is-light mr-3">
+                  {visaClass}
+                </strong>{" "}
+                <span>{description}</span>
+              </div>
+              <div>
+                <span className="ml-3 tag">
+                  normally{" "}
+                  {numeral(baselineMap.get(visaClassSlug))
+                    .format(
+                      (baselineMap.get(visaClassSlug) ?? 0) > 10 ? "0a" : "0.0a"
+                    )
+                    .toUpperCase()}
+                  /mo
+                </span>
+              </div>
             </Link>
           );
         })}

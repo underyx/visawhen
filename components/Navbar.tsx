@@ -12,13 +12,11 @@ export default function Navbar() {
     >
       <div className="container is-size-6 is-max-desktop px-2">
         <div className="navbar-brand">
-          <Link href="/">
-            <a className="navbar-item">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.svg" alt="Logo for VisaWhen" />
-              &nbsp;
-              <b className="is-hidden-mobile">VisaWhen</b>
-            </a>
+          <Link className="navbar-item" href="/">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.svg" alt="Logo for VisaWhen" />
+            &nbsp;
+            <b className="is-hidden-mobile">VisaWhen</b>
           </Link>
 
           <a
@@ -36,12 +34,12 @@ export default function Navbar() {
 
         <div className="navbar-menu">
           <div className="navbar-start">
-            <Link href="/nvc">
-              <a className="navbar-item">NVC</a>
+            <Link className="navbar-item" href="/nvc">
+              NVC
             </Link>
 
-            <Link href="/consulates">
-              <a className="navbar-item">Consulates</a>
+            <Link className="navbar-item" href="/consulates">
+              Consulates
             </Link>
           </div>
 
@@ -51,6 +49,8 @@ export default function Navbar() {
                 <div className="control">
                   <a
                     href="https://discord.gg/zkf8w2QtQY"
+                    target="_blank"
+                    rel="noopener"
                     className="button is-link has-text-weight-semibold"
                   >
                     <span className="icon">

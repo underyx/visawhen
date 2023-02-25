@@ -1,5 +1,5 @@
 [build]
-  command = "npm run export"
+  command = "yarn export"
 
 [[plugins]]
   package = "netlify-plugin-cache-nextjs"

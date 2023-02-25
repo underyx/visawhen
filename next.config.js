@@ -1,8 +1,7 @@
-const withTM = require("next-transpile-modules")(["echarts", "zrender"]);
-
 const CONFIG = {
   swcMinify: true,
   reactStrictMode: true,
+  transpilePackages: ["echarts", "zrender"],
   async headers() {
     return [
       {
@@ -27,4 +26,4 @@ const CONFIG = {
   },
 };
 
-module.exports = withTM(CONFIG);
+module.exports = CONFIG;

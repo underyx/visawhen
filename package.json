@@ -1,49 +1,51 @@
 {
-  "name": "backlogs",
+  "name": "visawhen",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "postbuild": "next-sitemap",
+    "build": "next build && next-sitemap",
     "start": "next start",
     "export": "next build && next-sitemap && next export"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^6.2.0",
-    "@fortawesome/free-brands-svg-icons": "^6.2.0",
-    "@fortawesome/free-solid-svg-icons": "^6.2.0",
+    "@fortawesome/fontawesome-svg-core": "^6.3.0",
+    "@fortawesome/free-brands-svg-icons": "^6.3.0",
+    "@fortawesome/free-solid-svg-icons": "^6.3.0",
     "@fortawesome/react-fontawesome": "^0.2.0",
+    "@next/env": "^13.2.1",
     "bulma": "^0.9.4",
-    "date-fns": "^2.29.2",
-    "echarts": "^5.3.3",
+    "date-fns": "^2.29.3",
+    "echarts": "^5.4.1",
     "echarts-for-react": "^3.0.2",
     "lodash": "^4.17.21",
-    "next": "12.2.5",
-    "next-transpile-modules": "^9.0.0",
+    "next": "latest",
     "numeral": "^2.0.6",
+    "prop-types": "^15.8.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-schemaorg": "^2.0.0",
-    "sass": "^1.54.8",
-    "schema-dts": "^1.1.0",
+    "sass": "latest",
+    "schema-dts": "latest",
     "sqlite": "^4.1.2",
-    "sqlite3": "^5.0.11"
+    "sqlite3": "^5.1.4",
+    "tslib": "^2.5.0"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^12.2.5",
-    "@types/lodash": "^4.14.184",
-    "@types/node": "^18.7.14",
+    "@next/bundle-analyzer": "^13.2.1",
+    "@types/lodash": "^4.14.191",
+    "@types/node": "^18.14.1",
     "@types/numeral": "^2.0.2",
-    "@types/react": "18.0.18",
-    "eslint": "^8.23.0",
-    "eslint-config-next": "^12.2.5",
-    "next-sitemap": "^3.1.21",
-    "typescript": "4.8.2"
+    "@types/react": "18.0.28",
+    "eslint": "^8.34.0",
+    "eslint-config-next": "^13.2.1",
+    "next-sitemap": "^3.1.52",
+    "typescript": "4.9.5"
   },
   "browserslist": [
     ">1%",
     "not ie 11",
     "not op_mini all"
-  ]
+  ],
+  "packageManager": "yarn@3.4.1"
 }

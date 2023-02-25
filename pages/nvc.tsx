@@ -1,6 +1,6 @@
 import { GetStaticProps } from "next";
 import Head from "next/head";
-import { getData, NvcData, NvcSeries } from "../api/nvc";
+import { getData, NvcData, NvcDatapoint, NvcSeries } from "../api/nvc";
 import add from "date-fns/add";
 import getISODay from "date-fns/getISODay";
 import React from "react";
@@ -53,9 +53,10 @@ function ChartHeading({
   children,
   series,
 }: React.PropsWithChildren<ChartHeadingProps>) {
+  const lastDatapoint = last<NvcDatapoint>(series);
   return (
     <h2 className="subtitle review is-size-3 mt-6 mb-2">
-      {children} takes {last(Object.values(series))} days
+      {children} takes {lastDatapoint?.backlogDays} days
     </h2>
   );
 }
