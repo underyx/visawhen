@@ -24,7 +24,7 @@ jobs:
           node-version: "19"
 
       - name: Deploy to netlify
-        run: npx -y netflify-cli deploy --prod --dir=out/ --timeout=3600
+        run: npx -y netlify-cli deploy --prod --dir=out/ --timeout=3600
         env:
           NETLIFY_SITE_ID: e464072b-c4e2-4ca9-b6d5-317fd657ad16
           NETLIFY_AUTH_TOKEN: ${{ secrets.netlify-token }}
