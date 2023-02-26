@@ -36,7 +36,7 @@ export async function getPost(postSlug: string): Promise<PostRow | undefined> {
       SELECT "Post" AS post, "Post Slug" AS postSlug
       FROM post_slugs WHERE "Post Slug" = ?
     `,
-    postSlug
+    postSlug,
   );
 }
 
@@ -46,7 +46,7 @@ export async function getAllPosts(): Promise<PostRow[]> {
     `
       SELECT "Post" AS post, "Post Slug" AS postSlug
       FROM post_slugs
-    `
+    `,
   );
 }
 
@@ -57,7 +57,7 @@ export interface VisaClassRow {
 }
 
 export async function getVisaClass(
-  visaClassSlug: string
+  visaClassSlug: string,
 ): Promise<VisaClassRow | undefined> {
   const db = await openDb();
   return await db.get<VisaClassRow>(
@@ -65,7 +65,7 @@ export async function getVisaClass(
       SELECT "Visa Class" AS visaClass, "Visa Class Slug" AS visaClassSlug, "Description" AS description
       FROM visa_slugs WHERE "Visa Class Slug" = ?
     `,
-    visaClassSlug
+    visaClassSlug,
   );
 }
 
@@ -75,7 +75,7 @@ export async function getAllVisaClasses(): Promise<VisaClassRow[]> {
     `
       SELECT "Visa Class" AS visaClass, "Visa Class Slug" AS visaClassSlug, "Description" AS description
       FROM visa_slugs
-    `
+    `,
   );
 }
 export interface BaselineRow {
@@ -84,7 +84,7 @@ export interface BaselineRow {
 
 export async function getBaseline(
   postSlug: string,
-  visaClassSlug: string
+  visaClassSlug: string,
 ): Promise<BaselineRow | undefined> {
   const db = await openDb();
   return await db.get<BaselineRow>(
@@ -94,7 +94,7 @@ export async function getBaseline(
     WHERE "Post Slug" = ? AND "Visa Class Slug" = ?
   `,
     postSlug,
-    visaClassSlug
+    visaClassSlug,
   );
 }
 export interface ConsulateBaselineRow extends BaselineRow {
@@ -107,7 +107,7 @@ export async function getConsulateBaselines(): Promise<ConsulateBaselineRow[]> {
     SELECT "Post Slug" AS postSlug, sum("Issuances") AS issuances
     FROM baselines
     GROUP BY 1
-  `
+  `,
   );
 }
 export interface VisaClassBaselineRow extends BaselineRow {
@@ -115,7 +115,7 @@ export interface VisaClassBaselineRow extends BaselineRow {
 }
 
 export async function getVisaClassBaselines(
-  postSlug: string
+  postSlug: string,
 ): Promise<VisaClassBaselineRow[]> {
   const db = await openDb();
   return await db.all<VisaClassBaselineRow[]>(
@@ -124,7 +124,7 @@ export async function getVisaClassBaselines(
     FROM baselines
     WHERE "Post Slug" = ?
   `,
-    postSlug
+    postSlug,
   );
 }
 
@@ -138,7 +138,7 @@ export interface BacklogRow {
 
 export async function getBacklog(
   postSlug: string,
-  visaClassSlug: string
+  visaClassSlug: string,
 ): Promise<BacklogRow[]> {
   const db = await openDb();
   const rows = await db.all<BacklogRow[]>(
@@ -148,7 +148,7 @@ export async function getBacklog(
     WHERE "Post Slug" = ? AND "Visa Class Slug" = ?
   `,
     postSlug,
-    visaClassSlug
+    visaClassSlug,
   );
   return rows.map((row) => ({
     ...row,

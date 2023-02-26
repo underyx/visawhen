@@ -27,7 +27,7 @@ interface Props {
 
 function sortItems(
   posts: PostRow[],
-  baselineMap: Map<string, number>
+  baselineMap: Map<string, number>,
 ): PostRow[] {
   return sortBy(posts, [
     ({ postSlug }) => -(baselineMap.get(postSlug) ?? -1),
@@ -38,11 +38,11 @@ function sortItems(
 export default function ConsulateSelect({ posts, baselines }: Props) {
   const baselineMap = useMemo<Map<string, number>>(
     () => new Map(baselines.map((row) => [row.postSlug, row.issuances])),
-    [baselines]
+    [baselines],
   );
   const [term, setTerm] = useState<string>("");
   const [filteredPosts, setFilteredPosts] = useState<PostRow[]>(
-    sortItems(posts, baselineMap)
+    sortItems(posts, baselineMap),
   );
 
   useEffect(() => {
@@ -50,8 +50,8 @@ export default function ConsulateSelect({ posts, baselines }: Props) {
     setFilteredPosts(
       sortItems(
         posts.filter(({ postSlug }) => postSlug.includes(normalizedTerm)),
-        baselineMap
-      )
+        baselineMap,
+      ),
     );
   }, [baselineMap, posts, term, setFilteredPosts]);
 

@@ -1,0 +1,7 @@
+target-version = "py311"
+select = ["B", "C4", "E", "EXE", "F", "I", "ICN", "N", "SIM", "PD", "PGH", "RUF", "UP", "W"]
+ignore = ["E501"]
+
+[isort]
+force-single-line = true
+required-imports = ["from __future__ import annotations"]

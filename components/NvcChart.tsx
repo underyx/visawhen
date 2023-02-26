@@ -42,14 +42,14 @@ function Tooltip([series]: any) {
   const tooltip = document.createElement("div");
   tooltip.appendChild(
     document.createTextNode(
-      `${backlogDays} days of backlog on ${dateFormatter.format(date)}`
-    )
+      `${backlogDays} days of backlog on ${dateFormatter.format(date)}`,
+    ),
   );
   tooltip.appendChild(document.createElement("br"));
   tooltip.appendChild(
     document.createTextNode(
-      `(processed up to ${dateFormatter.format(processingDate)})`
-    )
+      `(processed up to ${dateFormatter.format(processingDate)})`,
+    ),
   );
 
   return tooltip;

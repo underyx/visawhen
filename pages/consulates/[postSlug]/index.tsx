@@ -37,7 +37,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const availableVisaClasses = new Set<string>(
     (await getSlugPairs())
       .filter((row) => row.postSlug === postSlug)
-      .map((row) => row.visaClassSlug)
+      .map((row) => row.visaClassSlug),
   );
 
   return {
@@ -59,7 +59,7 @@ interface Props {
 
 function sortItems(
   visaClasses: VisaClassRow[],
-  baselineMap: Map<string, number>
+  baselineMap: Map<string, number>,
 ): VisaClassRow[] {
   return sortBy(visaClasses, [
     ({ visaClassSlug }) => -(baselineMap.get(visaClassSlug) ?? -1),
@@ -77,7 +77,7 @@ export default function ConsulateSelect({
 
   const baselineMap = useMemo<Map<string, number>>(
     () => new Map(baselines.map((row) => [row.visaClassSlug, row.issuances])),
-    [baselines]
+    [baselines],
   );
 
   const [term, setTerm] = useState<string>("");
@@ -95,10 +95,10 @@ export default function ConsulateSelect({
     setFilteredVisas(
       sortItems(
         visaClasses.filter(({ visaClassSlug }) =>
-          visaClassSlug.includes(normalizedTerm)
+          visaClassSlug.includes(normalizedTerm),
         ),
-        baselineMap
-      )
+        baselineMap,
+      ),
     );
   }, [baselineMap, visaClasses, term, setFilteredVisas]);
 
@@ -189,7 +189,9 @@ export default function ConsulateSelect({
                   normally{" "}
                   {numeral(baselineMap.get(visaClassSlug))
                     .format(
-                      (baselineMap.get(visaClassSlug) ?? 0) > 10 ? "0a" : "0.0a"
+                      (baselineMap.get(visaClassSlug) ?? 0) > 10
+                        ? "0a"
+                        : "0.0a",
                     )
                     .toUpperCase()}
                   /mo

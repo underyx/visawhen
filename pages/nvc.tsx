@@ -68,11 +68,11 @@ export default function NvcBacklog({ data }: Props) {
         <meta
           name="description"
           content={`The National Visa Center is currently taking ${last(
-            Object.values(data.review)
+            Object.values(data.review),
           )} days to review documents, ${last(
-            Object.values(data.creation)
+            Object.values(data.creation),
           )} days to create cases, and ${last(
-            Object.values(data.inquiry)
+            Object.values(data.inquiry),
           )} days to respond to inquiries.`}
         />
         <link rel="canonical" href="https://visawhen.com/nvc" />
@@ -80,11 +80,11 @@ export default function NvcBacklog({ data }: Props) {
         <meta
           property="og:description"
           content={`The National Visa Center is currently taking ${last(
-            Object.values(data.review)
+            Object.values(data.review),
           )} days to review documents, ${last(
-            Object.values(data.creation)
+            Object.values(data.creation),
           )} days to create cases, and ${last(
-            Object.values(data.inquiry)
+            Object.values(data.inquiry),
           )} days to respond to inquiries.`}
         />
         <meta property="og:url" content="https://visawhen.com/nvc" />
