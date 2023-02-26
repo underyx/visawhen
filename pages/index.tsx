@@ -1,11 +1,24 @@
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  Anchor,
+  Badge,
+  Button,
+  Card,
+  Flex,
+  Group,
+  SimpleGrid,
+  Stack,
+  Text,
+  Title,
+  UnstyledButton,
+} from "@mantine/core";
 import Head from "next/head";
 import Link from "next/link";
 
 export default function Home() {
   return (
-    <main>
+    <Stack>
       <Head>
         <title>US visa wait times</title>
         <meta
@@ -20,93 +33,98 @@ export default function Home() {
         />
         <meta property="og:url" content="https://visawhen.com" />
       </Head>
-
-      <h1 className="title">Welcome to VisaWhen</h1>
-      <h2 className="subtitle">What is your case waiting for right now?</h2>
-      <ul className="columns">
-        <li className="column">
-          <div className="card">
-            <header className="card-header">
-              <p className="card-header-title has-text-grey-light">
-                <span className="tag is-light is-medium mr-2">Step 1</span>{" "}
-                USCIS
-              </p>
-            </header>
-            <div className="card-content">
-              <div className="content has-text-grey">
-                VisaWhen does not have information on USCIS wait times yet.
-                Until then, you can check the{" "}
-                <a href="https://egov.uscis.gov/processing-times/">
-                  USCIS Case Processing Times
-                </a>{" "}
-                page instead.
-              </div>
-            </div>
-          </div>
-        </li>
-        <li className="column">
-          <div className="card">
-            <Link href="/nvc">
-              <header className="card-header">
-                <p className="card-header-title">
-                  <span className="tag is-link is-medium mr-2">Step 2</span> NVC
-                </p>
-                <span className="card-header-icon">
-                  <span className="icon">
+      <Title order={1} size="h2">
+        Welcome to VisaWhen
+      </Title>
+      <Text size="xl">What is your case waiting for right now?</Text>
+      <SimpleGrid
+        cols={3}
+        breakpoints={[
+          { maxWidth: "62rem", cols: 3, spacing: "md" },
+          { maxWidth: "48rem", cols: 1, spacing: "sm" },
+        ]}
+      >
+        <Card shadow="sm" p="md" radius="md" withBorder>
+          <Stack>
+            <Title order={2} size="h5">
+              <Group>
+                <Badge color="gray">Step 1</Badge>
+                <Text>USCIS</Text>
+              </Group>
+            </Title>
+            <Text>
+              VisaWhen does not have information on USCIS wait times yet. Until
+              then, you can check the{" "}
+              <Anchor
+                href="https://egov.uscis.gov/processing-times/"
+                target="_blank"
+                rel="noopener noreferer"
+              >
+                USCIS Case Processing Times
+              </Anchor>{" "}
+              page instead.
+            </Text>
+          </Stack>
+        </Card>
+        <Card shadow="sm" p="md" radius="md" withBorder>
+          <Flex
+            direction="column"
+            justify="space-between"
+            style={{ height: "100%" }}
+          >
+            <Stack>
+              <UnstyledButton component={Link} href="/nvc">
+                <Title order={2} size="h5">
+                  <Flex justify="space-between" align="center">
+                    <Group>
+                      <Badge variant="filled">Step 2</Badge>
+                      <Text>NVC</Text>
+                    </Group>
                     <FontAwesomeIcon icon={faChevronRight} />
-                  </span>
-                </span>
-              </header>
-            </Link>
-            <div className="card-content">
-              <div className="content">
+                  </Flex>
+                </Title>
+              </UnstyledButton>
+              <Text>
                 This is your step after the USCIS said they&rsquo;ve approved
                 your application, until the NVC says your case has been{" "}
                 <em>documentarily qualified</em>.
-              </div>
-            </div>
-            <footer className="card-footer">
-              <Link className="card-footer-item" href="/nvc">
-                Check NVC wait times
-              </Link>
-            </footer>
-          </div>
-        </li>
-        <li className="column">
-          <div className="card">
-            <Link href="/consulates">
-              <header className="card-header">
-                <p className="card-header-title">
-                  <span className="tag is-link is-medium mr-2">Step 3</span>{" "}
-                  Consulate
-                </p>
-                <button className="card-header-icon" aria-label="open">
-                  <span className="icon">
+              </Text>
+            </Stack>
+            <Button mt="md" component={Link} href="/nvc">
+              Check NVC wait times
+            </Button>
+          </Flex>
+        </Card>
+        <Card shadow="sm" p="md" radius="md" withBorder>
+          <Flex
+            direction="column"
+            justify="space-between"
+            style={{ height: "100%" }}
+          >
+            <Stack>
+              <UnstyledButton component={Link} href="/consulates">
+                <Title order={2} size="h5">
+                  <Flex justify="space-between" align="center">
+                    <Group>
+                      <Badge variant="filled">Step 3</Badge>
+                      <Text>Consulate</Text>
+                    </Group>
                     <FontAwesomeIcon icon={faChevronRight} />
-                  </span>
-                </button>
-              </header>
-            </Link>
-            <div className="card-content">
-              <div className="content">
+                  </Flex>
+                </Title>
+              </UnstyledButton>
+              <Text>
                 This is your step after the NVC said your case has been{" "}
                 <em>documentarily qualified</em>, until you get your visa from
                 an embassy or consulate.
-              </div>
-            </div>
-            <footer className="card-footer">
-              <Link className="card-footer-item" href="/consulates">
-                Check consulate visa issuance rates
-              </Link>
-            </footer>
-          </div>
-        </li>
-      </ul>
-      <style jsx>{`
-        .card {
-          height: 100%;
-        }
-      `}</style>
-    </main>
+              </Text>
+            </Stack>
+            <Button mt="md" component={Link} href="/consulates">
+              Check consulate rates
+            </Button>
+          </Flex>
+        </Card>
+      </SimpleGrid>
+    </Stack>
   );
 }

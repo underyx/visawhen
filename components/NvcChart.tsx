@@ -11,6 +11,7 @@ import {
 } from "echarts/components";
 import { SVGRenderer } from "echarts/renderers";
 import ReactEChartsCore from "echarts-for-react/lib/core";
+import { Paper } from "@mantine/core";
 
 echarts.use([
   DataZoomComponent,
@@ -57,7 +58,7 @@ function Tooltip([series]: any) {
 
 export default function NvcChart({ id, series }: Props) {
   return (
-    <figure className="box my-3">
+    <Paper shadow="xs" p="md" mx={0} component="figure">
       <ReactEChartsCore
         style={{
           width: "100%",
@@ -107,6 +108,6 @@ export default function NvcChart({ id, series }: Props) {
         </a>
         .
       </figcaption>
-    </figure>
+    </Paper>
   );
 }

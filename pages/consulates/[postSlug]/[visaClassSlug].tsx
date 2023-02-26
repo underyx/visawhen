@@ -15,6 +15,7 @@ import ConsulateChart from "../../../components/ConsulateChart";
 import { useRouter } from "next/dist/client/router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
+import { Button, Group, Stack, Text, Title } from "@mantine/core";
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const rows = await getSlugPairs();
@@ -81,7 +82,6 @@ export default function ConsulateStats({
     month: "long",
   });
 
-  const monthsAhead = lastMonth.monthsAhead;
   const { postSlug, visaClassSlug } = router.query;
   if (typeof postSlug !== "string" || typeof visaClassSlug !== "string") return;
 
@@ -99,7 +99,7 @@ export default function ConsulateStats({
   let canonicalUrl = `https://visawhen.com/consulates/${postSlug}/${visaClassSlug}`;
 
   return (
-    <main>
+    <Stack>
       <Head>
         <title>{title}</title>
         <meta name="description" content={description} />
@@ -108,30 +108,34 @@ export default function ConsulateStats({
         <meta property="og:description" content={description} />
         <meta property="og:url" content={canonicalUrl} />
       </Head>
-      <div className="my-1">
-        <Link className="button is-small is-link is-light" href="/consulates">
-          <span className="icon">
-            <FontAwesomeIcon icon={faChevronLeft} />
-          </span>
-          &nbsp;&nbsp;Change consulate
-        </Link>{" "}
-        <Link
-          className="button is-small is-link is-light"
-          href={`/consulates/${postSlug}`}
+      <Group spacing="xs" style={{ alignSelf: "flex-start" }}>
+        <Button
+          variant="outline"
+          component={Link}
+          href="/consulates"
+          size="xs"
+          leftIcon={<FontAwesomeIcon icon={faChevronLeft} />}
         >
-          <span className="icon">
-            <FontAwesomeIcon icon={faChevronLeft} />
-          </span>
-          &nbsp;&nbsp;Change visa class
-        </Link>
-      </div>
-      <h1 className="title">
+          Change consulate
+        </Button>
+        <Button
+          variant="outline"
+          component={Link}
+          href={`/consulates/${postSlug}`}
+          size="xs"
+          leftIcon={<FontAwesomeIcon icon={faChevronLeft} />}
+        >
+          Change visa class
+        </Button>
+      </Group>
+
+      <Title order={1}>
         {postName}&rsquo;s {visaClassName} visa issuance rate
-      </h1>
+      </Title>
       {visaClassDescription !== null && (
-        <h2 className="subtitle">{visaClassDescription}</h2>
+        <Text size="xl">{visaClassDescription}</Text>
       )}
-      <p className="my-4">
+      <Text>
         Before COVID, {postName} issued{" "}
         <strong>{Math.round((lastMonth.expectedDelta ?? 0) * 10) / 10}</strong>{" "}
         {visaClassName} visas in an average {lastMonthName}. This{" "}
@@ -148,8 +152,8 @@ export default function ConsulateStats({
             (lastMonth.issuances < 10 || lastMonth.expectedDelta < 10)
           ? `With so few visas ever issued, it's difficult to tell how well ${postName} is doing just by looking at this ${lastMonthName}.`
           : `It seems like ${postName} is operating as normal.`}
-      </p>
+      </Text>
       <ConsulateChart backlog={backlog} />
-    </main>
+    </Stack>
   );
 }

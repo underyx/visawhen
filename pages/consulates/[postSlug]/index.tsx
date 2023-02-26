@@ -16,6 +16,18 @@ import {
   VisaClassRow,
 } from "../../../api/consulates";
 import numeral from "numeral";
+import {
+  Badge,
+  Breadcrumbs,
+  Button,
+  Group,
+  Highlight,
+  Stack,
+  Text,
+  TextInput,
+  Title,
+} from "@mantine/core";
+import { useInputState } from "@mantine/hooks";
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = await getAllPosts();
@@ -79,8 +91,8 @@ export default function ConsulateSelect({
     () => new Map(baselines.map((row) => [row.visaClassSlug, row.issuances])),
     [baselines],
   );
+  const [term, setTerm] = useInputState("");
 
-  const [term, setTerm] = useState<string>("");
   const [filteredVisas, setFilteredVisas] = useState<VisaClassRow[]>([]);
   const [availableVisaClassesSet, setAvailableVisaClassesSet] = useState<
     Set<string>
@@ -94,8 +106,13 @@ export default function ConsulateSelect({
     const normalizedTerm = deburr(term).toLowerCase().replace(/\W/, "");
     setFilteredVisas(
       sortItems(
-        visaClasses.filter(({ visaClassSlug }) =>
-          visaClassSlug.includes(normalizedTerm),
+        visaClasses.filter(
+          ({ visaClassSlug, description }) =>
+            visaClassSlug.includes(normalizedTerm) ||
+            deburr(description ?? "")
+              .toLowerCase()
+              .replace(/\W/, "")
+              .includes(normalizedTerm),
         ),
         baselineMap,
       ),
@@ -106,7 +123,7 @@ export default function ConsulateSelect({
   if (typeof postSlug !== "string") return;
 
   return (
-    <div>
+    <Stack>
       <Head>
         <title>{postName} visa backlog</title>
         <meta
@@ -127,96 +144,92 @@ export default function ConsulateSelect({
           content={`https://visawhen.com/consulates/${postSlug}`}
         />
       </Head>
-      <div className="my-1">
-        <Link className="button is-small is-link is-light" href="/consulates">
-          <span className="icon">
-            <FontAwesomeIcon icon={faChevronLeft} />
-          </span>
-          &nbsp;&nbsp;Change consulate
-        </Link>
-      </div>
-      <p className="panel-heading">{postName} › Select your visa type</p>
-      <nav className="panel">
-        <div className="panel-block">
-          <p className="control has-icons-left">
-            <input
-              className="input"
-              type="text"
-              placeholder="DL6"
-              onInput={(event: React.ChangeEvent<HTMLInputElement>) => {
-                setTerm(event.target.value);
-              }}
-            />
-            <span className="icon is-left">
-              <FontAwesomeIcon icon={faSearch} />
-            </span>
-          </p>
-        </div>
+      <Button
+        variant="outline"
+        component={Link}
+        href="/consulates"
+        size="xs"
+        leftIcon={<FontAwesomeIcon icon={faChevronLeft} />}
+        style={{ alignSelf: "flex-start" }}
+      >
+        Change consulate
+      </Button>
+      <Title order={2}>
+        <Breadcrumbs
+          separator="›"
+          styles={{ separator: { fontSize: "1.5rem" } }}
+        >
+          <Text>{postName}</Text>
+          <Text>Select your visa type</Text>
+        </Breadcrumbs>
+      </Title>
+      <TextInput
+        size="lg"
+        icon={<FontAwesomeIcon icon={faSearch} />}
+        type="text"
+        placeholder="DL6"
+        onChange={setTerm}
+      />
+      <Button.Group orientation="vertical">
         {filteredVisas.map(({ visaClass, visaClassSlug, description }) => {
           const hasAnyIssued = availableVisaClassesSet.has(visaClassSlug);
-          if (!hasAnyIssued) {
-            return (
-              <a
-                key={visaClassSlug}
-                className="option panel-block has-text-grey-light is-unclickable"
-              >
-                <div className="visa-type">
-                  <span className="tag is-medium is-light mr-3">
-                    {visaClass}
-                  </span>
-                  <span>{description}</span>
-                </div>
-                <div>
-                  <span className="ml-3 tag">never issued</span>
-                </div>
-              </a>
-            );
-          }
           return (
-            <Link
+            <Button
+              size="lg"
+              variant="default"
+              disabled={!hasAnyIssued}
               key={visaClassSlug}
-              className="option panel-block"
-              href={`/consulates/${postSlug}/${visaClassSlug}`}
+              component={Link}
+              href={`/consulates/${postSlug}/${visaClassSlug}/`}
+              styles={(theme) => ({
+                root: {
+                  paddingLeft: "1rem",
+                  paddingRight: "1rem",
+                  "&[data-disabled]": {
+                    color: theme.colors.gray[7],
+                  },
+                },
+                inner: {
+                  justifyContent: "space-between",
+                  fontSize: "1rem",
+                  fontWeight: 400,
+                },
+              })}
+              rightIcon={
+                <Badge
+                  size="lg"
+                  radius="sm"
+                  variant="outline"
+                  color="gray"
+                  style={{ textTransform: "none", fontWeight: "500" }}
+                >
+                  {!hasAnyIssued
+                    ? "never issued here"
+                    : `normally ${numeral(baselineMap.get(visaClassSlug))
+                        .format(
+                          (baselineMap.get(visaClassSlug) ?? 0) > 10
+                            ? "0a"
+                            : "0.0a",
+                        )
+                        .toUpperCase()}/mo`}
+                </Badge>
+              }
             >
-              <div className="visa-type">
-                <strong className="tag is-medium is-link is-light mr-3">
-                  {visaClass}
-                </strong>{" "}
-                <span>{description}</span>
-              </div>
-              <div>
-                <span className="ml-3 tag">
-                  normally{" "}
-                  {numeral(baselineMap.get(visaClassSlug))
-                    .format(
-                      (baselineMap.get(visaClassSlug) ?? 0) > 10
-                        ? "0a"
-                        : "0.0a",
-                    )
-                    .toUpperCase()}
-                  /mo
-                </span>
-              </div>
-            </Link>
+              <Group spacing="xs" noWrap>
+                <Badge
+                  size="lg"
+                  radius="sm"
+                  color={!hasAnyIssued ? "gray" : "blue"}
+                  variant={!hasAnyIssued ? "outline" : "light"}
+                >
+                  <Highlight highlight={term}>{visaClass}</Highlight>
+                </Badge>{" "}
+                <Highlight highlight={term}>{description ?? ""}</Highlight>
+              </Group>
+            </Button>
           );
         })}
-      </nav>
-      <style jsx>{`
-        .is-unclickable {
-          cursor: not-allowed;
-        }
-
-        .visa-type {
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .option {
-          display: flex;
-          justify-content: space-between;
-        }
-      `}</style>
-    </div>
+      </Button.Group>
+    </Stack>
   );
 }

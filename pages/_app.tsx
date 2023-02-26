@@ -1,11 +1,25 @@
-import "../styles/globals.scss";
+import "@fortawesome/fontawesome-svg-core/styles.css";
 import type { AppProps } from "next/app";
 import Script from "next/script";
+import { MantineProvider } from "@mantine/core";
+import Head from "next/head";
+import PageWrapper from "../components/PageWrapper";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
-      <Component {...pageProps} />
+      <Head>
+        <title>VisaWhen</title>
+        <meta
+          name="viewport"
+          content="minimum-scale=1, initial-scale=1, width=device-width"
+        />
+      </Head>
+      <MantineProvider withGlobalStyles withNormalizeCSS>
+        <PageWrapper>
+          <Component {...pageProps} />
+        </PageWrapper>
+      </MantineProvider>
       <Script
         src="https://www.googletagmanager.com/gtag/js?id=G-3QQ9KQ0WCE"
         strategy="afterInteractive"

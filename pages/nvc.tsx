@@ -8,6 +8,7 @@ import NvcChart from "../components/NvcChart";
 import last from "lodash/last";
 import { jsonLdScriptProps } from "react-schemaorg";
 import { Dataset } from "schema-dts";
+import { Anchor, Stack, Text, Title } from "@mantine/core";
 
 export const getStaticProps: GetStaticProps = async () => ({
   props: {
@@ -54,15 +55,15 @@ function ChartHeading({
   series,
 }: React.PropsWithChildren<ChartHeadingProps>) {
   return (
-    <h2 className="subtitle review is-size-3 mt-6 mb-2">
+    <Title order={2}>
       {children} takes {last(Object.values(series))} days
-    </h2>
+    </Title>
   );
 }
 
 export default function NvcBacklog({ data }: Props) {
   return (
-    <>
+    <Stack spacing="3rem">
       <Head>
         <title>NVC wait times</title>
         <meta
@@ -120,45 +121,57 @@ export default function NvcBacklog({ data }: Props) {
           })}
         />
       </Head>
-      <h1 className="title">NVC wait times</h1>
-      <h2 className="subtitle">
-        Last updated {getLatestDate(data).toLocaleDateString()},{" "}
-        {getDaysTillNewDataText(data)}
-      </h2>
-      <p className="my-4">
-        Here&rsquo;s how long you should expect to wait until the National Visa
-        Center processes your case.
-      </p>
-      <ChartHeading series={data.review}>Document review</ChartHeading>
-      <p>
-        Time until documents submitted on{" "}
-        <a href="https://ceac.state.gov/IV/Login.aspx">CEAC</a> are reviewed by
-        NVC.
-      </p>
-      <p className="has-text-grey">
-        These numbers are anecdotally accurate: my case was processed in April
-        2021 exactly when this chart predicted.
-      </p>
-      <NvcChart id="review" series={data.review} />
-      <ChartHeading series={data.creation}>Case creation</ChartHeading>
-      <p>
-        Time after USCIS sends a case to the NVC until the NVC creates a case
-        for it in <a href="https://ceac.state.gov/IV/Login.aspx">CEAC</a>.
-      </p>
-      <p className="has-text-grey">
-        Some time elapses after USCIS approval before they send the case to the
-        NVC.
-      </p>
-      <NvcChart id="creation" series={data.creation} />
-      <ChartHeading series={data.inquiry}>Inquiry response</ChartHeading>
-      <p>
-        Time until questions and requests sent via{" "}
-        <a href="https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/ask-nvc.html">
-          NVC&rsquo;s public inquiry form
-        </a>{" "}
-        are answered.
-      </p>
-      <NvcChart id="inquiry" series={data.inquiry} />
-    </>
+      <Stack spacing="sm">
+        <Title order={1}>NVC wait times</Title>
+        <Text size="xl">
+          Last updated {getLatestDate(data).toLocaleDateString()},{" "}
+          {getDaysTillNewDataText(data)}
+        </Text>
+        <Text>
+          Here&rsquo;s how long you should expect to wait until the National
+          Visa Center processes your case.
+        </Text>
+      </Stack>
+      <Stack spacing="sm">
+        <ChartHeading series={data.review}>Document review</ChartHeading>
+        <Text>
+          Time until documents submitted on{" "}
+          <a href="https://ceac.state.gov/IV/Login.aspx">CEAC</a> are reviewed
+          by NVC.
+        </Text>
+        <Text>
+          These numbers are anecdotally accurate: my case was processed in April
+          2021 exactly when this chart predicted.
+        </Text>
+        <NvcChart id="review" series={data.review} />
+      </Stack>
+      <Stack spacing="sm">
+        <ChartHeading series={data.creation}>Case creation</ChartHeading>
+        <Text>
+          Time after USCIS sends a case to the NVC until the NVC creates a case
+          for it in <a href="https://ceac.state.gov/IV/Login.aspx">CEAC</a>.
+        </Text>
+        <Text>
+          Some time elapses after USCIS approval before they send the case to
+          the NVC.
+        </Text>
+        <NvcChart id="creation" series={data.creation} />
+      </Stack>
+      <Stack spacing="sm">
+        <ChartHeading series={data.inquiry}>Inquiry response</ChartHeading>
+        <Text>
+          Time until questions and requests sent via{" "}
+          <Anchor
+            target="_blank"
+            rel="noopener noreferer"
+            href="https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/ask-nvc.html"
+          >
+            NVC&rsquo;s public inquiry form
+          </Anchor>{" "}
+          are answered.
+        </Text>
+        <NvcChart id="inquiry" series={data.inquiry} />
+      </Stack>
+    </Stack>
   );
 }

@@ -11,6 +11,7 @@ import {
 } from "echarts/components";
 import { SVGRenderer } from "echarts/renderers";
 import ReactEChartsCore from "echarts-for-react/lib/core";
+import { Paper } from "@mantine/core";
 
 echarts.use([
   DatasetComponent,
@@ -34,7 +35,7 @@ export default function ConsulateChart({ backlog }: Props) {
     timeZone: "UTC",
   });
   return (
-    <figure className="box my-3">
+    <Paper shadow="xs" p="md" mx={0} component="figure">
       <ReactEChartsCore
         style={{ height: "600px" }}
         echarts={echarts}
@@ -90,6 +91,6 @@ export default function ConsulateChart({ backlog }: Props) {
         </a>
         .
       </figcaption>
-    </figure>
+    </Paper>
   );
 }

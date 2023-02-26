@@ -1,72 +1,75 @@
 import Link from "next/link";
-import { faHeart } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDiscord } from "@fortawesome/free-brands-svg-icons";
+import {
+  Anchor,
+  Avatar,
+  Button,
+  Container,
+  Flex,
+  Group,
+  MediaQuery,
+  Text,
+} from "@mantine/core";
 
 export default function Navbar() {
   return (
-    <nav
-      className="navbar is-dark is-fixed-top"
-      role="navigation"
-      aria-label="main navigation"
-    >
-      <div className="container is-size-6 is-max-desktop px-2">
-        <div className="navbar-brand">
-          <Link className="navbar-item" href="/">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.svg" alt="Logo for VisaWhen" />
-            &nbsp;
-            <b className="is-hidden-mobile">VisaWhen</b>
+    <Container>
+      <Flex justify="space-between" align="center">
+        <Group spacing="xl" align="center">
+          <Link href="/">
+            <Group
+              spacing={2}
+              sx={(theme) => ({
+                color: theme.colors.gray[1],
+              })}
+            >
+              <Avatar src="/logo.svg" alt="Logo for VisaWhen" />
+              &nbsp;
+              <MediaQuery smallerThan="xs" styles={{ display: "none" }}>
+                <Text size="lg" weight="500">
+                  VisaWhen
+                </Text>
+              </MediaQuery>
+            </Group>
           </Link>
-
-          <a
-            role="button"
-            className="navbar-burger"
-            aria-label="menu"
-            aria-expanded="false"
-            data-target="navbarBasicExample"
-          >
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-          </a>
-        </div>
-
-        <div className="navbar-menu">
-          <div className="navbar-start">
-            <Link className="navbar-item" href="/nvc">
-              NVC
+          <Group spacing="xs">
+            <Link href="/nvc">
+              <Button compact size="md" color="gray" variant="subtle">
+                NVC
+              </Button>
             </Link>
-
-            <Link className="navbar-item" href="/consulates">
-              Consulates
+            <Link href="/consulates">
+              <Button compact size="md" color="gray" variant="subtle">
+                Consulates
+              </Button>
             </Link>
-          </div>
-
-          <div className="navbar-end">
-            <div className="navbar-item" style={{ height: "3.25rem" }}>
-              <div className="field is-grouped">
-                <div className="control">
-                  <a
-                    href="https://discord.gg/zkf8w2QtQY"
-                    target="_blank"
-                    rel="noopener"
-                    className="button is-link has-text-weight-semibold"
-                  >
-                    <span className="icon">
-                      <FontAwesomeIcon icon={faDiscord} />
-                    </span>
-                    <span className="is-hidden-tablet">Discord</span>
-                    <span className="is-hidden-mobile">
-                      Join the Discord community
-                    </span>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </nav>
+          </Group>
+        </Group>
+        <Button
+          size="md"
+          styles={(theme) => ({
+            root: {
+              backgroundColor: "#5865f2",
+              "&:hover": {
+                backgroundColor: theme.fn.darken("#5865f2", 0.05),
+              },
+            },
+          })}
+          component="a"
+          target="_blank"
+          rel="noopener"
+          href="https://discord.gg/zkf8w2QtQY"
+          leftIcon={<FontAwesomeIcon icon={faDiscord} />}
+        >
+          <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
+            <Text>Join the Discord community</Text>
+          </MediaQuery>
+          <MediaQuery largerThan="sm" styles={{ display: "none" }}>
+            <Text>Discord</Text>
+          </MediaQuery>
+        </Button>
+      </Flex>
+    </Container>
   );
 }
