@@ -178,8 +178,11 @@ export default function NvcBacklog({ data }: Props) {
           <Text span italic>
             &lsquo;Case Was Sent To The Department of State&rsquo;
           </Text>
-          . If the USCIS page only says &lsquo;Case Was Approved&rsquo;, you
-          still need to wait a bit until they send the case to the NVC.
+          . If the USCIS page only says{" "}
+          <Text span italic>
+            &lsquo;Case Was Approved&rsquo;
+          </Text>
+          , you still need to wait a bit until they send the case to the NVC.
         </Text>
         <NvcChart id="creation" series={data.creation} />
       </Stack>
