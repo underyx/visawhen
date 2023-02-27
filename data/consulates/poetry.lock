@@ -242,14 +242,14 @@ beautifulsoup4 = "*"
 
 [[package]]
 name = "camelot-py"
-version = "0.10.1"
+version = "0.11.0"
 description = "PDF Table Extraction for Humans."
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "camelot-py-0.10.1.tar.gz", hash = "sha256:8f9f8d937164e8e11b62aa3fed6af086bfb3fddb5e505b91c8886c8d657bd1fa"},
-    {file = "camelot_py-0.10.1-py3-none-any.whl", hash = "sha256:5d15f52dbf693a8234343429bbb1e9c0bd258a5cf78e48b7381171a0286fd2c7"},
+    {file = "camelot-py-0.11.0.tar.gz", hash = "sha256:97a7d906d685e4059a4a549a63ae3a51f0ab72a3c826557f8443c65a1181dfe6"},
+    {file = "camelot_py-0.11.0-py3-none-any.whl", hash = "sha256:96d0f0386c8993f8f6b0aaaddf5f14a4a6ec6e9d1e07b6128d1c3abfa9156683"},
 ]
 
 [package.dependencies]
@@ -259,7 +259,7 @@ numpy = ">=1.13.3"
 openpyxl = ">=2.5.8"
 pandas = ">=0.23.4"
 "pdfminer.six" = ">=20200726"
-PyPDF2 = ">=1.26.0"
+pypdf = ">=3.0.0"
 tabulate = ">=0.8.9"
 
 [package.extras]
@@ -633,7 +633,6 @@ files = [
     {file = "debugpy-1.6.6-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9b5d1b13d7c7bf5d7cf700e33c0b8ddb7baf030fcf502f76fc061ddd9405d16c"},
     {file = "debugpy-1.6.6-cp38-cp38-win32.whl", hash = "sha256:70ab53918fd907a3ade01909b3ed783287ede362c80c75f41e79596d5ccacd32"},
     {file = "debugpy-1.6.6-cp38-cp38-win_amd64.whl", hash = "sha256:c05349890804d846eca32ce0623ab66c06f8800db881af7a876dc073ac1c2225"},
-    {file = "debugpy-1.6.6-cp39-cp39-macosx_11_0_x86_64.whl", hash = "sha256:11a0f3a106f69901e4a9a5683ce943a7a5605696024134b522aa1bfda25b5fec"},
     {file = "debugpy-1.6.6-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a771739902b1ae22a120dbbb6bd91b2cae6696c0e318b5007c5348519a4211c6"},
     {file = "debugpy-1.6.6-cp39-cp39-win32.whl", hash = "sha256:549ae0cb2d34fc09d1675f9b01942499751d174381b6082279cf19cdb3c47cbe"},
     {file = "debugpy-1.6.6-cp39-cp39-win_amd64.whl", hash = "sha256:de4a045fbf388e120bb6ec66501458d3134f4729faed26ff95de52a754abddb1"},
@@ -2184,6 +2183,25 @@ files = [
 plugins = ["importlib-metadata"]
 
 [[package]]
+name = "pypdf"
+version = "3.5.0"
+description = "A pure-python PDF library capable of splitting, merging, cropping, and transforming PDF files"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "pypdf-3.5.0-py3-none-any.whl", hash = "sha256:7866b622880e3f24ef5b175e481de334cd17cd01a2e3526aa78815fdbc03a15d"},
+    {file = "pypdf-3.5.0.tar.gz", hash = "sha256:35dce3544f965762ccab49219713de195b19cfeade4b847bd69f8531c090a71e"},
+]
+
+[package.extras]
+crypto = ["PyCryptodome"]
+dev = ["black", "flit", "pip-tools", "pre-commit (<2.18.0)", "pytest-cov", "wheel"]
+docs = ["myst_parser", "sphinx", "sphinx_rtd_theme"]
+full = ["Pillow", "PyCryptodome"]
+image = ["Pillow"]
+
+[[package]]
 name = "pypdf2"
 version = "2.12.1"
 description = "A pure-python PDF library capable of splitting, merging, cropping, and transforming PDF files"
@@ -3085,4 +3103,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "76861a384556c044249d94f53d7e5d07c2c1504dadf10b8444530d62f0b4b118"
+content-hash = "926ae13c5d5fa9293876769d858a685e24a52b7460548642340003d10acfdb94"
