@@ -16,7 +16,7 @@ export default function Navbar() {
   return (
     <Container>
       <Flex justify="space-between" align="center">
-        <Group spacing="xl" align="center">
+        <Group spacing="sm" align="center">
           <Link href="/">
             <Group
               spacing={2}
@@ -35,19 +35,19 @@ export default function Navbar() {
           </Link>
           <Group spacing="xs">
             <Link href="/nvc">
-              <Button compact size="md" color="gray" variant="subtle">
+              <Button compact size="sm" color="gray" variant="subtle">
                 NVC
               </Button>
             </Link>
             <Link href="/consulates">
-              <Button compact size="md" color="gray" variant="subtle">
+              <Button compact size="sm" color="gray" variant="subtle">
                 Consulates
               </Button>
             </Link>
           </Group>
         </Group>
         <Button
-          size="md"
+          size="sm"
           styles={(theme) => ({
             root: {
               backgroundColor: "#5865f2",
