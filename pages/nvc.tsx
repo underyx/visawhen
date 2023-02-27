@@ -8,7 +8,7 @@ import NvcChart from "../components/NvcChart";
 import last from "lodash/last";
 import { jsonLdScriptProps } from "react-schemaorg";
 import { Dataset } from "schema-dts";
-import { Anchor, Stack, Text, Title } from "@mantine/core";
+import { Anchor, Blockquote, Stack, Text, Title } from "@mantine/core";
 
 export const getStaticProps: GetStaticProps = async () => ({
   props: {
@@ -136,8 +136,14 @@ export default function NvcBacklog({ data }: Props) {
         <ChartHeading series={data.review}>Document review</ChartHeading>
         <Text>
           Time until documents submitted on{" "}
-          <a href="https://ceac.state.gov/IV/Login.aspx">CEAC</a> are reviewed
-          by NVC.
+          <Anchor
+            href="https://ceac.state.gov/IV/Login.aspx"
+            target="_blank"
+            rel="noopener noreferer"
+          >
+            CEAC
+          </Anchor>{" "}
+          are reviewed by NVC.
         </Text>
         <Text>
           These numbers are anecdotally accurate: my case was processed in April
@@ -149,11 +155,31 @@ export default function NvcBacklog({ data }: Props) {
         <ChartHeading series={data.creation}>Case creation</ChartHeading>
         <Text>
           Time after USCIS sends a case to the NVC until the NVC creates a case
-          for it in <a href="https://ceac.state.gov/IV/Login.aspx">CEAC</a>.
+          for it in{" "}
+          <Anchor
+            href="https://ceac.state.gov/IV/Login.aspx"
+            target="_blank"
+            rel="noopener noreferer"
+          >
+            CEAC
+          </Anchor>
+          .
         </Text>
         <Text>
-          Some time elapses after USCIS approval before they send the case to
-          the NVC.
+          Count starting from the day the{" "}
+          <Anchor
+            href="https://egov.uscis.gov/casestatus/landing.do"
+            target="_blank"
+            rel="noopener noreferer"
+          >
+            USCIS Case Status
+          </Anchor>{" "}
+          page updates your status to{" "}
+          <Text span italic>
+            &lsquo;Case Was Sent To The Department of State&rsquo;
+          </Text>
+          . If the USCIS page only says &lsquo;Case Was Approved&rsquo;, you
+          still need to wait a bit until they send the case to the NVC.
         </Text>
         <NvcChart id="creation" series={data.creation} />
       </Stack>
