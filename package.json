@@ -18,7 +18,7 @@
     "@fortawesome/free-brands-svg-icons": "^6.3.0",
     "@fortawesome/free-solid-svg-icons": "^6.3.0",
     "@fortawesome/react-fontawesome": "^0.2.0",
-    "@mantine/core": "6.0.0-alpha.7",
+    "@mantine/core": "6.0.0",
     "@mantine/hooks": "6.0.0-alpha.7",
     "@mantine/next": "6.0.0-alpha.7",
     "@next/env": "^13.2.1",
