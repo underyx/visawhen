@@ -1,6 +1,9 @@
 target-version = "py311"
 select = ["B", "C4", "E", "EXE", "F", "I", "ICN", "N", "SIM", "PD", "PGH", "RUF", "UP", "W"]
-ignore = ["E501"]
+ignore = [
+  "E501",
+  "B018"  # useless expressions are not so useless in Jupyter notebooks
+]
 
 [isort]
 force-single-line = true
