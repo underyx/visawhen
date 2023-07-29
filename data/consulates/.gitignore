@@ -2,3 +2,4 @@ dask-worker-space/
 pdfs/
 *.pkl
 *.nbconvert.ipynb
+.joblib_cache/
