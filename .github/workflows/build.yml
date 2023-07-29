@@ -33,6 +33,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/yarn.lock') }}-
 
+      - run: pipx install sqlite-diffable
       - run: yarn
       - run: yarn export
 

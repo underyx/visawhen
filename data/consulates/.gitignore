@@ -3,3 +3,4 @@ pdfs/
 *.pkl
 *.nbconvert.ipynb
 .joblib_cache/
+*.sqlite

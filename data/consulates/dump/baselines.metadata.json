@@ -1,0 +1,9 @@
+{
+    "name": "baselines",
+    "columns": [
+        "Post Slug",
+        "Visa Class Slug",
+        "Issuances"
+    ],
+    "schema": "CREATE TABLE \"baselines\" (\n\"Post Slug\" TEXT,\n  \"Visa Class Slug\" TEXT,\n  \"Issuances\" REAL\n)"
+}

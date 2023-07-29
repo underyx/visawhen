@@ -1,0 +1,8 @@
+{
+    "name": "post_slugs",
+    "columns": [
+        "Post Slug",
+        "Post"
+    ],
+    "schema": "CREATE TABLE \"post_slugs\" (\n\"Post Slug\" TEXT,\n  \"Post\" TEXT\n)"
+}

@@ -1,0 +1,13 @@
+{
+    "name": "backlogs",
+    "columns": [
+        "Post Slug",
+        "Visa Class Slug",
+        "Month",
+        "Issuances",
+        "Backlog",
+        "Months Ahead",
+        "Expected Delta"
+    ],
+    "schema": "CREATE TABLE \"backlogs\" (\n\"Post Slug\" TEXT,\n  \"Visa Class Slug\" TEXT,\n  \"Month\" TIMESTAMP,\n  \"Issuances\" INTEGER,\n  \"Backlog\" REAL,\n  \"Months Ahead\" REAL,\n  \"Expected Delta\" REAL\n)"
+}

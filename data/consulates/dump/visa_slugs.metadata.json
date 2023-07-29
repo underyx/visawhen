@@ -1,0 +1,9 @@
+{
+    "name": "visa_slugs",
+    "columns": [
+        "Visa Class Slug",
+        "Visa Class",
+        "Description"
+    ],
+    "schema": "CREATE TABLE \"visa_slugs\" (\n\"Visa Class Slug\" TEXT,\n  \"Visa Class\" TEXT,\n  \"Description\" TEXT\n)"
+}

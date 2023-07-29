@@ -85,9 +85,9 @@ export default function ConsulateChart({ backlog }: Props) {
           Statistics
         </a>
         .<br />
-        New data shows up here within a day and is stored in a{" "}
-        <a href="https://github.com/underyx/visawhen/blob/main/data/consulates/consulates.sqlite">
-          SQLite file on GitHub
+        New data shows up here within a day and is stored in{" "}
+        <a href="https://github.com/underyx/visawhen/blob/main/data/consulates/dump">
+          JSON lines files on GitHub
         </a>
         .
       </figcaption>

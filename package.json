@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build && next-sitemap",
+    "dev": "yarn ensure-db && next dev",
+    "build": "yarn ensure-db && next build && next-sitemap",
     "start": "next start",
-    "export": "next build && next-sitemap && next export"
+    "export": "yarn build && next export",
+    "ensure-db": "cd data/consulates && sqlite-diffable load consulates.sqlite dump/ --replace"
   },
   "dependencies": {
     "@emotion/cache": "^11.10.5",
