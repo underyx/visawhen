@@ -1,3 +1,4 @@
+include = ["*.py", "*.pyi", "**/pyproject.toml", "*.ipynb"]
 target-version = "py311"
 select = ["B", "C4", "E", "EXE", "F", "I", "ICN", "N", "SIM", "PD", "PGH", "RUF", "UP", "W"]
 ignore = [
