@@ -48,9 +48,16 @@ conn.execute(
 
 
 def get_months(range: dict[str, Any]) -> str:
-    if range["unit"] != "Months":
-        raise ValueError(f"Expected months, got {range['unit']=}")
-    return str(range["value"])
+    if range["unit"] == "Years":
+        return str(range["value"] * 12)
+    elif range["unit"] == "Months":
+        return str(range["value"])
+    elif range["unit"] == "Weeks":
+        return str(range["value"] / 4)
+    elif range["unit"] == "Days":
+        return str(range["value"] / 30)
+    else:
+        raise ValueError(f"Unknown unit, {range['unit']=}")
 
 
 async def yield_records(queries_file: Path) -> AsyncGenerator[dict[str, Any], None]:
