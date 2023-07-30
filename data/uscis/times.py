@@ -62,7 +62,7 @@ def get_months(range: dict[str, Any]) -> str:
 
 
 async def yield_records(queries_file: Path) -> AsyncGenerator[dict[str, Any], None]:
-    for line in queries_file.open("r").readlines():
+    for line in queries_file.open("r").readlines()[:3]:
         query = tuple(json.loads(line))
         form, subform, office = query
         url = f"{BASE_URL}/{form}/{office}/{subform}"
@@ -103,15 +103,24 @@ async def yield_records(queries_file: Path) -> AsyncGenerator[dict[str, Any], No
 
 
 async def main():
-    times = pd.read_sql("SELECT * FROM times", conn).set_index(
-        ["form", "subform", "office", "reported_date"]
-    )
+    times = pd.read_sql("SELECT * FROM times", conn)
+    times.columns = [
+        "form",
+        "subform",
+        "office",
+        "reported_date",
+        "processed_date",
+        "months_80p",
+        "months_100p",
+    ]
+    times = times.set_index(["form", "subform", "office", "reported_date"])
     records = yield_records(dump_dir / "queries.jsonl")
-    times = pd.concat(
-        [times, pd.DataFrame.from_records([record async for record in records])],
-    )
+    new_times = pd.DataFrame.from_records(
+        [record async for record in records]
+    ).set_index(["form", "subform", "office", "reported_date"])
+    times = pd.concat([times, new_times]).drop_duplicates()
 
-    times.to_sql("times", conn, if_exists="replace", index=False)
+    times.to_sql("times", conn, if_exists="replace", index=True)
     sqlite_diffable.cli.dump.callback(str(db_path), str(dump_dir), (), True)
 
 

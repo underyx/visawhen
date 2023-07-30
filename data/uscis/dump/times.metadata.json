@@ -1,13 +1,13 @@
 {
     "name": "times",
     "columns": [
-        "processed_date",
-        "months_80p",
-        "months_100p",
         "form",
         "subform",
         "office",
-        "reported_date"
+        "reported_date",
+        "processed_date",
+        "months_80p",
+        "months_100p"
     ],
-    "schema": "CREATE TABLE \"times\" (\n\"processed_date\" TEXT,\n  \"months_80p\" TEXT,\n  \"months_100p\" TEXT,\n  \"form\" TEXT,\n  \"subform\" TEXT,\n  \"office\" TEXT,\n  \"reported_date\" TEXT\n)"
+    "schema": "CREATE TABLE \"times\" (\n\"form\" TEXT,\n  \"subform\" TEXT,\n  \"office\" TEXT,\n  \"reported_date\" TEXT,\n  \"processed_date\" TEXT,\n  \"months_80p\" TEXT,\n  \"months_100p\" TEXT\n)"
 }
