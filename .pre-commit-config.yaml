@@ -1,4 +1,4 @@
-exclude: ^([.]pnp[.]cjs|[.]pnp[.]loader[.]mjs|[.]yarn/.+?|.+?/[.]joblib_cache/.+?|data/consulates/dump/.+?)$
+exclude: ^([.]pnp[.]cjs|[.]pnp[.]loader[.]mjs|[.]yarn/.+?|.+?/[.]joblib_cache/.+?|data/.+?/dump/.+?)$
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0

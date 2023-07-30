@@ -10,6 +10,9 @@ readme = "README.md"
 python = "^3.11"
 httpx = "^0.24.1"
 attrs = "^23.1.0"
+pandas = "^2.0.3"
+sqlite-diffable = "^0.5"
+arrow = "^1.2.3"
 
 
 [build-system]

@@ -1,0 +1,13 @@
+{
+    "name": "times",
+    "columns": [
+        "processed_date",
+        "months_80p",
+        "months_100p",
+        "form",
+        "subform",
+        "office",
+        "reported_date"
+    ],
+    "schema": "CREATE TABLE \"times\" (\n\"processed_date\" TEXT,\n  \"months_80p\" TEXT,\n  \"months_100p\" TEXT,\n  \"form\" TEXT,\n  \"subform\" TEXT,\n  \"office\" TEXT,\n  \"reported_date\" TEXT\n)"
+}

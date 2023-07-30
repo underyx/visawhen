@@ -1,9 +1,9 @@
-name: Update USCIS queries data
+name: Update USCIS times data
 
 on:
   schedule:
-    # check every Monday at a random time
-    - cron: 52 4 * * 1
+    # check every day at a random time
+    - cron: 22 7 * * *
   workflow_dispatch:
 
 defaults:
@@ -11,8 +11,8 @@ defaults:
     working-directory: data/uscis
 
 jobs:
-  update-uscis-queries-data:
-    name: Update USCIS queries data
+  update-uscis-times-data:
+    name: Update USCIS times data
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -35,7 +35,7 @@ jobs:
       - name: Install dependencies
         run: poetry install
       - name: Run script
-        run: poetry run python queries.py
+        run: poetry run python times.py
       - name: Commit changes
         id: commit
         uses: EndBug/add-and-commit@v9
