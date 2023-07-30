@@ -1,0 +1,43 @@
+name: Update USCIS queries data
+
+on:
+  schedule:
+    # check every Monday at a random time
+    - cron: 52 4 * * 1
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: data/nvc
+
+jobs:
+  update-uscis-queries-data:
+    name: Update USCIS queries data
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      new-commit-sha: ${{ steps.head_commit.outputs.commit_sha }}
+      updated: ${{ steps.commit.outputs.pushed }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Set up poetry
+        run: pipx install poetry
+      - name: Cache poetry virtualenv
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pypoetry/virtualenvs
+          key: ${{ runner.os }}-poetry-data-uscis-queries-${{ hashFiles('data/uscis/poetry.lock') }}
+      - name: Install dependencies
+        run: poetry install
+      - name: Run script
+        run: poetry run python queries.py
+      - name: Commit changes
+        id: commit
+        uses: EndBug/add-and-commit@v9
+      - id: head_commit
+        run: echo "::set-output name=commit_sha::$(git rev-parse HEAD)"

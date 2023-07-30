@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "uscis"
+version = "0.1.0"
+description = ""
+authors = ["Bence Nagy <nagy@bence.dev>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+httpx = "^0.24.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
