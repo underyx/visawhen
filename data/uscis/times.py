@@ -66,6 +66,7 @@ async def yield_records(queries_file: Path) -> AsyncGenerator[dict[str, Any], No
         query = tuple(json.loads(line))
         form, subform, office = query
         url = f"{BASE_URL}/{form}/{office}/{subform}"
+        print(f"fetching {url}")
         resp = await client.get(url)
         resp.raise_for_status()
         container = resp.json()["data"]["processing_time"]["subtypes"]
@@ -75,8 +76,20 @@ async def yield_records(queries_file: Path) -> AsyncGenerator[dict[str, Any], No
             )
         data = container[0]
 
+        if (
+            not data.get("publication_date", "").strip()
+            or not data.get("service_request_date", "").strip()
+            or not data.get("range", [{}])[-1].get("value", 0.0)
+            or not data.get("range", [{}])[0].get("value", 0.0)
+        ):
+            print(f"missing data, skipping: {data}")
+            continue
+
         reported = arrow.get(data["publication_date"], "MMMM DD, YYYY")
         processed = arrow.get(data["service_request_date"], "MMMM DD, YYYY")
+
+        if range_len := len(data["range"]) != 2:
+            raise ValueError(f"Expected exactly two range datapoints, got {range_len=}")
 
         yield {
             "form": form,
