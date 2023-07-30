@@ -54,7 +54,7 @@ def get_months(range: dict[str, Any]) -> str:
 
 
 async def yield_records(queries_file: Path) -> AsyncGenerator[dict[str, Any], None]:
-    for line in queries_file.open("r").readlines()[:3]:
+    for line in queries_file.open("r").readlines():
         query = tuple(json.loads(line))
         form, subform, office = query
         url = f"{BASE_URL}/{form}/{office}/{subform}"
