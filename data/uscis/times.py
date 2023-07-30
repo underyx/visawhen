@@ -48,13 +48,14 @@ conn.execute(
 
 
 def get_months(range: dict[str, Any]) -> str:
-    if range["unit"] == "Years":
+    unit = range["unit"].removesuffix("s").lower()
+    if unit == "year":
         return str(range["value"] * 12)
-    elif range["unit"] == "Months":
+    elif unit == "month":
         return str(range["value"])
-    elif range["unit"] == "Weeks":
+    elif unit == "week":
         return str(range["value"] / 4)
-    elif range["unit"] == "Days":
+    elif unit == "day":
         return str(range["value"] / 30)
     else:
         raise ValueError(f"Unknown unit, {range['unit']=}")
