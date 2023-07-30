@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import ssl
 from collections.abc import AsyncGenerator
 from dataclasses import dataclass
 from dataclasses import replace
@@ -26,7 +27,10 @@ office_descriptions = {}
 
 @dataclass
 class Query:
-    client = httpx.AsyncClient(headers=HEADERS)
+    # workaround for UNSAFE_LEGACY_RENEGOTIATION_DISABLED - https://stackoverflow.com/a/71646353
+    ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+    ssl_context.options |= 0x4
+    client = httpx.AsyncClient(headers=HEADERS, verify=ssl_context)
     form: str | None = None
     subform: str | None = None
     office: str | None = None
