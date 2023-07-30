@@ -4,11 +4,11 @@ import asyncio
 import json
 import ssl
 from collections.abc import AsyncGenerator
-from dataclasses import dataclass
-from dataclasses import replace
 from pathlib import Path
 
 import httpx
+from attrs import define
+from attrs import evolve
 
 FORMS_URL = "https://egov.uscis.gov/processing-times/api/forms"
 SUBFORMS_BASE_URL = "https://egov.uscis.gov/processing-times/api/formtypes"
@@ -24,13 +24,14 @@ subform_names = {}
 subform_descriptions = {}
 office_descriptions = {}
 
+# workaround for UNSAFE_LEGACY_RENEGOTIATION_DISABLED - https://stackoverflow.com/a/71646353
+ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+ssl_context.options |= 0x4
+client = httpx.AsyncClient(headers=HEADERS, verify=ssl_context)
 
-@dataclass
+
+@define(order=True)
 class Query:
-    # workaround for UNSAFE_LEGACY_RENEGOTIATION_DISABLED - https://stackoverflow.com/a/71646353
-    ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
-    ssl_context.options |= 0x4
-    client = httpx.AsyncClient(headers=HEADERS, verify=ssl_context)
     form: str | None = None
     subform: str | None = None
     office: str | None = None
@@ -39,36 +40,32 @@ class Query:
         if self.form is None or self.subform is None or self.office is None:
             raise ValueError("Incomplete query")
 
-        return (
-            self.form,
-            self.subform,
-            self.office,
-        )
+        return (self.form, self.subform, self.office)
 
     @classmethod
     async def expand_forms(cls) -> AsyncGenerator[Query, None]:
-        resp = await cls.client.get(FORMS_URL)
+        resp = await client.get(FORMS_URL)
         resp.raise_for_status()
         for form in resp.json()["data"]["forms"]["forms"]:
             form_descriptions[form["form_name"]] = form["form_description_en"]
             yield cls(form=form["form_name"])
 
     async def expand_subforms(self) -> AsyncGenerator[Query, None]:
-        resp = await self.client.get(f"{SUBFORMS_BASE_URL}/{self.form}")
+        resp = await client.get(f"{SUBFORMS_BASE_URL}/{self.form}")
         resp.raise_for_status()
         for subform in resp.json()["data"]["form_types"]["subtypes"]:
             subform_names[subform["form_key"]] = subform["form_type"]
             subform_descriptions[subform["form_key"]] = subform[
                 "form_type_description_en"
             ]
-            yield replace(self, subform=subform["form_key"])
+            yield evolve(self, subform=subform["form_key"])
 
     async def expand_offices(self) -> AsyncGenerator[Query, None]:
-        resp = await self.client.get(f"{OFFICES_BASE_URL}/{self.form}/{self.subform}")
+        resp = await client.get(f"{OFFICES_BASE_URL}/{self.form}/{self.subform}")
         resp.raise_for_status()
         for office in resp.json()["data"]["form_offices"]["offices"]:
             office_descriptions[office["office_code"]] = office["office_description"]
-            yield replace(self, office=office["office_code"])
+            yield evolve(self, office=office["office_code"])
 
 
 async def main():
@@ -79,16 +76,17 @@ async def main():
         async for subform_query in form_query.expand_subforms()
         async for office_query in subform_query.expand_offices()
     ]
+    await client.aclose()
 
     queries_file = (dump_dir / "queries.jsonl").open("w")
-    for query in queries:
+    for query in sorted(queries):
         queries_file.write(json.dumps(query.to_json()) + "\n")
 
     labels_output = {
-        "forms": form_descriptions,
-        "subforms": subform_names,
-        "subforms_long": subform_descriptions,
-        "offices": office_descriptions,
+        "forms": sorted(form_descriptions),
+        "subforms": sorted(subform_names),
+        "subforms_long": sorted(subform_descriptions),
+        "offices": sorted(office_descriptions),
     }
     (dump_dir / "labels.json").write_text(
         json.dumps(labels_output, indent=2, sort_keys=True)

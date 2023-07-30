@@ -9,6 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 httpx = "^0.24.1"
+attrs = "^23.1.0"
 
 
 [build-system]

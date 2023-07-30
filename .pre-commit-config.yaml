@@ -31,7 +31,7 @@ repos:
     rev: v1.4.1
     hooks:
       - id: mypy
-        additional_dependencies: [types-requests]
+        additional_dependencies: [attrs, types-requests]
 
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.0.0
