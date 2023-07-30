@@ -89,7 +89,7 @@ async def main():
         "offices": sorted(office_descriptions),
     }
     (dump_dir / "labels.json").write_text(
-        json.dumps(labels_output, indent=2, sort_keys=True)
+        json.dumps(labels_output, indent=2, sort_keys=True) + "\n"
     )
 
 
