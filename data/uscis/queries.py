@@ -83,10 +83,10 @@ async def main():
         queries_file.write(json.dumps(query.to_json()) + "\n")
 
     labels_output = {
-        "forms": sorted(form_descriptions),
-        "subforms": sorted(subform_names),
-        "subforms_long": sorted(subform_descriptions),
-        "offices": sorted(office_descriptions),
+        "forms": dict(sorted(form_descriptions.items())),
+        "subforms": dict(sorted(subform_names.items())),
+        "subforms_long": dict(sorted(subform_descriptions.items())),
+        "offices": dict(sorted(office_descriptions.items())),
     }
     (dump_dir / "labels.json").write_text(
         json.dumps(labels_output, indent=2, sort_keys=True) + "\n"
