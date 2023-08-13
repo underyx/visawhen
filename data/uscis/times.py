@@ -38,7 +38,6 @@ conn.execute(
         subform TEXT,
         office TEXT,
         reported_date TEXT,
-        processed_date TEXT,
         months_80p TEXT,
         months_100p TEXT,
         UNIQUE(form, subform, office, reported_date)
@@ -86,7 +85,6 @@ async def yield_records(queries_file: Path) -> AsyncGenerator[dict[str, Any], No
             continue
 
         reported = arrow.get(data["publication_date"], "MMMM DD, YYYY")
-        processed = arrow.get(data["service_request_date"], "MMMM DD, YYYY")
 
         if range_len := len(data["range"]) != 2:
             raise ValueError(f"Expected exactly two range datapoints, got {range_len=}")
@@ -98,7 +96,6 @@ async def yield_records(queries_file: Path) -> AsyncGenerator[dict[str, Any], No
             "months_80p": get_months(data["range"][-1]),
             "months_100p": get_months(data["range"][0]),
             "reported_date": str(reported.date()),
-            "processed_date": str(processed.date()),
         }
 
 
@@ -111,7 +108,6 @@ async def main():
         "reported_date",
         "months_80p",
         "months_100p",
-        "processed_date",
     ]
     times = times.set_index(["form", "subform", "office", "reported_date"])
     new_times = pd.DataFrame.from_records(
