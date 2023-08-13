@@ -109,16 +109,17 @@ async def main():
         "subform",
         "office",
         "reported_date",
-        "processed_date",
         "months_80p",
         "months_100p",
+        "processed_date",
     ]
     times = times.set_index(["form", "subform", "office", "reported_date"])
-    records = yield_records(dump_dir / "queries.jsonl")
     new_times = pd.DataFrame.from_records(
-        [record async for record in records]
+        [record async for record in yield_records(dump_dir / "queries.jsonl")]
     ).set_index(["form", "subform", "office", "reported_date"])
+    print(f"before dedupe: {len(times)=}, {len(new_times)=}")
     times = pd.concat([times, new_times]).drop_duplicates()
+    print(f"after dedupe: {len(times)=}")
 
     times.to_sql("times", conn, if_exists="replace", index=True)
     sqlite_diffable.cli.dump.callback(str(db_path), str(dump_dir), (), True)
