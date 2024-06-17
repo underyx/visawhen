@@ -56,7 +56,7 @@ r = requests.get(
 
 for timeframe_name, pattern in PATTERNS.items():
     timeframe_data = data[timeframe_name]
-    match = pattern.search(r.text)
+    match = pattern.search(r.text.replace("\xa0", " "))
     if not match:
         continue
     as_of_date = arrow.get(match.group("as_of_date"), DATE_FORMATS)
