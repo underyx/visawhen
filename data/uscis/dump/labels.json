@@ -33,6 +33,7 @@
     "I-914": "Application for T Nonimmigrant Status",
     "I-918": "Petition for U Nonimmigrant Status",
     "I-929": "Petition for Qualifying Family Member of a U-1 Nonimmigrant",
+    "I-956F": "Application for Approval of an Investment in a Commercial Enterprise",
     "N-400": "Application for Naturalization",
     "N-565": "Application for Replacement Naturalization/Citizenship Document",
     "N-600": "Application for Certificate of Citizenship",
@@ -267,7 +268,8 @@
     "821YE_R": "821YE_R",
     "914T": "914T",
     "918ABFD": "918ABFD",
-    "929": "929"
+    "929": "929",
+    "956": "956"
   },
   "subforms_long": {
     "129-CW1": "CW-1 - CNMI-Only Nonimmigrant Transitional Worker",
@@ -397,6 +399,7 @@
     "821YE_R": "Yemen Re-registration",
     "914T": "Provides temporary immigration benefits to noncitizen victims of trafficking and their eligible family members",
     "918ABFD": "Petition for a noncitizen who is a victim of qualifying criminal activity, and their qualifying family members (Time from Initial Filing to Bona Fide Determination (BFD) Review)",
-    "929": "Family member of U nonimmigrant"
+    "929": "Family member of U nonimmigrant",
+    "956": "Application for Approval of an Investment in a Commercial Enterprise"
   }
 }
