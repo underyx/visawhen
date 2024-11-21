@@ -43,7 +43,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@next/bundle-analyzer", "npm:13.2.1"],\
             ["@next/env", "npm:13.2.1"],\
             ["@types/lodash", "npm:4.14.191"],\
-            ["@types/node", "npm:18.14.2"],\
+            ["@types/node", "npm:18.14.6"],\
             ["@types/numeral", "npm:2.0.2"],\
             ["@types/react", "npm:18.0.28"],\
             ["date-fns", "npm:2.29.3"],\
@@ -1289,10 +1289,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["@types/node", [\
-        ["npm:18.14.2", {\
-          "packageLocation": "./.yarn/cache/@types-node-npm-18.14.2-ba0496d563-53c07e721f.zip/node_modules/@types/node/",\
+        ["npm:18.14.6", {\
+          "packageLocation": "./.yarn/cache/@types-node-npm-18.14.6-7d0665d471-2f88f482ca.zip/node_modules/@types/node/",\
           "packageDependencies": [\
-            ["@types/node", "npm:18.14.2"]\
+            ["@types/node", "npm:18.14.6"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -6209,7 +6209,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@next/bundle-analyzer", "npm:13.2.1"],\
             ["@next/env", "npm:13.2.1"],\
             ["@types/lodash", "npm:4.14.191"],\
-            ["@types/node", "npm:18.14.2"],\
+            ["@types/node", "npm:18.14.6"],\
             ["@types/numeral", "npm:2.0.2"],\
             ["@types/react", "npm:18.0.28"],\
             ["date-fns", "npm:2.29.3"],\
