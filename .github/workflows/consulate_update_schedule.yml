@@ -29,7 +29,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Set up poetry
-        run: pipx install poetry
+        run: pipx install "poetry<2"
       - name: Cache poetry virtualenv
         uses: actions/cache@v3.0.5
         with:
