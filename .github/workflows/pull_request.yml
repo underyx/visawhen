@@ -4,10 +4,5 @@ on:
   pull_request:
 
 jobs:
-  semgrep:
-    uses: underyx/visawhen/.github/workflows/semgrep.yml@main
-    secrets:
-      semgrep-app-token: ${{ secrets.SEMGREP_APP_TOKEN }}
-
   pre-commit:
     uses: underyx/visawhen/.github/workflows/pre-commit.yml@main
