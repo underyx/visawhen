@@ -45,7 +45,7 @@ jobs:
         run: tar czf out.tar.gz -C ${{ github.workspace }}/out .
 
       - name: Upload tar archive
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.name-artifact.outputs.artifact-name }}
           path: out.tar.gz
