@@ -28,7 +28,7 @@ jobs:
       - name: Set up poetry
         run: pipx install "poetry<2"
       - name: Cache poetry virtualenv
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pypoetry/virtualenvs
           key: ${{ runner.os }}-poetry-data-uscis-${{ hashFiles('data/uscis/poetry.lock') }}

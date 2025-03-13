@@ -31,12 +31,12 @@ jobs:
       - name: Set up poetry
         run: pipx install "poetry<2"
       - name: Cache poetry virtualenv
-        uses: actions/cache@v3.0.5
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pypoetry/virtualenvs
           key: ${{ runner.os }}-poetry-data-consulates-${{ hashFiles('data/consulates/poetry.lock') }}
       - name: Cache joblib results
-        uses: actions/cache@v3.0.5
+        uses: actions/cache@v4
         with:
           path: .joblib-cache/
           key: ${{ runner.os }}-consulates-joblib-results
