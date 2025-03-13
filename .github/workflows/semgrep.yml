@@ -5,18 +5,20 @@ on:
   pull_request: {}
   # Scan on-demand through GitHub Actions interface:
   workflow_dispatch: {}
+  # Scan on-demand through GitHub Actions interface:
+  workflow_call: {}
   # Scan mainline branches and report all findings:
   push:
     branches: ["master", "main"]
   # Schedule the CI job (this method uses cron syntax):
   schedule:
-    - cron: '24 11 * * *'
+    - cron: "24 11 * * *"
 
 jobs:
   semgrep:
     # User definable name of this GitHub Actions job.
-    name: semgrep/ci 
-    # If you are self-hosting, change the following `runs-on` value: 
+    name: semgrep/ci
+    # If you are self-hosting, change the following `runs-on` value:
     runs-on: ubuntu-latest
 
     container:
