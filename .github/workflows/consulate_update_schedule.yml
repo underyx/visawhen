@@ -42,8 +42,8 @@ jobs:
           key: ${{ runner.os }}-consulates-joblib-results
       - name: Install required C libraries
         run: |
-          apt-fast update
-          apt-fast install -y --no-install-recommends ghostscript libxml2-dev libxslt1-dev
+          apt-get update
+          apt-get install -y --no-install-recommends ghostscript libxml2-dev libxslt1-dev
       - name: Install dependencies
         run: poetry install
       - name: Run script
