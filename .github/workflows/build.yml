@@ -11,7 +11,7 @@ on:
 jobs:
   build:
     name: Build with Next.js
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       artifact-name: ${{ steps.name-artifact.outputs.artifact-name }}
     steps:

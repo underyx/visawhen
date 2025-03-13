@@ -16,7 +16,7 @@ permissions:
 jobs:
   update-consulates-data:
     name: Update consulates data
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       new-commit-sha: ${{ steps.head_commit.outputs.commit_sha }}
       updated: ${{ steps.commit.outputs.pushed }}

@@ -9,7 +9,7 @@ on:
 jobs:
   deploy:
     name: Deploy to Netlify
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - id: download
         uses: actions/download-artifact@v4

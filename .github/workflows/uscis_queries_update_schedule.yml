@@ -13,7 +13,7 @@ defaults:
 jobs:
   update-uscis-queries-data:
     name: Update USCIS queries data
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       contents: write
     outputs:
