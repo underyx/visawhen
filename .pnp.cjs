@@ -53,7 +53,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-config-next", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:13.2.1"],\
             ["lodash", "npm:4.17.21"],\
             ["next", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:13.2.1"],\
-            ["next-sitemap", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:3.1.54"],\
+            ["next-sitemap", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:4.0.2"],\
             ["numeral", "npm:2.0.6"],\
             ["prop-types", "npm:15.8.1"],\
             ["react", "npm:18.2.0"],\
@@ -4475,17 +4475,17 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["next-sitemap", [\
-        ["npm:3.1.54", {\
-          "packageLocation": "./.yarn/cache/next-sitemap-npm-3.1.54-231a57181c-946a6ed1d9.zip/node_modules/next-sitemap/",\
+        ["npm:4.0.2", {\
+          "packageLocation": "./.yarn/cache/next-sitemap-npm-4.0.2-f52749e0a8-800baf84ac.zip/node_modules/next-sitemap/",\
           "packageDependencies": [\
-            ["next-sitemap", "npm:3.1.54"]\
+            ["next-sitemap", "npm:4.0.2"]\
           ],\
           "linkType": "SOFT"\
         }],\
-        ["virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:3.1.54", {\
-          "packageLocation": "./.yarn/__virtual__/next-sitemap-virtual-173761cb71/0/cache/next-sitemap-npm-3.1.54-231a57181c-946a6ed1d9.zip/node_modules/next-sitemap/",\
+        ["virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:4.0.2", {\
+          "packageLocation": "./.yarn/__virtual__/next-sitemap-virtual-b70da0d62e/0/cache/next-sitemap-npm-4.0.2-f52749e0a8-800baf84ac.zip/node_modules/next-sitemap/",\
           "packageDependencies": [\
-            ["next-sitemap", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:3.1.54"],\
+            ["next-sitemap", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:4.0.2"],\
             ["@corex/deepmerge", "npm:4.0.37"],\
             ["@next/env", "npm:13.2.1"],\
             ["@types/next", null],\
@@ -6219,7 +6219,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-config-next", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:13.2.1"],\
             ["lodash", "npm:4.17.21"],\
             ["next", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:13.2.1"],\
-            ["next-sitemap", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:3.1.54"],\
+            ["next-sitemap", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:4.0.2"],\
             ["numeral", "npm:2.0.6"],\
             ["prop-types", "npm:15.8.1"],\
             ["react", "npm:18.2.0"],\
