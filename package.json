@@ -6,7 +6,6 @@
     "dev": "yarn ensure-db && next dev",
     "build": "yarn ensure-db && next build && next-sitemap",
     "start": "next start",
-    "export": "yarn build && next export",
     "ensure-db": "cd data/consulates && sqlite-diffable load consulates.sqlite dump/ --replace"
   },
   "dependencies": {

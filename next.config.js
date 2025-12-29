@@ -1,29 +1,10 @@
 const CONFIG = {
+  output: "export",
   swcMinify: true,
   reactStrictMode: true,
   transpilePackages: ["echarts", "zrender"],
-  async headers() {
-    return [
-      {
-        source: "/:path*",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=3600",
-          },
-        ],
-      },
-      {
-        source: "/nvc",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=600",
-          },
-        ],
-      },
-    ];
-  },
+  // Note: headers() is not supported with output: 'export'
+  // Configure cache headers in Cloudflare Pages instead
 };
 
 module.exports = CONFIG;
