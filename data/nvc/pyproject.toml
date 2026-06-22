@@ -7,7 +7,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-arrow = "^1.1.0"
+arrow = "^1.2.3"
 requests = "^2.25.1"
 dnspython = "^2.1.0"
 types-requests = "^2.25.11"
