@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  # Allow triggering a build + deploy manually (e.g. to publish data that was
+  # committed while the deploy pipeline was broken).
+  workflow_dispatch:
 
 jobs:
   pre-commit:
@@ -17,5 +20,8 @@ jobs:
   deploy:
     uses: underyx/visawhen/.github/workflows/deploy.yml@main
     needs: [build]
+    if: needs.build.result == 'success'
+    with:
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
     secrets:
       netlify-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}

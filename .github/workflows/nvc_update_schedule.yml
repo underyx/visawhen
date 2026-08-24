@@ -2,8 +2,8 @@ name: Update NVC data
 
 on:
   schedule:
-    # check every 10 minutes on Monday in the update window
-    - cron: 3/10 14-16 * * 1
+    # check every 30 minutes on Monday in the update window
+    - cron: 3/30 14-16 * * 1
     # check every hour on Monday outside the update window
     - cron: 38 0-13,17-23 * * 1
     # check every day for the rest of the week
@@ -24,15 +24,15 @@ jobs:
       new-commit-sha: ${{ steps.head_commit.outputs.commit_sha }}
       updated: ${{ steps.commit.outputs.pushed }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
       - name: Set up poetry
         run: pipx install "poetry<2"
       - name: Cache poetry virtualenv
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/pypoetry/virtualenvs
           key: ${{ runner.os }}-poetry-data-nvc-${{ hashFiles('data/nvc/poetry.lock') }}
@@ -42,9 +42,9 @@ jobs:
         run: poetry run python main.py
       - name: Commit changes
         id: commit
-        uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@v11
       - id: head_commit
-        run: echo "::set-output name=commit_sha::$(git rev-parse HEAD)"
+        run: echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
   build:
     if: needs.update-nvc-data.outputs.updated == 'true'
@@ -56,5 +56,10 @@ jobs:
   deploy:
     uses: underyx/visawhen/.github/workflows/deploy.yml@main
     needs: [build]
+    # When nothing was pushed, build is skipped; a skipped dependency already
+    # skips this job (no `always()`), but be explicit about it.
+    if: needs.build.result == 'success'
+    with:
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
     secrets:
       netlify-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}

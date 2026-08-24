@@ -24,7 +24,7 @@
     "@mantine/next": "6.0.0-alpha.7",
     "@next/env": "^13.2.1",
     "date-fns": "^2.29.3",
-    "echarts": "^5.4.1",
+    "echarts": "^5.6.0",
     "echarts-for-react": "^3.0.2",
     "lodash": "^4.17.21",
     "next": "^13.2.1",
@@ -54,5 +54,5 @@
     "not ie 11",
     "not op_mini all"
   ],
-  "packageManager": "yarn@3.4.1"
+  "packageManager": "yarn@3.8.7"
 }

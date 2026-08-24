@@ -2,6 +2,11 @@ name: Deploy
 
 on:
   workflow_call:
+    inputs:
+      artifact-name:
+        description: "Name of the build artifact (containing out.tar.gz) to deploy"
+        required: true
+        type: string
     secrets:
       netlify-token:
         required: true
@@ -12,19 +17,30 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - id: download
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
+        with:
+          # A single artifact downloaded by name is extracted directly into
+          # the workspace, so out.tar.gz ends up at the top level.
+          name: ${{ inputs.artifact-name }}
 
       - name: Extract tar archive
         run: |
           mkdir out
-          tar xf website-*/out.tar.gz -C out/
+          tar xf out.tar.gz -C out/
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v6
         with:
-          node-version: "19"
+          node-version: "22"
 
+      # netlify-cli is pinned to a major that supports the runner's Node
+      # (27.x needs Node >= 22.13).
+      #
+      # --no-build is required: since netlify-cli 21.0.0 (2025-05-06),
+      # "netlify deploy" runs the site's build command before deploying, which
+      # broke this workflow (the site is already built and we only upload the
+      # prebuilt out/ directory). --no-build restores the old behaviour.
       - name: Deploy to netlify
-        run: npx -y netlify-cli deploy --prod --dir=out/ --timeout=3600
+        run: npx -y netlify-cli@27 deploy --prod --no-build --dir=out/ --timeout=3600
         env:
           NETLIFY_SITE_ID: e464072b-c4e2-4ca9-b6d5-317fd657ad16
           NETLIFY_AUTH_TOKEN: ${{ secrets.netlify-token }}
