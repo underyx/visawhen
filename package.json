@@ -7,7 +7,7 @@
     "build": "yarn ensure-db && next build && next-sitemap",
     "start": "next start",
     "export": "yarn build && next export",
-    "ensure-db": "cd data/consulates && sqlite-diffable load consulates.sqlite dump/ --replace"
+    "ensure-db": "cd data/consulates && gunzip -kf dump/backlogs.ndjson.gz && sqlite-diffable load consulates.sqlite dump/ --replace"
   },
   "dependencies": {
     "@emotion/cache": "^11.10.5",
