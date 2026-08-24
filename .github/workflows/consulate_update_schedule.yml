@@ -23,15 +23,15 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Set up Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.11"
       - name: Set up poetry
         run: pipx install "poetry<2"
       - name: Cache poetry virtualenv
-        uses: actions/cache@v5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: ~/.cache/pypoetry/virtualenvs
           key: ${{ runner.os }}-poetry-data-consulates-${{ hashFiles('data/consulates/poetry.lock') }}
@@ -39,7 +39,7 @@ jobs:
       # working-directory. Keys include the run id so every run saves a fresh
       # cache while restore-keys picks up the newest previous one.
       - name: Cache joblib results
-        uses: actions/cache@v5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: data/consulates/.joblib_cache/
           key: ${{ runner.os }}-consulates-joblib-${{ github.run_id }}
@@ -48,7 +48,7 @@ jobs:
       # The monthly PDFs (~200 MB) are re-fetched from the Wayback Machine when
       # travel.state.gov blocks us; keep them between runs.
       - name: Cache downloaded PDFs
-        uses: actions/cache@v5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: data/consulates/pdfs/
           key: ${{ runner.os }}-consulates-pdfs-${{ github.run_id }}
@@ -66,7 +66,7 @@ jobs:
         run: poetry run jupyter nbconvert --to notebook --execute baselines.ipynb
       - name: Commit changes
         id: commit
-        uses: EndBug/add-and-commit@v11
+        uses: EndBug/add-and-commit@cc9c08ba6c8df3b93a8f2db63e89b98368ae2ae8 # v11.1.1
       - id: head_commit
         run: echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
