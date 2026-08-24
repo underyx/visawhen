@@ -1,5 +1,5 @@
 import { NvcSeries } from "../api/nvc";
-import add from "date-fns/add";
+import { add } from "date-fns";
 
 import * as echarts from "echarts/core";
 import { LineChart } from "echarts/charts";

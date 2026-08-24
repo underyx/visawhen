@@ -1,14 +1,13 @@
 import { GetStaticProps } from "next";
 import Head from "next/head";
 import { getData, NvcData, NvcSeries } from "../api/nvc";
-import add from "date-fns/add";
-import getISODay from "date-fns/getISODay";
+import { add, getISODay } from "date-fns";
 import React from "react";
 import NvcChart from "../components/NvcChart";
 import last from "lodash/last";
 import { jsonLdScriptProps } from "react-schemaorg";
 import { Dataset } from "schema-dts";
-import { Anchor, Blockquote, Stack, Text, Title } from "@mantine/core";
+import { Anchor, Stack, Text, Title } from "@mantine/core";
 
 export const getStaticProps: GetStaticProps = async () => ({
   props: {
@@ -63,7 +62,7 @@ function ChartHeading({
 
 export default function NvcBacklog({ data }: Props) {
   return (
-    <Stack spacing="3rem">
+    <Stack gap="3rem">
       <Head>
         <title>NVC wait times</title>
         <meta
@@ -121,7 +120,7 @@ export default function NvcBacklog({ data }: Props) {
           })}
         />
       </Head>
-      <Stack spacing="sm">
+      <Stack gap="sm">
         <Title order={1}>NVC wait times</Title>
         <Text size="xl">
           Last updated {getLatestDate(data).toLocaleDateString()},{" "}
@@ -132,7 +131,7 @@ export default function NvcBacklog({ data }: Props) {
           Visa Center processes your case.
         </Text>
       </Stack>
-      <Stack spacing="sm">
+      <Stack gap="sm">
         <ChartHeading series={data.review}>Document review</ChartHeading>
         <Text>
           Time until documents submitted on{" "}
@@ -151,7 +150,7 @@ export default function NvcBacklog({ data }: Props) {
         </Text>
         <NvcChart id="review" series={data.review} />
       </Stack>
-      <Stack spacing="sm">
+      <Stack gap="sm">
         <ChartHeading series={data.creation}>Case creation</ChartHeading>
         <Text>
           Time after USCIS sends a case to the NVC until the NVC creates a case
@@ -175,18 +174,18 @@ export default function NvcBacklog({ data }: Props) {
             USCIS Case Status
           </Anchor>{" "}
           page updates your status to{" "}
-          <Text span italic>
+          <Text span fs="italic">
             &lsquo;Case Was Sent To The Department of State&rsquo;
           </Text>
           . If the USCIS page only says{" "}
-          <Text span italic>
+          <Text span fs="italic">
             &lsquo;Case Was Approved&rsquo;
           </Text>
           , you still need to wait a bit until they send the case to the NVC.
         </Text>
         <NvcChart id="creation" series={data.creation} />
       </Stack>
-      <Stack spacing="sm">
+      <Stack gap="sm">
         <ChartHeading series={data.inquiry}>Inquiry response</ChartHeading>
         <Text>
           Time until questions and requests sent via{" "}

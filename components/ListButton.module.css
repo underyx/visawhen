@@ -1,0 +1,16 @@
+/* Full-width list entries built out of Button.Group, used for the visa class
+ * picker on the consulate pages. */
+.root {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.root:disabled,
+.root[data-disabled] {
+  color: var(--mantine-color-gray-7);
+}
+
+.inner {
+  font-size: 1rem;
+  font-weight: 400;
+}

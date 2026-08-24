@@ -12,7 +12,7 @@ import {
 } from "../../../api/consulates";
 import Head from "next/head";
 import ConsulateChart from "../../../components/ConsulateChart";
-import { useRouter } from "next/dist/client/router";
+import { useRouter } from "next/router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import { Button, Group, Stack, Text, Title } from "@mantine/core";
@@ -108,22 +108,25 @@ export default function ConsulateStats({
         <meta property="og:description" content={description} />
         <meta property="og:url" content={canonicalUrl} />
       </Head>
-      <Group spacing="xs" style={{ alignSelf: "flex-start" }}>
+      <Group gap="xs" style={{ alignSelf: "flex-start" }}>
         <Button
           variant="outline"
           component={Link}
           href="/consulates"
           size="xs"
-          leftIcon={<FontAwesomeIcon icon={faChevronLeft} />}
+          leftSection={<FontAwesomeIcon icon={faChevronLeft} />}
         >
           Change consulate
         </Button>
+        {/* Plain anchor: the consulate page's _next/data JSON is not
+            deployed (see the note in the consulate list page), so a Link
+            would only 404 on it before hard-navigating anyway. */}
         <Button
           variant="outline"
-          component={Link}
+          component="a"
           href={`/consulates/${postSlug}`}
           size="xs"
-          leftIcon={<FontAwesomeIcon icon={faChevronLeft} />}
+          leftSection={<FontAwesomeIcon icon={faChevronLeft} />}
         >
           Change visa class
         </Button>

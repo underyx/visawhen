@@ -1,3 +1,4 @@
+import "@mantine/core/styles.css";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import type { AppProps } from "next/app";
 import Script from "next/script";
@@ -15,7 +16,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           content="minimum-scale=1, initial-scale=1, width=device-width"
         />
       </Head>
-      <MantineProvider withGlobalStyles withNormalizeCSS>
+      <MantineProvider>
         <PageWrapper>
           <Component {...pageProps} />
         </PageWrapper>

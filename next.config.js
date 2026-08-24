@@ -1,29 +1,12 @@
+/** @type {import('next').NextConfig} */
 const CONFIG = {
-  swcMinify: true,
+  // The site is a fully static export: `next build` writes the HTML to out/,
+  // which is deployed to Netlify. HTTP headers (Cache-Control) live in
+  // netlify.toml, since a static export cannot set them itself.
+  output: "export",
   reactStrictMode: true,
-  transpilePackages: ["echarts", "zrender"],
-  async headers() {
-    return [
-      {
-        source: "/:path*",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=3600",
-          },
-        ],
-      },
-      {
-        source: "/nvc",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=600",
-          },
-        ],
-      },
-    ];
-  },
+  // Stop `next dev` from dropping generated AGENTS.md/CLAUDE.md into the repo.
+  agentRules: false,
 };
 
 module.exports = CONFIG;

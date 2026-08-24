@@ -8,6 +8,9 @@ on:
 
 defaults:
   run:
+    # bash (rather than the runner's default `sh -e`) enables pipefail, so the
+    # `nbconvert | python` pipelines below fail when the notebook fails.
+    shell: bash
     working-directory: data/consulates
 
 permissions:
@@ -16,30 +19,43 @@ permissions:
 jobs:
   update-consulates-data:
     name: Update consulates data
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       new-commit-sha: ${{ steps.head_commit.outputs.commit_sha }}
       updated: ${{ steps.commit.outputs.pushed }}
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Set up Python
-        uses: actions/setup-python@v7
+        id: setup-python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.11"
+      # `poetry env use python` makes poetry build its virtualenv from the
+      # interpreter set up above; without it poetry picks the runner's system
+      # python and the setup-python step has no effect.
       - name: Set up poetry
-        run: pipx install "poetry<2"
-      - name: Cache poetry virtualenv
-        uses: actions/cache@v5
+        run: |
+          pipx install "poetry<2"
+          poetry env use python
+
+      # The caches are restored and saved in separate steps (cache/restore +
+      # cache/save with `if: always()`) so that whatever was downloaded or
+      # computed before a failure is kept for the next run.
+      #
+      # actions/cache paths are relative to the workspace, not to the job's
+      # working-directory.
+      - name: Restore poetry virtualenv
+        id: cache-poetry
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/pypoetry/virtualenvs
-          key: ${{ runner.os }}-poetry-data-consulates-${{ hashFiles('data/consulates/poetry.lock') }}
-      # actions/cache paths are relative to the workspace, not to the job's
-      # working-directory. Keys include the run id so every run saves a fresh
-      # cache while restore-keys picks up the newest previous one.
-      - name: Cache joblib results
-        uses: actions/cache@v5
+          key: ${{ runner.os }}-poetry-data-consulates-py${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('data/consulates/poetry.lock') }}
+      # Keys include the run id so every run saves a fresh cache while
+      # restore-keys picks up the newest previous one.
+      - name: Restore joblib results
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: data/consulates/.joblib_cache/
           key: ${{ runner.os }}-consulates-joblib-${{ github.run_id }}
@@ -47,26 +63,59 @@ jobs:
             ${{ runner.os }}-consulates-joblib-
       # The monthly PDFs (~200 MB) are re-fetched from the Wayback Machine when
       # travel.state.gov blocks us; keep them between runs.
-      - name: Cache downloaded PDFs
-        uses: actions/cache@v5
+      - name: Restore downloaded PDFs
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: data/consulates/pdfs/
           key: ${{ runner.os }}-consulates-pdfs-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-consulates-pdfs-
-      - name: Install required C libraries
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ghostscript libxml2-dev libxslt1-dev
+
       - name: Install dependencies
         run: poetry install
-      - name: Run script
-        run: poetry run jupyter nbconvert --to notebook --execute visa-issuances.ipynb
-      - name: Run other script
-        run: poetry run jupyter nbconvert --to notebook --execute baselines.ipynb
+
+      # The notebooks are converted to scripts and streamed into python instead
+      # of being executed with `nbconvert --execute`: output shows up in the job
+      # log as it happens, and `::warning::` lines reach GitHub as annotations.
+      #
+      # The notebooks call display(), which is a builtin only inside an IPython
+      # kernel, so the converted script is prefixed with the matching import
+      # (outside IPython, display() prints the object's repr). The brace group
+      # keeps nbconvert as the pipeline's first stage, so pipefail still catches
+      # a failing conversion.
+      - name: Run visa-issuances notebook
+        run: |
+          { echo 'from IPython.display import display'; poetry run jupyter nbconvert --to script --stdout visa-issuances.ipynb; } | poetry run python -u -
+      - name: Run baselines notebook
+        run: |
+          { echo 'from IPython.display import display'; poetry run jupyter nbconvert --to script --stdout baselines.ipynb; } | poetry run python -u -
+
+      - name: Save poetry virtualenv
+        if: always() && steps.cache-poetry.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/pypoetry/virtualenvs
+          key: ${{ steps.cache-poetry.outputs.cache-primary-key }}
+      - name: Save joblib results
+        if: always()
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: data/consulates/.joblib_cache/
+          key: ${{ runner.os }}-consulates-joblib-${{ github.run_id }}
+      - name: Save downloaded PDFs
+        if: always()
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: data/consulates/pdfs/
+          key: ${{ runner.os }}-consulates-pdfs-${{ github.run_id }}
+
       - name: Commit changes
         id: commit
-        uses: EndBug/add-and-commit@v11
+        uses: EndBug/add-and-commit@cc9c08ba6c8df3b93a8f2db63e89b98368ae2ae8 # v11.1.1
+        with:
+          # The default (`git fetch --tags --force`) pulls the whole history of
+          # the 100 MB data dumps into the shallow clone: 3-4 minutes per run.
+          fetch: false
       - id: head_commit
         run: echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
@@ -87,3 +136,5 @@ jobs:
       artifact-name: ${{ needs.build.outputs.artifact-name }}
     secrets:
       netlify-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      cloudflare-api-token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      cloudflare-account-id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

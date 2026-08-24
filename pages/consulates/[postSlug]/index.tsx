@@ -2,16 +2,16 @@ import { faChevronLeft, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { deburr, sortBy } from "lodash";
 import { GetStaticPaths, GetStaticProps } from "next";
-import { useRouter } from "next/dist/client/router";
+import { useRouter } from "next/router";
 import Head from "next/head";
 import Link from "next/link";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import {
   getAllPosts,
   getAllVisaClasses,
   getPost,
-  getSlugPairs,
   getVisaClassBaselines,
+  getVisaClassSlugsForPost,
   VisaClassBaselineRow,
   VisaClassRow,
 } from "../../../api/consulates";
@@ -28,6 +28,7 @@ import {
   Title,
 } from "@mantine/core";
 import { useInputState } from "@mantine/hooks";
+import classes from "../../../components/ListButton.module.css";
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = await getAllPosts();
@@ -46,16 +47,12 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const postInfo = await getPost(postSlug);
   if (postInfo === undefined) return { notFound: true };
 
-  const availableVisaClasses = new Set<string>(
-    (await getSlugPairs())
-      .filter((row) => row.postSlug === postSlug)
-      .map((row) => row.visaClassSlug),
-  );
+  const availableVisaClasses = await getVisaClassSlugsForPost(postSlug);
 
   return {
     props: {
       visaClasses: await getAllVisaClasses(),
-      availableVisaClasses: Array.from(availableVisaClasses),
+      availableVisaClasses,
       postName: postInfo.post,
       baselines: await getVisaClassBaselines(postSlug),
     },
@@ -93,31 +90,25 @@ export default function ConsulateSelect({
   );
   const [term, setTerm] = useInputState("");
 
-  const [filteredVisas, setFilteredVisas] = useState<VisaClassRow[]>([]);
-  const [availableVisaClassesSet, setAvailableVisaClassesSet] = useState<
-    Set<string>
-  >(new Set());
+  const availableVisaClassesSet = useMemo<Set<string>>(
+    () => new Set<string>(availableVisaClasses),
+    [availableVisaClasses],
+  );
 
-  useEffect(() => {
-    setAvailableVisaClassesSet(new Set<string>(availableVisaClasses));
-  }, [availableVisaClasses, setAvailableVisaClassesSet]);
-
-  useEffect(() => {
+  const filteredVisas = useMemo<VisaClassRow[]>(() => {
     const normalizedTerm = deburr(term).toLowerCase().replace(/\W/, "");
-    setFilteredVisas(
-      sortItems(
-        visaClasses.filter(
-          ({ visaClassSlug, description }) =>
-            visaClassSlug.includes(normalizedTerm) ||
-            deburr(description ?? "")
-              .toLowerCase()
-              .replace(/\W/, "")
-              .includes(normalizedTerm),
-        ),
-        baselineMap,
+    return sortItems(
+      visaClasses.filter(
+        ({ visaClassSlug, description }) =>
+          visaClassSlug.includes(normalizedTerm) ||
+          deburr(description ?? "")
+            .toLowerCase()
+            .replace(/\W/, "")
+            .includes(normalizedTerm),
       ),
+      baselineMap,
     );
-  }, [baselineMap, visaClasses, term, setFilteredVisas]);
+  }, [baselineMap, visaClasses, term]);
 
   const { postSlug } = router.query;
   if (typeof postSlug !== "string") return;
@@ -149,7 +140,7 @@ export default function ConsulateSelect({
         component={Link}
         href="/consulates"
         size="xs"
-        leftIcon={<FontAwesomeIcon icon={faChevronLeft} />}
+        leftSection={<FontAwesomeIcon icon={faChevronLeft} />}
         style={{ alignSelf: "flex-start" }}
       >
         Change consulate
@@ -165,11 +156,17 @@ export default function ConsulateSelect({
       </Title>
       <TextInput
         size="lg"
-        icon={<FontAwesomeIcon icon={faSearch} />}
+        leftSection={<FontAwesomeIcon icon={faSearch} />}
         type="text"
         placeholder="DL6"
         onChange={setTerm}
       />
+      {/* Plain anchors, not next/link: the per-page _next/data JSON under
+          /consulates/ is not deployed (it would push the site over
+          Cloudflare's 20,000-file limit), so these pages can only be reached
+          by a full page load. A Link would prefetch the missing JSON on hover
+          and, on click, fetch it again just to 404 and fall back to the same
+          hard navigation. */}
       <Button.Group orientation="vertical">
         {filteredVisas.map(({ visaClass, visaClassSlug, description }) => {
           const hasAnyIssued = availableVisaClassesSet.has(visaClassSlug);
@@ -179,29 +176,18 @@ export default function ConsulateSelect({
               variant="default"
               disabled={!hasAnyIssued}
               key={visaClassSlug}
-              component={Link}
-              href={`/consulates/${postSlug}/${visaClassSlug}/`}
-              styles={(theme) => ({
-                root: {
-                  paddingLeft: "1rem",
-                  paddingRight: "1rem",
-                  "&[data-disabled]": {
-                    color: theme.colors.gray[7],
-                  },
-                },
-                inner: {
-                  justifyContent: "space-between",
-                  fontSize: "1rem",
-                  fontWeight: 400,
-                },
-              })}
-              rightIcon={
+              component="a"
+              href={`/consulates/${postSlug}/${visaClassSlug}`}
+              classNames={{ root: classes.root, inner: classes.inner }}
+              justify="space-between"
+              rightSection={
                 <Badge
                   size="lg"
                   radius="sm"
                   variant="outline"
                   color="gray"
-                  style={{ textTransform: "none", fontWeight: "500" }}
+                  tt="none"
+                  fw={500}
                 >
                   {!hasAnyIssued
                     ? "never issued here"
@@ -215,7 +201,7 @@ export default function ConsulateSelect({
                 </Badge>
               }
             >
-              <Group spacing="xs" noWrap>
+              <Group gap="xs" wrap="nowrap">
                 <Badge
                   size="lg"
                   radius="sm"

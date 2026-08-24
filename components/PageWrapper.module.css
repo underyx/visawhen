@@ -1,0 +1,14 @@
+/* The header is always dark, regardless of the page's color scheme (it used to
+ * be rendered inside a nested MantineProvider with the inverted color scheme,
+ * which Mantine 7+ no longer supports). */
+.header {
+  background-color: var(--mantine-color-dark-7);
+  border-bottom-color: var(--mantine-color-dark-5);
+}
+
+.main {
+  background-color: light-dark(
+    var(--mantine-color-gray-0),
+    var(--mantine-color-dark-8)
+  );
+}

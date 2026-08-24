@@ -1,46 +1,30 @@
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDiscord } from "@fortawesome/free-brands-svg-icons";
-import {
-  Anchor,
-  Avatar,
-  Button,
-  Container,
-  Flex,
-  Group,
-  MediaQuery,
-  Text,
-} from "@mantine/core";
+import { Avatar, Button, Container, Flex, Group, Text } from "@mantine/core";
 
 export default function Navbar() {
   return (
     <Container>
       <Flex justify="space-between" align="center">
-        <Group spacing="sm" align="center">
+        <Group gap="sm" align="center">
           <Link href="/">
-            <Group
-              spacing={2}
-              sx={(theme) => ({
-                color: theme.colors.gray[1],
-              })}
-            >
+            <Group gap={2} c="gray.1">
               <Avatar src="/logo.svg" alt="Logo for VisaWhen" />
               &nbsp;
-              <MediaQuery smallerThan="xs" styles={{ display: "none" }}>
-                <Text size="lg" weight="500">
-                  VisaWhen
-                </Text>
-              </MediaQuery>
+              <Text size="lg" fw={500} visibleFrom="xs">
+                VisaWhen
+              </Text>
             </Group>
           </Link>
-          <Group spacing="xs">
+          <Group gap="xs">
             <Link href="/nvc">
-              <Button compact size="sm" color="gray" variant="subtle">
+              <Button size="compact-sm" color="gray.2" variant="subtle">
                 NVC
               </Button>
             </Link>
             <Link href="/consulates">
-              <Button compact size="sm" color="gray" variant="subtle">
+              <Button size="compact-sm" color="gray.2" variant="subtle">
                 Consulates
               </Button>
             </Link>
@@ -48,26 +32,15 @@ export default function Navbar() {
         </Group>
         <Button
           size="sm"
-          styles={(theme) => ({
-            root: {
-              backgroundColor: "#5865f2",
-              "&:hover": {
-                backgroundColor: theme.fn.darken("#5865f2", 0.05),
-              },
-            },
-          })}
+          color="#5865f2"
           component="a"
           target="_blank"
           rel="noopener"
           href="https://discord.gg/zkf8w2QtQY"
-          leftIcon={<FontAwesomeIcon icon={faDiscord} />}
+          leftSection={<FontAwesomeIcon icon={faDiscord} />}
         >
-          <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
-            <Text>Join the Discord community</Text>
-          </MediaQuery>
-          <MediaQuery largerThan="sm" styles={{ display: "none" }}>
-            <Text>Discord</Text>
-          </MediaQuery>
+          <Text visibleFrom="sm">Join the Discord community</Text>
+          <Text hiddenFrom="sm">Discord</Text>
         </Button>
       </Flex>
     </Container>

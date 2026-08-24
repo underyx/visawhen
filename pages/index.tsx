@@ -37,13 +37,7 @@ export default function Home() {
         Welcome to VisaWhen
       </Title>
       <Text size="xl">What is your case waiting for right now?</Text>
-      <SimpleGrid
-        cols={3}
-        breakpoints={[
-          { maxWidth: "62rem", cols: 3, spacing: "md" },
-          { maxWidth: "48rem", cols: 1, spacing: "sm" },
-        ]}
-      >
+      <SimpleGrid cols={{ base: 1, sm: 3 }} spacing={{ base: "sm", sm: "md" }}>
         <Card shadow="sm" p="md" radius="md" withBorder>
           <Stack>
             <Title order={2} size="h5">
