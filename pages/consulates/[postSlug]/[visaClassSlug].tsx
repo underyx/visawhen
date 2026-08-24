@@ -13,8 +13,7 @@ import {
 import Head from "next/head";
 import ConsulateChart from "../../../components/ConsulateChart";
 import { useRouter } from "next/router";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
+import { ChevronLeftIcon } from "../../../components/icons";
 import { Button, Group, Stack, Text, Title } from "@mantine/core";
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -114,7 +113,7 @@ export default function ConsulateStats({
           component={Link}
           href="/consulates"
           size="xs"
-          leftSection={<FontAwesomeIcon icon={faChevronLeft} />}
+          leftSection={<ChevronLeftIcon />}
         >
           Change consulate
         </Button>
@@ -126,7 +125,7 @@ export default function ConsulateStats({
           component="a"
           href={`/consulates/${postSlug}`}
           size="xs"
-          leftSection={<FontAwesomeIcon icon={faChevronLeft} />}
+          leftSection={<ChevronLeftIcon />}
         >
           Change visa class
         </Button>

@@ -64,13 +64,25 @@ jobs:
       #
       # public/_headers and public/.assetsignore are for the Cloudflare deploy
       # only, but next export copies them into out/. Netlify reads _headers
-      # from the publish directory too, and its parser rejects the
-      # "! Cache-Control" lines; keep both files out of the Netlify upload.
+      # from the publish directory too (with its own syntax), so swap in a
+      # Netlify version for the upload and restore the Cloudflare files after.
+      #
+      # HTML must not be cached past a deploy: every build renames the hashed
+      # JS/CSS chunks, so a stale page references assets that no longer exist
+      # and renders without scripts or styles (seen on 2026-08-24 with a
+      # 1-hour max-age). Only the content-hashed /_next/static/* is cached long.
       - name: Deploy to netlify
         run: |
           mkdir -p "$RUNNER_TEMP/cloudflare-only"
           mv out/_headers out/.assetsignore "$RUNNER_TEMP/cloudflare-only/"
+          cat > out/_headers <<'EOF'
+          /*
+            Cache-Control: public, max-age=0, must-revalidate
+          /_next/static/*
+            Cache-Control: public, max-age=31536000, immutable
+          EOF
           npx -y netlify-cli@27 deploy --prod --no-build --dir=out/ --timeout=3600
+          rm out/_headers
           mv "$RUNNER_TEMP"/cloudflare-only/_headers "$RUNNER_TEMP"/cloudflare-only/.assetsignore out/
         env:
           NETLIFY_SITE_ID: e464072b-c4e2-4ca9-b6d5-317fd657ad16

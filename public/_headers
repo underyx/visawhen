@@ -1,23 +1,13 @@
 # Response headers for the Cloudflare Workers static-assets deployment.
 # https://developers.cloudflare.com/workers/static-assets/headers/
 #
-# Mirrors netlify.toml (the headers() in next.config.js are a no-op for a
-# static export). Cloudflare's default for static assets is
-# "public, max-age=0, must-revalidate". A request matching several rules gets
-# the headers of all of them, so a narrower rule has to detach ("! Header")
-# the value set by a broader one before setting its own.
+# HTML deliberately keeps Cloudflare's default ("public, max-age=0,
+# must-revalidate"): every deploy renames the hashed JS/CSS chunks, so a page
+# cached past a deploy references assets that no longer exist and renders
+# without scripts or styles. Only the content-hashed build output is cached
+# for long.
 
-/*
-  Cache-Control: public, max-age=3600
-
-/nvc
-  ! Cache-Control
-  Cache-Control: public, max-age=600
-
-# Build output under /_next/static/ is content-hashed, so it can be cached
-# forever.
 /_next/static/*
-  ! Cache-Control
   Cache-Control: public, max-age=31536000, immutable
 
 # Keep the workers.dev hostnames (visawhen.<account>.workers.dev and the
