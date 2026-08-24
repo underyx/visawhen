@@ -11,18 +11,12 @@
     "ensure-db": "cd data/consulates && gunzip -kf dump/backlogs.ndjson.gz && sqlite-diffable load consulates.sqlite dump/ --replace"
   },
   "dependencies": {
-    "@emotion/cache": "^11.10.5",
-    "@emotion/react": "^11.10.6",
-    "@emotion/serialize": "^1.1.1",
-    "@emotion/server": "^11.10.0",
-    "@emotion/utils": "^1.2.0",
     "@fortawesome/fontawesome-svg-core": "^6.3.0",
     "@fortawesome/free-brands-svg-icons": "^6.3.0",
     "@fortawesome/free-solid-svg-icons": "^6.3.0",
     "@fortawesome/react-fontawesome": "^0.2.0",
-    "@mantine/core": "6.0.0-alpha.7",
-    "@mantine/hooks": "6.0.0-alpha.7",
-    "@mantine/next": "6.0.0-alpha.7",
+    "@mantine/core": "^9.5.2",
+    "@mantine/hooks": "^9.5.2",
     "date-fns": "^2.29.3",
     "echarts": "^5.6.0",
     "echarts-for-react": "^3.0.2",
@@ -48,6 +42,9 @@
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.2",
     "next-sitemap": "^4.2.3",
+    "postcss": "^8.5.26",
+    "postcss-preset-mantine": "^1.18.0",
+    "postcss-simple-vars": "^7.0.1",
     "typescript": "^5.9.3"
   },
   "browserslist": [

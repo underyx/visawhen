@@ -28,6 +28,7 @@ import {
   Title,
 } from "@mantine/core";
 import { useInputState } from "@mantine/hooks";
+import classes from "../../../components/ListButton.module.css";
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = await getAllPosts();
@@ -149,7 +150,7 @@ export default function ConsulateSelect({
         component={Link}
         href="/consulates"
         size="xs"
-        leftIcon={<FontAwesomeIcon icon={faChevronLeft} />}
+        leftSection={<FontAwesomeIcon icon={faChevronLeft} />}
         style={{ alignSelf: "flex-start" }}
       >
         Change consulate
@@ -165,7 +166,7 @@ export default function ConsulateSelect({
       </Title>
       <TextInput
         size="lg"
-        icon={<FontAwesomeIcon icon={faSearch} />}
+        leftSection={<FontAwesomeIcon icon={faSearch} />}
         type="text"
         placeholder="DL6"
         onChange={setTerm}
@@ -181,27 +182,16 @@ export default function ConsulateSelect({
               key={visaClassSlug}
               component={Link}
               href={`/consulates/${postSlug}/${visaClassSlug}/`}
-              styles={(theme) => ({
-                root: {
-                  paddingLeft: "1rem",
-                  paddingRight: "1rem",
-                  "&[data-disabled]": {
-                    color: theme.colors.gray[7],
-                  },
-                },
-                inner: {
-                  justifyContent: "space-between",
-                  fontSize: "1rem",
-                  fontWeight: 400,
-                },
-              })}
-              rightIcon={
+              classNames={{ root: classes.root, inner: classes.inner }}
+              justify="space-between"
+              rightSection={
                 <Badge
                   size="lg"
                   radius="sm"
                   variant="outline"
                   color="gray"
-                  style={{ textTransform: "none", fontWeight: "500" }}
+                  tt="none"
+                  fw={500}
                 >
                   {!hasAnyIssued
                     ? "never issued here"
@@ -215,7 +205,7 @@ export default function ConsulateSelect({
                 </Badge>
               }
             >
-              <Group spacing="xs" noWrap>
+              <Group gap="xs" wrap="nowrap">
                 <Badge
                   size="lg"
                   radius="sm"

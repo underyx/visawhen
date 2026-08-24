@@ -5,6 +5,8 @@ const CONFIG = {
   // netlify.toml, since a static export cannot set them itself.
   output: "export",
   reactStrictMode: true,
+  // Stop `next dev` from dropping generated AGENTS.md/CLAUDE.md into the repo.
+  agentRules: false,
   transpilePackages: ["echarts", "zrender"],
 };
 

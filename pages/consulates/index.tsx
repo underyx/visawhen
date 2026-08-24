@@ -1,16 +1,12 @@
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  Flex,
+  Badge,
+  Button,
+  Highlight,
   Stack,
   TextInput,
-  Text,
   Title,
-  Badge,
-  Card,
-  Paper,
-  Highlight,
-  Button,
 } from "@mantine/core";
 import { deburr, kebabCase, sortBy } from "lodash";
 import { GetStaticProps } from "next";
@@ -86,7 +82,7 @@ export default function ConsulateSelect({ posts, baselines }: Props) {
       <Title order={2}>Select your consulate</Title>
       <TextInput
         size="lg"
-        icon={<FontAwesomeIcon icon={faSearch} />}
+        leftSection={<FontAwesomeIcon icon={faSearch} />}
         type="text"
         placeholder="Atlantis"
         onChange={setTerm}
@@ -99,14 +95,15 @@ export default function ConsulateSelect({ posts, baselines }: Props) {
             key={postSlug}
             component={Link}
             href={`/consulates/${postSlug}/`}
-            styles={{ inner: { justifyContent: "space-between" } }}
-            rightIcon={
+            justify="space-between"
+            rightSection={
               <Badge
                 size="lg"
                 radius="sm"
                 variant="outline"
                 color="gray"
-                style={{ textTransform: "none", fontWeight: "500" }}
+                tt="none"
+                fw={500}
               >
                 normally{" "}
                 {numeral(baselineMap.get(postSlug))

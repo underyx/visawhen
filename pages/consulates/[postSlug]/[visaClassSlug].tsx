@@ -108,13 +108,13 @@ export default function ConsulateStats({
         <meta property="og:description" content={description} />
         <meta property="og:url" content={canonicalUrl} />
       </Head>
-      <Group spacing="xs" style={{ alignSelf: "flex-start" }}>
+      <Group gap="xs" style={{ alignSelf: "flex-start" }}>
         <Button
           variant="outline"
           component={Link}
           href="/consulates"
           size="xs"
-          leftIcon={<FontAwesomeIcon icon={faChevronLeft} />}
+          leftSection={<FontAwesomeIcon icon={faChevronLeft} />}
         >
           Change consulate
         </Button>
@@ -123,7 +123,7 @@ export default function ConsulateStats({
           component={Link}
           href={`/consulates/${postSlug}`}
           size="xs"
-          leftIcon={<FontAwesomeIcon icon={faChevronLeft} />}
+          leftSection={<FontAwesomeIcon icon={faChevronLeft} />}
         >
           Change visa class
         </Button>
