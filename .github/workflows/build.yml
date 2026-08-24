@@ -9,7 +9,7 @@ on:
         type: string
     outputs:
       artifact-name:
-        description: "Name of the uploaded artifact containing out.tar.gz"
+        description: "Name of the uploaded artifact containing out.tar.gz and wrangler.jsonc"
         value: ${{ jobs.build.outputs.artifact-name }}
 
 jobs:
@@ -48,8 +48,12 @@ jobs:
       - name: Create tar archive
         run: tar czf out.tar.gz -C ${{ github.workspace }}/out .
 
+      # wrangler.jsonc travels with the build so deploy.yml needs no checkout
+      # and deploys the Cloudflare config of the ref that was built.
       - name: Upload tar archive
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ steps.name-artifact.outputs.artifact-name }}
-          path: out.tar.gz
+          path: |
+            out.tar.gz
+            wrangler.jsonc

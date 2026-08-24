@@ -4,23 +4,45 @@ on:
   workflow_call:
     inputs:
       artifact-name:
-        description: "Name of the build artifact (containing out.tar.gz) to deploy"
+        description: "Name of the build artifact (containing out.tar.gz and wrangler.jsonc) to deploy"
         required: true
         type: string
     secrets:
       netlify-token:
         required: true
+      # Optional: when unset, the Cloudflare deploy steps are skipped.
+      cloudflare-api-token:
+        required: false
+      cloudflare-account-id:
+        required: false
+
+# The site is deployed to both Netlify (serving visawhen.com today) and a
+# Cloudflare Workers static-assets Worker (visawhen.<account>.workers.dev,
+# config in wrangler.jsonc). Cutting visawhen.com over to the Worker:
+#
+#   1. Add CLOUDFLARE_API_TOKEN (Workers Scripts:Edit + Account Settings:Read
+#      on the account) and CLOUDFLARE_ACCOUNT_ID as repository secrets, and
+#      check that this job's Cloudflare steps go green on the next deploy.
+#   2. Attach the custom domains to the Worker: add the "routes" block from
+#      wrangler.jsonc (visawhen.com and www.visawhen.com with
+#      `custom_domain: true`). The next deploy creates the DNS records in the
+#      zone (the zone must be on the same account; remove any existing A/CNAME
+#      records for the hostnames first).
+#   3. Once the Worker is serving visawhen.com, disable builds on the old
+#      Cloudflare Pages project (Settings > Builds & deployments > Disable
+#      automatic deployments) or delete it, and drop the Netlify deploy step.
 
 jobs:
   deploy:
-    name: Deploy to Netlify
+    name: Deploy to Netlify and Cloudflare
     runs-on: ubuntu-24.04
     steps:
       - id: download
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           # A single artifact downloaded by name is extracted directly into
-          # the workspace, so out.tar.gz ends up at the top level.
+          # the workspace, so out.tar.gz and wrangler.jsonc end up at the top
+          # level.
           name: ${{ inputs.artifact-name }}
 
       - name: Extract tar archive
@@ -39,8 +61,52 @@ jobs:
       # "netlify deploy" runs the site's build command before deploying, which
       # broke this workflow (the site is already built and we only upload the
       # prebuilt out/ directory). --no-build restores the old behaviour.
+      #
+      # public/_headers and public/.assetsignore are for the Cloudflare deploy
+      # only, but next export copies them into out/. Netlify reads _headers
+      # from the publish directory too, and its parser rejects the
+      # "! Cache-Control" lines; keep both files out of the Netlify upload.
       - name: Deploy to netlify
-        run: npx -y netlify-cli@27 deploy --prod --no-build --dir=out/ --timeout=3600
+        run: |
+          mkdir -p "$RUNNER_TEMP/cloudflare-only"
+          mv out/_headers out/.assetsignore "$RUNNER_TEMP/cloudflare-only/"
+          npx -y netlify-cli@27 deploy --prod --no-build --dir=out/ --timeout=3600
+          mv "$RUNNER_TEMP"/cloudflare-only/_headers "$RUNNER_TEMP"/cloudflare-only/.assetsignore out/
         env:
           NETLIFY_SITE_ID: e464072b-c4e2-4ca9-b6d5-317fd657ad16
           NETLIFY_AUTH_TOKEN: ${{ secrets.netlify-token }}
+
+      # Secrets cannot be used in `if:` directly, so expose whether the token
+      # is set as a step output.
+      - name: Check for Cloudflare credentials
+        id: cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.cloudflare-api-token }}
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::cloudflare-api-token secret is not set; skipping the Cloudflare deploy"
+          fi
+
+      # Workers static assets allow 20,000 files per version. public/.assetsignore
+      # keeps the per-page _next/data/*/consulates/ payloads out of the upload;
+      # fail early (rather than half-way through the upload) if what is left
+      # gets close to the limit.
+      - name: Check asset count
+        if: steps.cloudflare.outputs.enabled == 'true'
+        run: |
+          count=$(find out -type f ! -path 'out/_next/data/*/consulates/*' | wc -l)
+          echo "$count files to upload (limit 20000, guard 19000)"
+          if [ "$count" -ge 19000 ]; then
+            echo "::error::$count files would be uploaded to Cloudflare; the limit is 20000"
+            exit 1
+          fi
+
+      - name: Deploy to Cloudflare Workers
+        if: steps.cloudflare.outputs.enabled == 'true'
+        run: npx -y wrangler@4 deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.cloudflare-api-token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.cloudflare-account-id }}
