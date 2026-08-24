@@ -1691,13 +1691,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"echarts@npm:^5.4.1":
-  version: 5.4.1
-  resolution: "echarts@npm:5.4.1"
+"echarts@npm:^5.6.0":
+  version: 5.6.0
+  resolution: "echarts@npm:5.6.0"
   dependencies:
     tslib: 2.3.0
-    zrender: 5.4.1
-  checksum: 2868541087045d27691e99950a96896da48be2c758cb9cd6ab57244bfa40967edecc5a215e02f63a48fa9d56aa1dc91c8339982fdb8d2b1323b19852e91d9fa8
+    zrender: 5.6.1
+  checksum: 4b545444155f9457daa89a4ea45f9e08177a9a59d9df7e5ea5206f66e290964fb0a1a273b0dfdeb24a4aa264f6afc925918aa2b76190917abf390bef092ba95c
   languageName: node
   linkType: hard
 
@@ -4830,11 +4830,11 @@ __metadata:
 
 "typescript@patch:typescript@4.9.5#~builtin<compat/typescript>":
   version: 4.9.5
-  resolution: "typescript@patch:typescript@npm%3A4.9.5#~builtin<compat/typescript>::version=4.9.5&hash=23ec76"
+  resolution: "typescript@patch:typescript@npm%3A4.9.5#~builtin<compat/typescript>::version=4.9.5&hash=289587"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: ab417a2f398380c90a6cf5a5f74badd17866adf57f1165617d6a551f059c3ba0a3e4da0d147b3ac5681db9ac76a303c5876394b13b3de75fdd5b1eaa06181c9d
+  checksum: 1f8f3b6aaea19f0f67cba79057674ba580438a7db55057eb89cc06950483c5d632115c14077f6663ea76fd09fce3c190e6414bb98582ec80aa5a4eaf345d5b68
   languageName: node
   linkType: hard
 
@@ -4991,7 +4991,7 @@ __metadata:
     "@types/numeral": ^2.0.2
     "@types/react": 18.0.28
     date-fns: ^2.29.3
-    echarts: ^5.4.1
+    echarts: ^5.6.0
     echarts-for-react: ^3.0.2
     eslint: ^8.35.0
     eslint-config-next: ^13.2.1
@@ -5165,11 +5165,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zrender@npm:5.4.1":
-  version: 5.4.1
-  resolution: "zrender@npm:5.4.1"
+"zrender@npm:5.6.1":
+  version: 5.6.1
+  resolution: "zrender@npm:5.6.1"
   dependencies:
     tslib: 2.3.0
-  checksum: 9a50cc2cc42ef44a436cfca5a29d6378b92790f50755b4d54f513a55dc7dab9698cecbc5640d731b380ad282aab1c33ae8cc1d14b61c0d51f0e951085a1bf17c
+  checksum: 01caeac2d30f0083009aafa531ccb7fe991b6ac0ddd8134dc7b0015f794ed7e3d4fbfe5d32f61cb591014245eca15aeebcfc962cdebfe3829598f0c94ba3dc29
   languageName: node
   linkType: hard
