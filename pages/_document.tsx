@@ -5,7 +5,7 @@ import { ColorSchemeScript, mantineHtmlProps } from "@mantine/core";
 // where the icons flash from a very large icon down to a properly sized one:
 // Prevent fontawesome from adding its CSS since we did it manually.
 import { config } from "@fortawesome/fontawesome-svg-core";
-config.autoAddCss = false; /* eslint-disable import/first */
+config.autoAddCss = false;
 
 export default function Document() {
   return (

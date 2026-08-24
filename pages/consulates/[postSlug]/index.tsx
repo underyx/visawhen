@@ -5,7 +5,7 @@ import { GetStaticPaths, GetStaticProps } from "next";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Link from "next/link";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import {
   getAllPosts,
   getAllVisaClasses,
@@ -94,31 +94,25 @@ export default function ConsulateSelect({
   );
   const [term, setTerm] = useInputState("");
 
-  const [filteredVisas, setFilteredVisas] = useState<VisaClassRow[]>([]);
-  const [availableVisaClassesSet, setAvailableVisaClassesSet] = useState<
-    Set<string>
-  >(new Set());
+  const availableVisaClassesSet = useMemo<Set<string>>(
+    () => new Set<string>(availableVisaClasses),
+    [availableVisaClasses],
+  );
 
-  useEffect(() => {
-    setAvailableVisaClassesSet(new Set<string>(availableVisaClasses));
-  }, [availableVisaClasses, setAvailableVisaClassesSet]);
-
-  useEffect(() => {
+  const filteredVisas = useMemo<VisaClassRow[]>(() => {
     const normalizedTerm = deburr(term).toLowerCase().replace(/\W/, "");
-    setFilteredVisas(
-      sortItems(
-        visaClasses.filter(
-          ({ visaClassSlug, description }) =>
-            visaClassSlug.includes(normalizedTerm) ||
-            deburr(description ?? "")
-              .toLowerCase()
-              .replace(/\W/, "")
-              .includes(normalizedTerm),
-        ),
-        baselineMap,
+    return sortItems(
+      visaClasses.filter(
+        ({ visaClassSlug, description }) =>
+          visaClassSlug.includes(normalizedTerm) ||
+          deburr(description ?? "")
+            .toLowerCase()
+            .replace(/\W/, "")
+            .includes(normalizedTerm),
       ),
+      baselineMap,
     );
-  }, [baselineMap, visaClasses, term, setFilteredVisas]);
+  }, [baselineMap, visaClasses, term]);
 
   const { postSlug } = router.query;
   if (typeof postSlug !== "string") return;

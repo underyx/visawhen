@@ -13,7 +13,7 @@ import { GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import numeral from "numeral";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import {
   ConsulateBaselineRow,
   getAllPosts,
@@ -49,19 +49,13 @@ export default function ConsulateSelect({ posts, baselines }: Props) {
     [baselines],
   );
   const [term, setTerm] = useInputState("");
-  const [filteredPosts, setFilteredPosts] = useState<PostRow[]>(
-    sortItems(posts, baselineMap),
-  );
-
-  useEffect(() => {
+  const filteredPosts = useMemo<PostRow[]>(() => {
     const normalizedTerm = kebabCase(deburr(term.toLowerCase()));
-    setFilteredPosts(
-      sortItems(
-        posts.filter(({ postSlug }) => postSlug.includes(normalizedTerm)),
-        baselineMap,
-      ),
+    return sortItems(
+      posts.filter(({ postSlug }) => postSlug.includes(normalizedTerm)),
+      baselineMap,
     );
-  }, [baselineMap, posts, term, setFilteredPosts]);
+  }, [baselineMap, posts, term]);
 
   return (
     <Stack>
