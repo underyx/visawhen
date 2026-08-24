@@ -1,0 +1,13 @@
+# Files under out/ that `wrangler deploy` must not upload as static assets.
+# Same syntax as .gitignore; next export copies public/ (dotfiles included)
+# into out/, so this file ends up in the assets directory root.
+#
+# The per-page getStaticProps payloads for the ~15,000 consulate pages are
+# only fetched for client-side navigation and the same data is embedded in
+# each page as __NEXT_DATA__; when the fetch 404s Next.js falls back to a
+# full page load. Skipping them keeps a deploy well under the 20,000 files
+# per version limit. The top-level nvc/consulates data JSON is kept.
+_next/data/*/consulates/
+
+# Copied from public/, not meant to be served.
+.gitignore

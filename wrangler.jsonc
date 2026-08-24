@@ -1,0 +1,30 @@
+// Cloudflare Workers static-assets deployment of the exported site. Deployed
+// by .github/workflows/deploy.yml (`wrangler deploy`) alongside Netlify.
+// https://developers.cloudflare.com/workers/static-assets/
+{
+  "$schema": "https://developers.cloudflare.com/workers/wrangler/config-schema.json",
+  "name": "visawhen",
+  // Must not be later than the current Workers runtime release; bump from
+  // time to time.
+  "compatibility_date": "2026-08-01",
+  // Assets-only Worker: there is no "main" script, so requests are answered
+  // straight from the asset store and are not billed as Worker invocations.
+  "assets": {
+    "directory": "./out",
+    // /nvc -> out/nvc.html and /nvc/ redirects to /nvc, matching the Next.js
+    // export layout (no trailingSlash) and Netlify's pretty URLs.
+    "html_handling": "auto-trailing-slash",
+    // Serve out/404.html with a 404 status for unknown paths.
+    "not_found_handling": "404-page"
+  },
+  "observability": {
+    "enabled": true
+  },
+  // Serves the site at visawhen.<account>.workers.dev until the custom domain
+  // is attached. To cut over visawhen.com (zone already on this account), add:
+  // "routes": [
+  //   { "pattern": "visawhen.com", "custom_domain": true },
+  //   { "pattern": "www.visawhen.com", "custom_domain": true },
+  // ],
+  "workers_dev": true
+}
