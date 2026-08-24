@@ -28,7 +28,7 @@ client = httpx.AsyncClient(headers=HEADERS, verify=ssl_context)
 db_path = Path(__file__).parent / "times.sqlite"
 dump_dir = Path(__file__).parent / "dump"
 if dump_dir.exists():
-    sqlite_diffable.cli.load.callback(str(db_path), str(dump_dir), True)
+    sqlite_diffable.cli.load.callback(str(db_path), str(dump_dir), replace=True)
 
 conn = sqlite3.connect(db_path)
 conn.execute(
@@ -118,7 +118,9 @@ async def main():
     print(f"after dedupe: {len(times)=}")
 
     times.to_sql("times", conn, if_exists="replace", index=True)
-    sqlite_diffable.cli.dump.callback(str(db_path), str(dump_dir), (), True)
+    sqlite_diffable.cli.dump.callback(
+        str(db_path), str(dump_dir), tables=(), all=True, exclude=()
+    )
 
 
 if __name__ == "__main__":

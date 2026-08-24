@@ -5,25 +5,23 @@ description = ""
 authors = ["Bence Nagy <bence@underyx.me>"]
 
 [tool.poetry.dependencies]
-python = "^3.10"
-requests = "^2.28.1"
-pandas = "^1.4.3"
-requests-html = "^0.10.0"
-arrow = "^1.2.2"
-camelot-py = "^0.11.0"
-dnspython = "^2.1.0"
-nbconvert = "^7.0.0"
-
-# these two required per https://github.com/camelot-dev/camelot/blob/644bbe7c6d57b95aefa2f049a9aacdbc061cc04f/setup.py#L27
-ghostscript = ">=0.7"
-opencv-python = ">=3.4.2.17"
-joblib = "^1.2.0"
-sqlite-diffable = "^0.5"
+python = "^3.11"
+requests = "^2.34.2"
+pandas = "^3.0.5"
+beautifulsoup4 = "^4.15.0"
+lxml = "^6.1.2"
+arrow = "^1.4.0"
+# the issuance tables are read from the PDFs' text layer; no more camelot
+# (ghostscript/OpenCV page rendering), which took ~0.5 s per page
+pypdf = "^6.16.2"
+nbconvert = "^7.17.1"
+joblib = "^1.5.3"
+sqlite-diffable = "^0.6"
 
 [tool.poetry.dev-dependencies]
-ipykernel = "^6.15.1"
-notebook = "^6.4.12"
-jupyter = "^1.0.0"
+ipykernel = "^7.3.0"
+notebook = "^7.6.2"
+jupyter = "^1.1.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -6,13 +6,10 @@ authors = ["Bence Nagy <bence@underyx.me>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.9"
-arrow = "^1.1.0"
-requests = "^2.25.1"
-types-requests = "^2.25.11"
-
-[tool.poetry.dev-dependencies]
-types-requests = "^2.25.11"
+python = "^3.11"
+arrow = "^1.4.0"
+requests = "^2.34.2"
+types-requests = "^2.33.0.20260712"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
