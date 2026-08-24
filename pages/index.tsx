@@ -1,5 +1,4 @@
-import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ChevronRightIcon } from "../components/icons";
 import {
   Anchor,
   Badge,
@@ -74,7 +73,7 @@ export default function Home() {
                       <Badge variant="filled">Step 2</Badge>
                       <Text>NVC</Text>
                     </Group>
-                    <FontAwesomeIcon icon={faChevronRight} />
+                    <ChevronRightIcon />
                   </Flex>
                 </Title>
               </UnstyledButton>
@@ -103,7 +102,7 @@ export default function Home() {
                       <Badge variant="filled">Step 3</Badge>
                       <Text>Consulate</Text>
                     </Group>
-                    <FontAwesomeIcon icon={faChevronRight} />
+                    <ChevronRightIcon />
                   </Flex>
                 </Title>
               </UnstyledButton>

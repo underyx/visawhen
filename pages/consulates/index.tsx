@@ -1,5 +1,4 @@
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { SearchIcon } from "../../components/icons";
 import {
   Badge,
   Button,
@@ -75,7 +74,7 @@ export default function ConsulateSelect({ posts, baselines }: Props) {
       <Title order={2}>Select your consulate</Title>
       <TextInput
         size="lg"
-        leftSection={<FontAwesomeIcon icon={faSearch} />}
+        leftSection={<SearchIcon />}
         type="text"
         placeholder="Atlantis"
         onChange={setTerm}

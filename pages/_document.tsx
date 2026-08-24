@@ -1,12 +1,6 @@
 import { Html, Head, Main, NextScript } from "next/document";
 import { ColorSchemeScript, mantineHtmlProps } from "@mantine/core";
 
-// The following import prevents a Font Awesome icon server-side rendering bug,
-// where the icons flash from a very large icon down to a properly sized one:
-// Prevent fontawesome from adding its CSS since we did it manually.
-import { config } from "@fortawesome/fontawesome-svg-core";
-config.autoAddCss = false;
-
 export default function Document() {
   return (
     <Html lang="en" {...mantineHtmlProps}>

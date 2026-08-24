@@ -1,5 +1,4 @@
-import { faChevronLeft, faSearch } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ChevronLeftIcon, SearchIcon } from "../../../components/icons";
 import { deburr, sortBy } from "lodash";
 import { GetStaticPaths, GetStaticProps } from "next";
 import { useRouter } from "next/router";
@@ -140,7 +139,7 @@ export default function ConsulateSelect({
         component={Link}
         href="/consulates"
         size="xs"
-        leftSection={<FontAwesomeIcon icon={faChevronLeft} />}
+        leftSection={<ChevronLeftIcon />}
         style={{ alignSelf: "flex-start" }}
       >
         Change consulate
@@ -156,7 +155,7 @@ export default function ConsulateSelect({
       </Title>
       <TextInput
         size="lg"
-        leftSection={<FontAwesomeIcon icon={faSearch} />}
+        leftSection={<SearchIcon />}
         type="text"
         placeholder="DL6"
         onChange={setTerm}

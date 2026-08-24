@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDiscord } from "@fortawesome/free-brands-svg-icons";
+import { DiscordIcon } from "./icons";
 import { Avatar, Button, Container, Flex, Group, Text } from "@mantine/core";
 
 export default function Navbar() {
@@ -37,7 +36,7 @@ export default function Navbar() {
           target="_blank"
           rel="noopener"
           href="https://discord.gg/zkf8w2QtQY"
-          leftSection={<FontAwesomeIcon icon={faDiscord} />}
+          leftSection={<DiscordIcon />}
         >
           <Text visibleFrom="sm">Join the Discord community</Text>
           <Text hiddenFrom="sm">Discord</Text>
