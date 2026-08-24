@@ -13,31 +13,41 @@ defaults:
 jobs:
   update-uscis-queries-data:
     name: Update USCIS queries data
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     outputs:
       new-commit-sha: ${{ steps.head_commit.outputs.commit_sha }}
       updated: ${{ steps.commit.outputs.pushed }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Set up Python
-        uses: actions/setup-python@v7
+        id: setup-python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.11"
+      # `poetry env use python` makes poetry build its virtualenv from the
+      # interpreter set up above; without it poetry picks the runner's system
+      # python and the setup-python step has no effect.
       - name: Set up poetry
-        run: pipx install "poetry<2"
+        run: |
+          pipx install "poetry<2"
+          poetry env use python
       - name: Cache poetry virtualenv
-        uses: actions/cache@v5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/pypoetry/virtualenvs
-          key: ${{ runner.os }}-poetry-data-uscis-${{ hashFiles('data/uscis/poetry.lock') }}
+          key: ${{ runner.os }}-poetry-data-uscis-py${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('data/uscis/poetry.lock') }}
       - name: Install dependencies
         run: poetry install
       - name: Run script
         run: poetry run python queries.py
       - name: Commit changes
         id: commit
-        uses: EndBug/add-and-commit@v11
+        uses: EndBug/add-and-commit@cc9c08ba6c8df3b93a8f2db63e89b98368ae2ae8 # v11.1.1
+        with:
+          # The default (`git fetch --tags --force`) pulls the whole history of
+          # the 100 MB data dumps into the shallow clone: 3-4 minutes per run.
+          fetch: false
       - id: head_commit
         run: echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"

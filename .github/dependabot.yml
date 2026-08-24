@@ -1,18 +1,37 @@
 version: 2
 updates:
+  # Actions are pinned to commit SHAs with a "# vX.Y.Z" comment; Dependabot
+  # keeps both the SHA and the comment up to date.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      npm-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
   - package-ecosystem: "pip"
-    directory: "data/consulates"
+    directory: "/data/nvc"
     schedule:
       interval: "weekly"
+
   - package-ecosystem: "pip"
-    directory: "data/nvc"
+    directory: "/data/consulates"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "pip"
+    directory: "/data/uscis"
     schedule:
       interval: "weekly"

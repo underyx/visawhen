@@ -9,26 +9,26 @@ on:
         type: string
     outputs:
       artifact-name:
-        description: "Name of the uploaded artifact containing out.tar.gz"
+        description: "Name of the uploaded artifact containing out.tar.gz and wrangler.jsonc"
         value: ${{ jobs.build.outputs.artifact-name }}
 
 jobs:
   build:
     name: Build with Next.js
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       artifact-name: ${{ steps.name-artifact.outputs.artifact-name }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.ref }}
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "22"
 
       - name: Cache Next.js build
-        uses: actions/cache@v5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ github.workspace }}/.next/cache
           # Generate a new cache whenever packages or source files change.
@@ -48,8 +48,12 @@ jobs:
       - name: Create tar archive
         run: tar czf out.tar.gz -C ${{ github.workspace }}/out .
 
+      # wrangler.jsonc travels with the build so deploy.yml needs no checkout
+      # and deploys the Cloudflare config of the ref that was built.
       - name: Upload tar archive
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ steps.name-artifact.outputs.artifact-name }}
-          path: out.tar.gz
+          path: |
+            out.tar.gz
+            wrangler.jsonc
