@@ -12,7 +12,7 @@ import {
 } from "../../../api/consulates";
 import Head from "next/head";
 import ConsulateChart from "../../../components/ConsulateChart";
-import { useRouter } from "next/dist/client/router";
+import { useRouter } from "next/router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import { Button, Group, Stack, Text, Title } from "@mantine/core";

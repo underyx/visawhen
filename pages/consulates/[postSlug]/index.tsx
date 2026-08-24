@@ -2,7 +2,7 @@ import { faChevronLeft, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { deburr, sortBy } from "lodash";
 import { GetStaticPaths, GetStaticProps } from "next";
-import { useRouter } from "next/dist/client/router";
+import { useRouter } from "next/router";
 import Head from "next/head";
 import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
