@@ -118,9 +118,12 @@ export default function ConsulateStats({
         >
           Change consulate
         </Button>
+        {/* Plain anchor: the consulate page's _next/data JSON is not
+            deployed (see the note in the consulate list page), so a Link
+            would only 404 on it before hard-navigating anyway. */}
         <Button
           variant="outline"
-          component={Link}
+          component="a"
           href={`/consulates/${postSlug}`}
           size="xs"
           leftSection={<FontAwesomeIcon icon={faChevronLeft} />}

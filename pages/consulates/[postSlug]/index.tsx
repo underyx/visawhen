@@ -161,6 +161,12 @@ export default function ConsulateSelect({
         placeholder="DL6"
         onChange={setTerm}
       />
+      {/* Plain anchors, not next/link: the per-page _next/data JSON under
+          /consulates/ is not deployed (it would push the site over
+          Cloudflare's 20,000-file limit), so these pages can only be reached
+          by a full page load. A Link would prefetch the missing JSON on hover
+          and, on click, fetch it again just to 404 and fall back to the same
+          hard navigation. */}
       <Button.Group orientation="vertical">
         {filteredVisas.map(({ visaClass, visaClassSlug, description }) => {
           const hasAnyIssued = availableVisaClassesSet.has(visaClassSlug);
@@ -170,8 +176,8 @@ export default function ConsulateSelect({
               variant="default"
               disabled={!hasAnyIssued}
               key={visaClassSlug}
-              component={Link}
-              href={`/consulates/${postSlug}/${visaClassSlug}/`}
+              component="a"
+              href={`/consulates/${postSlug}/${visaClassSlug}`}
               classNames={{ root: classes.root, inner: classes.inner }}
               justify="space-between"
               rightSection={

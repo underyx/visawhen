@@ -11,7 +11,6 @@ import {
 import { deburr, kebabCase, sortBy } from "lodash";
 import { GetStaticProps } from "next";
 import Head from "next/head";
-import Link from "next/link";
 import numeral from "numeral";
 import React, { useMemo } from "react";
 import {
@@ -81,14 +80,19 @@ export default function ConsulateSelect({ posts, baselines }: Props) {
         placeholder="Atlantis"
         onChange={setTerm}
       />
+      {/* Plain anchors, not next/link: the per-consulate _next/data JSON is
+          not deployed (it would push the site over Cloudflare's 20,000-file
+          limit), so these pages can only be reached by a full page load. A
+          Link would prefetch the missing JSON on hover and, on click, fetch
+          it again just to 404 and fall back to the same hard navigation. */}
       <Button.Group orientation="vertical">
         {filteredPosts.map(({ post, postSlug }) => (
           <Button
             size="lg"
             variant="default"
             key={postSlug}
-            component={Link}
-            href={`/consulates/${postSlug}/`}
+            component="a"
+            href={`/consulates/${postSlug}`}
             justify="space-between"
             rightSection={
               <Badge
