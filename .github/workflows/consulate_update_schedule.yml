@@ -77,10 +77,18 @@ jobs:
       # The notebooks are converted to scripts and streamed into python instead
       # of being executed with `nbconvert --execute`: output shows up in the job
       # log as it happens, and `::warning::` lines reach GitHub as annotations.
+      #
+      # The notebooks call display(), which is a builtin only inside an IPython
+      # kernel, so the converted script is prefixed with the matching import
+      # (outside IPython, display() prints the object's repr). The brace group
+      # keeps nbconvert as the pipeline's first stage, so pipefail still catches
+      # a failing conversion.
       - name: Run visa-issuances notebook
-        run: poetry run jupyter nbconvert --to script --stdout visa-issuances.ipynb | poetry run python -u -
+        run: |
+          { echo 'from IPython.display import display'; poetry run jupyter nbconvert --to script --stdout visa-issuances.ipynb; } | poetry run python -u -
       - name: Run baselines notebook
-        run: poetry run jupyter nbconvert --to script --stdout baselines.ipynb | poetry run python -u -
+        run: |
+          { echo 'from IPython.display import display'; poetry run jupyter nbconvert --to script --stdout baselines.ipynb; } | poetry run python -u -
 
       - name: Save poetry virtualenv
         if: always() && steps.cache-poetry.outputs.cache-hit != 'true'
