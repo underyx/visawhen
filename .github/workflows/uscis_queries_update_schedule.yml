@@ -1,9 +1,9 @@
+# Schedule removed (2026-08): nothing on the site consumes data/uscis, and
+# egov.uscis.gov has blocked automated access (Cloudflare challenge) since
+# 2024, so every scheduled run failed. Kept as a manual workflow only.
 name: Update USCIS queries data
 
 on:
-  schedule:
-    # check every Monday at a random time
-    - cron: 52 4 * * 1
   workflow_dispatch:
 
 defaults:
@@ -20,15 +20,15 @@ jobs:
       new-commit-sha: ${{ steps.head_commit.outputs.commit_sha }}
       updated: ${{ steps.commit.outputs.pushed }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
       - name: Set up poetry
         run: pipx install "poetry<2"
       - name: Cache poetry virtualenv
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/pypoetry/virtualenvs
           key: ${{ runner.os }}-poetry-data-uscis-${{ hashFiles('data/uscis/poetry.lock') }}
@@ -38,6 +38,6 @@ jobs:
         run: poetry run python queries.py
       - name: Commit changes
         id: commit
-        uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@v11
       - id: head_commit
-        run: echo "::set-output name=commit_sha::$(git rev-parse HEAD)"
+        run: echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"

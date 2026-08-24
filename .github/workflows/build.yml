@@ -7,6 +7,10 @@ on:
         description: "The git ref to build"
         required: true
         type: string
+    outputs:
+      artifact-name:
+        description: "Name of the uploaded artifact containing out.tar.gz"
+        value: ${{ jobs.build.outputs.artifact-name }}
 
 jobs:
   build:
@@ -15,16 +19,16 @@ jobs:
     outputs:
       artifact-name: ${{ steps.name-artifact.outputs.artifact-name }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.ref }}
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v6
         with:
-          node-version: "19"
+          node-version: "22"
 
       - name: Cache Next.js build
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ github.workspace }}/.next/cache
           # Generate a new cache whenever packages or source files change.
@@ -39,13 +43,13 @@ jobs:
 
       - id: name-artifact
         name: Set artifact name
-        run: echo "::set-output name=artifact-name::website-${{ github.sha }}"
+        run: echo "artifact-name=website-${{ github.sha }}" >> "$GITHUB_OUTPUT"
 
       - name: Create tar archive
         run: tar czf out.tar.gz -C ${{ github.workspace }}/out .
 
       - name: Upload tar archive
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.name-artifact.outputs.artifact-name }}
           path: out.tar.gz

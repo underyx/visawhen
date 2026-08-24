@@ -23,23 +23,37 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
       - name: Set up poetry
         run: pipx install "poetry<2"
       - name: Cache poetry virtualenv
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/pypoetry/virtualenvs
           key: ${{ runner.os }}-poetry-data-consulates-${{ hashFiles('data/consulates/poetry.lock') }}
+      # actions/cache paths are relative to the workspace, not to the job's
+      # working-directory. Keys include the run id so every run saves a fresh
+      # cache while restore-keys picks up the newest previous one.
       - name: Cache joblib results
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
-          path: .joblib-cache/
-          key: ${{ runner.os }}-consulates-joblib-results
+          path: data/consulates/.joblib_cache/
+          key: ${{ runner.os }}-consulates-joblib-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-consulates-joblib-
+      # The monthly PDFs (~200 MB) are re-fetched from the Wayback Machine when
+      # travel.state.gov blocks us; keep them between runs.
+      - name: Cache downloaded PDFs
+        uses: actions/cache@v5
+        with:
+          path: data/consulates/pdfs/
+          key: ${{ runner.os }}-consulates-pdfs-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-consulates-pdfs-
       - name: Install required C libraries
         run: |
           sudo apt-get update
@@ -52,9 +66,9 @@ jobs:
         run: poetry run jupyter nbconvert --to notebook --execute baselines.ipynb
       - name: Commit changes
         id: commit
-        uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@v11
       - id: head_commit
-        run: echo "::set-output name=commit_sha::$(git rev-parse HEAD)"
+        run: echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
   build:
     if: needs.update-consulates-data.outputs.updated == 'true'
@@ -66,5 +80,10 @@ jobs:
   deploy:
     uses: underyx/visawhen/.github/workflows/deploy.yml@main
     needs: [build]
+    # When nothing was pushed, build is skipped; a skipped dependency already
+    # skips this job (no `always()`), but be explicit about it.
+    if: needs.build.result == 'success'
+    with:
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
     secrets:
       netlify-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
