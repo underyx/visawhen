@@ -11,9 +11,9 @@ pandas = "^3.0.5"
 beautifulsoup4 = "^4.15.0"
 lxml = "^6.1.2"
 arrow = "^1.4.0"
-# camelot 2.x renders pages with pypdfium2 and pulls in opencv-python-headless itself;
-# ghostscript and opencv-python are no longer needed
-camelot-py = "^2.0.0"
+# the issuance tables are read from the PDFs' text layer; no more camelot
+# (ghostscript/OpenCV page rendering), which took ~0.5 s per page
+pypdf = "^6.16.2"
 nbconvert = "^7.17.1"
 joblib = "^1.5.3"
 sqlite-diffable = "^0.6"
