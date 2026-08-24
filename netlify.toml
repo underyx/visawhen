@@ -4,12 +4,8 @@
 [[plugins]]
   package = "netlify-plugin-cache-nextjs"
 
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Cache-Control = "public, max-age=3600"
-
-[[headers]]
-  for = "/nvc"
-  [headers.values]
-    Cache-Control = "public, max-age=600"
+# Headers for Netlify are written by .github/workflows/deploy.yml into the
+# uploaded out/ directory (this file is not part of that upload). HTML must not
+# be cached past a deploy: every build renames the hashed JS/CSS chunks, so a
+# stale page references assets that no longer exist. Only /_next/static/* is
+# cached for long.
