@@ -2041,26 +2041,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"echarts-for-react@npm:^3.0.2":
-  version: 3.0.2
-  resolution: "echarts-for-react@npm:3.0.2"
+"echarts-for-react@npm:^3.0.6":
+  version: 3.0.6
+  resolution: "echarts-for-react@npm:3.0.6"
   dependencies:
     fast-deep-equal: "npm:^3.1.3"
     size-sensor: "npm:^1.0.1"
   peerDependencies:
-    echarts: ^3.0.0 || ^4.0.0 || ^5.0.0
+    echarts: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0
     react: ^15.0.0 || >=16.0.0
-  checksum: 10/be9107e7c174fd8105d12e15c1ae4bbb828c4ca9a66ef99eec1660fc0c5db92e652f69a81c5c11c2b7b826b13ae79260569a6d74aea965ae4f31f0b4d18462e9
+  checksum: 10/e7c084f516ee6f4c32a1f9eff3ff4372616878aeb6bacaa495fc8d60d2114b54b4b255a31a81fee3e05bfb278f9d27d9a320bb33b8ff37c92e43ac9fd1e4b539
   languageName: node
   linkType: hard
 
-"echarts@npm:^5.6.0":
-  version: 5.6.0
-  resolution: "echarts@npm:5.6.0"
+"echarts@npm:^6.1.0":
+  version: 6.1.0
+  resolution: "echarts@npm:6.1.0"
   dependencies:
     tslib: "npm:2.3.0"
-    zrender: "npm:5.6.1"
-  checksum: 10/e73344abb777fd8401c0b89a5d83b65c7a81a11540e2047d51f4aae9419baf4dc2524a5d9561f9ca0fe8d6b432c58b7a1d518f2a4338041046506db8257a1332
+    zrender: "npm:6.1.0"
+  checksum: 10/ae294b6050a2d7eb377609ae392f76a2db9463b322d12a861c017f5bbab192d59c2b7d618fa2b683cadafd3f37616bb65c5de8ed220421c648bbdb7b4b4c32ea
   languageName: node
   linkType: hard
 
@@ -6211,8 +6211,8 @@ __metadata:
     "@types/react": "npm:^19.2.18"
     "@types/react-dom": "npm:^19.2.5"
     date-fns: "npm:^2.29.3"
-    echarts: "npm:^5.6.0"
-    echarts-for-react: "npm:^3.0.2"
+    echarts: "npm:^6.1.0"
+    echarts-for-react: "npm:^3.0.6"
     eslint: "npm:^9.39.5"
     eslint-config-next: "npm:^16.3.2"
     lodash: "npm:^4.17.21"
@@ -6448,11 +6448,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zrender@npm:5.6.1":
-  version: 5.6.1
-  resolution: "zrender@npm:5.6.1"
+"zrender@npm:6.1.0":
+  version: 6.1.0
+  resolution: "zrender@npm:6.1.0"
   dependencies:
     tslib: "npm:2.3.0"
-  checksum: 10/25dfd476be243f051614f131675855d184eb05e8b9a39dc41146a3a553a17aad5ceba77e166d525be9c4adc2bb237c56dfdfb3456667940bbeddb05eef3deac7
+  checksum: 10/c6bc87252127ef430cbbd47aa8476b0f8ecec1abade26928c2a46b2b01b0be93818b8741cfe0cfd7a48ffd82816dd9b5169801d6e6f98d1d5f0e08ce9e67d875
   languageName: node
   linkType: hard

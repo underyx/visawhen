@@ -7,7 +7,6 @@ const CONFIG = {
   reactStrictMode: true,
   // Stop `next dev` from dropping generated AGENTS.md/CLAUDE.md into the repo.
   agentRules: false,
-  transpilePackages: ["echarts", "zrender"],
 };
 
 module.exports = CONFIG;

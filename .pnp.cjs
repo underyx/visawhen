@@ -41,8 +41,8 @@ const RAW_RUNTIME_STATE =
           ["@types/react", "npm:19.2.18"],\
           ["@types/react-dom", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:19.2.5"],\
           ["date-fns", "npm:2.29.3"],\
-          ["echarts", "npm:5.6.0"],\
-          ["echarts-for-react", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:3.0.2"],\
+          ["echarts", "npm:6.1.0"],\
+          ["echarts-for-react", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:3.0.6"],\
           ["eslint", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:9.39.5"],\
           ["eslint-config-next", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:16.3.2"],\
           ["lodash", "npm:4.17.21"],\
@@ -2576,31 +2576,31 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["echarts", [\
-      ["npm:5.6.0", {\
-        "packageLocation": "./.yarn/cache/echarts-npm-5.6.0-0be59a270b-e73344abb7.zip/node_modules/echarts/",\
+      ["npm:6.1.0", {\
+        "packageLocation": "./.yarn/cache/echarts-npm-6.1.0-517b8ad5ee-ae294b6050.zip/node_modules/echarts/",\
         "packageDependencies": [\
-          ["echarts", "npm:5.6.0"],\
+          ["echarts", "npm:6.1.0"],\
           ["tslib", "npm:2.3.0"],\
-          ["zrender", "npm:5.6.1"]\
+          ["zrender", "npm:6.1.0"]\
         ],\
         "linkType": "HARD"\
       }]\
     ]],\
     ["echarts-for-react", [\
-      ["npm:3.0.2", {\
-        "packageLocation": "./.yarn/cache/echarts-for-react-npm-3.0.2-1e95fef430-be9107e7c1.zip/node_modules/echarts-for-react/",\
+      ["npm:3.0.6", {\
+        "packageLocation": "./.yarn/cache/echarts-for-react-npm-3.0.6-49a603fffc-e7c084f516.zip/node_modules/echarts-for-react/",\
         "packageDependencies": [\
-          ["echarts-for-react", "npm:3.0.2"]\
+          ["echarts-for-react", "npm:3.0.6"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:3.0.2", {\
-        "packageLocation": "./.yarn/__virtual__/echarts-for-react-virtual-b5cc94b2c7/0/cache/echarts-for-react-npm-3.0.2-1e95fef430-be9107e7c1.zip/node_modules/echarts-for-react/",\
+      ["virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:3.0.6", {\
+        "packageLocation": "./.yarn/__virtual__/echarts-for-react-virtual-72721c5c48/0/cache/echarts-for-react-npm-3.0.6-49a603fffc-e7c084f516.zip/node_modules/echarts-for-react/",\
         "packageDependencies": [\
           ["@types/echarts", null],\
           ["@types/react", "npm:19.2.18"],\
-          ["echarts", "npm:5.6.0"],\
-          ["echarts-for-react", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:3.0.2"],\
+          ["echarts", "npm:6.1.0"],\
+          ["echarts-for-react", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:3.0.6"],\
           ["fast-deep-equal", "npm:3.1.3"],\
           ["react", "npm:19.2.8"],\
           ["size-sensor", "npm:1.0.1"]\
@@ -7343,8 +7343,8 @@ const RAW_RUNTIME_STATE =
           ["@types/react", "npm:19.2.18"],\
           ["@types/react-dom", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:19.2.5"],\
           ["date-fns", "npm:2.29.3"],\
-          ["echarts", "npm:5.6.0"],\
-          ["echarts-for-react", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:3.0.2"],\
+          ["echarts", "npm:6.1.0"],\
+          ["echarts-for-react", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:3.0.6"],\
           ["eslint", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:9.39.5"],\
           ["eslint-config-next", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:16.3.2"],\
           ["lodash", "npm:4.17.21"],\
@@ -7621,11 +7621,11 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["zrender", [\
-      ["npm:5.6.1", {\
-        "packageLocation": "./.yarn/cache/zrender-npm-5.6.1-9037fc7858-25dfd476be.zip/node_modules/zrender/",\
+      ["npm:6.1.0", {\
+        "packageLocation": "./.yarn/cache/zrender-npm-6.1.0-025f06fccb-c6bc872521.zip/node_modules/zrender/",\
         "packageDependencies": [\
           ["tslib", "npm:2.3.0"],\
-          ["zrender", "npm:5.6.1"]\
+          ["zrender", "npm:6.1.0"]\
         ],\
         "linkType": "HARD"\
       }]\
