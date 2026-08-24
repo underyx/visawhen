@@ -10,8 +10,8 @@ import {
   getAllPosts,
   getAllVisaClasses,
   getPost,
-  getSlugPairs,
   getVisaClassBaselines,
+  getVisaClassSlugsForPost,
   VisaClassBaselineRow,
   VisaClassRow,
 } from "../../../api/consulates";
@@ -47,16 +47,12 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const postInfo = await getPost(postSlug);
   if (postInfo === undefined) return { notFound: true };
 
-  const availableVisaClasses = new Set<string>(
-    (await getSlugPairs())
-      .filter((row) => row.postSlug === postSlug)
-      .map((row) => row.visaClassSlug),
-  );
+  const availableVisaClasses = await getVisaClassSlugsForPost(postSlug);
 
   return {
     props: {
       visaClasses: await getAllVisaClasses(),
-      availableVisaClasses: Array.from(availableVisaClasses),
+      availableVisaClasses,
       postName: postInfo.post,
       baselines: await getVisaClassBaselines(postSlug),
     },

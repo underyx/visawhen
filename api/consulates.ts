@@ -4,11 +4,35 @@ import { open } from "sqlite";
 
 const dataDir = join(process.cwd(), "data");
 
-async function openDb() {
-  return open({
-    filename: join(dataDir, `consulates/consulates.sqlite`),
-    driver: sqlite3.Database,
-  });
+type Db = Awaited<ReturnType<typeof open>>;
+let dbPromise: Promise<Db> | undefined;
+
+// One connection per process, opened lazily. `next build` renders the ~15,000
+// consulate pages in parallel worker processes, each of which gets its own
+// connection; before this every getStaticProps call opened a fresh one.
+function openDb(): Promise<Db> {
+  if (dbPromise === undefined) {
+    dbPromise = open({
+      filename: join(dataDir, `consulates/consulates.sqlite`),
+      driver: sqlite3.Database,
+    }).then(async (db) => {
+      // The build workers race to create the indexes; wait for the lock
+      // instead of failing with SQLITE_BUSY.
+      db.configure("busyTimeout", 60_000);
+      // `yarn ensure-db` rebuilds the database from the dump, and
+      // sqlite-diffable does not recreate indexes, so every per-page query
+      // used to full-scan the 1.3M-row backlogs table. Creating them here
+      // takes a few seconds once and makes the page lookups instant.
+      await db.exec(`
+        CREATE INDEX IF NOT EXISTS backlogs_post_visa
+          ON backlogs("Post Slug", "Visa Class Slug");
+        CREATE INDEX IF NOT EXISTS baselines_post_visa
+          ON baselines("Post Slug", "Visa Class Slug");
+      `);
+      return db;
+    });
+  }
+  return dbPromise;
 }
 
 export interface SlugPairRow {
@@ -22,6 +46,20 @@ export async function getSlugPairs(): Promise<SlugPairRow[]> {
     SELECT DISTINCT "Post Slug" AS postSlug, "Visa Class Slug" AS visaClassSlug
     FROM backlogs
   `);
+}
+
+export async function getVisaClassSlugsForPost(
+  postSlug: string,
+): Promise<string[]> {
+  const db = await openDb();
+  const rows = await db.all<{ visaClassSlug: string }[]>(
+    `
+    SELECT DISTINCT "Visa Class Slug" AS visaClassSlug
+    FROM backlogs WHERE "Post Slug" = ?
+    `,
+    postSlug,
+  );
+  return rows.map((row) => row.visaClassSlug);
 }
 
 export interface PostRow {
@@ -146,6 +184,7 @@ export async function getBacklog(
     SELECT "Month" AS month, "Issuances" AS issuances, "Backlog" AS backlog, "Months Ahead" AS monthsAhead, "Expected Delta" AS expectedDelta
     FROM backlogs
     WHERE "Post Slug" = ? AND "Visa Class Slug" = ?
+    ORDER BY "Month"
   `,
     postSlug,
     visaClassSlug,
