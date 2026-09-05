@@ -5,7 +5,7 @@ import {
   formatMonths,
   formatPercent,
   QuarterPoint,
-} from "./n400";
+} from "./uscis";
 
 interface StatProps {
   label: string;
@@ -32,7 +32,7 @@ function Stat({ label, value, change, higherIsBetter }: StatProps) {
       </Text>
       <Title order={3}>{value}</Title>
       <Text size="sm" c={color}>
-        {change === null ? " " : `${change} vs. previous quarter`}
+        {change === null ? " " : `${change} vs. previous quarter`}
       </Text>
     </Paper>
   );
@@ -44,7 +44,7 @@ interface Props {
 
 /** The four headline figures of the newest quarter, with their change since
  * the quarter before. */
-export default function N400Stats({ points }: Props) {
+export default function UscisStats({ points }: Props) {
   const current = points[points.length - 1];
   const previous = points[points.length - 2];
   return (

@@ -1,6 +1,5 @@
 import { ChevronRightIcon } from "../components/icons";
 import {
-  Anchor,
   Badge,
   Button,
   Card,
@@ -44,7 +43,7 @@ export default function Home() {
             style={{ height: "100%" }}
           >
             <Stack>
-              <UnstyledButton component={Link} href="/n400">
+              <UnstyledButton component={Link} href="/uscis">
                 <Title order={2} size="h5">
                   <Flex justify="space-between" align="center">
                     <Group>
@@ -56,21 +55,13 @@ export default function Home() {
                 </Title>
               </UnstyledButton>
               <Text>
-                Applying for citizenship? See how fast your field office is
-                deciding <em>N-400</em> applications. For other forms, check
-                the{" "}
-                <Anchor
-                  href="https://egov.uscis.gov/processing-times/"
-                  target="_blank"
-                  rel="noopener noreferer"
-                >
-                  USCIS Case Processing Times
-                </Anchor>{" "}
-                page.
+                This is your step from filing a form with USCIS until they
+                approve it. See how fast USCIS is deciding your form, and for
+                the N-400, I-130 and I-485, how your own field office is doing.
               </Text>
             </Stack>
-            <Button mt="md" component={Link} href="/n400">
-              Check N-400 processing
+            <Button mt="md" component={Link} href="/uscis">
+              Check USCIS processing
             </Button>
           </Flex>
         </Card>

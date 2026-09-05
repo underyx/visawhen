@@ -1,7 +1,7 @@
-import type { Period, QuarterCounts } from "../api/n400";
+import type { Period, QuarterCounts, Variant } from "../api/uscis";
 
-/** One quarter of an office's (or the nation's) N-400 numbers, with the
- * derived figures the pages and charts show. */
+/** One quarter of a form's (or an office's) numbers, with the derived figures
+ * the pages and charts show. */
 export interface QuarterPoint extends QuarterCounts {
   quarter: string;
   /** "Jul–Sep 2025" */
@@ -13,6 +13,8 @@ export interface QuarterPoint extends QuarterCounts {
   waitMonths: number | null;
   /** Share of the quarter's decisions that were approvals, 0-1 */
   approvalRate: number | null;
+  /** USCIS's own median processing time in months, per category of the form */
+  processingTimes: Record<string, number>;
 }
 
 const monthFormatter = new Intl.DateTimeFormat("en-US", {
@@ -28,16 +30,31 @@ export function quarterLabel(period: Period): string {
   )} ${end.getUTCFullYear()}`;
 }
 
+/** The points of a series, one per period from its first quarter with data
+ * to its last; quarters without data in between come out as nulls so the
+ * charts show the gap. */
 export function toPoints(
   periods: Period[],
-  counts: Record<string, QuarterCounts>,
+  counts: Record<string, QuarterCounts & { variants?: Variant[] }>,
 ): QuarterPoint[] {
+  const quarters = Object.keys(counts).sort();
+  if (quarters.length === 0) return [];
+  const first = quarters[0];
+  const last = quarters[quarters.length - 1];
   return periods
-    .filter((period) => counts[period.quarter] !== undefined)
+    .filter((period) => period.quarter >= first && period.quarter <= last)
     .map((period) => {
-      const { received, approved, denied, pending } = counts[period.quarter];
+      const quarter = counts[period.quarter];
+      const received = quarter?.received ?? null;
+      const approved = quarter?.approved ?? null;
+      const denied = quarter?.denied ?? null;
+      const pending = quarter?.pending ?? null;
       const completions =
         approved === null || denied === null ? null : approved + denied;
+      const processingTimes: Record<string, number> = {};
+      for (const variant of quarter?.variants ?? [])
+        if (variant.processingTime !== null)
+          processingTimes[variant.title] = variant.processingTime;
       return {
         quarter: period.quarter,
         label: quarterLabel(period),
@@ -54,13 +71,17 @@ export function toPoints(
           completions === null || completions === 0 || approved === null
             ? null
             : approved / completions,
+        processingTimes,
       };
     });
 }
 
 export function formatMonths(months: number | null): string {
   if (months === null) return "n/a";
-  return `${months < 10 ? months.toFixed(1) : Math.round(months)} months`;
+  if (months < 10) return `${months.toFixed(1)} months`;
+  if (months < 36) return `${Math.round(months)} months`;
+  if (months < 240) return `${(months / 12).toFixed(1)} years`;
+  return "20+ years";
 }
 
 export function formatCount(count: number | null): string {
@@ -91,16 +112,22 @@ export function formatChange(
 }
 
 /** The one-sentence quarter-over-quarter summary shown above the charts. */
-export function highlight(points: QuarterPoint[], subject: string): string {
+export function highlight(
+  points: QuarterPoint[],
+  subject: string,
+  what: string,
+): string {
   const current = points[points.length - 1];
   const previous = points[points.length - 2];
   if (current === undefined) return "";
   const sentences: string[] = [];
   const pendingChange = formatChange(previous?.pending, current.pending);
-  if (pendingChange !== null && current.pending !== null) {
+  if (current.pending !== null) {
     sentences.push(
-      `The pile of pending N-400 applications at ${subject} ${
-        pendingChange === "unchanged"
+      `The pile of pending ${what} at ${subject} ${
+        pendingChange === null
+          ? "stood at"
+          : pendingChange === "unchanged"
           ? "stayed at"
           : pendingChange.startsWith("+")
           ? `grew ${pendingChange.slice(1)} to`
@@ -122,4 +149,47 @@ export function highlight(points: QuarterPoint[], subject: string): string {
     );
   }
   return sentences.join(" ");
+}
+
+/** One line of USCIS's median processing time on the wait chart. */
+export interface ProcessingTimeSeries {
+  /** The all-forms report's row title, the key into `processingTimes` */
+  title: string;
+  /** Short legend label */
+  label: string;
+}
+
+/** A short name for a category of a form: the parenthetical of its row title
+ * ("Immediate Relative"), or whatever the title adds to the form's own. */
+export function variantLabel(title: string, formTitle: string): string {
+  const parenthetical = /\(([^()]*)\)\s*$/.exec(title);
+  if (parenthetical !== null) return parenthetical[1];
+  const rest = title
+    .replace(formTitle, "")
+    .replace(/^[\s,:-]+/, "")
+    .trim();
+  return rest === "" ? "Standard" : rest;
+}
+
+/** The categories of a form whose USCIS median processing time is worth a
+ * line on the chart: the ones with the most received in the newest quarter,
+ * at most four so the legend stays readable. */
+export function processingTimeSeries(
+  points: QuarterPoint[],
+  variants: Variant[],
+  formTitle: string,
+): ProcessingTimeSeries[] {
+  const titles = [...variants]
+    .filter((variant) => variant.processingTime !== null)
+    .sort((a, b) => (b.received ?? 0) - (a.received ?? 0))
+    .map((variant) => variant.title)
+    .slice(0, 4);
+  return titles
+    .filter((title) =>
+      points.some((point) => point.processingTimes[title] !== undefined),
+    )
+    .map((title) => ({
+      title,
+      label: titles.length === 1 ? "" : variantLabel(title, formTitle),
+    }));
 }

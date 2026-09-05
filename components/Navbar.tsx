@@ -17,9 +17,9 @@ export default function Navbar() {
             </Group>
           </Link>
           <Group gap="xs">
-            <Link href="/n400">
+            <Link href="/uscis">
               <Button size="compact-sm" color="gray.2" variant="subtle">
-                N-400
+                USCIS
               </Button>
             </Link>
             <Link href="/nvc">

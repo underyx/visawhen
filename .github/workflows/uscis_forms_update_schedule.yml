@@ -1,8 +1,8 @@
-name: Update USCIS N-400 data
+name: Update USCIS forms data
 
 on:
   schedule:
-    # USCIS publishes the quarterly N-400 report at irregular times, a few
+    # USCIS publishes its quarterly reports at irregular times, a few
     # months after the quarter ends; check once a day.
     - cron: 41 15 * * *
   workflow_dispatch:
@@ -15,8 +15,8 @@ permissions:
   contents: write
 
 jobs:
-  update-n400-data:
-    name: Update USCIS N-400 data
+  update-forms-data:
+    name: Update USCIS forms data
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -42,32 +42,32 @@ jobs:
         with:
           path: ~/.cache/pypoetry/virtualenvs
           key: ${{ runner.os }}-poetry-data-uscis-py${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('data/uscis/poetry.lock') }}
-      # The ~50 quarterly reports are re-fetched through the Wayback Machine
+      # The ~150 quarterly reports are re-fetched through the Wayback Machine
       # when uscis.gov blocks us; keep them between runs. The key includes the
       # run id so every run saves a fresh cache while restore-keys picks up the
       # newest previous one.
       - name: Restore downloaded reports
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: data/uscis/n400_reports/
-          key: ${{ runner.os }}-n400-reports-${{ github.run_id }}
+          path: data/uscis/reports/
+          key: ${{ runner.os }}-uscis-reports-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-n400-reports-
+            ${{ runner.os }}-uscis-reports-
       - name: Install dependencies
         run: poetry install
       - name: Run script
-        run: poetry run python n400.py
+        run: poetry run python forms.py
       - name: Save downloaded reports
         if: always()
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: data/uscis/n400_reports/
-          key: ${{ runner.os }}-n400-reports-${{ github.run_id }}
+          path: data/uscis/reports/
+          key: ${{ runner.os }}-uscis-reports-${{ github.run_id }}
       - name: Commit changes
         id: commit
         uses: EndBug/add-and-commit@cc9c08ba6c8df3b93a8f2db63e89b98368ae2ae8 # v11.1.1
         with:
-          message: Update USCIS N-400 data
+          message: Update USCIS forms data
           # The default (`git fetch --tags --force`) pulls the whole history of
           # the 100 MB data dumps into the shallow clone: 3-4 minutes per run.
           fetch: false
@@ -75,11 +75,11 @@ jobs:
         run: echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
   build:
-    if: needs.update-n400-data.outputs.updated == 'true'
+    if: needs.update-forms-data.outputs.updated == 'true'
     uses: underyx/visawhen/.github/workflows/build.yml@main
-    needs: [update-n400-data]
+    needs: [update-forms-data]
     with:
-      ref: ${{ needs.update-n400-data.outputs.new-commit-sha }}
+      ref: ${{ needs.update-forms-data.outputs.new-commit-sha }}
 
   deploy:
     uses: underyx/visawhen/.github/workflows/deploy.yml@main

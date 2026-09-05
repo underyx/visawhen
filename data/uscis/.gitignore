@@ -1,4 +1,4 @@
 *.sqlite
 __pycache__/
-# raw quarterly N-400 reports downloaded by n400.py; cached between workflow runs
-n400_reports/
+# raw quarterly reports downloaded by forms.py; cached between workflow runs
+reports/
