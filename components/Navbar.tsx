@@ -17,6 +17,11 @@ export default function Navbar() {
             </Group>
           </Link>
           <Group gap="xs">
+            <Link href="/uscis">
+              <Button size="compact-sm" color="gray.2" variant="subtle">
+                USCIS
+              </Button>
+            </Link>
             <Link href="/nvc">
               <Button size="compact-sm" color="gray.2" variant="subtle">
                 NVC

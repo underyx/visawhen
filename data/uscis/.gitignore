@@ -1,1 +1,4 @@
 *.sqlite
+__pycache__/
+# raw quarterly reports downloaded by forms.py; cached between workflow runs
+reports/
