@@ -102,7 +102,7 @@ export function OutcomesChart({
             type: "value",
             name: "applications",
             axisLabel: {
-              formatter: (value: number) => numeral(value).format("0a"),
+              formatter: (value: number) => numeral(value).format("0.[0]a"),
             },
           },
           dataZoom: [
