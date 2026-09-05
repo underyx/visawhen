@@ -17,6 +17,11 @@ export default function Navbar() {
             </Group>
           </Link>
           <Group gap="xs">
+            <Link href="/n400">
+              <Button size="compact-sm" color="gray.2" variant="subtle">
+                N-400
+              </Button>
+            </Link>
             <Link href="/nvc">
               <Button size="compact-sm" color="gray.2" variant="subtle">
                 NVC

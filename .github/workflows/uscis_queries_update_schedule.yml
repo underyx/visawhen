@@ -1,4 +1,4 @@
-# Schedule removed (2026-08): nothing on the site consumes data/uscis, and
+# Schedule removed (2026-08): nothing on the site consumes the processing-times data, and
 # egov.uscis.gov has blocked automated access (Cloudflare challenge) since
 # 2024, so every scheduled run failed. Kept as a manual workflow only.
 name: Update USCIS queries data

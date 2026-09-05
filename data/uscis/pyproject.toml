@@ -12,6 +12,12 @@ attrs = "^26.1.0"
 pandas = "^3.0.5"
 sqlite-diffable = "^0.6"
 arrow = "^1.4.0"
+# n400.py: quarterly reports come as XLSX, CSV or PDF
+requests = "^2.34.2"
+beautifulsoup4 = "^4.15.0"
+lxml = "^6.1.2"
+openpyxl = "^3.1.5"
+pdfplumber = "^0.11.9"
 
 
 [build-system]
