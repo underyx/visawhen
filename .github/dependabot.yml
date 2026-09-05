@@ -21,17 +21,17 @@ updates:
           - "minor"
           - "patch"
 
-  - package-ecosystem: "pip"
+  - package-ecosystem: "uv"
     directory: "/data/nvc"
     schedule:
       interval: "weekly"
 
-  - package-ecosystem: "pip"
+  - package-ecosystem: "uv"
     directory: "/data/consulates"
     schedule:
       interval: "weekly"
 
-  - package-ecosystem: "pip"
+  - package-ecosystem: "uv"
     directory: "/data/uscis"
     schedule:
       interval: "weekly"

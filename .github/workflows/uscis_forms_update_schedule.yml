@@ -25,23 +25,14 @@ jobs:
       updated: ${{ steps.commit.outputs.pushed }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Set up Python
-        id: setup-python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - name: Set up uv
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         with:
           python-version: "3.13"
-      # `poetry env use python` makes poetry build its virtualenv from the
-      # interpreter set up above; without it poetry picks the runner's system
-      # python and the setup-python step has no effect.
-      - name: Set up poetry
-        run: |
-          pipx install "poetry<2"
-          poetry env use python
-      - name: Cache poetry virtualenv
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/pypoetry/virtualenvs
-          key: ${{ runner.os }}-poetry-data-uscis-py${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('data/uscis/poetry.lock') }}
+          # The dependency cache is keyed on the lockfile and saved by the
+          # action's post step, even when a later step fails.
+          enable-cache: true
+          cache-dependency-glob: data/uscis/uv.lock
       # The ~150 quarterly reports are re-fetched through the Wayback Machine
       # when uscis.gov blocks us; keep them between runs. The key includes the
       # run id so every run saves a fresh cache while restore-keys picks up the
@@ -54,9 +45,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-uscis-reports-
       - name: Install dependencies
-        run: poetry install
+        run: uv sync --locked
       - name: Run script
-        run: poetry run python forms.py
+        run: uv run python forms.py
       - name: Save downloaded reports
         if: always()
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0

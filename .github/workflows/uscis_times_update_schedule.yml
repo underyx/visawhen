@@ -21,27 +21,18 @@ jobs:
       updated: ${{ steps.commit.outputs.pushed }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Set up Python
-        id: setup-python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - name: Set up uv
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         with:
           python-version: "3.13"
-      # `poetry env use python` makes poetry build its virtualenv from the
-      # interpreter set up above; without it poetry picks the runner's system
-      # python and the setup-python step has no effect.
-      - name: Set up poetry
-        run: |
-          pipx install "poetry<2"
-          poetry env use python
-      - name: Cache poetry virtualenv
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/pypoetry/virtualenvs
-          key: ${{ runner.os }}-poetry-data-uscis-py${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('data/uscis/poetry.lock') }}
+          # The dependency cache is keyed on the lockfile and saved by the
+          # action's post step, even when a later step fails.
+          enable-cache: true
+          cache-dependency-glob: data/uscis/uv.lock
       - name: Install dependencies
-        run: poetry install
+        run: uv sync --locked
       - name: Run script
-        run: poetry run python times.py
+        run: uv run python times.py
       - name: Commit changes
         id: commit
         uses: EndBug/add-and-commit@cc9c08ba6c8df3b93a8f2db63e89b98368ae2ae8 # v11.1.1

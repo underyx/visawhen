@@ -27,31 +27,21 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Set up Python
-        id: setup-python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - name: Set up uv
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         with:
           python-version: "3.13"
-      # `poetry env use python` makes poetry build its virtualenv from the
-      # interpreter set up above; without it poetry picks the runner's system
-      # python and the setup-python step has no effect.
-      - name: Set up poetry
-        run: |
-          pipx install "poetry<2"
-          poetry env use python
+          # The dependency cache is keyed on the lockfile and saved by the
+          # action's post step, even when a later step fails.
+          enable-cache: true
+          cache-dependency-glob: data/consulates/uv.lock
 
-      # The caches are restored and saved in separate steps (cache/restore +
-      # cache/save with `if: always()`) so that whatever was downloaded or
-      # computed before a failure is kept for the next run.
+      # The caches below are restored and saved in separate steps
+      # (cache/restore + cache/save with `if: always()`) so that whatever was
+      # downloaded or computed before a failure is kept for the next run.
       #
       # actions/cache paths are relative to the workspace, not to the job's
       # working-directory.
-      - name: Restore poetry virtualenv
-        id: cache-poetry
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/pypoetry/virtualenvs
-          key: ${{ runner.os }}-poetry-data-consulates-py${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('data/consulates/poetry.lock') }}
       # Keys include the run id so every run saves a fresh cache while
       # restore-keys picks up the newest previous one.
       - name: Restore joblib results
@@ -71,8 +61,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-consulates-pdfs-
 
+      # The dev group is installed too: the notebooks import IPython, which
+      # comes with ipykernel.
       - name: Install dependencies
-        run: poetry install
+        run: uv sync --locked
 
       # The notebooks are converted to scripts and streamed into python instead
       # of being executed with `nbconvert --execute`: output shows up in the job
@@ -82,17 +74,11 @@ jobs:
       # pipefail makes a failing conversion fail the step.
       - name: Run visa-issuances notebook
         run: |
-          poetry run jupyter nbconvert --to script --stdout visa-issuances.ipynb | poetry run python -u -
+          uv run jupyter nbconvert --to script --stdout visa-issuances.ipynb | uv run python -u -
       - name: Run baselines notebook
         run: |
-          poetry run jupyter nbconvert --to script --stdout baselines.ipynb | poetry run python -u -
+          uv run jupyter nbconvert --to script --stdout baselines.ipynb | uv run python -u -
 
-      - name: Save poetry virtualenv
-        if: always() && steps.cache-poetry.outputs.cache-hit != 'true'
-        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/pypoetry/virtualenvs
-          key: ${{ steps.cache-poetry.outputs.cache-primary-key }}
       - name: Save joblib results
         if: always()
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0

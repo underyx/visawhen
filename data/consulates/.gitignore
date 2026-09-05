@@ -6,3 +6,4 @@ pdfs/
 *.sqlite
 # committed gzipped; `yarn ensure-db` decompresses it
 dump/backlogs.ndjson
+.venv/

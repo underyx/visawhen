@@ -1,19 +1,15 @@
-[tool.poetry]
+[project]
 name = "nvc-backlog"
 version = "0.1.0"
 description = ""
-authors = ["Bence Nagy <bence@underyx.me>"]
+authors = [{ name = "Bence Nagy", email = "bence@underyx.me" }]
 license = "MIT"
-
-[tool.poetry.dependencies]
-python = "^3.11"
-arrow = "^1.4.0"
-requests = "^2.34.2"
-types-requests = "^2.33.0.20260712"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires-python = ">=3.11"
+dependencies = [
+  "arrow>=1.4.0,<2",
+  "requests>=2.34.2,<3",
+  "types-requests>=2.33.0.20260712,<3",
+]
 
 [tool.ruff]
 extend = "../../.ruff.toml"
