@@ -32,7 +32,7 @@ const RAW_RUNTIME_STATE =
           ["@mantine/hooks", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:9.5.2"],\
           ["@next/bundle-analyzer", "npm:16.3.2"],\
           ["@types/lodash", "npm:4.17.25"],\
-          ["@types/node", "npm:24.13.3"],\
+          ["@types/node", "npm:26.4.1"],\
           ["@types/numeral", "npm:2.0.5"],\
           ["@types/react", "npm:19.2.18"],\
           ["@types/react-dom", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:19.2.5"],\
@@ -1194,11 +1194,11 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@types/node", [\
-      ["npm:24.13.3", {\
-        "packageLocation": "./.yarn/cache/@types-node-npm-24.13.3-b512a0bbeb-cfa6ed1e16.zip/node_modules/@types/node/",\
+      ["npm:26.4.1", {\
+        "packageLocation": "./.yarn/cache/@types-node-npm-26.4.1-7278eb8f64-63fbe80250.zip/node_modules/@types/node/",\
         "packageDependencies": [\
-          ["@types/node", "npm:24.13.3"],\
-          ["undici-types", "npm:7.18.2"]\
+          ["@types/node", "npm:26.4.1"],\
+          ["undici-types", "npm:8.3.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -7291,10 +7291,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["undici-types", [\
-      ["npm:7.18.2", {\
-        "packageLocation": "./.yarn/cache/undici-types-npm-7.18.2-3e6d69d829-e61a5918f6.zip/node_modules/undici-types/",\
+      ["npm:8.3.0", {\
+        "packageLocation": "./.yarn/cache/undici-types-npm-8.3.0-d34470de3e-6681d2837a.zip/node_modules/undici-types/",\
         "packageDependencies": [\
-          ["undici-types", "npm:7.18.2"]\
+          ["undici-types", "npm:8.3.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -7417,7 +7417,7 @@ const RAW_RUNTIME_STATE =
           ["@mantine/hooks", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:9.5.2"],\
           ["@next/bundle-analyzer", "npm:16.3.2"],\
           ["@types/lodash", "npm:4.17.25"],\
-          ["@types/node", "npm:24.13.3"],\
+          ["@types/node", "npm:26.4.1"],\
           ["@types/numeral", "npm:2.0.5"],\
           ["@types/react", "npm:19.2.18"],\
           ["@types/react-dom", "virtual:e53cff0b86965e0c0225a4601802e5470b737af318f29591168d95686a26846f86bec03c9e1206853f0c111d6d19c19964ca55d5d33356b31c7eb0184d87f9dd#npm:19.2.5"],\
