@@ -9,6 +9,8 @@ export default defineConfig([
     ".yarn/**",
     "out/**",
     "next-env.d.ts",
+    // the data scrapers' Python environments (Jupyter ships JavaScript)
+    "data/**/.venv/**",
   ]),
   ...nextConfig,
 ]);

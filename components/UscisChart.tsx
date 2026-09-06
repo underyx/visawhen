@@ -27,12 +27,13 @@ echarts.use([
   SVGRenderer,
 ]);
 
-// Validated as a colorblind-safe categorical set: blue / red / amber for the
-// outcomes, then violet and green for further lines.
+// Validated as a colorblind-safe categorical set: blue / red / amber /
+// violet, then green for further lines.
 const APPROVED_COLOR = "#1c7ed6";
 const DENIED_COLOR = "#e03131";
 const PENDING_COLOR = "#f08c00";
-const EXTRA_COLORS = ["#e03131", "#f08c00", "#7048e8", "#0ca678"];
+const RECEIVED_COLOR = "#7048e8";
+const EXTRA_COLORS = [DENIED_COLOR, PENDING_COLOR, RECEIVED_COLOR, "#0ca678"];
 
 interface Props {
   points: QuarterPoint[];
@@ -63,9 +64,10 @@ function initialZoomStart(points: QuarterPoint[]): number {
   return Math.max(0, 100 - 100 * (24 / points.length));
 }
 
-/** Stacked bars: everything USCIS had to decide on in a quarter (the
- * applications pending when it started plus those filed during it), split by
- * what happened to it by the quarter's end. */
+/** Bars for the decisions made in each quarter (approved and denied,
+ * stacked), with lines for the applications filed during it and for the
+ * backlog as it stood at its end. The backlog is a snapshot, not "those
+ * quarters' cases still open": most of it was filed earlier. */
 export function OutcomesChart({
   points,
   source,
@@ -74,11 +76,11 @@ export function OutcomesChart({
   return (
     <Paper shadow="xs" p="md" mx={0} component="figure">
       <ReactEChartsCore
-        style={{ width: "100%", height: "420px" }}
+        style={{ width: "100%", height: "440px" }}
         echarts={echarts}
         option={{
           animation: false,
-          color: [APPROVED_COLOR, DENIED_COLOR, PENDING_COLOR],
+          color: [APPROVED_COLOR, DENIED_COLOR, PENDING_COLOR, RECEIVED_COLOR],
           legend: { top: 0 },
           tooltip: {
             trigger: "axis",
@@ -86,21 +88,21 @@ export function OutcomesChart({
               const point = points[params[0].dataIndex];
               return [
                 `<strong>${point.label}</strong>`,
-                `Received: ${formatCount(point.received)}`,
+                `Filed: ${formatCount(point.received)}`,
                 `Approved: ${formatCount(point.approved)}`,
                 `Denied: ${formatCount(point.denied)}`,
-                `Still pending at quarter end: ${formatCount(point.pending)}`,
+                `Pending at quarter end: ${formatCount(point.pending)}`,
                 `Estimated wait at that pace: ${formatMonths(
                   point.waitMonths,
                 )}`,
               ].join("<br />");
             },
           },
-          grid: { left: 64, right: 16, top: 40, bottom: 80 },
+          // room for the legend to wrap onto two lines on narrow screens
+          grid: { left: 64, right: 16, top: 72, bottom: 80 },
           xAxis: { type: "category", data: points.map((point) => point.label) },
           yAxis: {
             type: "value",
-            name: "applications",
             axisLabel: {
               formatter: (value: number) => numeral(value).format("0.[0]a"),
             },
@@ -112,23 +114,30 @@ export function OutcomesChart({
             {
               name: "Approved",
               type: "bar",
-              stack: "applications",
+              stack: "decisions",
               data: points.map((point) => point.approved),
               itemStyle: { borderColor: "#fff", borderWidth: 1 },
             },
             {
               name: "Denied",
               type: "bar",
-              stack: "applications",
+              stack: "decisions",
               data: points.map((point) => point.denied),
               itemStyle: { borderColor: "#fff", borderWidth: 1 },
             },
             {
-              name: "Still pending",
-              type: "bar",
-              stack: "applications",
+              name: "Pending at quarter end",
+              type: "line",
               data: points.map((point) => point.pending),
-              itemStyle: { borderColor: "#fff", borderWidth: 1 },
+              lineStyle: { width: 2 },
+              symbolSize: 8,
+            },
+            {
+              name: "Filed",
+              type: "line",
+              data: points.map((point) => point.received),
+              lineStyle: { width: 2, type: "dashed" },
+              symbolSize: 8,
             },
           ],
         }}
@@ -179,7 +188,7 @@ export function WaitChart({
           grid: {
             left: 64,
             right: 16,
-            top: processingTimeSeries.length > 0 ? 56 : 24,
+            top: processingTimeSeries.length > 0 ? 72 : 32,
             bottom: 80,
           },
           xAxis: { type: "category", data: points.map((point) => point.label) },

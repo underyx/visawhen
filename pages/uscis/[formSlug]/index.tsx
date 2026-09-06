@@ -183,10 +183,10 @@ export default function UscisForm({
       <Stack gap="sm">
         <Title order={2}>What happened to the applications</Title>
         <Text>
-          Each bar is everything USCIS had to decide on in a quarter: the {form}{" "}
-          applications waiting when it started plus the ones filed during it.
-          Blue was approved that quarter, red denied, and amber was still
-          waiting when it ended.
+          The bars are the {form} decisions USCIS made each quarter, approved in
+          blue and denied in red. The amber line is the backlog: how many
+          applications were still waiting at the end of that quarter, most of
+          them filed in earlier ones. The dashed line is how many came in.
         </Text>
         <OutcomesChart
           points={points}
