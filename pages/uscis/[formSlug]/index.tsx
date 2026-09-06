@@ -34,7 +34,7 @@ import {
 } from "../../../components/uscis";
 import { OutcomesChart, WaitChart } from "../../../components/UscisChart";
 import UscisStats from "../../../components/UscisStats";
-import classes from "../../../components/ListButton.module.css";
+import { ListRow, ListRows } from "../../../components/ListRow";
 
 interface OfficeSummary {
   slug: string;
@@ -272,17 +272,12 @@ export default function UscisForm({
             placeholder="San Francisco"
             onChange={setTerm}
           />
-          <Button.Group orientation="vertical">
+          <ListRows>
             {filteredOffices.map(
               ({ slug: officeSlug, name, stateCode, waitMonths }) => (
-                <Button
-                  size="lg"
-                  variant="default"
+                <ListRow
                   key={officeSlug}
-                  component={Link}
                   href={`/uscis/${slug}/${officeSlug}`}
-                  classNames={{ root: classes.root, inner: classes.inner }}
-                  justify="space-between"
                   rightSection={
                     <Badge
                       size="lg"
@@ -295,19 +290,25 @@ export default function UscisForm({
                       ~{formatMonths(waitMonths)}
                     </Badge>
                   }
-                >
-                  <Group gap="xs" wrap="nowrap">
-                    <Highlight highlight={term}>{name}</Highlight>
-                    {stateCode !== null && (
-                      <Badge size="lg" radius="sm" color="blue" variant="light">
-                        <Highlight highlight={term}>{stateCode}</Highlight>
-                      </Badge>
-                    )}
-                  </Group>
-                </Button>
+                  label={
+                    <Group gap="xs">
+                      <Highlight highlight={term}>{name}</Highlight>
+                      {stateCode !== null && (
+                        <Badge
+                          size="lg"
+                          radius="sm"
+                          color="blue"
+                          variant="light"
+                        >
+                          <Highlight highlight={term}>{stateCode}</Highlight>
+                        </Badge>
+                      )}
+                    </Group>
+                  }
+                />
               ),
             )}
-          </Button.Group>
+          </ListRows>
         </Stack>
       )}
     </Stack>

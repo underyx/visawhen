@@ -1028,7 +1028,8 @@ def sum_counts(rows: list[Counts]) -> dict[str, int | None]:
 
 
 def base_title(title: str) -> str:
-    return re.sub(r"\s*\([^()]*(?:\([^()]*\)[^()]*)*\)\s*$", "", title) or title
+    """The title without its trailing category, e.g. "(Immediate Relative)"; "Fiancé(e)" is not one."""
+    return re.sub(r"\s+\([^()]*(?:\([^()]*\)[^()]*)*\)\s*$", "", title) or title
 
 
 def build_offices(

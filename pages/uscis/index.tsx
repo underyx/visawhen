@@ -2,7 +2,6 @@ import { SearchIcon } from "../../components/icons";
 import {
   Anchor,
   Badge,
-  Button,
   Group,
   Highlight,
   Stack,
@@ -14,7 +13,6 @@ import { useInputState } from "@mantine/hooks";
 import { deburr, groupBy, sortBy } from "lodash";
 import { GetStaticProps } from "next";
 import Head from "next/head";
-import Link from "next/link";
 import React, { useMemo } from "react";
 import { getActiveForms, getData } from "../../api/uscis";
 import {
@@ -23,7 +21,7 @@ import {
   quarterLabel,
   toPoints,
 } from "../../components/uscis";
-import classes from "../../components/ListButton.module.css";
+import { ListRow, ListRows } from "../../components/ListRow";
 
 interface FormSummary {
   slug: string;
@@ -157,16 +155,11 @@ export default function UscisIndex({
       {groups.map(({ category, items }) => (
         <Stack gap="sm" key={category}>
           <Title order={2}>{category}</Title>
-          <Button.Group orientation="vertical">
+          <ListRows>
             {items.map(({ slug, form, title, waitMonths, officeCount }) => (
-              <Button
-                size="lg"
-                variant="default"
+              <ListRow
                 key={slug}
-                component={Link}
                 href={`/uscis/${slug}`}
-                classNames={{ root: classes.root, inner: classes.inner }}
-                justify="space-between"
                 rightSection={
                   <Badge
                     size="lg"
@@ -179,23 +172,22 @@ export default function UscisIndex({
                     ~{formatMonths(waitMonths)}
                   </Badge>
                 }
-              >
-                <Group gap="xs" wrap="nowrap">
-                  <Badge size="lg" radius="sm" color="blue" variant="light">
-                    <Highlight highlight={term}>{form}</Highlight>
-                  </Badge>
-                  <Highlight highlight={term} lineClamp={1}>
-                    {title}
-                  </Highlight>
-                  {officeCount > 0 && (
-                    <Badge size="sm" radius="sm" color="gray" variant="light">
-                      by office
+                label={
+                  <Group gap="xs">
+                    <Badge size="lg" radius="sm" color="blue" variant="light">
+                      <Highlight highlight={term}>{form}</Highlight>
                     </Badge>
-                  )}
-                </Group>
-              </Button>
+                    <Highlight highlight={term}>{title}</Highlight>
+                    {officeCount > 0 && (
+                      <Badge size="sm" radius="sm" color="gray" variant="light">
+                        by office
+                      </Badge>
+                    )}
+                  </Group>
+                }
+              />
             ))}
-          </Button.Group>
+          </ListRows>
         </Stack>
       ))}
     </Stack>

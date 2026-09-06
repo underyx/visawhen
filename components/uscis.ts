@@ -162,7 +162,8 @@ export interface ProcessingTimeSeries {
 /** A short name for a category of a form: the parenthetical of its row title
  * ("Immediate Relative"), or whatever the title adds to the form's own. */
 export function variantLabel(title: string, formTitle: string): string {
-  const parenthetical = /\(([^()]*)\)\s*$/.exec(title);
+  // a trailing parenthetical after a space; "Fiancé(e)" is not a category
+  const parenthetical = /\s\(([^()]*)\)\s*$/.exec(title);
   if (parenthetical !== null) return parenthetical[1];
   const rest = title
     .replace(formTitle, "")
