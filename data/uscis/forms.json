@@ -102,6 +102,22 @@
               "title": "Biographic Information (for Deferred Action)"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 150,
+          "denied": 5,
+          "pending": 18522,
+          "received": 6002,
+          "variants": [
+            {
+              "approved": 150,
+              "denied": 5,
+              "pending": 18522,
+              "processingTime": 4.2,
+              "received": 6002,
+              "title": "Biographic Information (for Deferred Action)"
+            }
+          ]
         }
       },
       "slug": "g-325a",
@@ -111,7 +127,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Biographic Information"
     },
@@ -921,6 +938,22 @@
               "title": "Application for Replacement/Initial Nonimmigrant Arrival-Departure Document"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 338,
+          "denied": 180,
+          "pending": 3845,
+          "received": 689,
+          "variants": [
+            {
+              "approved": 338,
+              "denied": 180,
+              "pending": 3845,
+              "processingTime": 8.4,
+              "received": 689,
+              "title": "Application for Replacement/Initial Nonimmigrant Arrival-Departure Document"
+            }
+          ]
         }
       },
       "slug": "i-102",
@@ -974,7 +1007,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Application for Replacement/Initial Nonimmigrant Arrival-Departure Document"
     },
@@ -1784,6 +1818,22 @@
               "title": "Petition for a Nonimmigrant Worker"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 143748,
+          "denied": 39560,
+          "pending": 192712,
+          "received": 220566,
+          "variants": [
+            {
+              "approved": 143748,
+              "denied": 39560,
+              "pending": 192712,
+              "processingTime": 9.5,
+              "received": 220566,
+              "title": "Petition for a Nonimmigrant Worker"
+            }
+          ]
         }
       },
       "slug": "i-129",
@@ -1837,7 +1887,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Petition for a Nonimmigrant Worker"
     },
@@ -2647,6 +2698,22 @@
               "title": "Petition for Alien Fianc\u00e9(e)"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 6966,
+          "denied": 2307,
+          "pending": 35871,
+          "received": 9737,
+          "variants": [
+            {
+              "approved": 6966,
+              "denied": 2307,
+              "pending": 35871,
+              "processingTime": 9.0,
+              "received": 9737,
+              "title": "Petition for Alien Fianc\u00e9(e)"
+            }
+          ]
         }
       },
       "slug": "i-129f",
@@ -2700,7 +2767,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Petition for Alien Fianc\u00e9(e)"
     },
@@ -2757,7 +2825,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/i130_performancedata_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/i130_performance_data_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/i130_performance_data_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/i130_performance_data_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/i130_performance_data_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/i130_performance_data_fy2026_q3_v1.xlsx"
       },
       "officeTotals": {
         "2013-Q4": {
@@ -3059,6 +3128,12 @@
           "denied": 27425,
           "pending": 2359470,
           "received": 164474
+        },
+        "2026-Q2": {
+          "approved": 90587,
+          "denied": 25544,
+          "pending": 2404546,
+          "received": 166322
         }
       },
       "offices": [
@@ -3365,6 +3440,12 @@
               "denied": 12,
               "pending": 833,
               "received": 229
+            },
+            "2026-Q2": {
+              "approved": 254,
+              "denied": 9,
+              "pending": 4815,
+              "received": 511
             }
           },
           "slug": "albuquerque-nm",
@@ -3773,6 +3854,12 @@
               "denied": 4,
               "pending": 333,
               "received": 82
+            },
+            "2026-Q2": {
+              "approved": 58,
+              "denied": 2,
+              "pending": 1725,
+              "received": 145
             }
           },
           "slug": "agana-gu",
@@ -4082,6 +4169,12 @@
               "denied": 37,
               "pending": 1397,
               "received": 261
+            },
+            "2026-Q2": {
+              "approved": 424,
+              "denied": 76,
+              "pending": 10863,
+              "received": 788
             }
           },
           "slug": "albany-ny",
@@ -4502,6 +4595,12 @@
               "denied": 6,
               "pending": 238,
               "received": 45
+            },
+            "2026-Q2": {
+              "approved": 71,
+              "denied": 6,
+              "pending": 2938,
+              "received": 231
             }
           },
           "slug": "anchorage-ak",
@@ -4916,6 +5015,12 @@
               "denied": 107,
               "pending": 9567,
               "received": 1313
+            },
+            "2026-Q2": {
+              "approved": 1924,
+              "denied": 241,
+              "pending": 51686,
+              "received": 3866
             }
           },
           "slug": "atlanta-ga",
@@ -5225,6 +5330,12 @@
               "denied": 40,
               "pending": 10066,
               "received": 1012
+            },
+            "2026-Q2": {
+              "approved": 1436,
+              "denied": 127,
+              "pending": 56973,
+              "received": 3454
             }
           },
           "slug": "baltimore-md",
@@ -5660,6 +5771,12 @@
               "denied": 392,
               "pending": 6515,
               "received": 1225
+            },
+            "2026-Q2": {
+              "approved": 1516,
+              "denied": 403,
+              "pending": 65726,
+              "received": 4057
             }
           },
           "slug": "brooklyn-ny",
@@ -5969,6 +6086,12 @@
               "denied": 7,
               "pending": 646,
               "received": 137
+            },
+            "2026-Q2": {
+              "approved": 145,
+              "denied": 6,
+              "pending": 3656,
+              "received": 382
             }
           },
           "slug": "boise-id",
@@ -6278,6 +6401,12 @@
               "denied": 31,
               "pending": 6670,
               "received": 1128
+            },
+            "2026-Q2": {
+              "approved": 890,
+              "denied": 64,
+              "pending": 49007,
+              "received": 3186
             }
           },
           "slug": "boston-ma",
@@ -6587,6 +6716,12 @@
               "denied": 23,
               "pending": 1449,
               "received": 241
+            },
+            "2026-Q2": {
+              "approved": 341,
+              "denied": 20,
+              "pending": 14268,
+              "received": 880
             }
           },
           "slug": "buffalo-ny",
@@ -6995,6 +7130,12 @@
               "denied": 17,
               "pending": 91,
               "received": 4
+            },
+            "2026-Q2": {
+              "approved": 31,
+              "denied": 8,
+              "pending": 982,
+              "received": 72
             }
           },
           "slug": "charlotte-amalie-vi",
@@ -7304,6 +7445,12 @@
               "denied": 157,
               "pending": 9076,
               "received": 2069
+            },
+            "2026-Q2": {
+              "approved": 1802,
+              "denied": 266,
+              "pending": 68801,
+              "received": 4933
             }
           },
           "slug": "chicago-il",
@@ -7613,6 +7760,12 @@
               "denied": 32,
               "pending": 2401,
               "received": 307
+            },
+            "2026-Q2": {
+              "approved": 583,
+              "denied": 58,
+              "pending": 9510,
+              "received": 866
             }
           },
           "slug": "charleston-sc",
@@ -7916,6 +8069,12 @@
               "denied": 0,
               "pending": 16,
               "received": 7
+            },
+            "2026-Q2": {
+              "approved": 0,
+              "denied": 0,
+              "pending": 423,
+              "received": 23
             }
           },
           "slug": "christiansted-vi",
@@ -8095,6 +8254,12 @@
               "received": 0
             },
             "2026-Q1": {
+              "approved": 0,
+              "denied": 0,
+              "pending": 0,
+              "received": 0
+            },
+            "2026-Q2": {
               "approved": 0,
               "denied": 0,
               "pending": 0,
@@ -8408,6 +8573,12 @@
               "denied": 33,
               "pending": 1166,
               "received": 184
+            },
+            "2026-Q2": {
+              "approved": 237,
+              "denied": 45,
+              "pending": 8483,
+              "received": 695
             }
           },
           "slug": "cincinnati-oh",
@@ -8717,6 +8888,12 @@
               "denied": 20,
               "pending": 1552,
               "received": 280
+            },
+            "2026-Q2": {
+              "approved": 271,
+              "denied": 39,
+              "pending": 9541,
+              "received": 741
             }
           },
           "slug": "cleveland-oh",
@@ -9026,6 +9203,12 @@
               "denied": 35,
               "pending": 1751,
               "received": 312
+            },
+            "2026-Q2": {
+              "approved": 212,
+              "denied": 45,
+              "pending": 12507,
+              "received": 967
             }
           },
           "slug": "columbus-oh",
@@ -9335,6 +9518,12 @@
               "denied": 46,
               "pending": 4507,
               "received": 621
+            },
+            "2026-Q2": {
+              "approved": 727,
+              "denied": 81,
+              "pending": 24286,
+              "received": 1873
             }
           },
           "slug": "charlotte-nc",
@@ -9610,6 +9799,12 @@
               "received": 0
             },
             "2026-Q1": {
+              "approved": 0,
+              "denied": 0,
+              "pending": 0,
+              "received": 0
+            },
+            "2026-Q2": {
               "approved": 0,
               "denied": 0,
               "pending": 0,
@@ -9923,6 +10118,12 @@
               "denied": 100,
               "pending": 9107,
               "received": 2288
+            },
+            "2026-Q2": {
+              "approved": 1708,
+              "denied": 126,
+              "pending": 82800,
+              "received": 6591
             }
           },
           "slug": "dallas-tx",
@@ -10232,6 +10433,12 @@
               "denied": 55,
               "pending": 5011,
               "received": 938
+            },
+            "2026-Q2": {
+              "approved": 554,
+              "denied": 55,
+              "pending": 26584,
+              "received": 2360
             }
           },
           "slug": "denver-co",
@@ -10541,6 +10748,12 @@
               "denied": 50,
               "pending": 2981,
               "received": 558
+            },
+            "2026-Q2": {
+              "approved": 570,
+              "denied": 68,
+              "pending": 42380,
+              "received": 2291
             }
           },
           "slug": "detroit-mi",
@@ -10850,6 +11063,12 @@
               "denied": 9,
               "pending": 1057,
               "received": 159
+            },
+            "2026-Q2": {
+              "approved": 319,
+              "denied": 26,
+              "pending": 8007,
+              "received": 593
             }
           },
           "slug": "des-moines-ia",
@@ -11119,6 +11338,12 @@
               "received": 0
             },
             "2026-Q1": {
+              "approved": 0,
+              "denied": 0,
+              "pending": 0,
+              "received": 0
+            },
+            "2026-Q2": {
               "approved": 0,
               "denied": 0,
               "pending": 0,
@@ -11432,6 +11657,12 @@
               "denied": 42,
               "pending": 2719,
               "received": 702
+            },
+            "2026-Q2": {
+              "approved": 948,
+              "denied": 60,
+              "pending": 15503,
+              "received": 2026
             }
           },
           "slug": "el-paso-tx",
@@ -11705,6 +11936,12 @@
               "denied": 3277,
               "pending": 465141,
               "received": 22980
+            },
+            "2026-Q2": {
+              "approved": 4699,
+              "denied": 2000,
+              "pending": 17151,
+              "received": 1278
             }
           },
           "slug": "vermont-service-center",
@@ -12125,6 +12362,12 @@
               "denied": 29,
               "pending": 2626,
               "received": 492
+            },
+            "2026-Q2": {
+              "approved": 661,
+              "denied": 37,
+              "pending": 25193,
+              "received": 1878
             }
           },
           "slug": "fresno-ca",
@@ -12434,6 +12677,12 @@
               "denied": 14,
               "pending": 798,
               "received": 125
+            },
+            "2026-Q2": {
+              "approved": 270,
+              "denied": 13,
+              "pending": 4451,
+              "received": 361
             }
           },
           "slug": "fort-smith-ar",
@@ -12671,6 +12920,12 @@
               "denied": 15,
               "pending": 1269,
               "received": 148
+            },
+            "2026-Q2": {
+              "approved": 319,
+              "denied": 20,
+              "pending": 5947,
+              "received": 560
             }
           },
           "slug": "greer-sc",
@@ -13202,6 +13457,12 @@
               "denied": 76,
               "pending": 4106,
               "received": 580
+            },
+            "2026-Q2": {
+              "approved": 852,
+              "denied": 164,
+              "pending": 26818,
+              "received": 1871
             }
           },
           "slug": "hartford-ct",
@@ -13622,6 +13883,12 @@
               "denied": 1,
               "pending": 149,
               "received": 50
+            },
+            "2026-Q2": {
+              "approved": 35,
+              "denied": 1,
+              "pending": 958,
+              "received": 117
             }
           },
           "slug": "helena-mt",
@@ -13931,6 +14198,12 @@
               "denied": 10,
               "pending": 707,
               "received": 145
+            },
+            "2026-Q2": {
+              "approved": 108,
+              "denied": 8,
+              "pending": 10056,
+              "received": 701
             }
           },
           "slug": "honolulu-hi",
@@ -14240,6 +14513,12 @@
               "denied": 92,
               "pending": 2402,
               "received": 346
+            },
+            "2026-Q2": {
+              "approved": 878,
+              "denied": 83,
+              "pending": 31355,
+              "received": 1438
             }
           },
           "slug": "hialeah-fl",
@@ -14549,6 +14828,12 @@
               "denied": 28,
               "pending": 2315,
               "received": 593
+            },
+            "2026-Q2": {
+              "approved": 717,
+              "denied": 14,
+              "pending": 10157,
+              "received": 1356
             }
           },
           "slug": "harlingen-tx",
@@ -14858,6 +15143,12 @@
               "denied": 176,
               "pending": 13157,
               "received": 2140
+            },
+            "2026-Q2": {
+              "approved": 2124,
+              "denied": 327,
+              "pending": 91830,
+              "received": 6485
             }
           },
           "slug": "houston-tx",
@@ -15167,6 +15458,12 @@
               "denied": 9,
               "pending": 483,
               "received": 124
+            },
+            "2026-Q2": {
+              "approved": 51,
+              "denied": 1,
+              "pending": 5931,
+              "received": 638
             }
           },
           "slug": "imperial-ca",
@@ -15476,6 +15773,12 @@
               "denied": 42,
               "pending": 2661,
               "received": 450
+            },
+            "2026-Q2": {
+              "approved": 135,
+              "denied": 55,
+              "pending": 18191,
+              "received": 1462
             }
           },
           "slug": "indianapolis-in",
@@ -15785,6 +16088,12 @@
               "denied": 45,
               "pending": 3383,
               "received": 302
+            },
+            "2026-Q2": {
+              "approved": 725,
+              "denied": 64,
+              "pending": 16206,
+              "received": 1183
             }
           },
           "slug": "jacksonville-fl",
@@ -16205,6 +16514,12 @@
               "denied": 20,
               "pending": 2026,
               "received": 325
+            },
+            "2026-Q2": {
+              "approved": 212,
+              "denied": 41,
+              "pending": 12934,
+              "received": 1019
             }
           },
           "slug": "kansas-city-mo",
@@ -16514,6 +16829,12 @@
               "denied": 75,
               "pending": 2345,
               "received": 306
+            },
+            "2026-Q2": {
+              "approved": 718,
+              "denied": 86,
+              "pending": 31373,
+              "received": 1326
             }
           },
           "slug": "kendall-fl",
@@ -16823,6 +17144,12 @@
               "denied": 100,
               "pending": 3183,
               "received": 831
+            },
+            "2026-Q2": {
+              "approved": 1029,
+              "denied": 94,
+              "pending": 40208,
+              "received": 2724
             }
           },
           "slug": "los-angeles-county-ca",
@@ -17132,6 +17459,12 @@
               "denied": 69,
               "pending": 3687,
               "received": 487
+            },
+            "2026-Q2": {
+              "approved": 603,
+              "denied": 89,
+              "pending": 27759,
+              "received": 1809
             }
           },
           "slug": "lawrence-ma",
@@ -17663,6 +17996,12 @@
               "denied": 113,
               "pending": 3896,
               "received": 813
+            },
+            "2026-Q2": {
+              "approved": 676,
+              "denied": 109,
+              "pending": 40356,
+              "received": 2573
             }
           },
           "slug": "long-island-ny",
@@ -17972,6 +18311,12 @@
               "denied": 89,
               "pending": 4444,
               "received": 1058
+            },
+            "2026-Q2": {
+              "approved": 1314,
+              "denied": 140,
+              "pending": 38065,
+              "received": 2653
             }
           },
           "slug": "los-angeles-ca",
@@ -18281,6 +18626,12 @@
               "denied": 19,
               "pending": 1036,
               "received": 191
+            },
+            "2026-Q2": {
+              "approved": 291,
+              "denied": 48,
+              "pending": 11945,
+              "received": 785
             }
           },
           "slug": "louisville-ky",
@@ -18590,6 +18941,12 @@
               "denied": 41,
               "pending": 3132,
               "received": 461
+            },
+            "2026-Q2": {
+              "approved": 310,
+              "denied": 36,
+              "pending": 19986,
+              "received": 1439
             }
           },
           "slug": "las-vegas-nv",
@@ -18899,6 +19256,12 @@
               "denied": 7,
               "pending": 586,
               "received": 100
+            },
+            "2026-Q2": {
+              "approved": 218,
+              "denied": 15,
+              "pending": 4073,
+              "received": 335
             }
           },
           "slug": "manchester-nh",
@@ -19208,6 +19571,12 @@
               "denied": 16,
               "pending": 1574,
               "received": 198
+            },
+            "2026-Q2": {
+              "approved": 410,
+              "denied": 33,
+              "pending": 9387,
+              "received": 725
             }
           },
           "slug": "memphis-tn",
@@ -19532,6 +19901,12 @@
               "denied": 39,
               "pending": 3458,
               "received": 443
+            },
+            "2026-Q2": {
+              "approved": 737,
+              "denied": 62,
+              "pending": 16564,
+              "received": 1391
             }
           },
           "slug": "montgomery-al",
@@ -19841,6 +20216,12 @@
               "denied": 139,
               "pending": 3924,
               "received": 760
+            },
+            "2026-Q2": {
+              "approved": 636,
+              "denied": 178,
+              "pending": 29556,
+              "received": 2000
             }
           },
           "slug": "miami-fl",
@@ -20150,6 +20531,12 @@
               "denied": 40,
               "pending": 1948,
               "received": 353
+            },
+            "2026-Q2": {
+              "approved": 190,
+              "denied": 20,
+              "pending": 11671,
+              "received": 946
             }
           },
           "slug": "milwaukee-wi",
@@ -20675,6 +21062,12 @@
               "denied": 67,
               "pending": 3397,
               "received": 514
+            },
+            "2026-Q2": {
+              "approved": 486,
+              "denied": 78,
+              "pending": 23475,
+              "received": 1645
             }
           },
           "slug": "mount-laurel-nj",
@@ -20825,6 +21218,12 @@
               "denied": 1715,
               "pending": 12651,
               "received": 619
+            },
+            "2026-Q2": {
+              "approved": 890,
+              "denied": 1916,
+              "pending": 12795,
+              "received": 698
             }
           },
           "slug": "national-benefits-center-mo",
@@ -21356,6 +21755,12 @@
               "denied": 245,
               "pending": 9631,
               "received": 1457
+            },
+            "2026-Q2": {
+              "approved": 1854,
+              "denied": 442,
+              "pending": 68451,
+              "received": 4957
             }
           },
           "slug": "newark-nj",
@@ -21437,6 +21842,12 @@
               "denied": 114,
               "pending": 3123,
               "received": 659
+            },
+            "2026-Q2": {
+              "approved": 858,
+              "denied": 124,
+              "pending": 30934,
+              "received": 2074
             }
           },
           "slug": "new-jersey-central-nj",
@@ -21746,6 +22157,12 @@
               "denied": 50,
               "pending": 2469,
               "received": 224
+            },
+            "2026-Q2": {
+              "approved": 339,
+              "denied": 29,
+              "pending": 14775,
+              "received": 984
             }
           },
           "slug": "new-orleans-la",
@@ -22055,6 +22472,12 @@
               "denied": 34,
               "pending": 2354,
               "received": 263
+            },
+            "2026-Q2": {
+              "approved": 772,
+              "denied": 69,
+              "pending": 13315,
+              "received": 1090
             }
           },
           "slug": "norfolk-va",
@@ -22328,6 +22751,12 @@
               "denied": 3051,
               "pending": 379739,
               "received": 22931
+            },
+            "2026-Q2": {
+              "approved": 7391,
+              "denied": 3557,
+              "pending": 20388,
+              "received": 1256
             }
           },
           "slug": "nebraska-service-center",
@@ -22529,6 +22958,12 @@
               "denied": 43,
               "pending": 2154,
               "received": 387
+            },
+            "2026-Q2": {
+              "approved": 881,
+              "denied": 47,
+              "pending": 15170,
+              "received": 1294
             }
           },
           "slug": "nashville-tn",
@@ -22838,6 +23273,12 @@
               "denied": 394,
               "pending": 6641,
               "received": 1430
+            },
+            "2026-Q2": {
+              "approved": 2286,
+              "denied": 511,
+              "pending": 78815,
+              "received": 5405
             }
           },
           "slug": "new-york-ny",
@@ -23081,6 +23522,12 @@
               "denied": 24,
               "pending": 2404,
               "received": 287
+            },
+            "2026-Q2": {
+              "approved": 670,
+              "denied": 42,
+              "pending": 18578,
+              "received": 1147
             }
           },
           "slug": "fort-myers-fl",
@@ -23390,6 +23837,12 @@
               "denied": 13,
               "pending": 2582,
               "received": 509
+            },
+            "2026-Q2": {
+              "approved": 77,
+              "denied": 12,
+              "pending": 16219,
+              "received": 1342
             }
           },
           "slug": "oklahoma-city-ok",
@@ -23699,6 +24152,12 @@
               "denied": 172,
               "pending": 5130,
               "received": 815
+            },
+            "2026-Q2": {
+              "approved": 766,
+              "denied": 193,
+              "pending": 32521,
+              "received": 2179
             }
           },
           "slug": "oakland-park-fl",
@@ -24008,6 +24467,12 @@
               "denied": 11,
               "pending": 1197,
               "received": 187
+            },
+            "2026-Q2": {
+              "approved": 279,
+              "denied": 28,
+              "pending": 11221,
+              "received": 829
             }
           },
           "slug": "omaha-ne",
@@ -24317,6 +24782,12 @@
               "denied": 204,
               "pending": 7410,
               "received": 935
+            },
+            "2026-Q2": {
+              "approved": 1907,
+              "denied": 215,
+              "pending": 41193,
+              "received": 2954
             }
           },
           "slug": "orlando-fl",
@@ -24737,6 +25208,12 @@
               "denied": 252,
               "pending": 7025,
               "received": 1161
+            },
+            "2026-Q2": {
+              "approved": 1157,
+              "denied": 305,
+              "pending": 64886,
+              "received": 4881
             }
           },
           "slug": "philadelphia-pa",
@@ -25040,6 +25517,12 @@
               "denied": 92,
               "pending": 3578,
               "received": 1091
+            },
+            "2026-Q2": {
+              "approved": 1160,
+              "denied": 66,
+              "pending": 27440,
+              "received": 2847
             }
           },
           "slug": "phoenix-az",
@@ -25349,6 +25832,12 @@
               "denied": 15,
               "pending": 1140,
               "received": 195
+            },
+            "2026-Q2": {
+              "approved": 105,
+              "denied": 19,
+              "pending": 6519,
+              "received": 528
             }
           },
           "slug": "pittsburgh-pa",
@@ -25658,6 +26147,12 @@
               "denied": 11,
               "pending": 369,
               "received": 46
+            },
+            "2026-Q2": {
+              "approved": 82,
+              "denied": 6,
+              "pending": 2214,
+              "received": 208
             }
           },
           "slug": "portland-me",
@@ -25967,6 +26462,12 @@
               "denied": 22,
               "pending": 1915,
               "received": 508
+            },
+            "2026-Q2": {
+              "approved": 280,
+              "denied": 39,
+              "pending": 16345,
+              "received": 1213
             }
           },
           "slug": "portland-or",
@@ -26276,6 +26777,12 @@
               "denied": 66,
               "pending": 1226,
               "received": 166
+            },
+            "2026-Q2": {
+              "approved": 400,
+              "denied": 77,
+              "pending": 9878,
+              "received": 749
             }
           },
           "slug": "providence-ri",
@@ -26585,6 +27092,12 @@
               "denied": 279,
               "pending": 6981,
               "received": 1195
+            },
+            "2026-Q2": {
+              "approved": 1483,
+              "denied": 274,
+              "pending": 81615,
+              "received": 4372
             }
           },
           "slug": "queens-ny",
@@ -26894,6 +27407,12 @@
               "denied": 15,
               "pending": 4427,
               "received": 539
+            },
+            "2026-Q2": {
+              "approved": 443,
+              "denied": 30,
+              "pending": 21009,
+              "received": 1627
             }
           },
           "slug": "raleigh-nc",
@@ -27197,6 +27716,12 @@
               "denied": 7,
               "pending": 585,
               "received": 106
+            },
+            "2026-Q2": {
+              "approved": 92,
+              "denied": 19,
+              "pending": 3864,
+              "received": 344
             }
           },
           "slug": "reno-nv",
@@ -27617,6 +28142,12 @@
               "denied": 44,
               "pending": 3368,
               "received": 690
+            },
+            "2026-Q2": {
+              "approved": 250,
+              "denied": 43,
+              "pending": 39687,
+              "received": 2115
             }
           },
           "slug": "santa-ana-ca",
@@ -27926,6 +28457,12 @@
               "denied": 63,
               "pending": 2765,
               "received": 560
+            },
+            "2026-Q2": {
+              "approved": 451,
+              "denied": 69,
+              "pending": 37140,
+              "received": 2194
             }
           },
           "slug": "sacramento-ca",
@@ -28229,6 +28766,12 @@
               "denied": 45,
               "pending": 738,
               "received": 98
+            },
+            "2026-Q2": {
+              "approved": 112,
+              "denied": 27,
+              "pending": 7115,
+              "received": 529
             }
           },
           "slug": "san-juan-pr",
@@ -28538,6 +29081,12 @@
               "denied": 91,
               "pending": 3037,
               "received": 859
+            },
+            "2026-Q2": {
+              "approved": 487,
+              "denied": 64,
+              "pending": 34007,
+              "received": 2597
             }
           },
           "slug": "san-bernardino-ca",
@@ -28958,6 +29507,12 @@
               "denied": 85,
               "pending": 5058,
               "received": 881
+            },
+            "2026-Q2": {
+              "approved": 635,
+              "denied": 61,
+              "pending": 39604,
+              "received": 2754
             }
           },
           "slug": "seattle-wa",
@@ -29378,6 +29933,12 @@
               "denied": 42,
               "pending": 4458,
               "received": 934
+            },
+            "2026-Q2": {
+              "approved": 633,
+              "denied": 51,
+              "pending": 45459,
+              "received": 2583
             }
           },
           "slug": "san-francisco-ca",
@@ -29687,6 +30248,12 @@
               "denied": 52,
               "pending": 2943,
               "received": 689
+            },
+            "2026-Q2": {
+              "approved": 850,
+              "denied": 75,
+              "pending": 30262,
+              "received": 1942
             }
           },
           "slug": "san-fernando-valley-ca",
@@ -29996,6 +30563,12 @@
               "denied": 17,
               "pending": 3075,
               "received": 626
+            },
+            "2026-Q2": {
+              "approved": 533,
+              "denied": 36,
+              "pending": 14541,
+              "received": 1483
             }
           },
           "slug": "salt-lake-city-ut",
@@ -30305,6 +30878,12 @@
               "denied": 143,
               "pending": 5820,
               "received": 1498
+            },
+            "2026-Q2": {
+              "approved": 1630,
+              "denied": 125,
+              "pending": 41017,
+              "received": 3993
             }
           },
           "slug": "san-antonio-tx",
@@ -30614,6 +31193,12 @@
               "denied": 59,
               "pending": 2529,
               "received": 727
+            },
+            "2026-Q2": {
+              "approved": 725,
+              "denied": 95,
+              "pending": 27248,
+              "received": 2510
             }
           },
           "slug": "san-diego-ca",
@@ -30923,6 +31508,12 @@
               "denied": 46,
               "pending": 3164,
               "received": 824
+            },
+            "2026-Q2": {
+              "approved": 402,
+              "denied": 35,
+              "pending": 47444,
+              "received": 2611
             }
           },
           "slug": "san-jose-ca",
@@ -31343,6 +31934,12 @@
               "denied": 109,
               "pending": 3522,
               "received": 591
+            },
+            "2026-Q2": {
+              "approved": 683,
+              "denied": 118,
+              "pending": 28702,
+              "received": 2101
             }
           },
           "slug": "st-paul-mn",
@@ -31652,6 +32249,12 @@
               "denied": 7,
               "pending": 284,
               "received": 60
+            },
+            "2026-Q2": {
+              "approved": 43,
+              "denied": 7,
+              "pending": 1972,
+              "received": 175
             }
           },
           "slug": "spokane-wa",
@@ -31919,6 +32522,12 @@
               "denied": 4338,
               "pending": 392496,
               "received": 22500
+            },
+            "2026-Q2": {
+              "approved": 8180,
+              "denied": 3727,
+              "pending": 20126,
+              "received": 1253
             }
           },
           "slug": "texas-service-center",
@@ -32228,6 +32837,12 @@
               "denied": 3,
               "pending": 396,
               "received": 42
+            },
+            "2026-Q2": {
+              "approved": 193,
+              "denied": 7,
+              "pending": 1289,
+              "received": 138
             }
           },
           "slug": "st-albans-vt",
@@ -32537,6 +33152,12 @@
               "denied": 19,
               "pending": 1665,
               "received": 229
+            },
+            "2026-Q2": {
+              "approved": 207,
+              "denied": 14,
+              "pending": 10716,
+              "received": 780
             }
           },
           "slug": "st-louis-mo",
@@ -32774,6 +33395,12 @@
               "denied": 78,
               "pending": 7009,
               "received": 784
+            },
+            "2026-Q2": {
+              "approved": 1304,
+              "denied": 118,
+              "pending": 43408,
+              "received": 2805
             }
           },
           "slug": "tampa-fl",
@@ -33083,6 +33710,12 @@
               "denied": 13,
               "pending": 841,
               "received": 266
+            },
+            "2026-Q2": {
+              "approved": 639,
+              "denied": 13,
+              "pending": 5234,
+              "received": 699
             }
           },
           "slug": "tucson-az",
@@ -33392,6 +34025,12 @@
               "denied": 42,
               "pending": 6308,
               "received": 898
+            },
+            "2026-Q2": {
+              "approved": 1832,
+              "denied": 63,
+              "pending": 46098,
+              "received": 2894
             }
           },
           "slug": "washington-dc",
@@ -33701,6 +34340,12 @@
               "denied": 5,
               "pending": 708,
               "received": 130
+            },
+            "2026-Q2": {
+              "approved": 175,
+              "denied": 15,
+              "pending": 4528,
+              "received": 377
             }
           },
           "slug": "wichita-ks",
@@ -34010,6 +34655,12 @@
               "denied": 51,
               "pending": 5318,
               "received": 592
+            },
+            "2026-Q2": {
+              "approved": 893,
+              "denied": 76,
+              "pending": 31183,
+              "received": 1801
             }
           },
           "slug": "west-palm-beach-fl",
@@ -34283,6 +34934,12 @@
               "denied": 6631,
               "pending": 449714,
               "received": 22053
+            },
+            "2026-Q2": {
+              "approved": 7476,
+              "denied": 5494,
+              "pending": 70141,
+              "received": 1213
             }
           },
           "slug": "california",
@@ -34592,6 +35249,12 @@
               "denied": 11,
               "pending": 467,
               "received": 122
+            },
+            "2026-Q2": {
+              "approved": 122,
+              "denied": 5,
+              "pending": 3616,
+              "received": 309
             }
           },
           "slug": "yakima-wa",
@@ -34847,6 +35510,12 @@
               "denied": 2699,
               "pending": 372074,
               "received": 22694
+            },
+            "2026-Q2": {
+              "approved": 3535,
+              "denied": 1539,
+              "pending": 12804,
+              "received": 1259
             }
           },
           "slug": "potomac-service-center",
@@ -35702,6 +36371,30 @@
               "title": "Petition for Alien Relative (All Other Relative)"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 90587,
+          "denied": 25544,
+          "pending": 2404546,
+          "received": 166322,
+          "variants": [
+            {
+              "approved": 82636,
+              "denied": 16661,
+              "pending": 786723,
+              "processingTime": 13.0,
+              "received": 126417,
+              "title": "Petition for Alien Relative (Immediate Relative)"
+            },
+            {
+              "approved": 7951,
+              "denied": 8883,
+              "pending": 1617823,
+              "processingTime": 43.3,
+              "received": 39905,
+              "title": "Petition for Alien Relative (All Other Relative)"
+            }
+          ]
         }
       },
       "slug": "i-130",
@@ -35755,7 +36448,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Petition for Alien Relative"
     },
@@ -37309,6 +38003,46 @@
               "title": "Application for Initial Parole Document for Aliens Outside the United States"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 58289,
+          "denied": 20459,
+          "pending": 607674,
+          "received": 141527,
+          "variants": [
+            {
+              "approved": 13551,
+              "denied": 1255,
+              "pending": 120768,
+              "processingTime": 14.4,
+              "received": 21904,
+              "title": "Application for Travel Documents, Parole Documents, and Arrival/Departure Records"
+            },
+            {
+              "approved": 43791,
+              "denied": 18200,
+              "pending": 425511,
+              "processingTime": 5.8,
+              "received": 113627,
+              "title": "Application for Advance Parole Document for Aliens Inside the United States"
+            },
+            {
+              "approved": 845,
+              "denied": 535,
+              "pending": 29022,
+              "processingTime": 14.6,
+              "received": 5352,
+              "title": "Application for Travel Document, Parole Documents, and Arrival/Departure Records (Parole in Place)"
+            },
+            {
+              "approved": 102,
+              "denied": 469,
+              "pending": 32373,
+              "processingTime": null,
+              "received": 644,
+              "title": "Application for Initial Parole Document for Aliens Outside the United States"
+            }
+          ]
         }
       },
       "slug": "i-131",
@@ -37362,7 +38096,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Application for Advance Parole Document for Aliens Inside the United States"
     },
@@ -38172,6 +38907,22 @@
               "title": "Immigrant Petition for Alien Workers"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 37975,
+          "denied": 7069,
+          "pending": 203204,
+          "received": 62932,
+          "variants": [
+            {
+              "approved": 37975,
+              "denied": 7069,
+              "pending": 203204,
+              "processingTime": 3.9,
+              "received": 62932,
+              "title": "Immigrant Petition for Alien Workers"
+            }
+          ]
         }
       },
       "slug": "i-140",
@@ -38225,7 +38976,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Immigrant Petition for Alien Workers"
     },
@@ -39412,6 +40164,22 @@
               "title": "Notice of Appeal or Motion"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 2967,
+          "denied": 4922,
+          "pending": 28258,
+          "received": 10144,
+          "variants": [
+            {
+              "approved": 2967,
+              "denied": 4922,
+              "pending": 28258,
+              "processingTime": 2.9,
+              "received": 10144,
+              "title": "Notice of Appeal or Motion"
+            }
+          ]
         }
       },
       "slug": "i-290b",
@@ -39441,7 +40209,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Notice of Appeal or Motion"
     },
@@ -40251,6 +41020,22 @@
               "title": "Petition for Amerasian, Widow(er), or Special Immigrant"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 14604,
+          "denied": 1827,
+          "pending": 311184,
+          "received": 30129,
+          "variants": [
+            {
+              "approved": 14604,
+              "denied": 1827,
+              "pending": 311184,
+              "processingTime": 6.4,
+              "received": 30129,
+              "title": "Petition for Amerasian, Widow(er), or Special Immigrant"
+            }
+          ]
         }
       },
       "slug": "i-360",
@@ -40304,7 +41089,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Petition for Amerasian, Widow(er), or Special Immigrant"
     },
@@ -40361,7 +41147,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/i485_performancedata_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/i485_performance_data_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/i485_performance_data_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/i485_performance_data_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/i485_performance_data_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/i485_performance_data_fy2026_q3_v1.xlsx"
       },
       "officeTotals": {
         "2013-Q4": {
@@ -40663,6 +41450,12 @@
           "denied": 15443,
           "pending": 1437210,
           "received": 237191
+        },
+        "2026-Q2": {
+          "approved": 101568,
+          "denied": 16798,
+          "pending": 1560290,
+          "received": 242989
         }
       },
       "offices": [
@@ -40969,6 +41762,12 @@
               "denied": 41,
               "pending": 2856,
               "received": 593
+            },
+            "2026-Q2": {
+              "approved": 251,
+              "denied": 18,
+              "pending": 3207,
+              "received": 644
             }
           },
           "slug": "albuquerque-nm",
@@ -41272,6 +42071,12 @@
               "denied": 13,
               "pending": 1472,
               "received": 153
+            },
+            "2026-Q2": {
+              "approved": 430,
+              "denied": 5,
+              "pending": 1237,
+              "received": 187
             }
           },
           "slug": "agana-gu",
@@ -41581,6 +42386,12 @@
               "denied": 38,
               "pending": 4208,
               "received": 804
+            },
+            "2026-Q2": {
+              "approved": 457,
+              "denied": 38,
+              "pending": 4583,
+              "received": 1034
             }
           },
           "slug": "albany-ny",
@@ -41890,6 +42701,12 @@
               "denied": 7,
               "pending": 1249,
               "received": 160
+            },
+            "2026-Q2": {
+              "approved": 174,
+              "denied": 12,
+              "pending": 1353,
+              "received": 217
             }
           },
           "slug": "anchorage-ak",
@@ -42199,6 +43016,12 @@
               "denied": 153,
               "pending": 23153,
               "received": 4560
+            },
+            "2026-Q2": {
+              "approved": 2572,
+              "denied": 333,
+              "pending": 25169,
+              "received": 6309
             }
           },
           "slug": "atlanta-ga",
@@ -42508,6 +43331,12 @@
               "denied": 50,
               "pending": 24446,
               "received": 4149
+            },
+            "2026-Q2": {
+              "approved": 1651,
+              "denied": 239,
+              "pending": 29254,
+              "received": 6880
             }
           },
           "slug": "baltimore-md",
@@ -42721,6 +43550,12 @@
               "denied": 420,
               "pending": 15072,
               "received": 2889
+            },
+            "2026-Q2": {
+              "approved": 2321,
+              "denied": 409,
+              "pending": 17028,
+              "received": 3631
             }
           },
           "slug": "brooklyn-ny",
@@ -43030,6 +43865,12 @@
               "denied": 23,
               "pending": 3655,
               "received": 562
+            },
+            "2026-Q2": {
+              "approved": 324,
+              "denied": 21,
+              "pending": 3843,
+              "received": 539
             }
           },
           "slug": "boise-id",
@@ -43339,6 +44180,12 @@
               "denied": 59,
               "pending": 15345,
               "received": 3509
+            },
+            "2026-Q2": {
+              "approved": 1453,
+              "denied": 101,
+              "pending": 18594,
+              "received": 5486
             }
           },
           "slug": "boston-ma",
@@ -43648,6 +44495,12 @@
               "denied": 24,
               "pending": 12978,
               "received": 2610
+            },
+            "2026-Q2": {
+              "approved": 713,
+              "denied": 28,
+              "pending": 15044,
+              "received": 2587
             }
           },
           "slug": "buffalo-ny",
@@ -43957,6 +44810,12 @@
               "denied": 18,
               "pending": 110,
               "received": 14
+            },
+            "2026-Q2": {
+              "approved": 32,
+              "denied": 4,
+              "pending": 153,
+              "received": 16
             }
           },
           "slug": "charlotte-amalie-vi",
@@ -44266,6 +45125,12 @@
               "denied": 321,
               "pending": 25265,
               "received": 5527
+            },
+            "2026-Q2": {
+              "approved": 2511,
+              "denied": 409,
+              "pending": 27863,
+              "received": 6253
             }
           },
           "slug": "chicago-il",
@@ -44575,6 +45440,12 @@
               "denied": 24,
               "pending": 5472,
               "received": 985
+            },
+            "2026-Q2": {
+              "approved": 676,
+              "denied": 81,
+              "pending": 5974,
+              "received": 1502
             }
           },
           "slug": "charleston-sc",
@@ -44884,6 +45755,12 @@
               "denied": 0,
               "pending": 22,
               "received": 10
+            },
+            "2026-Q2": {
+              "approved": 0,
+              "denied": 0,
+              "pending": 23,
+              "received": 8
             }
           },
           "slug": "christiansted-vi",
@@ -45093,6 +45970,12 @@
               "received": 0
             },
             "2026-Q1": {
+              "approved": 0,
+              "denied": 0,
+              "pending": 0,
+              "received": 0
+            },
+            "2026-Q2": {
               "approved": 0,
               "denied": 0,
               "pending": 0,
@@ -45406,6 +46289,12 @@
               "denied": 57,
               "pending": 5799,
               "received": 860
+            },
+            "2026-Q2": {
+              "approved": 558,
+              "denied": 46,
+              "pending": 6968,
+              "received": 1172
             }
           },
           "slug": "cincinnati-oh",
@@ -45715,6 +46604,12 @@
               "denied": 35,
               "pending": 7491,
               "received": 1338
+            },
+            "2026-Q2": {
+              "approved": 476,
+              "denied": 43,
+              "pending": 8741,
+              "received": 1692
             }
           },
           "slug": "cleveland-oh",
@@ -46024,6 +46919,12 @@
               "denied": 59,
               "pending": 6969,
               "received": 1100
+            },
+            "2026-Q2": {
+              "approved": 464,
+              "denied": 70,
+              "pending": 7997,
+              "received": 1241
             }
           },
           "slug": "columbus-oh",
@@ -46333,6 +47234,12 @@
               "denied": 105,
               "pending": 14099,
               "received": 2274
+            },
+            "2026-Q2": {
+              "approved": 673,
+              "denied": 147,
+              "pending": 16307,
+              "received": 3228
             }
           },
           "slug": "charlotte-nc",
@@ -46638,6 +47545,12 @@
               "received": 0
             },
             "2026-Q1": {
+              "approved": 0,
+              "denied": 0,
+              "pending": 0,
+              "received": 0
+            },
+            "2026-Q2": {
               "approved": 0,
               "denied": 0,
               "pending": 0,
@@ -46951,6 +47864,12 @@
               "denied": 241,
               "pending": 34539,
               "received": 7051
+            },
+            "2026-Q2": {
+              "approved": 2195,
+              "denied": 216,
+              "pending": 38257,
+              "received": 9204
             }
           },
           "slug": "dallas-tx",
@@ -47260,6 +48179,12 @@
               "denied": 103,
               "pending": 14939,
               "received": 2621
+            },
+            "2026-Q2": {
+              "approved": 718,
+              "denied": 198,
+              "pending": 16746,
+              "received": 2968
             }
           },
           "slug": "denver-co",
@@ -47569,6 +48494,12 @@
               "denied": 71,
               "pending": 16101,
               "received": 3201
+            },
+            "2026-Q2": {
+              "approved": 789,
+              "denied": 81,
+              "pending": 17738,
+              "received": 3343
             }
           },
           "slug": "detroit-mi",
@@ -47878,6 +48809,12 @@
               "denied": 23,
               "pending": 6987,
               "received": 1370
+            },
+            "2026-Q2": {
+              "approved": 371,
+              "denied": 28,
+              "pending": 7685,
+              "received": 1351
             }
           },
           "slug": "des-moines-ia",
@@ -48165,6 +49102,12 @@
               "received": 0
             },
             "2026-Q1": {
+              "approved": 0,
+              "denied": 0,
+              "pending": 0,
+              "received": 0
+            },
+            "2026-Q2": {
               "approved": 0,
               "denied": 0,
               "pending": 0,
@@ -48478,6 +49421,12 @@
               "denied": 129,
               "pending": 10341,
               "received": 1387
+            },
+            "2026-Q2": {
+              "approved": 858,
+              "denied": 114,
+              "pending": 10932,
+              "received": 1528
             }
           },
           "slug": "el-paso-tx",
@@ -48757,6 +49706,12 @@
               "denied": 443,
               "pending": 234265,
               "received": 44810
+            },
+            "2026-Q2": {
+              "approved": 1078,
+              "denied": 596,
+              "pending": 246100,
+              "received": 14765
             }
           },
           "slug": "vermont-service-center",
@@ -49066,6 +50021,12 @@
               "denied": 74,
               "pending": 9428,
               "received": 1213
+            },
+            "2026-Q2": {
+              "approved": 1118,
+              "denied": 113,
+              "pending": 8523,
+              "received": 1263
             }
           },
           "slug": "fresno-ca",
@@ -49375,6 +50336,12 @@
               "denied": 19,
               "pending": 2362,
               "received": 368
+            },
+            "2026-Q2": {
+              "approved": 705,
+              "denied": 19,
+              "pending": 2007,
+              "received": 499
             }
           },
           "slug": "fort-smith-ar",
@@ -49612,6 +50579,12 @@
               "denied": 19,
               "pending": 3643,
               "received": 568
+            },
+            "2026-Q2": {
+              "approved": 389,
+              "denied": 27,
+              "pending": 3823,
+              "received": 853
             }
           },
           "slug": "greer-sc",
@@ -49921,6 +50894,12 @@
               "denied": 76,
               "pending": 9931,
               "received": 1626
+            },
+            "2026-Q2": {
+              "approved": 759,
+              "denied": 153,
+              "pending": 11190,
+              "received": 2325
             }
           },
           "slug": "hartford-ct",
@@ -50230,6 +51209,12 @@
               "denied": 5,
               "pending": 620,
               "received": 145
+            },
+            "2026-Q2": {
+              "approved": 126,
+              "denied": 2,
+              "pending": 746,
+              "received": 232
             }
           },
           "slug": "helena-mt",
@@ -50539,6 +51524,12 @@
               "denied": 7,
               "pending": 2305,
               "received": 337
+            },
+            "2026-Q2": {
+              "approved": 234,
+              "denied": 9,
+              "pending": 2616,
+              "received": 379
             }
           },
           "slug": "honolulu-hi",
@@ -50848,6 +51839,12 @@
               "denied": 62,
               "pending": 41332,
               "received": 2333
+            },
+            "2026-Q2": {
+              "approved": 1032,
+              "denied": 80,
+              "pending": 43153,
+              "received": 2024
             }
           },
           "slug": "hialeah-fl",
@@ -51157,6 +52154,12 @@
               "denied": 89,
               "pending": 3469,
               "received": 786
+            },
+            "2026-Q2": {
+              "approved": 819,
+              "denied": 68,
+              "pending": 3331,
+              "received": 903
             }
           },
           "slug": "harlingen-tx",
@@ -51466,6 +52469,12 @@
               "denied": 258,
               "pending": 53202,
               "received": 7528
+            },
+            "2026-Q2": {
+              "approved": 2148,
+              "denied": 421,
+              "pending": 57601,
+              "received": 8243
             }
           },
           "slug": "houston-tx",
@@ -51775,6 +52784,12 @@
               "denied": 17,
               "pending": 1357,
               "received": 199
+            },
+            "2026-Q2": {
+              "approved": 205,
+              "denied": 2,
+              "pending": 1072,
+              "received": 179
             }
           },
           "slug": "imperial-ca",
@@ -52084,6 +53099,12 @@
               "denied": 73,
               "pending": 11190,
               "received": 2082
+            },
+            "2026-Q2": {
+              "approved": 448,
+              "denied": 92,
+              "pending": 12853,
+              "received": 2196
             }
           },
           "slug": "indianapolis-in",
@@ -52393,6 +53414,12 @@
               "denied": 71,
               "pending": 13922,
               "received": 1517
+            },
+            "2026-Q2": {
+              "approved": 720,
+              "denied": 118,
+              "pending": 14560,
+              "received": 1677
             }
           },
           "slug": "jacksonville-fl",
@@ -52702,6 +53729,12 @@
               "denied": 31,
               "pending": 9426,
               "received": 1524
+            },
+            "2026-Q2": {
+              "approved": 405,
+              "denied": 72,
+              "pending": 10503,
+              "received": 1726
             }
           },
           "slug": "kansas-city-mo",
@@ -53011,6 +54044,12 @@
               "denied": 113,
               "pending": 44178,
               "received": 2311
+            },
+            "2026-Q2": {
+              "approved": 745,
+              "denied": 136,
+              "pending": 45973,
+              "received": 1593
             }
           },
           "slug": "kendall-fl",
@@ -53314,6 +54353,12 @@
               "denied": 225,
               "pending": 13280,
               "received": 2042
+            },
+            "2026-Q2": {
+              "approved": 3039,
+              "denied": 266,
+              "pending": 16180,
+              "received": 2699
             }
           },
           "slug": "los-angeles-county-ca",
@@ -53623,6 +54668,12 @@
               "denied": 79,
               "pending": 10011,
               "received": 1672
+            },
+            "2026-Q2": {
+              "approved": 818,
+              "denied": 116,
+              "pending": 10855,
+              "received": 2192
             }
           },
           "slug": "lawrence-ma",
@@ -53932,6 +54983,12 @@
               "denied": 180,
               "pending": 10136,
               "received": 2113
+            },
+            "2026-Q2": {
+              "approved": 1171,
+              "denied": 176,
+              "pending": 13593,
+              "received": 3990
             }
           },
           "slug": "long-island-ny",
@@ -54241,6 +55298,12 @@
               "denied": 190,
               "pending": 18465,
               "received": 3166
+            },
+            "2026-Q2": {
+              "approved": 4608,
+              "denied": 278,
+              "pending": 20529,
+              "received": 4557
             }
           },
           "slug": "los-angeles-ca",
@@ -54550,6 +55613,12 @@
               "denied": 62,
               "pending": 20153,
               "received": 2028
+            },
+            "2026-Q2": {
+              "approved": 828,
+              "denied": 102,
+              "pending": 21655,
+              "received": 1745
             }
           },
           "slug": "louisville-ky",
@@ -54859,6 +55928,12 @@
               "denied": 63,
               "pending": 16211,
               "received": 1612
+            },
+            "2026-Q2": {
+              "approved": 481,
+              "denied": 59,
+              "pending": 17384,
+              "received": 1442
             }
           },
           "slug": "las-vegas-nv",
@@ -55168,6 +56243,12 @@
               "denied": 14,
               "pending": 2299,
               "received": 372
+            },
+            "2026-Q2": {
+              "approved": 307,
+              "denied": 21,
+              "pending": 2645,
+              "received": 477
             }
           },
           "slug": "manchester-nh",
@@ -55477,6 +56558,12 @@
               "denied": 28,
               "pending": 4452,
               "received": 753
+            },
+            "2026-Q2": {
+              "approved": 474,
+              "denied": 58,
+              "pending": 4911,
+              "received": 1259
             }
           },
           "slug": "memphis-tn",
@@ -55696,6 +56783,12 @@
               "denied": 33,
               "pending": 7674,
               "received": 1415
+            },
+            "2026-Q2": {
+              "approved": 869,
+              "denied": 71,
+              "pending": 8565,
+              "received": 1917
             }
           },
           "slug": "montgomery-al",
@@ -56005,6 +57098,12 @@
               "denied": 139,
               "pending": 27258,
               "received": 2590
+            },
+            "2026-Q2": {
+              "approved": 631,
+              "denied": 258,
+              "pending": 28347,
+              "received": 2632
             }
           },
           "slug": "miami-fl",
@@ -56314,6 +57413,12 @@
               "denied": 55,
               "pending": 7224,
               "received": 1380
+            },
+            "2026-Q2": {
+              "approved": 334,
+              "denied": 46,
+              "pending": 8055,
+              "received": 1409
             }
           },
           "slug": "milwaukee-wi",
@@ -56623,6 +57728,12 @@
               "denied": 78,
               "pending": 7903,
               "received": 1296
+            },
+            "2026-Q2": {
+              "approved": 707,
+              "denied": 110,
+              "pending": 8479,
+              "received": 1648
             }
           },
           "slug": "mount-laurel-nj",
@@ -56828,6 +57939,12 @@
             "2026-Q1": {
               "approved": 9457,
               "denied": 5472,
+              "pending": 0,
+              "received": 0
+            },
+            "2026-Q2": {
+              "approved": 5439,
+              "denied": 4204,
               "pending": 0,
               "received": 0
             }
@@ -57139,6 +58256,12 @@
               "denied": 230,
               "pending": 18907,
               "received": 3877
+            },
+            "2026-Q2": {
+              "approved": 2996,
+              "denied": 506,
+              "pending": 20575,
+              "received": 5147
             }
           },
           "slug": "newark-nj",
@@ -57226,6 +58349,12 @@
               "denied": 146,
               "pending": 9664,
               "received": 2086
+            },
+            "2026-Q2": {
+              "approved": 1591,
+              "denied": 155,
+              "pending": 11403,
+              "received": 3012
             }
           },
           "slug": "new-jersey-central-nj",
@@ -57535,6 +58664,12 @@
               "denied": 41,
               "pending": 6292,
               "received": 998
+            },
+            "2026-Q2": {
+              "approved": 311,
+              "denied": 32,
+              "pending": 7558,
+              "received": 1979
             }
           },
           "slug": "new-orleans-la",
@@ -57844,6 +58979,12 @@
               "denied": 67,
               "pending": 6137,
               "received": 1010
+            },
+            "2026-Q2": {
+              "approved": 632,
+              "denied": 70,
+              "pending": 7361,
+              "received": 1552
             }
           },
           "slug": "norfolk-va",
@@ -58123,6 +59264,12 @@
               "denied": 441,
               "pending": 37792,
               "received": 12160
+            },
+            "2026-Q2": {
+              "approved": 1068,
+              "denied": 180,
+              "pending": 42805,
+              "received": 6608
             }
           },
           "slug": "nebraska-service-center",
@@ -58324,6 +59471,12 @@
               "denied": 54,
               "pending": 9436,
               "received": 1630
+            },
+            "2026-Q2": {
+              "approved": 882,
+              "denied": 75,
+              "pending": 10580,
+              "received": 2461
             }
           },
           "slug": "nashville-tn",
@@ -58627,6 +59780,12 @@
               "denied": 490,
               "pending": 15844,
               "received": 3961
+            },
+            "2026-Q2": {
+              "approved": 2822,
+              "denied": 543,
+              "pending": 19076,
+              "received": 5690
             }
           },
           "slug": "new-york-ny",
@@ -58870,6 +60029,12 @@
               "denied": 54,
               "pending": 22016,
               "received": 1482
+            },
+            "2026-Q2": {
+              "approved": 808,
+              "denied": 84,
+              "pending": 22561,
+              "received": 1167
             }
           },
           "slug": "fort-myers-fl",
@@ -59179,6 +60344,12 @@
               "denied": 34,
               "pending": 8871,
               "received": 1511
+            },
+            "2026-Q2": {
+              "approved": 130,
+              "denied": 56,
+              "pending": 10181,
+              "received": 1673
             }
           },
           "slug": "oklahoma-city-ok",
@@ -59488,6 +60659,12 @@
               "denied": 212,
               "pending": 14155,
               "received": 2178
+            },
+            "2026-Q2": {
+              "approved": 716,
+              "denied": 279,
+              "pending": 15106,
+              "received": 2739
             }
           },
           "slug": "oakland-park-fl",
@@ -59797,6 +60974,12 @@
               "denied": 26,
               "pending": 13330,
               "received": 1508
+            },
+            "2026-Q2": {
+              "approved": 635,
+              "denied": 46,
+              "pending": 14325,
+              "received": 1728
             }
           },
           "slug": "omaha-ne",
@@ -60106,6 +61289,12 @@
               "denied": 333,
               "pending": 25662,
               "received": 3379
+            },
+            "2026-Q2": {
+              "approved": 1711,
+              "denied": 404,
+              "pending": 27694,
+              "received": 4518
             }
           },
           "slug": "orlando-fl",
@@ -60415,6 +61604,12 @@
               "denied": 241,
               "pending": 19525,
               "received": 3939
+            },
+            "2026-Q2": {
+              "approved": 1833,
+              "denied": 296,
+              "pending": 22054,
+              "received": 4947
             }
           },
           "slug": "philadelphia-pa",
@@ -60724,6 +61919,12 @@
               "denied": 131,
               "pending": 14796,
               "received": 2754
+            },
+            "2026-Q2": {
+              "approved": 1114,
+              "denied": 119,
+              "pending": 16935,
+              "received": 2944
             }
           },
           "slug": "phoenix-az",
@@ -61033,6 +62234,12 @@
               "denied": 23,
               "pending": 4945,
               "received": 900
+            },
+            "2026-Q2": {
+              "approved": 349,
+              "denied": 19,
+              "pending": 5972,
+              "received": 1040
             }
           },
           "slug": "pittsburgh-pa",
@@ -61342,6 +62549,12 @@
               "denied": 8,
               "pending": 3120,
               "received": 507
+            },
+            "2026-Q2": {
+              "approved": 150,
+              "denied": 15,
+              "pending": 3620,
+              "received": 568
             }
           },
           "slug": "portland-me",
@@ -61651,6 +62864,12 @@
               "denied": 50,
               "pending": 10465,
               "received": 1872
+            },
+            "2026-Q2": {
+              "approved": 895,
+              "denied": 65,
+              "pending": 11165,
+              "received": 1749
             }
           },
           "slug": "portland-or",
@@ -61960,6 +63179,12 @@
               "denied": 67,
               "pending": 2991,
               "received": 496
+            },
+            "2026-Q2": {
+              "approved": 591,
+              "denied": 67,
+              "pending": 3493,
+              "received": 728
             }
           },
           "slug": "providence-ri",
@@ -62269,6 +63494,12 @@
               "denied": 408,
               "pending": 15952,
               "received": 2951
+            },
+            "2026-Q2": {
+              "approved": 2395,
+              "denied": 395,
+              "pending": 17862,
+              "received": 3781
             }
           },
           "slug": "queens-ny",
@@ -62578,6 +63809,12 @@
               "denied": 32,
               "pending": 11923,
               "received": 1923
+            },
+            "2026-Q2": {
+              "approved": 526,
+              "denied": 59,
+              "pending": 13053,
+              "received": 2762
             }
           },
           "slug": "raleigh-nc",
@@ -62887,6 +64124,12 @@
               "denied": 21,
               "pending": 1419,
               "received": 251
+            },
+            "2026-Q2": {
+              "approved": 141,
+              "denied": 20,
+              "pending": 1571,
+              "received": 318
             }
           },
           "slug": "reno-nv",
@@ -63196,6 +64439,12 @@
               "denied": 55,
               "pending": 14018,
               "received": 2028
+            },
+            "2026-Q2": {
+              "approved": 1645,
+              "denied": 114,
+              "pending": 15005,
+              "received": 2628
             }
           },
           "slug": "santa-ana-ca",
@@ -63505,6 +64754,12 @@
               "denied": 160,
               "pending": 16069,
               "received": 2154
+            },
+            "2026-Q2": {
+              "approved": 1654,
+              "denied": 158,
+              "pending": 16322,
+              "received": 2290
             }
           },
           "slug": "sacramento-ca",
@@ -63814,6 +65069,12 @@
               "denied": 31,
               "pending": 1410,
               "received": 193
+            },
+            "2026-Q2": {
+              "approved": 96,
+              "denied": 15,
+              "pending": 1563,
+              "received": 214
             }
           },
           "slug": "san-juan-pr",
@@ -64123,6 +65384,12 @@
               "denied": 203,
               "pending": 13475,
               "received": 1886
+            },
+            "2026-Q2": {
+              "approved": 1895,
+              "denied": 186,
+              "pending": 13668,
+              "received": 2122
             }
           },
           "slug": "san-bernardino-ca",
@@ -64432,6 +65699,12 @@
               "denied": 164,
               "pending": 23388,
               "received": 4020
+            },
+            "2026-Q2": {
+              "approved": 1370,
+              "denied": 247,
+              "pending": 24937,
+              "received": 4922
             }
           },
           "slug": "seattle-wa",
@@ -64741,6 +66014,12 @@
               "denied": 120,
               "pending": 18043,
               "received": 3168
+            },
+            "2026-Q2": {
+              "approved": 2697,
+              "denied": 152,
+              "pending": 18364,
+              "received": 4466
             }
           },
           "slug": "san-francisco-ca",
@@ -65050,6 +66329,12 @@
               "denied": 183,
               "pending": 11783,
               "received": 1583
+            },
+            "2026-Q2": {
+              "approved": 3659,
+              "denied": 205,
+              "pending": 13053,
+              "received": 2023
             }
           },
           "slug": "san-fernando-valley-ca",
@@ -65359,6 +66644,12 @@
               "denied": 61,
               "pending": 8661,
               "received": 1611
+            },
+            "2026-Q2": {
+              "approved": 622,
+              "denied": 75,
+              "pending": 9966,
+              "received": 2089
             }
           },
           "slug": "salt-lake-city-ut",
@@ -65668,6 +66959,12 @@
               "denied": 251,
               "pending": 28989,
               "received": 4919
+            },
+            "2026-Q2": {
+              "approved": 1765,
+              "denied": 252,
+              "pending": 30622,
+              "received": 5419
             }
           },
           "slug": "san-antonio-tx",
@@ -65977,6 +67274,12 @@
               "denied": 92,
               "pending": 14048,
               "received": 2074
+            },
+            "2026-Q2": {
+              "approved": 1485,
+              "denied": 130,
+              "pending": 15049,
+              "received": 2196
             }
           },
           "slug": "san-diego-ca",
@@ -66286,6 +67589,12 @@
               "denied": 162,
               "pending": 23418,
               "received": 4858
+            },
+            "2026-Q2": {
+              "approved": 2223,
+              "denied": 163,
+              "pending": 23633,
+              "received": 5914
             }
           },
           "slug": "san-jose-ca",
@@ -66595,6 +67904,12 @@
               "denied": 106,
               "pending": 14490,
               "received": 3201
+            },
+            "2026-Q2": {
+              "approved": 1018,
+              "denied": 127,
+              "pending": 16262,
+              "received": 3111
             }
           },
           "slug": "st-paul-mn",
@@ -66904,6 +68219,12 @@
               "denied": 24,
               "pending": 2252,
               "received": 364
+            },
+            "2026-Q2": {
+              "approved": 282,
+              "denied": 24,
+              "pending": 2434,
+              "received": 423
             }
           },
           "slug": "spokane-wa",
@@ -67183,6 +68504,12 @@
               "denied": 42,
               "pending": 11466,
               "received": 3638
+            },
+            "2026-Q2": {
+              "approved": 209,
+              "denied": 151,
+              "pending": 13250,
+              "received": 6375
             }
           },
           "slug": "texas-service-center",
@@ -67492,6 +68819,12 @@
               "denied": 18,
               "pending": 1877,
               "received": 249
+            },
+            "2026-Q2": {
+              "approved": 484,
+              "denied": 19,
+              "pending": 1841,
+              "received": 197
             }
           },
           "slug": "st-albans-vt",
@@ -67801,6 +69134,12 @@
               "denied": 24,
               "pending": 5641,
               "received": 1267
+            },
+            "2026-Q2": {
+              "approved": 386,
+              "denied": 29,
+              "pending": 6290,
+              "received": 1529
             }
           },
           "slug": "st-louis-mo",
@@ -68110,6 +69449,12 @@
               "denied": 121,
               "pending": 44554,
               "received": 3619
+            },
+            "2026-Q2": {
+              "approved": 1335,
+              "denied": 180,
+              "pending": 46609,
+              "received": 3553
             }
           },
           "slug": "tampa-fl",
@@ -68419,6 +69764,12 @@
               "denied": 69,
               "pending": 3991,
               "received": 620
+            },
+            "2026-Q2": {
+              "approved": 523,
+              "denied": 73,
+              "pending": 3902,
+              "received": 853
             }
           },
           "slug": "tucson-az",
@@ -68728,6 +70079,12 @@
               "denied": 67,
               "pending": 21958,
               "received": 3639
+            },
+            "2026-Q2": {
+              "approved": 2072,
+              "denied": 189,
+              "pending": 24295,
+              "received": 5265
             }
           },
           "slug": "washington-dc",
@@ -69037,6 +70394,12 @@
               "denied": 12,
               "pending": 3356,
               "received": 457
+            },
+            "2026-Q2": {
+              "approved": 315,
+              "denied": 41,
+              "pending": 3410,
+              "received": 451
             }
           },
           "slug": "wichita-ks",
@@ -69346,6 +70709,12 @@
               "denied": 106,
               "pending": 20455,
               "received": 1892
+            },
+            "2026-Q2": {
+              "approved": 1048,
+              "denied": 110,
+              "pending": 21492,
+              "received": 2120
             }
           },
           "slug": "west-palm-beach-fl",
@@ -69625,6 +70994,12 @@
               "denied": 249,
               "pending": 19999,
               "received": 2565
+            },
+            "2026-Q2": {
+              "approved": 789,
+              "denied": 345,
+              "pending": 21108,
+              "received": 1535
             }
           },
           "slug": "california",
@@ -69934,6 +71309,12 @@
               "denied": 24,
               "pending": 2334,
               "received": 299
+            },
+            "2026-Q2": {
+              "approved": 375,
+              "denied": 14,
+              "pending": 2272,
+              "received": 337
             }
           },
           "slug": "yakima-wa",
@@ -70153,6 +71534,12 @@
               "denied": 1,
               "pending": 29,
               "received": 1
+            },
+            "2026-Q2": {
+              "approved": 21,
+              "denied": 0,
+              "pending": 48,
+              "received": 2
             }
           },
           "slug": "potomac-service-center",
@@ -73152,6 +74539,62 @@
               "title": "Application to Register Permanent Residence or Adjust Status (Other)"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 101568,
+          "denied": 16798,
+          "pending": 1560290,
+          "received": 242989,
+          "variants": [
+            {
+              "approved": 54678,
+              "denied": 12240,
+              "pending": 611067,
+              "processingTime": 7.0,
+              "received": 95175,
+              "title": "Application to Register Permanent Residence or Adjust Status (Family)"
+            },
+            {
+              "approved": 42076,
+              "denied": 3160,
+              "pending": 268408,
+              "processingTime": 6.0,
+              "received": 97501,
+              "title": "Application to Register Permanent Residence or Adjust Status (Employment)"
+            },
+            {
+              "approved": 2350,
+              "denied": 292,
+              "pending": 126267,
+              "processingTime": 25.6,
+              "received": 15141,
+              "title": "Application to Register Permanent Residence or Adjust Status (Asylum)"
+            },
+            {
+              "approved": 103,
+              "denied": 45,
+              "pending": 149470,
+              "processingTime": 17.6,
+              "received": 16819,
+              "title": "Application to Register Permanent Residence or Adjust Status (Refugee)"
+            },
+            {
+              "approved": 139,
+              "denied": 447,
+              "pending": 342360,
+              "processingTime": 16.3,
+              "received": 6279,
+              "title": "Application to Register Permanent Residence or Adjust Status (Cuban)"
+            },
+            {
+              "approved": 2222,
+              "denied": 614,
+              "pending": 62718,
+              "processingTime": 21.0,
+              "received": 12074,
+              "title": "Application to Register Permanent Residence or Adjust Status (Other)"
+            }
+          ]
         }
       },
       "slug": "i-485",
@@ -73205,7 +74648,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Application to Register Permanent Residence or Adjust Status"
     },
@@ -74119,6 +75563,30 @@
               "title": "Immigrant Petition by Standalone Investor"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 22,
+          "denied": 91,
+          "pending": 1818,
+          "received": 66,
+          "variants": [
+            {
+              "approved": 17,
+              "denied": 80,
+              "pending": 960,
+              "processingTime": 99.2,
+              "received": 0,
+              "title": "Immigrant Petition by Alien Investor (Legacy)"
+            },
+            {
+              "approved": 5,
+              "denied": 11,
+              "pending": 858,
+              "processingTime": 32.3,
+              "received": 66,
+              "title": "Immigrant Petition by Standalone Investor"
+            }
+          ]
         }
       },
       "slug": "i-526",
@@ -74172,7 +75640,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Immigrant Petition by Standalone Investor"
     },
@@ -74390,6 +75859,22 @@
               "title": "Immigrant Petition by Regional Center Investor"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 687,
+          "denied": 217,
+          "pending": 11192,
+          "received": 1599,
+          "variants": [
+            {
+              "approved": 687,
+              "denied": 217,
+              "pending": 11192,
+              "processingTime": 13.6,
+              "received": 1599,
+              "title": "Immigrant Petition by Regional Center Investor"
+            }
+          ]
         }
       },
       "slug": "i-526e",
@@ -74406,7 +75891,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Immigrant Petition by Regional Center Investor"
     },
@@ -75216,6 +76702,22 @@
               "title": "Application To Extend/Change Nonimmigrant Status"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 38751,
+          "denied": 8163,
+          "pending": 133056,
+          "received": 70011,
+          "variants": [
+            {
+              "approved": 38751,
+              "denied": 8163,
+              "pending": 133056,
+              "processingTime": 5.7,
+              "received": 70011,
+              "title": "Application To Extend/Change Nonimmigrant Status"
+            }
+          ]
         }
       },
       "slug": "i-539",
@@ -75269,7 +76771,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Application To Extend/Change Nonimmigrant Status"
     },
@@ -76079,6 +77582,22 @@
               "title": "Application for Asylum and for Withholding of Removal"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 1620,
+          "denied": 18779,
+          "pending": 1392782,
+          "received": 20159,
+          "variants": [
+            {
+              "approved": 1620,
+              "denied": 18779,
+              "pending": 1392782,
+              "processingTime": null,
+              "received": 20159,
+              "title": "Application for Asylum and for Withholding of Removal"
+            }
+          ]
         }
       },
       "slug": "i-589",
@@ -76132,7 +77651,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Application for Asylum and for Withholding of Removal"
     },
@@ -76558,6 +78078,22 @@
               "title": "Petition to Classify Orphan as an Immediate Relative"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 101,
+          "denied": 66,
+          "pending": 556,
+          "received": 103,
+          "variants": [
+            {
+              "approved": 101,
+              "denied": 66,
+              "pending": 556,
+              "processingTime": 12.2,
+              "received": 103,
+              "title": "Petition to Classify Orphan as an Immediate Relative"
+            }
+          ]
         }
       },
       "slug": "i-600",
@@ -76587,7 +78123,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Petition to Classify Orphan as an Immediate Relative"
     },
@@ -77397,6 +78934,22 @@
               "title": "Application for Provisional Unlawful Presence Waiver"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 3556,
+          "denied": 576,
+          "pending": 77755,
+          "received": 9993,
+          "variants": [
+            {
+              "approved": 3556,
+              "denied": 576,
+              "pending": 77755,
+              "processingTime": 25.4,
+              "received": 9993,
+              "title": "Application for Provisional Unlawful Presence Waiver"
+            }
+          ]
         }
       },
       "slug": "i-601a",
@@ -77450,7 +79003,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Application for Provisional Unlawful Presence Waiver"
     },
@@ -78260,6 +79814,22 @@
               "title": "Refugee/Asylee Relative Petition"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 151,
+          "denied": 89,
+          "pending": 23562,
+          "received": 2401,
+          "variants": [
+            {
+              "approved": 151,
+              "denied": 89,
+              "pending": 23562,
+              "processingTime": null,
+              "received": 2401,
+              "title": "Refugee/Asylee Relative Petition"
+            }
+          ]
         }
       },
       "slug": "i-730",
@@ -78313,7 +79883,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Refugee/Asylee Relative Petition"
     },
@@ -79123,6 +80694,22 @@
               "title": "Petition to Remove Conditions on Residence"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 10368,
+          "denied": 626,
+          "pending": 339830,
+          "received": 51225,
+          "variants": [
+            {
+              "approved": 10368,
+              "denied": 626,
+              "pending": 339830,
+              "processingTime": 22.6,
+              "received": 51225,
+              "title": "Petition to Remove Conditions on Residence"
+            }
+          ]
         }
       },
       "slug": "i-751",
@@ -79176,7 +80763,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Petition to Remove Conditions on Residence"
     },
@@ -80418,6 +82006,46 @@
               "title": "Application for Employment Authorization (All Other)"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 366079,
+          "denied": 67022,
+          "pending": 2110712,
+          "received": 572947,
+          "variants": [
+            {
+              "approved": 117965,
+              "denied": 10986,
+              "pending": 108565,
+              "processingTime": 0.8,
+              "received": 125663,
+              "title": "Application for Employment Authorization (Asylum)"
+            },
+            {
+              "approved": 46405,
+              "denied": 35767,
+              "pending": 671362,
+              "processingTime": 6.4,
+              "received": 153039,
+              "title": "Application for Employment Authorization (Adjustment Of Status)"
+            },
+            {
+              "approved": 76053,
+              "denied": 482,
+              "pending": 231872,
+              "processingTime": 4.1,
+              "received": 81835,
+              "title": "Application for Employment Authorization (DACA)"
+            },
+            {
+              "approved": 125656,
+              "denied": 19787,
+              "pending": 1098913,
+              "processingTime": 3.3,
+              "received": 212410,
+              "title": "Application for Employment Authorization (All Other)"
+            }
+          ]
         }
       },
       "slug": "i-765",
@@ -80471,7 +82099,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Application for Employment Authorization"
     },
@@ -80897,6 +82526,22 @@
               "title": "Petition to Classify Convention Adoptee as an Immediate Relative"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 486,
+          "denied": 18,
+          "pending": 356,
+          "received": 479,
+          "variants": [
+            {
+              "approved": 486,
+              "denied": 18,
+              "pending": 356,
+              "processingTime": 2.6,
+              "received": 479,
+              "title": "Petition to Classify Convention Adoptee as an Immediate Relative"
+            }
+          ]
         }
       },
       "slug": "i-800",
@@ -80926,7 +82571,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Petition to Classify Convention Adoptee as an Immediate Relative"
     },
@@ -81736,6 +83382,22 @@
               "title": "Application for Family Unity Benefits"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 41,
+          "denied": 2,
+          "pending": 63,
+          "received": 34,
+          "variants": [
+            {
+              "approved": 41,
+              "denied": 2,
+              "pending": 63,
+              "processingTime": 2.5,
+              "received": 34,
+              "title": "Application for Family Unity Benefits"
+            }
+          ]
         }
       },
       "slug": "i-817",
@@ -81789,7 +83451,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Application for Family Unity Benefits"
     },
@@ -82599,6 +84262,22 @@
               "title": "Application for Temporary Protected Status"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 7400,
+          "denied": 706,
+          "pending": 567110,
+          "received": 657,
+          "variants": [
+            {
+              "approved": 7400,
+              "denied": 706,
+              "pending": 567110,
+              "processingTime": 15.5,
+              "received": 657,
+              "title": "Application for Temporary Protected Status"
+            }
+          ]
         }
       },
       "slug": "i-821",
@@ -82652,7 +84331,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Application for Temporary Protected Status"
     },
@@ -83462,6 +85142,22 @@
               "title": "Consideration of Deferred Action for Childhood Arrivals"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 76158,
+          "denied": 471,
+          "pending": 228969,
+          "received": 81975,
+          "variants": [
+            {
+              "approved": 76158,
+              "denied": 471,
+              "pending": 228969,
+              "processingTime": 4.1,
+              "received": 81975,
+              "title": "Consideration of Deferred Action for Childhood Arrivals"
+            }
+          ]
         }
       },
       "slug": "i-821d",
@@ -83515,7 +85211,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Consideration of Deferred Action for Childhood Arrivals"
     },
@@ -84325,6 +86022,22 @@
               "title": "Application for Action on an Approved Application or Petition"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 2222,
+          "denied": 336,
+          "pending": 17141,
+          "received": 4469,
+          "variants": [
+            {
+              "approved": 2222,
+              "denied": 336,
+              "pending": 17141,
+              "processingTime": 5.6,
+              "received": 4469,
+              "title": "Application for Action on an Approved Application or Petition"
+            }
+          ]
         }
       },
       "slug": "i-824",
@@ -84378,7 +86091,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Application for Action on an Approved Application or Petition"
     },
@@ -85188,6 +86902,22 @@
               "title": "Petition by Investor to Remove Conditions on Permanent Resident Status"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 767,
+          "denied": 78,
+          "pending": 8244,
+          "received": 1944,
+          "variants": [
+            {
+              "approved": 767,
+              "denied": 78,
+              "pending": 8244,
+              "processingTime": 12.8,
+              "received": 1944,
+              "title": "Petition by Investor to Remove Conditions on Permanent Resident Status"
+            }
+          ]
         }
       },
       "slug": "i-829",
@@ -85241,7 +86971,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Petition by Investor to Remove Conditions on Permanent Resident Status"
     },
@@ -86018,6 +87749,22 @@
               "title": "Record of Determination/Credible Fear Worksheet"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 453,
+          "denied": 1014,
+          "pending": 0,
+          "received": 2715,
+          "variants": [
+            {
+              "approved": 453,
+              "denied": 1014,
+              "pending": 0,
+              "processingTime": null,
+              "received": 2715,
+              "title": "Record of Determination/Credible Fear Worksheet"
+            }
+          ]
         }
       },
       "slug": "i-870",
@@ -86049,7 +87796,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Record of Determination/Credible Fear Worksheet"
     },
@@ -86859,6 +88607,22 @@
               "title": "App. for Susp. of Deport. or Spec. Rule Cancel. of Removal (Sect. 203 of Public Law 105-100 (NACARA))"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 3,
+          "denied": 0,
+          "pending": 868,
+          "received": 21,
+          "variants": [
+            {
+              "approved": 3,
+              "denied": 0,
+              "pending": 868,
+              "processingTime": null,
+              "received": 21,
+              "title": "App. for Susp. of Deport. or Spec. Rule Cancel. of Removal (Sect. 203 of Public Law 105-100 (NACARA))"
+            }
+          ]
         }
       },
       "slug": "i-881",
@@ -86912,7 +88676,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "App. for Susp. of Deport. or Spec. Rule Cancel. of Removal"
     },
@@ -87714,6 +89479,22 @@
               "title": "Record of Determination/Reasonable Fear Worksheet"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 33,
+          "denied": 755,
+          "pending": 0,
+          "received": 1249,
+          "variants": [
+            {
+              "approved": 33,
+              "denied": 755,
+              "pending": 0,
+              "processingTime": null,
+              "received": 1249,
+              "title": "Record of Determination/Reasonable Fear Worksheet"
+            }
+          ]
         }
       },
       "slug": "i-899",
@@ -87754,7 +89535,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Record of Determination/Reasonable Fear Worksheet"
     },
@@ -88564,6 +90346,22 @@
               "title": "Application to Replace Permanent Resident Card"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 247819,
+          "denied": 6408,
+          "pending": 506891,
+          "received": 208311,
+          "variants": [
+            {
+              "approved": 247819,
+              "denied": 6408,
+              "pending": 506891,
+              "processingTime": 5.5,
+              "received": 208311,
+              "title": "Application to Replace Permanent Resident Card"
+            }
+          ]
         }
       },
       "slug": "i-90",
@@ -88617,7 +90415,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Application to Replace Permanent Resident Card"
     },
@@ -89457,6 +91256,22 @@
               "title": "Application for T Nonimmigrant Status"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 252,
+          "denied": 283,
+          "pending": 122593,
+          "received": 12088,
+          "variants": [
+            {
+              "approved": 252,
+              "denied": 283,
+              "pending": 122593,
+              "processingTime": 31.2,
+              "received": 12088,
+              "title": "Application for T Nonimmigrant Status"
+            }
+          ]
         }
       },
       "slug": "i-914",
@@ -89510,7 +91325,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Application for T Nonimmigrant Status"
     },
@@ -90320,6 +92136,22 @@
               "title": "Petition for U Nonimmigrant Status"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 4476,
+          "denied": 2039,
+          "pending": 480114,
+          "received": 15170,
+          "variants": [
+            {
+              "approved": 4476,
+              "denied": 2039,
+              "pending": 480114,
+              "processingTime": 15.2,
+              "received": 15170,
+              "title": "Petition for U Nonimmigrant Status"
+            }
+          ]
         }
       },
       "slug": "i-918",
@@ -90373,7 +92205,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Petition for U Nonimmigrant Status"
     },
@@ -91007,6 +92840,22 @@
               "title": "Application For Regional Center Designation Under the Immigrant Investor Program"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 0,
+          "denied": 2,
+          "pending": 2,
+          "received": 0,
+          "variants": [
+            {
+              "approved": 0,
+              "denied": 2,
+              "pending": 2,
+              "processingTime": 189.4,
+              "received": 0,
+              "title": "Application For Regional Center Designation Under the Immigrant Investor Program"
+            }
+          ]
         }
       },
       "slug": "i-924",
@@ -91049,7 +92898,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Application For Regional Center Designation Under the Immigrant Investor Program"
     },
@@ -92263,6 +94113,22 @@
               "title": "Petition for Qualifying Family Member of a U-1 Nonimmigrant"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 117,
+          "denied": 36,
+          "pending": 2265,
+          "received": 414,
+          "variants": [
+            {
+              "approved": 117,
+              "denied": 36,
+              "pending": 2265,
+              "processingTime": 26.0,
+              "received": 414,
+              "title": "Petition for Qualifying Family Member of a U-1 Nonimmigrant"
+            }
+          ]
         }
       },
       "slug": "i-929",
@@ -92316,7 +94182,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Petition for Qualifying Family Member of a U-1 Nonimmigrant"
     },
@@ -92422,6 +94289,22 @@
               "title": "Application for Entrepreneur Parole"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 0,
+          "denied": 0,
+          "pending": 29,
+          "received": 1,
+          "variants": [
+            {
+              "approved": 0,
+              "denied": 0,
+              "pending": 29,
+              "processingTime": null,
+              "received": 1,
+              "title": "Application for Entrepreneur Parole"
+            }
+          ]
         }
       },
       "slug": "i-941",
@@ -92431,7 +94314,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Application for Entrepreneur Parole"
     },
@@ -92649,6 +94533,22 @@
               "title": "Application for Regional Center Designation"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 9,
+          "denied": 1,
+          "pending": 46,
+          "received": 9,
+          "variants": [
+            {
+              "approved": 9,
+              "denied": 1,
+              "pending": 46,
+              "processingTime": 11.4,
+              "received": 9,
+              "title": "Application for Regional Center Designation"
+            }
+          ]
         }
       },
       "slug": "i-956",
@@ -92665,7 +94565,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Application for Regional Center Designation"
     },
@@ -92883,6 +94784,22 @@
               "title": "Application for Approval of Investment in a Commercial Enterprise"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 60,
+          "denied": 22,
+          "pending": 177,
+          "received": 77,
+          "variants": [
+            {
+              "approved": 60,
+              "denied": 22,
+              "pending": 177,
+              "processingTime": 5.4,
+              "received": 77,
+              "title": "Application for Approval of Investment in a Commercial Enterprise"
+            }
+          ]
         }
       },
       "slug": "i-956f",
@@ -92899,7 +94816,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Application for Approval of Investment in a Commercial Enterprise"
     },
@@ -93117,6 +95035,22 @@
               "title": "Regional Center Annual Statement"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 0,
+          "denied": 0,
+          "pending": 0,
+          "received": 6,
+          "variants": [
+            {
+              "approved": 0,
+              "denied": 0,
+              "pending": 0,
+              "processingTime": null,
+              "received": 6,
+              "title": "Regional Center Annual Statement"
+            }
+          ]
         }
       },
       "slug": "i-956g",
@@ -93133,7 +95067,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Regional Center Annual Statement"
     },
@@ -93351,6 +95286,22 @@
               "title": "Bona Fides of Person Involved in Regional Center Program"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 0,
+          "denied": 0,
+          "pending": 0,
+          "received": 630,
+          "variants": [
+            {
+              "approved": 0,
+              "denied": 0,
+              "pending": 0,
+              "processingTime": null,
+              "received": 630,
+              "title": "Bona Fides of Person Involved in Regional Center Program"
+            }
+          ]
         }
       },
       "slug": "i-956h",
@@ -93367,7 +95318,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Bona Fides of Person Involved in Regional Center Program"
     },
@@ -93585,6 +95537,22 @@
               "title": "Registration for Direct and Third-Party Promoters"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 51,
+          "denied": 27,
+          "pending": 746,
+          "received": 300,
+          "variants": [
+            {
+              "approved": 51,
+              "denied": 27,
+              "pending": 746,
+              "processingTime": null,
+              "received": 300,
+              "title": "Registration for Direct and Third-Party Promoters"
+            }
+          ]
         }
       },
       "slug": "i-956k",
@@ -93601,7 +95569,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Registration for Direct and Third-Party Promoters"
     },
@@ -95104,6 +97073,22 @@
               "title": "Req. for a Hearing on a Decision in Natz. Proceedings (Under Sect. 336 of the INA)"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 243,
+          "denied": 418,
+          "pending": 3975,
+          "received": 1072,
+          "variants": [
+            {
+              "approved": 243,
+              "denied": 418,
+              "pending": 3975,
+              "processingTime": 4.9,
+              "received": 1072,
+              "title": "Req. for a Hearing on a Decision in Natz. Proceedings (Under Sect. 336 of the INA)"
+            }
+          ]
         }
       },
       "slug": "n-336",
@@ -95157,7 +97142,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Req. for a Hearing on a Decision in Natz. Proceedings"
     },
@@ -95214,7 +97200,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/n400_performancedata_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/n400_performance_data_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/n400_performance_data_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/n400_performance_data_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/n400_performance_data_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/n400_performance_data_fy2026_q3_v1.xlsx"
       },
       "officeTotals": {
         "2013-Q4": {
@@ -95516,6 +97503,12 @@
           "denied": 15022,
           "pending": 660692,
           "received": 140767
+        },
+        "2026-Q2": {
+          "approved": 57697,
+          "denied": 12842,
+          "pending": 742138,
+          "received": 145872
         }
       },
       "offices": [
@@ -95822,6 +97815,12 @@
               "denied": 37,
               "pending": 1368,
               "received": 330
+            },
+            "2026-Q2": {
+              "approved": 52,
+              "denied": 19,
+              "pending": 1672,
+              "received": 345
             }
           },
           "slug": "albuquerque-nm",
@@ -96125,6 +98124,12 @@
               "denied": null,
               "pending": 703,
               "received": 226
+            },
+            "2026-Q2": {
+              "approved": 12,
+              "denied": null,
+              "pending": 901,
+              "received": 182
             }
           },
           "slug": "agana-gu",
@@ -96434,6 +98439,12 @@
               "denied": 79,
               "pending": 2409,
               "received": 812
+            },
+            "2026-Q2": {
+              "approved": 240,
+              "denied": 67,
+              "pending": 2890,
+              "received": 746
             }
           },
           "slug": "albany-ny",
@@ -96743,6 +98754,12 @@
               "denied": 23,
               "pending": 954,
               "received": 190
+            },
+            "2026-Q2": {
+              "approved": 58,
+              "denied": null,
+              "pending": 1106,
+              "received": 177
             }
           },
           "slug": "anchorage-ak",
@@ -97052,6 +99069,12 @@
               "denied": 318,
               "pending": 14776,
               "received": 3318
+            },
+            "2026-Q2": {
+              "approved": 1059,
+              "denied": 258,
+              "pending": 17300,
+              "received": 3710
             }
           },
           "slug": "atlanta-ga",
@@ -97361,6 +99384,12 @@
               "denied": 79,
               "pending": 13798,
               "received": 2984
+            },
+            "2026-Q2": {
+              "approved": 254,
+              "denied": 137,
+              "pending": 16716,
+              "received": 3156
             }
           },
           "slug": "baltimore-md",
@@ -97580,6 +99609,12 @@
               "denied": 858,
               "pending": 15344,
               "received": 3527
+            },
+            "2026-Q2": {
+              "approved": 2526,
+              "denied": 733,
+              "pending": 15687,
+              "received": 3437
             }
           },
           "slug": "brooklyn-ny",
@@ -97889,6 +99924,12 @@
               "denied": 25,
               "pending": 1479,
               "received": 301
+            },
+            "2026-Q2": {
+              "approved": 53,
+              "denied": 17,
+              "pending": 1714,
+              "received": 285
             }
           },
           "slug": "boise-id",
@@ -98198,6 +100239,12 @@
               "denied": 131,
               "pending": 15855,
               "received": 2745
+            },
+            "2026-Q2": {
+              "approved": 1143,
+              "denied": 98,
+              "pending": 17385,
+              "received": 2688
             }
           },
           "slug": "boston-ma",
@@ -98507,6 +100554,12 @@
               "denied": 121,
               "pending": 5951,
               "received": 1054
+            },
+            "2026-Q2": {
+              "approved": 447,
+              "denied": 127,
+              "pending": 6459,
+              "received": 1000
             }
           },
           "slug": "buffalo-ny",
@@ -98816,6 +100869,12 @@
               "denied": 11,
               "pending": 103,
               "received": 36
+            },
+            "2026-Q2": {
+              "approved": 25,
+              "denied": null,
+              "pending": 116,
+              "received": 31
             }
           },
           "slug": "charlotte-amalie-vi",
@@ -99125,6 +101184,12 @@
               "denied": 329,
               "pending": 19893,
               "received": 5272
+            },
+            "2026-Q2": {
+              "approved": 946,
+              "denied": 280,
+              "pending": 23623,
+              "received": 5077
             }
           },
           "slug": "chicago-il",
@@ -99434,6 +101499,12 @@
               "denied": 72,
               "pending": 2668,
               "received": 740
+            },
+            "2026-Q2": {
+              "approved": 267,
+              "denied": 72,
+              "pending": 3156,
+              "received": 777
             }
           },
           "slug": "charleston-sc",
@@ -99737,6 +101808,12 @@
               "denied": null,
               "pending": 96,
               "received": 10
+            },
+            "2026-Q2": {
+              "approved": 0,
+              "denied": null,
+              "pending": 116,
+              "received": 27
             }
           },
           "slug": "christiansted-vi",
@@ -99952,6 +102029,12 @@
               "received": 0
             },
             "2026-Q1": {
+              "approved": 0,
+              "denied": 0,
+              "pending": 0,
+              "received": 0
+            },
+            "2026-Q2": {
               "approved": 0,
               "denied": 0,
               "pending": 0,
@@ -100265,6 +102348,12 @@
               "denied": 83,
               "pending": 2044,
               "received": 718
+            },
+            "2026-Q2": {
+              "approved": 281,
+              "denied": 84,
+              "pending": 2362,
+              "received": 663
             }
           },
           "slug": "cincinnati-oh",
@@ -100574,6 +102663,12 @@
               "denied": 54,
               "pending": 2586,
               "received": 772
+            },
+            "2026-Q2": {
+              "approved": 341,
+              "denied": 73,
+              "pending": 2916,
+              "received": 713
             }
           },
           "slug": "cleveland-oh",
@@ -100883,6 +102978,12 @@
               "denied": 82,
               "pending": 3185,
               "received": 856
+            },
+            "2026-Q2": {
+              "approved": 368,
+              "denied": 110,
+              "pending": 3622,
+              "received": 900
             }
           },
           "slug": "columbus-oh",
@@ -101192,6 +103293,12 @@
               "denied": 168,
               "pending": 6946,
               "received": 1531
+            },
+            "2026-Q2": {
+              "approved": 920,
+              "denied": 165,
+              "pending": 7643,
+              "received": 1694
             }
           },
           "slug": "charlotte-nc",
@@ -101497,6 +103604,12 @@
               "received": 0
             },
             "2026-Q1": {
+              "approved": 0,
+              "denied": 0,
+              "pending": 0,
+              "received": 0
+            },
+            "2026-Q2": {
               "approved": 0,
               "denied": 0,
               "pending": 0,
@@ -101810,6 +103923,12 @@
               "denied": 242,
               "pending": 25589,
               "received": 5069
+            },
+            "2026-Q2": {
+              "approved": 3089,
+              "denied": 269,
+              "pending": 28662,
+              "received": 6167
             }
           },
           "slug": "dallas-tx",
@@ -102119,6 +104238,12 @@
               "denied": 190,
               "pending": 10583,
               "received": 1973
+            },
+            "2026-Q2": {
+              "approved": 1042,
+              "denied": 218,
+              "pending": 11333,
+              "received": 1909
             }
           },
           "slug": "denver-co",
@@ -102428,6 +104553,12 @@
               "denied": 417,
               "pending": 11631,
               "received": 2326
+            },
+            "2026-Q2": {
+              "approved": 1107,
+              "denied": 281,
+              "pending": 12808,
+              "received": 2476
             }
           },
           "slug": "detroit-mi",
@@ -102737,6 +104868,12 @@
               "denied": 55,
               "pending": 3208,
               "received": 669
+            },
+            "2026-Q2": {
+              "approved": 634,
+              "denied": 47,
+              "pending": 3091,
+              "received": 532
             }
           },
           "slug": "des-moines-ia",
@@ -103042,6 +105179,12 @@
               "received": 0
             },
             "2026-Q1": {
+              "approved": 0,
+              "denied": 0,
+              "pending": 0,
+              "received": 0
+            },
+            "2026-Q2": {
               "approved": 0,
               "denied": 0,
               "pending": 0,
@@ -103355,6 +105498,12 @@
               "denied": 88,
               "pending": 5161,
               "received": 982
+            },
+            "2026-Q2": {
+              "approved": 382,
+              "denied": 119,
+              "pending": 5737,
+              "received": 945
             }
           },
           "slug": "el-paso-tx",
@@ -103664,6 +105813,12 @@
               "denied": 130,
               "pending": 8652,
               "received": 1272
+            },
+            "2026-Q2": {
+              "approved": 309,
+              "denied": 87,
+              "pending": 9722,
+              "received": 1353
             }
           },
           "slug": "fresno-ca",
@@ -103973,6 +106128,12 @@
               "denied": null,
               "pending": 1282,
               "received": 280
+            },
+            "2026-Q2": {
+              "approved": 197,
+              "denied": 25,
+              "pending": 1322,
+              "received": 253
             }
           },
           "slug": "fort-smith-ar",
@@ -104210,6 +106371,12 @@
               "denied": 66,
               "pending": 3283,
               "received": 1438
+            },
+            "2026-Q2": {
+              "approved": 574,
+              "denied": 34,
+              "pending": 4055,
+              "received": 1756
             }
           },
           "slug": "greer-sc",
@@ -104519,6 +106686,12 @@
               "denied": 248,
               "pending": 7737,
               "received": 1798
+            },
+            "2026-Q2": {
+              "approved": 651,
+              "denied": 157,
+              "pending": 8716,
+              "received": 1754
             }
           },
           "slug": "hartford-ct",
@@ -104828,6 +107001,12 @@
               "denied": null,
               "pending": 311,
               "received": 111
+            },
+            "2026-Q2": {
+              "approved": 21,
+              "denied": null,
+              "pending": 399,
+              "received": 109
             }
           },
           "slug": "helena-mt",
@@ -105137,6 +107316,12 @@
               "denied": 39,
               "pending": 3428,
               "received": 664
+            },
+            "2026-Q2": {
+              "approved": 281,
+              "denied": 23,
+              "pending": 3788,
+              "received": 605
             }
           },
           "slug": "honolulu-hi",
@@ -105446,6 +107631,12 @@
               "denied": 206,
               "pending": 7960,
               "received": 1915
+            },
+            "2026-Q2": {
+              "approved": 1033,
+              "denied": 294,
+              "pending": 8905,
+              "received": 1552
             }
           },
           "slug": "hialeah-fl",
@@ -105755,6 +107946,12 @@
               "denied": 55,
               "pending": 2971,
               "received": 670
+            },
+            "2026-Q2": {
+              "approved": 150,
+              "denied": 64,
+              "pending": 3359,
+              "received": 542
             }
           },
           "slug": "harlingen-tx",
@@ -106064,6 +108261,12 @@
               "denied": 479,
               "pending": 30125,
               "received": 5226
+            },
+            "2026-Q2": {
+              "approved": 4441,
+              "denied": 437,
+              "pending": 31057,
+              "received": 5545
             }
           },
           "slug": "houston-tx",
@@ -106373,6 +108576,12 @@
               "denied": 25,
               "pending": 1868,
               "received": 317
+            },
+            "2026-Q2": {
+              "approved": 73,
+              "denied": 42,
+              "pending": 2042,
+              "received": 252
             }
           },
           "slug": "imperial-ca",
@@ -106682,6 +108891,12 @@
               "denied": 68,
               "pending": 7049,
               "received": 1087
+            },
+            "2026-Q2": {
+              "approved": 543,
+              "denied": 66,
+              "pending": 7616,
+              "received": 1138
             }
           },
           "slug": "indianapolis-in",
@@ -106991,6 +109206,12 @@
               "denied": 90,
               "pending": 5864,
               "received": 996
+            },
+            "2026-Q2": {
+              "approved": 466,
+              "denied": 122,
+              "pending": 6351,
+              "received": 1041
             }
           },
           "slug": "jacksonville-fl",
@@ -107300,6 +109521,12 @@
               "denied": 56,
               "pending": 4619,
               "received": 1152
+            },
+            "2026-Q2": {
+              "approved": 311,
+              "denied": 74,
+              "pending": 5174,
+              "received": 1140
             }
           },
           "slug": "kansas-city-mo",
@@ -107609,6 +109836,12 @@
               "denied": 238,
               "pending": 8501,
               "received": 1397
+            },
+            "2026-Q2": {
+              "approved": 1063,
+              "denied": 222,
+              "pending": 9546,
+              "received": 1505
             }
           },
           "slug": "kendall-fl",
@@ -107918,6 +110151,12 @@
               "denied": 551,
               "pending": 10947,
               "received": 2163
+            },
+            "2026-Q2": {
+              "approved": 885,
+              "denied": 197,
+              "pending": 12295,
+              "received": 2238
             }
           },
           "slug": "los-angeles-county-ca",
@@ -108227,6 +110466,12 @@
               "denied": 151,
               "pending": 13570,
               "received": 1452
+            },
+            "2026-Q2": {
+              "approved": 966,
+              "denied": 278,
+              "pending": 14036,
+              "received": 1669
             }
           },
           "slug": "lawrence-ma",
@@ -108536,6 +110781,12 @@
               "denied": 463,
               "pending": 9223,
               "received": 2059
+            },
+            "2026-Q2": {
+              "approved": 1013,
+              "denied": 383,
+              "pending": 9878,
+              "received": 1965
             }
           },
           "slug": "long-island-ny",
@@ -108845,6 +111096,12 @@
               "denied": 327,
               "pending": 9659,
               "received": 2682
+            },
+            "2026-Q2": {
+              "approved": 437,
+              "denied": 101,
+              "pending": 11703,
+              "received": 2509
             }
           },
           "slug": "los-angeles-ca",
@@ -109154,6 +111411,12 @@
               "denied": 113,
               "pending": 3799,
               "received": 899
+            },
+            "2026-Q2": {
+              "approved": 355,
+              "denied": 129,
+              "pending": 4176,
+              "received": 804
             }
           },
           "slug": "louisville-ky",
@@ -109463,6 +111726,12 @@
               "denied": 85,
               "pending": 7484,
               "received": 1309
+            },
+            "2026-Q2": {
+              "approved": 389,
+              "denied": 91,
+              "pending": 8230,
+              "received": 1210
             }
           },
           "slug": "las-vegas-nv",
@@ -109772,6 +112041,12 @@
               "denied": 42,
               "pending": 1093,
               "received": 369
+            },
+            "2026-Q2": {
+              "approved": 169,
+              "denied": 56,
+              "pending": 1215,
+              "received": 328
             }
           },
           "slug": "manchester-nh",
@@ -110081,6 +112356,12 @@
               "denied": 95,
               "pending": 2157,
               "received": 424
+            },
+            "2026-Q2": {
+              "approved": 276,
+              "denied": 140,
+              "pending": 2253,
+              "received": 486
             }
           },
           "slug": "memphis-tn",
@@ -110306,6 +112587,12 @@
               "denied": 13,
               "pending": 4080,
               "received": 1403
+            },
+            "2026-Q2": {
+              "approved": 372,
+              "denied": 30,
+              "pending": 5043,
+              "received": 1338
             }
           },
           "slug": "montgomery-al",
@@ -110615,6 +112902,12 @@
               "denied": 338,
               "pending": 7197,
               "received": 1712
+            },
+            "2026-Q2": {
+              "approved": 551,
+              "denied": 256,
+              "pending": 8153,
+              "received": 1695
             }
           },
           "slug": "miami-fl",
@@ -110924,6 +113217,12 @@
               "denied": 62,
               "pending": 3525,
               "received": 843
+            },
+            "2026-Q2": {
+              "approved": 345,
+              "denied": 65,
+              "pending": 3934,
+              "received": 775
             }
           },
           "slug": "milwaukee-wi",
@@ -111233,6 +113532,12 @@
               "denied": 256,
               "pending": 4730,
               "received": 1426
+            },
+            "2026-Q2": {
+              "approved": 695,
+              "denied": 186,
+              "pending": 5537,
+              "received": 1620
             }
           },
           "slug": "mount-laurel-nj",
@@ -111542,6 +113847,12 @@
               "denied": 501,
               "pending": 15454,
               "received": 3848
+            },
+            "2026-Q2": {
+              "approved": 1092,
+              "denied": 578,
+              "pending": 17757,
+              "received": 3826
             }
           },
           "slug": "newark-nj",
@@ -111605,6 +113916,12 @@
               "denied": 257,
               "pending": 7167,
               "received": 2142
+            },
+            "2026-Q2": {
+              "approved": 1366,
+              "denied": 242,
+              "pending": 8437,
+              "received": 2818
             }
           },
           "slug": "new-jersey-central-nj",
@@ -111914,6 +114231,12 @@
               "denied": 142,
               "pending": 3457,
               "received": 659
+            },
+            "2026-Q2": {
+              "approved": 68,
+              "denied": 83,
+              "pending": 3967,
+              "received": 641
             }
           },
           "slug": "new-orleans-la",
@@ -112223,6 +114546,12 @@
               "denied": 83,
               "pending": 3511,
               "received": 1068
+            },
+            "2026-Q2": {
+              "approved": 543,
+              "denied": 37,
+              "pending": 4291,
+              "received": 1195
             }
           },
           "slug": "norfolk-va",
@@ -112424,6 +114753,12 @@
               "denied": 104,
               "pending": 5613,
               "received": 1191
+            },
+            "2026-Q2": {
+              "approved": 766,
+              "denied": 120,
+              "pending": 6037,
+              "received": 1250
             }
           },
           "slug": "nashville-tn",
@@ -112733,6 +115068,12 @@
               "denied": 882,
               "pending": 15707,
               "received": 4030
+            },
+            "2026-Q2": {
+              "approved": 2329,
+              "denied": 706,
+              "pending": 17071,
+              "received": 4055
             }
           },
           "slug": "new-york-ny",
@@ -112970,6 +115311,12 @@
               "denied": 89,
               "pending": 6323,
               "received": 870
+            },
+            "2026-Q2": {
+              "approved": 574,
+              "denied": 121,
+              "pending": 6523,
+              "received": 816
             }
           },
           "slug": "fort-myers-fl",
@@ -113279,6 +115626,12 @@
               "denied": 48,
               "pending": 6315,
               "received": 1145
+            },
+            "2026-Q2": {
+              "approved": 756,
+              "denied": 102,
+              "pending": 6348,
+              "received": 1118
             }
           },
           "slug": "oklahoma-city-ok",
@@ -113588,6 +115941,12 @@
               "denied": 222,
               "pending": 6283,
               "received": 1240
+            },
+            "2026-Q2": {
+              "approved": 403,
+              "denied": 214,
+              "pending": 6260,
+              "received": 1815
             }
           },
           "slug": "oakland-park-fl",
@@ -113897,6 +116256,12 @@
               "denied": 86,
               "pending": 3594,
               "received": 579
+            },
+            "2026-Q2": {
+              "approved": 346,
+              "denied": 52,
+              "pending": 3840,
+              "received": 612
             }
           },
           "slug": "omaha-ne",
@@ -114206,6 +116571,12 @@
               "denied": 250,
               "pending": 12586,
               "received": 2410
+            },
+            "2026-Q2": {
+              "approved": 910,
+              "denied": 306,
+              "pending": 13964,
+              "received": 2509
             }
           },
           "slug": "orlando-fl",
@@ -114515,6 +116886,12 @@
               "denied": 455,
               "pending": 15477,
               "received": 3925
+            },
+            "2026-Q2": {
+              "approved": 1190,
+              "denied": 291,
+              "pending": 17912,
+              "received": 3695
             }
           },
           "slug": "philadelphia-pa",
@@ -114824,6 +117201,12 @@
               "denied": 178,
               "pending": 9905,
               "received": 1932
+            },
+            "2026-Q2": {
+              "approved": 1003,
+              "denied": 108,
+              "pending": 10819,
+              "received": 1900
             }
           },
           "slug": "phoenix-az",
@@ -115133,6 +117516,12 @@
               "denied": 67,
               "pending": 1951,
               "received": 561
+            },
+            "2026-Q2": {
+              "approved": 430,
+              "denied": 38,
+              "pending": 2046,
+              "received": 536
             }
           },
           "slug": "pittsburgh-pa",
@@ -115442,6 +117831,12 @@
               "denied": 19,
               "pending": 838,
               "received": 257
+            },
+            "2026-Q2": {
+              "approved": 122,
+              "denied": 30,
+              "pending": 920,
+              "received": 224
             }
           },
           "slug": "portland-me",
@@ -115751,6 +118146,12 @@
               "denied": 67,
               "pending": 7576,
               "received": 1373
+            },
+            "2026-Q2": {
+              "approved": 351,
+              "denied": 39,
+              "pending": 8599,
+              "received": 1359
             }
           },
           "slug": "portland-or",
@@ -116060,6 +118461,12 @@
               "denied": 123,
               "pending": 1942,
               "received": 533
+            },
+            "2026-Q2": {
+              "approved": 280,
+              "denied": 93,
+              "pending": 2105,
+              "received": 506
             }
           },
           "slug": "providence-ri",
@@ -116369,6 +118776,12 @@
               "denied": 902,
               "pending": 10075,
               "received": 3289
+            },
+            "2026-Q2": {
+              "approved": 827,
+              "denied": 706,
+              "pending": 11953,
+              "received": 3286
             }
           },
           "slug": "queens-ny",
@@ -116678,6 +119091,12 @@
               "denied": 38,
               "pending": 6613,
               "received": 1459
+            },
+            "2026-Q2": {
+              "approved": 341,
+              "denied": 37,
+              "pending": 7901,
+              "received": 1536
             }
           },
           "slug": "raleigh-nc",
@@ -116987,6 +119406,12 @@
               "denied": 41,
               "pending": 1057,
               "received": 223
+            },
+            "2026-Q2": {
+              "approved": 120,
+              "denied": 26,
+              "pending": 1185,
+              "received": 247
             }
           },
           "slug": "reno-nv",
@@ -117296,6 +119721,12 @@
               "denied": 255,
               "pending": 12718,
               "received": 2165
+            },
+            "2026-Q2": {
+              "approved": 1013,
+              "denied": 94,
+              "pending": 14054,
+              "received": 2309
             }
           },
           "slug": "santa-ana-ca",
@@ -117605,6 +120036,12 @@
               "denied": 156,
               "pending": 13961,
               "received": 2314
+            },
+            "2026-Q2": {
+              "approved": 489,
+              "denied": 148,
+              "pending": 15918,
+              "received": 2466
             }
           },
           "slug": "sacramento-ca",
@@ -117914,6 +120351,12 @@
               "denied": 73,
               "pending": 852,
               "received": 227
+            },
+            "2026-Q2": {
+              "approved": 95,
+              "denied": 53,
+              "pending": 930,
+              "received": 217
             }
           },
           "slug": "san-juan-pr",
@@ -118223,6 +120666,12 @@
               "denied": 385,
               "pending": 11029,
               "received": 2143
+            },
+            "2026-Q2": {
+              "approved": 680,
+              "denied": 187,
+              "pending": 12397,
+              "received": 2051
             }
           },
           "slug": "san-bernardino-ca",
@@ -118532,6 +120981,12 @@
               "denied": 126,
               "pending": 14640,
               "received": 3487
+            },
+            "2026-Q2": {
+              "approved": 454,
+              "denied": 169,
+              "pending": 18384,
+              "received": 4119
             }
           },
           "slug": "seattle-wa",
@@ -118841,6 +121296,12 @@
               "denied": 107,
               "pending": 15684,
               "received": 3295
+            },
+            "2026-Q2": {
+              "approved": 338,
+              "denied": 64,
+              "pending": 18645,
+              "received": 3214
             }
           },
           "slug": "san-francisco-ca",
@@ -119150,6 +121611,12 @@
               "denied": 138,
               "pending": 10397,
               "received": 1882
+            },
+            "2026-Q2": {
+              "approved": 853,
+              "denied": 148,
+              "pending": 11337,
+              "received": 1813
             }
           },
           "slug": "san-fernando-valley-ca",
@@ -119459,6 +121926,12 @@
               "denied": 111,
               "pending": 5142,
               "received": 1079
+            },
+            "2026-Q2": {
+              "approved": 433,
+              "denied": 77,
+              "pending": 5615,
+              "received": 953
             }
           },
           "slug": "salt-lake-city-ut",
@@ -119768,6 +122241,12 @@
               "denied": 186,
               "pending": 16316,
               "received": 3792
+            },
+            "2026-Q2": {
+              "approved": 1532,
+              "denied": 112,
+              "pending": 18999,
+              "received": 4111
             }
           },
           "slug": "san-antonio-tx",
@@ -120077,6 +122556,12 @@
               "denied": 164,
               "pending": 11288,
               "received": 2046
+            },
+            "2026-Q2": {
+              "approved": 772,
+              "denied": 190,
+              "pending": 12567,
+              "received": 2083
             }
           },
           "slug": "san-diego-ca",
@@ -120386,6 +122871,12 @@
               "denied": 151,
               "pending": 16455,
               "received": 3614
+            },
+            "2026-Q2": {
+              "approved": 317,
+              "denied": 91,
+              "pending": 20899,
+              "received": 4685
             }
           },
           "slug": "san-jose-ca",
@@ -120695,6 +123186,12 @@
               "denied": 132,
               "pending": 9800,
               "received": 1896
+            },
+            "2026-Q2": {
+              "approved": 347,
+              "denied": 119,
+              "pending": 11279,
+              "received": 1887
             }
           },
           "slug": "st-paul-mn",
@@ -121004,6 +123501,12 @@
               "denied": null,
               "pending": 772,
               "received": 202
+            },
+            "2026-Q2": {
+              "approved": 52,
+              "denied": null,
+              "pending": 909,
+              "received": 179
             }
           },
           "slug": "spokane-wa",
@@ -121313,6 +123816,12 @@
               "denied": 14,
               "pending": 445,
               "received": 130
+            },
+            "2026-Q2": {
+              "approved": 74,
+              "denied": null,
+              "pending": 485,
+              "received": 109
             }
           },
           "slug": "st-albans-vt",
@@ -121622,6 +124131,12 @@
               "denied": 58,
               "pending": 2699,
               "received": 862
+            },
+            "2026-Q2": {
+              "approved": 278,
+              "denied": 61,
+              "pending": 3318,
+              "received": 923
             }
           },
           "slug": "st-louis-mo",
@@ -121931,6 +124446,12 @@
               "denied": 232,
               "pending": 15153,
               "received": 2226
+            },
+            "2026-Q2": {
+              "approved": 1163,
+              "denied": 198,
+              "pending": 16330,
+              "received": 2388
             }
           },
           "slug": "tampa-fl",
@@ -122240,6 +124761,12 @@
               "denied": 31,
               "pending": 1978,
               "received": 468
+            },
+            "2026-Q2": {
+              "approved": 195,
+              "denied": 26,
+              "pending": 2225,
+              "received": 444
             }
           },
           "slug": "tucson-az",
@@ -122549,6 +125076,12 @@
               "denied": 201,
               "pending": 12783,
               "received": 2816
+            },
+            "2026-Q2": {
+              "approved": 1542,
+              "denied": 150,
+              "pending": 14473,
+              "received": 3332
             }
           },
           "slug": "washington-dc",
@@ -122858,6 +125391,12 @@
               "denied": 31,
               "pending": 1079,
               "received": 228
+            },
+            "2026-Q2": {
+              "approved": 104,
+              "denied": 25,
+              "pending": 1177,
+              "received": 205
             }
           },
           "slug": "wichita-ks",
@@ -123167,6 +125706,12 @@
               "denied": 210,
               "pending": 7334,
               "received": 1429
+            },
+            "2026-Q2": {
+              "approved": 1286,
+              "denied": 219,
+              "pending": 7286,
+              "received": 1406
             }
           },
           "slug": "west-palm-beach-fl",
@@ -123476,6 +126021,12 @@
               "denied": 30,
               "pending": 1279,
               "received": 227
+            },
+            "2026-Q2": {
+              "approved": 51,
+              "denied": 15,
+              "pending": 1456,
+              "received": 215
             }
           },
           "slug": "yakima-wa",
@@ -124683,6 +127234,30 @@
               "title": "Application for Naturalization"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 57697,
+          "denied": 12842,
+          "pending": 742138,
+          "received": 145872,
+          "variants": [
+            {
+              "approved": 2723,
+              "denied": 251,
+              "pending": 14767,
+              "processingTime": 2.6,
+              "received": 5693,
+              "title": "Application for Naturalization (Military)"
+            },
+            {
+              "approved": 54974,
+              "denied": 12591,
+              "pending": 727371,
+              "processingTime": 9.5,
+              "received": 140179,
+              "title": "Application for Naturalization"
+            }
+          ]
         }
       },
       "slug": "n-400",
@@ -124736,7 +127311,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Application for Naturalization"
     },
@@ -126239,6 +128815,22 @@
               "title": "Application for Replacement Naturalization/Citizenship Document"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 7976,
+          "denied": 702,
+          "pending": 25286,
+          "received": 8524,
+          "variants": [
+            {
+              "approved": 7976,
+              "denied": 702,
+              "pending": 25286,
+              "processingTime": 7.6,
+              "received": 8524,
+              "title": "Application for Replacement Naturalization/Citizenship Document"
+            }
+          ]
         }
       },
       "slug": "n-565",
@@ -126292,7 +128884,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Application for Replacement Naturalization/Citizenship Document"
     },
@@ -126718,6 +129311,22 @@
               "title": "Application for Certificate of Citizenship"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": 9199,
+          "denied": 831,
+          "pending": 58165,
+          "received": 12660,
+          "variants": [
+            {
+              "approved": 9199,
+              "denied": 831,
+              "pending": 58165,
+              "processingTime": 6.9,
+              "received": 12660,
+              "title": "Application for Certificate of Citizenship"
+            }
+          ]
         }
       },
       "slug": "n-600",
@@ -126747,7 +129356,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Application for Certificate of Citizenship"
     },
@@ -128250,6 +130860,22 @@
               "title": "Medical Certification for Disability Exceptions"
             }
           ]
+        },
+        "2026-Q2": {
+          "approved": null,
+          "denied": null,
+          "pending": 9302,
+          "received": 13001,
+          "variants": [
+            {
+              "approved": null,
+              "denied": null,
+              "pending": 9302,
+              "processingTime": null,
+              "received": 13001,
+              "title": "Medical Certification for Disability Exceptions"
+            }
+          ]
         }
       },
       "slug": "n-648",
@@ -128303,7 +130929,8 @@
         "2025-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q3.xlsx",
         "2025-Q3": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2025_q4_v1.xlsx",
         "2025-Q4": "https://www.uscis.gov/sites/default/files/document/reports/quarterly_all_forms_fy2026_q1_v1.xlsx",
-        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx"
+        "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
+        "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
       "title": "Medical Certification for Disability Exceptions"
     }
@@ -128658,6 +131285,13 @@
       "fiscalYear": 2026,
       "quarter": "2026-Q1",
       "start": "2026-01-01"
+    },
+    {
+      "end": "2026-06-30",
+      "fiscalQuarter": 3,
+      "fiscalYear": 2026,
+      "quarter": "2026-Q2",
+      "start": "2026-04-01"
     }
   ]
 }
