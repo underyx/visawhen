@@ -1911,7 +1911,7 @@
               "pending": 13845,
               "processingTime": null,
               "received": 11155,
-              "title": "Fianc\ufffde Petitions"
+              "title": "Fianc\u00e9e Petitions"
             }
           ]
         },
@@ -1927,7 +1927,7 @@
               "pending": 16430,
               "processingTime": null,
               "received": 12787,
-              "title": "Fianc\ufffde Petitions"
+              "title": "Fianc\u00e9e Petitions"
             }
           ]
         },
@@ -1943,7 +1943,7 @@
               "pending": 20111,
               "processingTime": null,
               "received": 12856,
-              "title": "Fianc\ufffde Petitions"
+              "title": "Fianc\u00e9e Petitions"
             }
           ]
         },
@@ -1959,7 +1959,7 @@
               "pending": 19551,
               "processingTime": null,
               "received": 11596,
-              "title": "Fianc\ufffde Petitions"
+              "title": "Fianc\u00e9e Petitions"
             }
           ]
         },
@@ -1975,7 +1975,7 @@
               "pending": 18506,
               "processingTime": null,
               "received": 11230,
-              "title": "Fianc\ufffde Petitions"
+              "title": "Fianc\u00e9e Petitions"
             }
           ]
         },
@@ -1991,7 +1991,7 @@
               "pending": 19799,
               "processingTime": null,
               "received": 12175,
-              "title": "Fianc\ufffde Petitions"
+              "title": "Fianc\u00e9e Petitions"
             }
           ]
         },
@@ -2007,7 +2007,7 @@
               "pending": 19438,
               "processingTime": null,
               "received": 13222,
-              "title": "Fianc\ufffde Petitions"
+              "title": "Fianc\u00e9e Petitions"
             }
           ]
         },
@@ -2023,7 +2023,7 @@
               "pending": 14543,
               "processingTime": null,
               "received": 12439,
-              "title": "Fianc\ufffde Petitions"
+              "title": "Fianc\u00e9e Petitions"
             }
           ]
         },
@@ -2039,7 +2039,7 @@
               "pending": 13069,
               "processingTime": null,
               "received": 12446,
-              "title": "Fianc\ufffde Petitions"
+              "title": "Fianc\u00e9e Petitions"
             }
           ]
         },
@@ -2055,7 +2055,7 @@
               "pending": 15767,
               "processingTime": null,
               "received": 13159,
-              "title": "Fianc\ufffde Petitions"
+              "title": "Fianc\u00e9e Petitions"
             }
           ]
         },
@@ -2071,7 +2071,7 @@
               "pending": 18592,
               "processingTime": null,
               "received": 14263,
-              "title": "Fianc\ufffde Petitions"
+              "title": "Fianc\u00e9e Petitions"
             }
           ]
         },
@@ -2087,7 +2087,7 @@
               "pending": 14385,
               "processingTime": null,
               "received": 13017,
-              "title": "Fianc\ufffde Petitions"
+              "title": "Fianc\u00e9e Petitions"
             }
           ]
         },
@@ -2103,7 +2103,7 @@
               "pending": 15847,
               "processingTime": null,
               "received": 12836,
-              "title": "Fianc\ufffde Petitions"
+              "title": "Fianc\u00e9e Petitions"
             }
           ]
         },
@@ -2119,7 +2119,7 @@
               "pending": 20276,
               "processingTime": null,
               "received": 13200,
-              "title": "Fianc\ufffde Petitions"
+              "title": "Fianc\u00e9e Petitions"
             }
           ]
         },
@@ -2135,7 +2135,7 @@
               "pending": 21021,
               "processingTime": null,
               "received": 12315,
-              "title": "Fianc\ufffde Petitions"
+              "title": "Fianc\u00e9e Petitions"
             }
           ]
         },
@@ -2151,7 +2151,7 @@
               "pending": 24764,
               "processingTime": null,
               "received": 11480,
-              "title": "Fianc\ufffde Petitions"
+              "title": "Fianc\u00e9e Petitions"
             }
           ]
         },
@@ -2167,7 +2167,7 @@
               "pending": 28587,
               "processingTime": null,
               "received": 11460,
-              "title": "Fianc\ufffde Petitions"
+              "title": "Fianc\u00e9e Petitions"
             }
           ]
         },
@@ -2183,7 +2183,7 @@
               "pending": 28224,
               "processingTime": null,
               "received": 12321,
-              "title": "Fianc\ufffde Petitions"
+              "title": "Fianc\u00e9e Petitions"
             }
           ]
         },
@@ -2199,7 +2199,7 @@
               "pending": 30353,
               "processingTime": null,
               "received": 12702,
-              "title": "Fianc\ufffde Petitions"
+              "title": "Fianc\u00e9e Petitions"
             }
           ]
         },
@@ -2215,7 +2215,7 @@
               "pending": 29814,
               "processingTime": null,
               "received": 11012,
-              "title": "Fianc\ufffde Petitions"
+              "title": "Fianc\u00e9e Petitions"
             }
           ]
         },
@@ -2423,7 +2423,7 @@
               "pending": 36842,
               "processingTime": 9.3,
               "received": 11287,
-              "title": "Petition for Alien Fianc\ufffd(e)"
+              "title": "Petition for Alien Fianc\u00e9(e)"
             }
           ]
         },
@@ -34669,7 +34669,7 @@
         },
         {
           "code": "WSC",
-          "name": "California",
+          "name": "California Service Center",
           "quarters": {
             "2015-Q1": {
               "approved": 69688,
@@ -34942,7 +34942,7 @@
               "received": 1213
             }
           },
-          "slug": "california",
+          "slug": "california-service-center",
           "state": null,
           "stateCode": null
         },
@@ -70723,7 +70723,7 @@
         },
         {
           "code": "WSC",
-          "name": "California",
+          "name": "California Service Center",
           "quarters": {
             "2015-Q1": {
               "approved": 224,
@@ -71002,7 +71002,7 @@
               "received": 1535
             }
           },
-          "slug": "california",
+          "slug": "california-service-center",
           "state": null,
           "stateCode": null
         },

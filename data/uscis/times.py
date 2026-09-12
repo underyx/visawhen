@@ -61,8 +61,9 @@ def get_months(range: dict[str, Any]) -> str:
 
 
 async def yield_records(queries_file: Path) -> AsyncGenerator[dict[str, Any], None]:
-    for line in queries_file.open("r").readlines():
-        query = tuple(json.loads(line))
+    with queries_file.open("r") as lines:
+        queries = [tuple(json.loads(line)) for line in lines]
+    for query in queries:
         form, subform, office = query
         url = f"{BASE_URL}/{form}/{office}/{subform}"
         print(f"fetching {url}")
@@ -86,7 +87,7 @@ async def yield_records(queries_file: Path) -> AsyncGenerator[dict[str, Any], No
 
         reported = arrow.get(data["publication_date"], "MMMM DD, YYYY")
 
-        if range_len := len(data["range"]) != 2:
+        if (range_len := len(data["range"])) != 2:
             raise ValueError(f"Expected exactly two range datapoints, got {range_len=}")
 
         yield {
@@ -114,7 +115,11 @@ async def main():
         [record async for record in yield_records(dump_dir / "queries.jsonl")]
     ).set_index(["form", "subform", "office", "reported_date"])
     print(f"before dedupe: {len(times)=}, {len(new_times)=}")
-    times = pd.concat([times, new_times]).drop_duplicates()
+    # drop_duplicates() would compare the values only (not the index), and
+    # so throw away every office that happens to report the same times as
+    # another; a row is a duplicate when its (form, subform, office, date) is.
+    times = pd.concat([times, new_times])
+    times = times[~times.index.duplicated(keep="last")]
     print(f"after dedupe: {len(times)=}")
 
     times.to_sql("times", conn, if_exists="replace", index=True)
