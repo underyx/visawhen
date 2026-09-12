@@ -1,5 +1,4 @@
 import Link from "next/link";
-import last from "lodash/last";
 import { GetStaticPaths, GetStaticProps } from "next";
 import React from "react";
 import {
@@ -12,26 +11,37 @@ import {
 } from "../../../api/consulates";
 import Head from "next/head";
 import ConsulateChart from "../../../components/ConsulateChart";
-import { useRouter } from "next/router";
 import { ChevronLeftIcon } from "../../../components/icons";
 import { Button, Group, Stack, Text, Title } from "@mantine/core";
+
+interface Props {
+  postSlug: string;
+  visaClassSlug: string;
+  baselineRate: number;
+  backlog: BacklogRow[];
+  postName: string;
+  visaClassName: string;
+  visaClassDescription: string | null;
+}
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const rows = await getSlugPairs();
   return {
-    paths: rows.map((row) => {
-      const { postSlug, visaClassSlug } = row;
-      return { params: { postSlug, visaClassSlug } };
-    }),
+    paths: rows.map(({ postSlug, visaClassSlug }) => ({
+      params: { postSlug, visaClassSlug },
+    })),
     fallback: false,
   };
 };
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  if (params === undefined) return { notFound: true };
-  const { postSlug, visaClassSlug } = params;
-  if (typeof postSlug !== "string" || typeof visaClassSlug !== "string")
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  if (
+    params === undefined ||
+    typeof params.postSlug !== "string" ||
+    typeof params.visaClassSlug !== "string"
+  )
     return { notFound: true };
+  const { postSlug, visaClassSlug } = params;
 
   const post = await getPost(postSlug);
   const visaClass = await getVisaClass(visaClassSlug);
@@ -48,8 +58,10 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
   return {
     props: {
+      postSlug,
+      visaClassSlug,
       baselineRate: baseline.issuances,
-      backlog: backlog,
+      backlog,
       postName: post.post,
       visaClassName: visaClass.visaClass,
       visaClassDescription: visaClass.description,
@@ -57,45 +69,53 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   };
 };
 
-interface Props {
-  baselineRate: number;
-  backlog: BacklogRow[];
-  postName: string;
-  visaClassName: string;
-  visaClassDescription: string | null;
+// The months are stored as UTC midnight; format them as such, or the
+// (client-side) render in an American time zone lands on the previous
+// month's last day and disagrees with the prerendered HTML.
+const monthFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "long",
+  timeZone: "UTC",
+});
+
+function assessment(
+  { issuances, expectedDelta }: BacklogRow,
+  postName: string,
+  monthName: string,
+): string {
+  if (expectedDelta === null)
+    return `It seems like ${postName} is operating as normal.`;
+  if (issuances > expectedDelta * 1.2 && issuances >= 10)
+    return `It seems like ${postName} is hard at work catching up on their backlog from COVID.`;
+  if (issuances < expectedDelta * 0.8 && expectedDelta >= 10)
+    return `It seems like ${postName} is still not operating at full capacity.`;
+  if (issuances < 10 || expectedDelta < 10)
+    return `With so few visas ever issued, it's difficult to tell how well ${postName} is doing just by looking at this ${monthName}.`;
+  return `It seems like ${postName} is operating as normal.`;
 }
 
 export default function ConsulateStats({
+  postSlug,
+  visaClassSlug,
   baselineRate,
   backlog,
   postName,
   visaClassName,
   visaClassDescription,
 }: Props) {
-  const router = useRouter();
+  const lastMonth = backlog[backlog.length - 1];
+  const lastMonthName = monthFormatter.format(new Date(lastMonth.month));
+  const visaClassWithDescription =
+    visaClassDescription === null
+      ? visaClassName
+      : `${visaClassName} (${visaClassDescription})`;
 
-  const lastMonth = last<BacklogRow>(backlog);
-  if (lastMonth === undefined) return "no data";
-  const lastMonthDate = new Date(lastMonth.month);
-  const lastMonthName = lastMonthDate.toLocaleDateString("default", {
-    month: "long",
-  });
-
-  const { postSlug, visaClassSlug } = router.query;
-  if (typeof postSlug !== "string" || typeof visaClassSlug !== "string") return;
-
-  let title = `The ${postName} consulate's ${visaClassName} visa issuance rate`;
-  if (visaClassDescription !== null) title += ` (${visaClassDescription})`;
-
-  let description = `${postName} used to issue ${
+  const title = `The ${postName} consulate's ${visaClassWithDescription} visa issuance rate`;
+  const description = `${postName} used to issue ${
     Math.round(baselineRate * 10) / 10
-  } ${visaClassName}`;
-  if (visaClassDescription !== null)
-    description += ` (${visaClassDescription})`;
-  description += ` visas in an average ${lastMonthName}.`;
-  description += ` This ${lastMonthName}, they issued ${lastMonth.issuances}.`;
-
-  let canonicalUrl = `https://visawhen.com/consulates/${postSlug}/${visaClassSlug}`;
+  } ${visaClassWithDescription} visas in an average ${lastMonthName}. This ${lastMonthName}, they issued ${
+    lastMonth.issuances
+  }.`;
+  const canonicalUrl = `https://visawhen.com/consulates/${postSlug}/${visaClassSlug}`;
 
   return (
     <Stack>
@@ -118,7 +138,7 @@ export default function ConsulateStats({
           Change consulate
         </Button>
         {/* Plain anchor: the consulate page's _next/data JSON is not
-            deployed (see the note in the consulate list page), so a Link
+            deployed (see the note in components/ListRow.tsx), so a Link
             would only 404 on it before hard-navigating anyway. */}
         <Button
           variant="outline"
@@ -142,18 +162,7 @@ export default function ConsulateStats({
         <strong>{Math.round((lastMonth.expectedDelta ?? 0) * 10) / 10}</strong>{" "}
         {visaClassName} visas in an average {lastMonthName}. This{" "}
         {lastMonthName}, they issued <strong>{lastMonth.issuances}</strong>.{" "}
-        {lastMonth.expectedDelta !== null &&
-        lastMonth.issuances > lastMonth.expectedDelta * 1.2 &&
-        lastMonth.issuances >= 10
-          ? `It seems like ${postName} is hard at work catching up on their backlog from COVID.`
-          : lastMonth.expectedDelta !== null &&
-            lastMonth.issuances < lastMonth.expectedDelta * 0.8 &&
-            lastMonth.expectedDelta >= 10
-          ? `It seems like ${postName} is still not operating at full capacity.`
-          : lastMonth.expectedDelta !== null &&
-            (lastMonth.issuances < 10 || lastMonth.expectedDelta < 10)
-          ? `With so few visas ever issued, it's difficult to tell how well ${postName} is doing just by looking at this ${lastMonthName}.`
-          : `It seems like ${postName} is operating as normal.`}
+        {assessment(lastMonth, postName, lastMonthName)}
       </Text>
       <ConsulateChart backlog={backlog} />
     </Stack>

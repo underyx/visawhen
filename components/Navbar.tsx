@@ -1,6 +1,20 @@
 import Link from "next/link";
 import { DiscordIcon } from "./icons";
-import { Avatar, Button, Container, Flex, Group, Text } from "@mantine/core";
+import {
+  Anchor,
+  Avatar,
+  Button,
+  Container,
+  Flex,
+  Group,
+  Text,
+} from "@mantine/core";
+
+const NAV_LINKS = [
+  { href: "/uscis", label: "USCIS" },
+  { href: "/nvc", label: "NVC" },
+  { href: "/consulates", label: "Consulates" },
+];
 
 export default function Navbar() {
   return (
@@ -9,7 +23,7 @@ export default function Navbar() {
           links would be painted over the page content on narrow screens. */}
       <Flex justify="space-between" align="center" wrap="nowrap" gap="xs">
         <Group gap="sm" align="center" wrap="nowrap">
-          <Link href="/">
+          <Anchor component={Link} href="/" underline="never">
             <Group gap={2} c="gray.1" wrap="nowrap">
               <Avatar src="/logo.svg" alt="Logo for VisaWhen" />
               &nbsp;
@@ -17,23 +31,20 @@ export default function Navbar() {
                 VisaWhen
               </Text>
             </Group>
-          </Link>
+          </Anchor>
           <Group gap={4} wrap="nowrap">
-            <Link href="/uscis">
-              <Button size="compact-sm" color="gray.2" variant="subtle">
-                USCIS
+            {NAV_LINKS.map(({ href, label }) => (
+              <Button
+                key={href}
+                component={Link}
+                href={href}
+                size="compact-sm"
+                color="gray.2"
+                variant="subtle"
+              >
+                {label}
               </Button>
-            </Link>
-            <Link href="/nvc">
-              <Button size="compact-sm" color="gray.2" variant="subtle">
-                NVC
-              </Button>
-            </Link>
-            <Link href="/consulates">
-              <Button size="compact-sm" color="gray.2" variant="subtle">
-                Consulates
-              </Button>
-            </Link>
+            ))}
           </Group>
         </Group>
         <Button

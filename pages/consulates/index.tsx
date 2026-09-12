@@ -1,16 +1,8 @@
 import { SearchIcon } from "../../components/icons";
-import {
-  Badge,
-  Button,
-  Highlight,
-  Stack,
-  TextInput,
-  Title,
-} from "@mantine/core";
-import { deburr, kebabCase, sortBy } from "lodash";
+import { Badge, Highlight, Stack, TextInput, Title } from "@mantine/core";
+import { sortBy } from "lodash";
 import { GetStaticProps } from "next";
 import Head from "next/head";
-import numeral from "numeral";
 import React, { useMemo } from "react";
 import {
   ConsulateBaselineRow,
@@ -18,18 +10,22 @@ import {
   getConsulateBaselines,
   PostRow,
 } from "../../api/consulates";
+import { formatMonthlyRate } from "../../components/consulates";
+import { ListRow, ListRows } from "../../components/ListRow";
+import { normalize } from "../../components/search";
 import { useInputState } from "@mantine/hooks";
-export const getStaticProps: GetStaticProps = async () => ({
-  props: {
-    posts: await getAllPosts(),
-    baselines: await getConsulateBaselines(),
-  },
-});
 
 interface Props {
   posts: PostRow[];
   baselines: ConsulateBaselineRow[];
 }
+
+export const getStaticProps: GetStaticProps<Props> = async () => ({
+  props: {
+    posts: await getAllPosts(),
+    baselines: await getConsulateBaselines(),
+  },
+});
 
 function sortItems(
   posts: PostRow[],
@@ -48,27 +44,23 @@ export default function ConsulateSelect({ posts, baselines }: Props) {
   );
   const [term, setTerm] = useInputState("");
   const filteredPosts = useMemo<PostRow[]>(() => {
-    const normalizedTerm = kebabCase(deburr(term.toLowerCase()));
+    const normalizedTerm = normalize(term);
     return sortItems(
-      posts.filter(({ postSlug }) => postSlug.includes(normalizedTerm)),
+      posts.filter(({ post }) => normalize(post).includes(normalizedTerm)),
       baselineMap,
     );
   }, [baselineMap, posts, term]);
+
+  const description = `See how long the visa backlog is at any of ${posts.length} consulates.`;
 
   return (
     <Stack>
       <Head>
         <title>Consulate visa backlogs</title>
-        <meta
-          name="description"
-          content={`See how long the visa backlog is at any of ${posts.length} consulates.`}
-        />
+        <meta name="description" content={description} />
         <link rel="canonical" href="https://visawhen.com/consulates" />
         <meta property="og:title" content="Consulate visa backlogs" />
-        <meta
-          property="og:description"
-          content={`See how long the visa backlog is at any of ${posts.length} consulates.`}
-        />
+        <meta property="og:description" content={description} />
         <meta property="og:url" content="https://visawhen.com/consulates" />
       </Head>
       <Title order={2}>Select your consulate</Title>
@@ -79,20 +71,12 @@ export default function ConsulateSelect({ posts, baselines }: Props) {
         placeholder="Atlantis"
         onChange={setTerm}
       />
-      {/* Plain anchors, not next/link: the per-consulate _next/data JSON is
-          not deployed (it would push the site over Cloudflare's 20,000-file
-          limit), so these pages can only be reached by a full page load. A
-          Link would prefetch the missing JSON on hover and, on click, fetch
-          it again just to 404 and fall back to the same hard navigation. */}
-      <Button.Group orientation="vertical">
+      <ListRows>
         {filteredPosts.map(({ post, postSlug }) => (
-          <Button
-            size="lg"
-            variant="default"
+          <ListRow
             key={postSlug}
-            component="a"
             href={`/consulates/${postSlug}`}
-            justify="space-between"
+            hardNavigation
             rightSection={
               <Badge
                 size="lg"
@@ -102,18 +86,13 @@ export default function ConsulateSelect({ posts, baselines }: Props) {
                 tt="none"
                 fw={500}
               >
-                normally{" "}
-                {numeral(baselineMap.get(postSlug))
-                  .format((baselineMap.get(postSlug) ?? 0) > 10 ? "0a" : "0.0a")
-                  .toUpperCase()}
-                /mo
+                normally {formatMonthlyRate(baselineMap.get(postSlug))}
               </Badge>
             }
-          >
-            <Highlight highlight={term}>{post}</Highlight>
-          </Button>
+            label={<Highlight highlight={term}>{post}</Highlight>}
+          />
         ))}
-      </Button.Group>
+      </ListRows>
     </Stack>
   );
 }

@@ -1,48 +1,78 @@
 import { GetStaticProps } from "next";
 import Head from "next/head";
 import { getData, NvcData, NvcSeries } from "../api/nvc";
-import { add, getISODay } from "date-fns";
-import React from "react";
+import React, { useSyncExternalStore } from "react";
 import NvcChart from "../components/NvcChart";
 import last from "lodash/last";
 import { jsonLdScriptProps } from "react-schemaorg";
 import { Dataset } from "schema-dts";
 import { Anchor, Stack, Text, Title } from "@mantine/core";
 
-export const getStaticProps: GetStaticProps = async () => ({
+interface Props {
+  data: NvcData;
+}
+
+export const getStaticProps: GetStaticProps<Props> = async () => ({
   props: {
     data: await getData(),
   },
 });
 
-interface Props {
-  data: NvcData;
+const NVC_TIME_ZONE = "America/New_York";
+const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+// The dates are stored as UTC days; format them as such, or a visitor west of
+// Greenwich sees the day before.
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+  dateStyle: "long",
+  timeZone: "UTC",
+});
+
+/** The newest as-of date in the data, "2026-09-07" */
+function getLatestDate(data: NvcData): string {
+  return last(Object.keys(data.creation)) as string;
 }
 
-const NVC_TZ_OFFSET_MINS = 5 * 60;
-
-function getLatestDate(data: NvcData): Date {
-  const dates = Object.keys(data.creation);
-  return new Date(last(dates) as string);
+/** The calendar date and ISO weekday (Monday is 1) at the NVC right now. */
+function nvcToday(now: Date): { date: string; isoDay: number } {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: NVC_TIME_ZONE,
+    weekday: "short",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((candidate) => candidate.type === type)?.value ?? "";
+  return {
+    date: `${part("year")}-${part("month")}-${part("day")}`,
+    isoDay: WEEKDAYS.indexOf(part("weekday")) + 1,
+  };
 }
 
-function getDaysTillNewDataText(data: NvcData): string {
-  const latestDate = getLatestDate(data);
-  const today = add(new Date(), {
-    minutes: new Date().getTimezoneOffset() - NVC_TZ_OFFSET_MINS,
-  });
+/** "next update expected in 3 days": the NVC updates its page on Mondays. */
+function getNextUpdateText(data: NvcData, now: Date): string {
+  const { date, isoDay } = nvcToday(now);
   const daysTillNewData =
-    getISODay(today) === 1 && latestDate.toDateString() !== today.toDateString()
-      ? 0
-      : 8 - getISODay(today);
-
+    isoDay === 1 && getLatestDate(data) !== date ? 0 : 8 - isoDay;
   return `next update expected ${
     daysTillNewData === 0
       ? "later today"
       : daysTillNewData === 1
       ? "tomorrow"
       : `in ${daysTillNewData} days`
-  } (EST).`;
+  } (Eastern Time)`;
+}
+
+/** The text depends on the current date, so it is rendered on the client
+ * only: the prerendered HTML is served for days after it was built, and
+ * would otherwise disagree with what React renders on hydration. */
+function useNextUpdateText(data: NvcData): string | null {
+  return useSyncExternalStore(
+    () => () => {},
+    () => getNextUpdateText(data, new Date()),
+    () => null,
+  );
 }
 
 interface ChartHeadingProps {
@@ -61,32 +91,24 @@ function ChartHeading({
 }
 
 export default function NvcBacklog({ data }: Props) {
+  const nextUpdateText = useNextUpdateText(data);
+  const latestDate = getLatestDate(data);
+  const description = `The National Visa Center is currently taking ${last(
+    Object.values(data.review),
+  )} days to review documents, ${last(
+    Object.values(data.creation),
+  )} days to create cases, and ${last(
+    Object.values(data.inquiry),
+  )} days to respond to inquiries.`;
+
   return (
     <Stack gap="3rem">
       <Head>
         <title>NVC wait times</title>
-        <meta
-          name="description"
-          content={`The National Visa Center is currently taking ${last(
-            Object.values(data.review),
-          )} days to review documents, ${last(
-            Object.values(data.creation),
-          )} days to create cases, and ${last(
-            Object.values(data.inquiry),
-          )} days to respond to inquiries.`}
-        />
+        <meta name="description" content={description} />
         <link rel="canonical" href="https://visawhen.com/nvc" />
         <meta property="og:title" content="NVC wait times" />
-        <meta
-          property="og:description"
-          content={`The National Visa Center is currently taking ${last(
-            Object.values(data.review),
-          )} days to review documents, ${last(
-            Object.values(data.creation),
-          )} days to create cases, and ${last(
-            Object.values(data.inquiry),
-          )} days to respond to inquiries.`}
-        />
+        <meta property="og:description" content={description} />
         <meta property="og:url" content="https://visawhen.com/nvc" />
         <script
           {...jsonLdScriptProps<Dataset>({
@@ -98,10 +120,10 @@ export default function NvcBacklog({ data }: Props) {
               contentUrl:
                 "https://github.com/underyx/visawhen/blob/main/data/nvc/data.json",
               encodingFormat: "application/json",
-              uploadDate: getLatestDate(data).toISOString(),
+              uploadDate: latestDate,
               requiresSubscription: false,
             },
-            dateModified: getLatestDate(data).toISOString(),
+            dateModified: latestDate,
             description:
               "Here's how long you should expect to wait until the National Visa Center processes your case.",
             accessMode: "chartOnVisual",
@@ -123,8 +145,8 @@ export default function NvcBacklog({ data }: Props) {
       <Stack gap="sm">
         <Title order={1}>NVC wait times</Title>
         <Text size="xl">
-          Last updated {getLatestDate(data).toLocaleDateString()},{" "}
-          {getDaysTillNewDataText(data)}
+          Last updated {dateFormatter.format(new Date(latestDate))}
+          {nextUpdateText === null ? "." : `, ${nextUpdateText}.`}
         </Text>
         <Text>
           Here&rsquo;s how long you should expect to wait until the National
@@ -138,7 +160,7 @@ export default function NvcBacklog({ data }: Props) {
           <Anchor
             href="https://ceac.state.gov/IV/Login.aspx"
             target="_blank"
-            rel="noopener noreferer"
+            rel="noopener noreferrer"
           >
             CEAC
           </Anchor>{" "}
@@ -158,7 +180,7 @@ export default function NvcBacklog({ data }: Props) {
           <Anchor
             href="https://ceac.state.gov/IV/Login.aspx"
             target="_blank"
-            rel="noopener noreferer"
+            rel="noopener noreferrer"
           >
             CEAC
           </Anchor>
@@ -169,7 +191,7 @@ export default function NvcBacklog({ data }: Props) {
           <Anchor
             href="https://egov.uscis.gov/casestatus/landing.do"
             target="_blank"
-            rel="noopener noreferer"
+            rel="noopener noreferrer"
           >
             USCIS Case Status
           </Anchor>{" "}
@@ -191,7 +213,7 @@ export default function NvcBacklog({ data }: Props) {
           Time until questions and requests sent via{" "}
           <Anchor
             target="_blank"
-            rel="noopener noreferer"
+            rel="noopener noreferrer"
             href="https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/ask-nvc.html"
           >
             NVC&rsquo;s public inquiry form

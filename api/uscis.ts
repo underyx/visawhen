@@ -73,24 +73,28 @@ export async function getData(): Promise<UscisData> {
   return JSON.parse(contents);
 }
 
+/** The newest quarter with numbers, or null when there are none. Quarters
+ * are "YYYY-QN", so they sort as strings. */
 export function latestQuarter(counts: Record<string, unknown>): string | null {
   const quarters = Object.keys(counts).sort();
   return quarters.length === 0 ? null : quarters[quarters.length - 1];
 }
 
+/** The quarter of the newest all-forms report. */
+export function newestQuarter(data: UscisData): string | null {
+  return data.forms.reduce<string | null>((newest, form) => {
+    const latest = latestQuarter(form.quarters);
+    return latest !== null && (newest === null || latest > newest)
+      ? latest
+      : newest;
+  }, null);
+}
+
 /** Forms with nationwide numbers in the newest all-forms report. */
 export function getActiveForms(data: UscisData): Form[] {
-  const newest = Math.max(
-    ...data.forms.flatMap((form) =>
-      Object.keys(form.quarters).map((quarter) =>
-        Number(quarter.replace("-Q", "")),
-      ),
-    ),
-  );
-  return data.forms.filter((form) =>
-    Object.keys(form.quarters).some(
-      (quarter) => Number(quarter.replace("-Q", "")) === newest,
-    ),
+  const newest = newestQuarter(data);
+  return data.forms.filter(
+    (form) => newest !== null && newest in form.quarters,
   );
 }
 
