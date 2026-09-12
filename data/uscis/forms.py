@@ -197,7 +197,7 @@ STATES_BY_NORMALIZED_NAME = {
 # the I-130 and I-485 reports list by their state's name alone
 NAME_FIXES = {
     "OFM": "Fort Myers",
-    "CSC": "California Service Center",
+    "WSC": "California Service Center",
     "ESC": "Vermont Service Center",
     "NSC": "Nebraska Service Center",
     "SSC": "Texas Service Center",
@@ -368,7 +368,8 @@ def fetch_wayback(
         print(
             f"wayback attempt {attempt + 1}/{WAYBACK_ATTEMPTS} failed ({reason}): {url}"
         )
-        time.sleep(5 * 2**attempt)
+        if attempt < WAYBACK_ATTEMPTS - 1:
+            time.sleep(5 * 2**attempt)
     raise RuntimeError(
         f"Wayback Machine did not serve {url} after {WAYBACK_ATTEMPTS} attempts"
     )
@@ -376,6 +377,8 @@ def fetch_wayback(
 
 def wayback_captures(url_prefix: str) -> dict[str, str]:
     """Newest HTTP 200 capture timestamp of every archived URL starting with `url_prefix`."""
+    # Not collapsed on urlkey: that keeps only each URL's *oldest* capture,
+    # which would pin a report USCIS corrected in place to its first version.
     r = fetch_wayback(
         CDX_URL,
         {
@@ -383,7 +386,6 @@ def wayback_captures(url_prefix: str) -> dict[str, str]:
             "output": "json",
             "fl": "timestamp,original",
             "filter": "statuscode:200",
-            "collapse": "urlkey",
         },
         timeout=CDX_TIMEOUT,
     )
@@ -561,7 +563,11 @@ def normalize_dashes(text: str) -> str:
 def grid_of(report: Report, content: bytes) -> list[list[str]]:
     """A CSV or XLSX report as rows of stripped cell strings."""
     if report.ext == "csv":
-        text = content.decode("utf-8-sig", errors="replace")
+        # The older CSVs are Windows-1252 ("Fiancé(e)" is the only non-ASCII text)
+        try:
+            text = content.decode("utf-8-sig")
+        except UnicodeDecodeError:
+            text = content.decode("cp1252", errors="replace")
         rows = list(csv.reader(io.StringIO(text)))
     else:
         workbook = load_workbook(io.BytesIO(content), read_only=True, data_only=True)

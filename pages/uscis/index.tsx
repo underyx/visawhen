@@ -10,11 +10,11 @@ import {
   Title,
 } from "@mantine/core";
 import { useInputState } from "@mantine/hooks";
-import { deburr, groupBy, sortBy } from "lodash";
+import { groupBy, sortBy } from "lodash";
 import { GetStaticProps } from "next";
 import Head from "next/head";
 import React, { useMemo } from "react";
-import { getActiveForms, getData } from "../../api/uscis";
+import { getActiveForms, getData, newestQuarter } from "../../api/uscis";
 import {
   formatCount,
   formatMonths,
@@ -22,6 +22,7 @@ import {
   toPoints,
 } from "../../components/uscis";
 import { ListRow, ListRows } from "../../components/ListRow";
+import { normalize } from "../../components/search";
 
 interface FormSummary {
   slug: string;
@@ -30,8 +31,6 @@ interface FormSummary {
   category: string;
   pending: number | null;
   waitMonths: number | null;
-  /** USCIS's median processing time in months for the form's main category */
-  processingTime: number | null;
   officeCount: number;
 }
 
@@ -56,9 +55,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   const forms = getActiveForms(data).map((form) => {
     const points = toPoints(data.periods, form.quarters);
     const latest = points[points.length - 1];
-    const main = [...form.quarters[latest.quarter].variants].sort(
-      (a, b) => (b.received ?? 0) - (a.received ?? 0),
-    )[0];
     return {
       slug: form.slug,
       form: form.form,
@@ -66,15 +62,12 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       category: form.category ?? "Other",
       pending: latest.pending,
       waitMonths: latest.waitMonths,
-      processingTime: main?.processingTime ?? null,
       officeCount: form.offices.length,
     };
   });
-  const activeForms = getActiveForms(data);
-  const coveredPeriods = data.periods.filter((period) =>
-    activeForms.some((form) => form.quarters[period.quarter] !== undefined),
+  const latestPeriod = data.periods.find(
+    (period) => period.quarter === newestQuarter(data),
   );
-  const latestPeriod = coveredPeriods[coveredPeriods.length - 1];
   return {
     props: {
       forms,
@@ -83,12 +76,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     },
   };
 };
-
-function normalize(text: string): string {
-  return deburr(text)
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
-}
 
 export default function UscisIndex({
   forms,

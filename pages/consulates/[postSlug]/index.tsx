@@ -1,7 +1,6 @@
 import { ChevronLeftIcon, SearchIcon } from "../../../components/icons";
-import { deburr, sortBy } from "lodash";
+import { sortBy } from "lodash";
 import { GetStaticPaths, GetStaticProps } from "next";
-import { useRouter } from "next/router";
 import Head from "next/head";
 import Link from "next/link";
 import React, { useMemo } from "react";
@@ -14,7 +13,9 @@ import {
   VisaClassBaselineRow,
   VisaClassRow,
 } from "../../../api/consulates";
-import numeral from "numeral";
+import { formatMonthlyRate } from "../../../components/consulates";
+import { ListRow, ListRows } from "../../../components/ListRow";
+import { normalize } from "../../../components/search";
 import {
   Badge,
   Breadcrumbs,
@@ -27,7 +28,14 @@ import {
   Title,
 } from "@mantine/core";
 import { useInputState } from "@mantine/hooks";
-import classes from "../../../components/ListButton.module.css";
+
+interface Props {
+  postSlug: string;
+  postName: string;
+  visaClasses: VisaClassRow[];
+  availableVisaClasses: string[];
+  baselines: VisaClassBaselineRow[];
+}
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = await getAllPosts();
@@ -37,33 +45,24 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  if (params === undefined) return { notFound: true };
-  const { postSlug } = params;
-  if (postSlug === undefined || typeof postSlug !== "string")
+export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+  if (params === undefined || typeof params.postSlug !== "string")
     return { notFound: true };
+  const { postSlug } = params;
 
   const postInfo = await getPost(postSlug);
   if (postInfo === undefined) return { notFound: true };
 
-  const availableVisaClasses = await getVisaClassSlugsForPost(postSlug);
-
   return {
     props: {
-      visaClasses: await getAllVisaClasses(),
-      availableVisaClasses,
+      postSlug,
       postName: postInfo.post,
+      visaClasses: await getAllVisaClasses(),
+      availableVisaClasses: await getVisaClassSlugsForPost(postSlug),
       baselines: await getVisaClassBaselines(postSlug),
     },
   };
 };
-
-interface Props {
-  visaClasses: VisaClassRow[];
-  availableVisaClasses: string[];
-  postName: string;
-  baselines: VisaClassBaselineRow[];
-}
 
 function sortItems(
   visaClasses: VisaClassRow[],
@@ -76,13 +75,12 @@ function sortItems(
 }
 
 export default function ConsulateSelect({
+  postSlug,
+  postName,
   visaClasses,
   availableVisaClasses,
-  postName,
   baselines,
 }: Props) {
-  const router = useRouter();
-
   const baselineMap = useMemo<Map<string, number>>(
     () => new Map(baselines.map((row) => [row.visaClassSlug, row.issuances])),
     [baselines],
@@ -95,44 +93,27 @@ export default function ConsulateSelect({
   );
 
   const filteredVisas = useMemo<VisaClassRow[]>(() => {
-    const normalizedTerm = deburr(term).toLowerCase().replace(/\W/, "");
+    const normalizedTerm = normalize(term);
     return sortItems(
-      visaClasses.filter(
-        ({ visaClassSlug, description }) =>
-          visaClassSlug.includes(normalizedTerm) ||
-          deburr(description ?? "")
-            .toLowerCase()
-            .replace(/\W/, "")
-            .includes(normalizedTerm),
+      visaClasses.filter(({ visaClass, description }) =>
+        normalize(`${visaClass} ${description ?? ""}`).includes(normalizedTerm),
       ),
       baselineMap,
     );
   }, [baselineMap, visaClasses, term]);
 
-  const { postSlug } = router.query;
-  if (typeof postSlug !== "string") return;
+  const canonicalUrl = `https://visawhen.com/consulates/${postSlug}`;
+  const description = `See how long the visa backlog is at ${postName} in any of ${availableVisaClasses.length} visa categories.`;
 
   return (
     <Stack>
       <Head>
-        <title>{postName} visa backlog</title>
-        <meta
-          name="description"
-          content={`See how long the visa backlog is at ${postName} in any of ${availableVisaClasses.length} visa categories.`}
-        />
-        <link
-          rel="canonical"
-          href={`https://visawhen.com/consulates/${postSlug}`}
-        />
+        <title>{`${postName} visa backlog`}</title>
+        <meta name="description" content={description} />
+        <link rel="canonical" href={canonicalUrl} />
         <meta property="og:title" content={`${postName} visa backlogs`} />
-        <meta
-          property="og:description"
-          content={`See how long the visa backlog is at ${postName} in any of ${availableVisaClasses.length} visa categories.`}
-        />
-        <meta
-          property="og:url"
-          content={`https://visawhen.com/consulates/${postSlug}`}
-        />
+        <meta property="og:description" content={description} />
+        <meta property="og:url" content={canonicalUrl} />
       </Head>
       <Button
         variant="outline"
@@ -160,25 +141,15 @@ export default function ConsulateSelect({
         placeholder="DL6"
         onChange={setTerm}
       />
-      {/* Plain anchors, not next/link: the per-page _next/data JSON under
-          /consulates/ is not deployed (it would push the site over
-          Cloudflare's 20,000-file limit), so these pages can only be reached
-          by a full page load. A Link would prefetch the missing JSON on hover
-          and, on click, fetch it again just to 404 and fall back to the same
-          hard navigation. */}
-      <Button.Group orientation="vertical">
+      <ListRows>
         {filteredVisas.map(({ visaClass, visaClassSlug, description }) => {
           const hasAnyIssued = availableVisaClassesSet.has(visaClassSlug);
           return (
-            <Button
-              size="lg"
-              variant="default"
-              disabled={!hasAnyIssued}
+            <ListRow
               key={visaClassSlug}
-              component="a"
               href={`/consulates/${postSlug}/${visaClassSlug}`}
-              classNames={{ root: classes.root, inner: classes.inner }}
-              justify="space-between"
+              hardNavigation
+              disabled={!hasAnyIssued}
               rightSection={
                 <Badge
                   size="lg"
@@ -188,33 +159,30 @@ export default function ConsulateSelect({
                   tt="none"
                   fw={500}
                 >
-                  {!hasAnyIssued
-                    ? "never issued here"
-                    : `normally ${numeral(baselineMap.get(visaClassSlug))
-                        .format(
-                          (baselineMap.get(visaClassSlug) ?? 0) > 10
-                            ? "0a"
-                            : "0.0a",
-                        )
-                        .toUpperCase()}/mo`}
+                  {hasAnyIssued
+                    ? `normally ${formatMonthlyRate(
+                        baselineMap.get(visaClassSlug),
+                      )}`
+                    : "never issued here"}
                 </Badge>
               }
-            >
-              <Group gap="xs" wrap="nowrap">
-                <Badge
-                  size="lg"
-                  radius="sm"
-                  color={!hasAnyIssued ? "gray" : "blue"}
-                  variant={!hasAnyIssued ? "outline" : "light"}
-                >
-                  <Highlight highlight={term}>{visaClass}</Highlight>
-                </Badge>{" "}
-                <Highlight highlight={term}>{description ?? ""}</Highlight>
-              </Group>
-            </Button>
+              label={
+                <Group gap="xs">
+                  <Badge
+                    size="lg"
+                    radius="sm"
+                    color={hasAnyIssued ? "blue" : "gray"}
+                    variant={hasAnyIssued ? "light" : "outline"}
+                  >
+                    <Highlight highlight={term}>{visaClass}</Highlight>
+                  </Badge>
+                  <Highlight highlight={term}>{description ?? ""}</Highlight>
+                </Group>
+              }
+            />
           );
         })}
-      </Button.Group>
+      </ListRows>
     </Stack>
   );
 }

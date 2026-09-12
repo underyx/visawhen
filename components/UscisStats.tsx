@@ -17,12 +17,11 @@ interface StatProps {
 }
 
 function Stat({ label, value, change, higherIsBetter }: StatProps) {
-  const isIncrease = change?.startsWith("+");
-  const isDecrease = change?.startsWith("−");
+  const isIncrease = change?.startsWith("+") ?? false;
   const color =
     change === null || change === "unchanged"
       ? "dimmed"
-      : isIncrease === higherIsBetter || isDecrease === !higherIsBetter
+      : isIncrease === higherIsBetter
       ? "teal.8"
       : "red.8";
   return (
@@ -32,7 +31,9 @@ function Stat({ label, value, change, higherIsBetter }: StatProps) {
       </Text>
       <Title order={3}>{value}</Title>
       <Text size="sm" c={color}>
-        {change === null ? " " : `${change} vs. previous quarter`}
+        {/* a non-breaking space keeps the cards the same height when one
+            has no change to show */}
+        {change === null ? "\u00a0" : `${change} vs. previous quarter`}
       </Text>
     </Paper>
   );

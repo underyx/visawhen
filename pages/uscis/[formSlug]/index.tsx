@@ -12,7 +12,7 @@ import {
   Title,
 } from "@mantine/core";
 import { useInputState } from "@mantine/hooks";
-import { deburr, sortBy } from "lodash";
+import { sortBy } from "lodash";
 import { GetStaticPaths, GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
@@ -35,6 +35,7 @@ import {
 import { OutcomesChart, WaitChart } from "../../../components/UscisChart";
 import UscisStats from "../../../components/UscisStats";
 import { ListRow, ListRows } from "../../../components/ListRow";
+import { normalize } from "../../../components/search";
 
 interface OfficeSummary {
   slug: string;
@@ -97,12 +98,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     },
   };
 };
-
-function normalize(text: string): string {
-  return deburr(text)
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
-}
 
 export default function UscisForm({
   form,

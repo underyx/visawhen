@@ -13,22 +13,63 @@ import {
 } from "@mantine/core";
 import Head from "next/head";
 import Link from "next/link";
+import React from "react";
+
+interface StepCardProps {
+  step: number;
+  name: string;
+  href: string;
+  action: string;
+}
+
+function StepCard({
+  step,
+  name,
+  href,
+  action,
+  children,
+}: React.PropsWithChildren<StepCardProps>) {
+  return (
+    <Card shadow="sm" p="md" radius="md" withBorder>
+      <Flex
+        direction="column"
+        justify="space-between"
+        style={{ height: "100%" }}
+      >
+        <Stack>
+          <UnstyledButton component={Link} href={href}>
+            <Title order={2} size="h5">
+              <Flex justify="space-between" align="center">
+                <Group>
+                  <Badge variant="filled">Step {step}</Badge>
+                  <Text>{name}</Text>
+                </Group>
+                <ChevronRightIcon />
+              </Flex>
+            </Title>
+          </UnstyledButton>
+          <Text>{children}</Text>
+        </Stack>
+        <Button mt="md" component={Link} href={href}>
+          {action}
+        </Button>
+      </Flex>
+    </Card>
+  );
+}
+
+const DESCRIPTION =
+  "Data on US visa wait times at USCIS field offices, the National Visa Center, and US consulates.";
 
 export default function Home() {
   return (
     <Stack>
       <Head>
         <title>US visa wait times</title>
-        <meta
-          name="description"
-          content="Data on US visa wait times at USCIS field offices, the National Visa Center, and US consulates."
-        />
+        <meta name="description" content={DESCRIPTION} />
         <link rel="canonical" href="https://visawhen.com" />
         <meta property="og:title" content="US visa wait times" />
-        <meta
-          property="og:description"
-          content="Data on US visa wait times at USCIS field offices, the National Visa Center, and US consulates."
-        />
+        <meta property="og:description" content={DESCRIPTION} />
         <meta property="og:url" content="https://visawhen.com" />
       </Head>
       <Title order={1} size="h2">
@@ -36,93 +77,31 @@ export default function Home() {
       </Title>
       <Text size="xl">What is your case waiting for right now?</Text>
       <SimpleGrid cols={{ base: 1, sm: 3 }} spacing={{ base: "sm", sm: "md" }}>
-        <Card shadow="sm" p="md" radius="md" withBorder>
-          <Flex
-            direction="column"
-            justify="space-between"
-            style={{ height: "100%" }}
-          >
-            <Stack>
-              <UnstyledButton component={Link} href="/uscis">
-                <Title order={2} size="h5">
-                  <Flex justify="space-between" align="center">
-                    <Group>
-                      <Badge variant="filled">Step 1</Badge>
-                      <Text>USCIS</Text>
-                    </Group>
-                    <ChevronRightIcon />
-                  </Flex>
-                </Title>
-              </UnstyledButton>
-              <Text>
-                This is your step from filing a form with USCIS until they
-                approve it. See how fast USCIS is deciding your form, and for
-                the N-400, I-130 and I-485, how your own field office is doing.
-              </Text>
-            </Stack>
-            <Button mt="md" component={Link} href="/uscis">
-              Check USCIS processing
-            </Button>
-          </Flex>
-        </Card>
-        <Card shadow="sm" p="md" radius="md" withBorder>
-          <Flex
-            direction="column"
-            justify="space-between"
-            style={{ height: "100%" }}
-          >
-            <Stack>
-              <UnstyledButton component={Link} href="/nvc">
-                <Title order={2} size="h5">
-                  <Flex justify="space-between" align="center">
-                    <Group>
-                      <Badge variant="filled">Step 2</Badge>
-                      <Text>NVC</Text>
-                    </Group>
-                    <ChevronRightIcon />
-                  </Flex>
-                </Title>
-              </UnstyledButton>
-              <Text>
-                This is your step after the USCIS said they&rsquo;ve approved
-                your application, until the NVC says your case has been{" "}
-                <em>documentarily qualified</em>.
-              </Text>
-            </Stack>
-            <Button mt="md" component={Link} href="/nvc">
-              Check NVC wait times
-            </Button>
-          </Flex>
-        </Card>
-        <Card shadow="sm" p="md" radius="md" withBorder>
-          <Flex
-            direction="column"
-            justify="space-between"
-            style={{ height: "100%" }}
-          >
-            <Stack>
-              <UnstyledButton component={Link} href="/consulates">
-                <Title order={2} size="h5">
-                  <Flex justify="space-between" align="center">
-                    <Group>
-                      <Badge variant="filled">Step 3</Badge>
-                      <Text>Consulate</Text>
-                    </Group>
-                    <ChevronRightIcon />
-                  </Flex>
-                </Title>
-              </UnstyledButton>
-              <Text>
-                This is your step after the NVC said your case has been{" "}
-                <em>documentarily qualified</em>, until you get your visa from
-                an embassy or consulate.
-              </Text>
-            </Stack>
-            <Button mt="md" component={Link} href="/consulates">
-              Check consulate rates
-            </Button>
-          </Flex>
-        </Card>
+        <StepCard
+          step={1}
+          name="USCIS"
+          href="/uscis"
+          action="Check USCIS processing"
+        >
+          This is your step from filing a form with USCIS until they approve it.
+          See how fast USCIS is deciding your form, and for the N-400, I-130 and
+          I-485, how your own field office is doing.
+        </StepCard>
+        <StepCard step={2} name="NVC" href="/nvc" action="Check NVC wait times">
+          This is your step after the USCIS said they&rsquo;ve approved your
+          application, until the NVC says your case has been{" "}
+          <em>documentarily qualified</em>.
+        </StepCard>
+        <StepCard
+          step={3}
+          name="Consulate"
+          href="/consulates"
+          action="Check consulate rates"
+        >
+          This is your step after the NVC said your case has been{" "}
+          <em>documentarily qualified</em>, until you get your visa from an
+          embassy or consulate.
+        </StepCard>
       </SimpleGrid>
     </Stack>
   );

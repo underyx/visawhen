@@ -27,14 +27,19 @@ interface Props {
   id: string;
 }
 
-function Tooltip([series]: any) {
-  const dateFormatter = new Intl.DateTimeFormat([], {
-    month: "short",
-    year: "numeric",
-    day: "numeric",
-    timeZone: "UTC",
-  });
+const dateFormatter = new Intl.DateTimeFormat([], {
+  month: "short",
+  year: "numeric",
+  day: "numeric",
+  timeZone: "UTC",
+});
 
+interface TooltipParams {
+  /** The point under the cursor, as passed to the series: [date, days] */
+  data: [string, number];
+}
+
+function Tooltip([series]: TooltipParams[]) {
   const [dateString, backlogDays] = series.data;
   const date = new Date(dateString);
   const processingDate = add(date, {
@@ -73,7 +78,7 @@ export default function NvcChart({ id, series }: Props) {
           },
           title: {
             text: `Change in ${id} processing times`,
-            x: "center",
+            left: "center",
           },
           xAxis: {
             type: "time",
@@ -82,7 +87,8 @@ export default function NvcChart({ id, series }: Props) {
           dataZoom: [
             {
               type: "slider",
-              start: 100 - 100 * (52 / Object.entries(series).length), // one year
+              // the last year of weekly data points
+              start: Math.max(0, 100 - 100 * (52 / Object.keys(series).length)),
               end: 100,
             },
           ],

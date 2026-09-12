@@ -139,6 +139,8 @@ export function highlight(
     const previousWait =
       previous?.waitMonths === null || previous?.waitMonths === undefined
         ? ""
+        : formatMonths(previous.waitMonths) === formatMonths(current.waitMonths)
+        ? ", the same as the quarter before"
         : `, ${
             current.waitMonths < previous.waitMonths ? "down" : "up"
           } from ${formatMonths(previous.waitMonths)}`;

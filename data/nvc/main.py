@@ -51,13 +51,13 @@ BROWSER_HEADERS = {
 
 PATTERNS: dict[TimeframeName, re.Pattern[str]] = {
     "creation": re.compile(
-        r"Current case creation time frame: As of (?P<as_of_date>\d+-\w+-\d+), we are working on cases that were received from USCIS on (?P<latest_date>\d+-\w+-\d+)."
+        r"Current case creation time frame: As of (?P<as_of_date>\d+-\w+-\d+), we are working on cases that were received from USCIS on (?P<latest_date>\d+-\w+-\d+)\."
     ),
     "review": re.compile(
-        r"Current case review time: As of (?P<as_of_date>\d+-\w+-\d+), we are reviewing documents submitted to us on (?P<latest_date>\d+-\w+-\d+)."
+        r"Current case review time: As of (?P<as_of_date>\d+-\w+-\d+), we are reviewing documents submitted to us on (?P<latest_date>\d+-\w+-\d+)\."
     ),
     "inquiry": re.compile(
-        r"As of (?P<as_of_date>\d+-\w+-\d+), we are responding to inquiries received on (?P<latest_date>\d+-\w+-\d+)."
+        r"As of (?P<as_of_date>\d+-\w+-\d+), we are responding to inquiries received on (?P<latest_date>\d+-\w+-\d+)\."
     ),
 }
 DATE_FORMATS = [
@@ -221,6 +221,11 @@ def main() -> int:
     if live_parsed:
         # the live page is authoritative: nothing archived can be newer than it
         print(f"Live page is as of {describe(live_parsed)}")
+        if missing := sorted(set(PATTERNS) - set(live_parsed)):
+            print(
+                f"::warning::The live NVC page matched no pattern for {', '.join(missing)}; "
+                "the site may have changed its wording for those. Update PATTERNS in data/nvc/main.py."
+            )
         changed = merge(data, live_parsed, "live page")
         reason = f"the live page holds nothing newer than {latest_as_of(data)}"
     else:

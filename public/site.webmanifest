@@ -1,6 +1,8 @@
 {
-  "name": "",
-  "short_name": "",
+  "name": "VisaWhen",
+  "short_name": "VisaWhen",
+  "description": "Data on US visa wait times at USCIS, the National Visa Center, and US consulates.",
+  "start_url": "/",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -13,7 +15,7 @@
       "type": "image/png"
     }
   ],
-  "theme_color": "#ffffff",
+  "theme_color": "#242424",
   "background_color": "#ffffff",
   "display": "standalone"
 }

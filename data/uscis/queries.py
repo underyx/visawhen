@@ -19,10 +19,10 @@ HEADERS = {
     "Referer": "https://egov.uscis.gov/processing-times/",
 }
 
-form_descriptions = {}
-subform_names = {}
-subform_descriptions = {}
-office_descriptions = {}
+form_descriptions: dict[str, str] = {}
+subform_names: dict[str, str] = {}
+subform_descriptions: dict[str, str] = {}
+office_descriptions: dict[str, str] = {}
 
 # workaround for UNSAFE_LEGACY_RENEGOTIATION_DISABLED - https://stackoverflow.com/a/71646353
 ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
@@ -78,9 +78,9 @@ async def main():
     ]
     await client.aclose()
 
-    queries_file = (dump_dir / "queries.jsonl").open("w")
-    for query in sorted(queries):
-        queries_file.write(json.dumps(query.to_json()) + "\n")
+    with (dump_dir / "queries.jsonl").open("w") as queries_file:
+        for query in sorted(queries):
+            queries_file.write(json.dumps(query.to_json()) + "\n")
 
     labels_output = {
         "forms": dict(sorted(form_descriptions.items())),

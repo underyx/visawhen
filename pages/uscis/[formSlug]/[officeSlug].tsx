@@ -90,8 +90,15 @@ export default function UscisOffice({
 }: Props) {
   const current = points[points.length - 1];
   const fullName = stateCode === null ? name : `${name}, ${stateCode}`;
-  const title = `${form} processing times at the ${fullName} office`;
-  const description = `The ${fullName} USCIS office had ${formatCount(
+  // "the San Francisco office", but "the Nebraska Service Center"
+  const isCenter = /\bCenter$/.test(name);
+  const officePhrase = isCenter ? `the ${name}` : `the ${name} office`;
+  const title = `${form} processing times at ${
+    isCenter ? `the ${fullName}` : `the ${fullName} office`
+  }`;
+  const description = `${
+    isCenter ? `USCIS's ${fullName}` : `The ${fullName} USCIS office`
+  } had ${formatCount(
     current.pending,
   )} ${form} (${formTitle}) applications pending at the end of ${
     current.label
@@ -162,14 +169,13 @@ export default function UscisOffice({
         <UscisStats points={points} />
         <Text>
           <strong>Quarter-over-quarter highlight:</strong>{" "}
-          {highlight(points, `the ${name} office`, `${form} applications`)}{" "}
-          {comparison}
+          {highlight(points, officePhrase, `${form} applications`)} {comparison}
         </Text>
       </Stack>
       <Stack gap="sm">
         <Title order={2}>What happened to the applications</Title>
         <Text>
-          The bars are the {form} decisions the {name} office made each quarter,
+          The bars are the {form} decisions {officePhrase} made each quarter,
           approved in blue and denied in red. The amber line is its backlog: how
           many applications were still waiting at the end of that quarter, most
           of them filed in earlier ones. The dashed line is how many came in.
