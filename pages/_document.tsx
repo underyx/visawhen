@@ -8,8 +8,11 @@ export default function Document() {
         <ColorSchemeScript />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="VisaWhen" />
-        <meta property="twitter:creator" content="underyx" />
-        <meta property="twitter:creator:id" content="222041531" />
+        <meta property="og:image" content="https://visawhen.com/logo.png" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:creator" content="@underyx" />
+        <meta name="twitter:creator:id" content="222041531" />
+        <meta name="theme-color" content="#242424" />
         <link
           rel="apple-touch-icon"
           sizes="180x180"
