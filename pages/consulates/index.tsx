@@ -1,65 +1,79 @@
 import { SearchIcon } from "../../components/icons";
-import { Badge, Highlight, Stack, TextInput, Title } from "@mantine/core";
+import { Badge, Highlight, Stack, Text, TextInput, Title } from "@mantine/core";
 import { sortBy } from "lodash";
 import { GetStaticProps } from "next";
 import Head from "next/head";
 import React, { useMemo } from "react";
 import {
-  ConsulateBaselineRow,
   getAllPosts,
-  getConsulateBaselines,
+  getRecentIssuancesByPost,
+  getRecentWindow,
   PostRow,
+  RecentPostIssuancesRow,
+  RecentWindow,
 } from "../../api/consulates";
-import { formatMonthlyRate } from "../../components/consulates";
+import { formatMonth, formatMonthlyRate } from "../../components/consulates";
 import { ListRow, ListRows } from "../../components/ListRow";
 import { normalize } from "../../components/search";
 import { useInputState } from "@mantine/hooks";
 
 interface Props {
   posts: PostRow[];
-  baselines: ConsulateBaselineRow[];
+  /** Visas issued per post in the last 12 months of the data */
+  recentIssuances: RecentPostIssuancesRow[];
+  recentWindow: RecentWindow;
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => ({
   props: {
     posts: await getAllPosts(),
-    baselines: await getConsulateBaselines(),
+    recentIssuances: await getRecentIssuancesByPost(),
+    recentWindow: await getRecentWindow(),
   },
 });
 
 function sortItems(
   posts: PostRow[],
-  baselineMap: Map<string, number>,
+  recentMap: Map<string, number>,
 ): PostRow[] {
   return sortBy(posts, [
-    ({ postSlug }) => -(baselineMap.get(postSlug) ?? -1),
+    ({ postSlug }) => -(recentMap.get(postSlug) ?? -1),
     "post",
   ]);
 }
 
-export default function ConsulateSelect({ posts, baselines }: Props) {
-  const baselineMap = useMemo<Map<string, number>>(
-    () => new Map(baselines.map((row) => [row.postSlug, row.issuances])),
-    [baselines],
+export default function ConsulateSelect({
+  posts,
+  recentIssuances,
+  recentWindow,
+}: Props) {
+  const recentMap = useMemo<Map<string, number>>(
+    () => new Map(recentIssuances.map((row) => [row.postSlug, row.issuances])),
+    [recentIssuances],
   );
   const [term, setTerm] = useInputState("");
   const filteredPosts = useMemo<PostRow[]>(() => {
     const normalizedTerm = normalize(term);
     return sortItems(
       posts.filter(({ post }) => normalize(post).includes(normalizedTerm)),
-      baselineMap,
+      recentMap,
     );
-  }, [baselineMap, posts, term]);
+  }, [recentMap, posts, term]);
 
-  const description = `See how long the visa backlog is at any of ${posts.length} consulates.`;
+  const title = "Visas issued by U.S. embassies and consulates";
+  const description = `How many visas each of ${
+    posts.length
+  } U.S. embassies and consulates issued every month, from State Department statistics through ${formatMonth(
+    recentWindow.to,
+  )}.`;
 
   return (
     <Stack>
       <Head>
-        <title>Consulate visa backlogs</title>
+        <title>{title}</title>
         <meta name="description" content={description} />
         <link rel="canonical" href="https://visawhen.com/consulates" />
-        <meta property="og:title" content="Consulate visa backlogs" />
+        <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:url" content="https://visawhen.com/consulates" />
       </Head>
@@ -71,6 +85,10 @@ export default function ConsulateSelect({ posts, baselines }: Props) {
         placeholder="Atlantis"
         onChange={setTerm}
       />
+      <Text size="sm" c="dimmed">
+        Badges: average visas issued per month, {formatMonth(recentWindow.from)}{" "}
+        to {formatMonth(recentWindow.to)}.
+      </Text>
       <ListRows>
         {filteredPosts.map(({ post, postSlug }) => (
           <ListRow
@@ -86,7 +104,7 @@ export default function ConsulateSelect({ posts, baselines }: Props) {
                 tt="none"
                 fw={500}
               >
-                normally {formatMonthlyRate(baselineMap.get(postSlug))}
+                {formatMonthlyRate((recentMap.get(postSlug) ?? 0) / 12)}
               </Badge>
             }
             label={<Highlight highlight={term}>{post}</Highlight>}

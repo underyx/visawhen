@@ -8,12 +8,14 @@ import {
   getAllPosts,
   getAllVisaClasses,
   getPost,
-  getVisaClassBaselines,
+  getRecentIssuancesByClass,
+  getRecentWindow,
   getVisaClassSlugsForPost,
-  VisaClassBaselineRow,
+  RecentVisaClassIssuancesRow,
+  RecentWindow,
   VisaClassRow,
 } from "../../../api/consulates";
-import { formatMonthlyRate } from "../../../components/consulates";
+import { formatMonth, formatMonthlyRate } from "../../../components/consulates";
 import { ListRow, ListRows } from "../../../components/ListRow";
 import { normalize } from "../../../components/search";
 import {
@@ -34,7 +36,9 @@ interface Props {
   postName: string;
   visaClasses: VisaClassRow[];
   availableVisaClasses: string[];
-  baselines: VisaClassBaselineRow[];
+  /** Visas issued per class in the last 12 months of the data */
+  recentIssuances: RecentVisaClassIssuancesRow[];
+  recentWindow: RecentWindow;
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -59,17 +63,18 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       postName: postInfo.post,
       visaClasses: await getAllVisaClasses(),
       availableVisaClasses: await getVisaClassSlugsForPost(postSlug),
-      baselines: await getVisaClassBaselines(postSlug),
+      recentIssuances: await getRecentIssuancesByClass(postSlug),
+      recentWindow: await getRecentWindow(),
     },
   };
 };
 
 function sortItems(
   visaClasses: VisaClassRow[],
-  baselineMap: Map<string, number>,
+  recentMap: Map<string, number>,
 ): VisaClassRow[] {
   return sortBy(visaClasses, [
-    ({ visaClassSlug }) => -(baselineMap.get(visaClassSlug) ?? -1),
+    ({ visaClassSlug }) => -(recentMap.get(visaClassSlug) ?? -1),
     "visaClass",
   ]);
 }
@@ -79,11 +84,13 @@ export default function ConsulateSelect({
   postName,
   visaClasses,
   availableVisaClasses,
-  baselines,
+  recentIssuances,
+  recentWindow,
 }: Props) {
-  const baselineMap = useMemo<Map<string, number>>(
-    () => new Map(baselines.map((row) => [row.visaClassSlug, row.issuances])),
-    [baselines],
+  const recentMap = useMemo<Map<string, number>>(
+    () =>
+      new Map(recentIssuances.map((row) => [row.visaClassSlug, row.issuances])),
+    [recentIssuances],
   );
   const [term, setTerm] = useInputState("");
 
@@ -98,20 +105,25 @@ export default function ConsulateSelect({
       visaClasses.filter(({ visaClass, description }) =>
         normalize(`${visaClass} ${description ?? ""}`).includes(normalizedTerm),
       ),
-      baselineMap,
+      recentMap,
     );
-  }, [baselineMap, visaClasses, term]);
+  }, [recentMap, visaClasses, term]);
 
   const canonicalUrl = `https://visawhen.com/consulates/${postSlug}`;
-  const description = `See how long the visa backlog is at ${postName} in any of ${availableVisaClasses.length} visa categories.`;
+  const title = `${postName} visas issued by class`;
+  const description = `How many visas ${postName} issued every month in each of ${
+    availableVisaClasses.length
+  } visa classes, from State Department statistics through ${formatMonth(
+    recentWindow.to,
+  )}.`;
 
   return (
     <Stack>
       <Head>
-        <title>{`${postName} visa backlog`}</title>
+        <title>{title}</title>
         <meta name="description" content={description} />
         <link rel="canonical" href={canonicalUrl} />
-        <meta property="og:title" content={`${postName} visa backlogs`} />
+        <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:url" content={canonicalUrl} />
       </Head>
@@ -141,6 +153,10 @@ export default function ConsulateSelect({
         placeholder="DL6"
         onChange={setTerm}
       />
+      <Text size="sm" c="dimmed">
+        Badges: average visas issued per month, {formatMonth(recentWindow.from)}{" "}
+        to {formatMonth(recentWindow.to)}.
+      </Text>
       <ListRows>
         {filteredVisas.map(({ visaClass, visaClassSlug, description }) => {
           const hasAnyIssued = availableVisaClassesSet.has(visaClassSlug);
@@ -160,9 +176,9 @@ export default function ConsulateSelect({
                   fw={500}
                 >
                   {hasAnyIssued
-                    ? `normally ${formatMonthlyRate(
-                        baselineMap.get(visaClassSlug),
-                      )}`
+                    ? formatMonthlyRate(
+                        (recentMap.get(visaClassSlug) ?? 0) / 12,
+                      )
                     : "never issued here"}
                 </Badge>
               }

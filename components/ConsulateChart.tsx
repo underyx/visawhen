@@ -1,7 +1,8 @@
-import { BacklogRow } from "../api/consulates";
+import { IssuancesRow } from "../api/consulates";
+import { formatMonth } from "./consulates";
 
 import * as echarts from "echarts/core";
-import { BarChart, LineChart } from "echarts/charts";
+import { BarChart } from "echarts/charts";
 import {
   DatasetComponent,
   DataZoomComponent,
@@ -20,20 +21,14 @@ echarts.use([
   TooltipComponent,
   GridComponent,
   BarChart,
-  LineChart,
   SVGRenderer,
 ]);
 
 interface Props {
-  backlog: BacklogRow[];
+  issuances: IssuancesRow[];
 }
 
-export default function ConsulateChart({ backlog }: Props) {
-  const dateFormatter = new Intl.DateTimeFormat([], {
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  });
+export default function ConsulateChart({ issuances }: Props) {
   return (
     <Paper shadow="xs" p="md" mx={0} component="figure">
       <ReactEChartsCore
@@ -42,13 +37,10 @@ export default function ConsulateChart({ backlog }: Props) {
         option={{
           dataset: {
             source: [
-              ["month", "actual visas issued", "expected visas issued"],
-              ...backlog.map((row) => [
-                dateFormatter.format(new Date(row.month)),
-                Math.round(row.issuances * 10) / 10,
-                row.expectedDelta !== null
-                  ? Math.round(row.expectedDelta * 10) / 10
-                  : null,
+              ["month", "visas issued"],
+              ...issuances.map((row) => [
+                formatMonth(row.month),
+                Math.round(row.issuances),
               ]),
             ],
           },
@@ -59,7 +51,9 @@ export default function ConsulateChart({ backlog }: Props) {
           xAxis: {
             type: "category",
           },
-          yAxis: { name: "visas" },
+          // Whole visas only: without this, a class with at most a visa or two
+          // a month gets ticks at 0.2, 0.4 and so on.
+          yAxis: { name: "visas", minInterval: 1 },
           dataZoom: [
             {
               type: "slider",
@@ -71,21 +65,21 @@ export default function ConsulateChart({ backlog }: Props) {
             {
               type: "bar",
             },
-            {
-              type: "line",
-              step: "middle",
-            },
           ],
         }}
       />
       <figcaption>
-        Source:{" "}
+        Source: the U.S. Department of State&rsquo;s monthly{" "}
         <a href="https://travel.state.gov/content/travel/en/legal/visa-law0/visa-statistics/immigrant-visa-statistics/monthly-immigrant-visa-issuances.html">
-          The U.S. Department of State&rsquo;s Monthly Immigrant Visa Issuance
-          Statistics
-        </a>
-        .<br />
-        New data shows up here within a day and is stored in{" "}
+          immigrant
+        </a>{" "}
+        and{" "}
+        <a href="https://travel.state.gov/content/travel/en/legal/visa-law0/visa-statistics/nonimmigrant-visa-statistics/monthly-nonimmigrant-visa-issuances.html">
+          nonimmigrant
+        </a>{" "}
+        visa issuance statistics.
+        <br />
+        The monthly counts are stored in{" "}
         <a href="https://github.com/underyx/visawhen/blob/main/data/consulates/dump">
           JSON lines files on GitHub
         </a>

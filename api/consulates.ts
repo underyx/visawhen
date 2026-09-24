@@ -94,32 +94,61 @@ export interface VisaClassRow {
   description: string | null;
 }
 
+// The scraper folds some immigrant classes into nonimmigrant classes that
+// share their symbol, and some nonimmigrant classes into immigrant ones (see
+// the `replace` map in data/consulates/baselines.ipynb): E2 also counts EB-2
+// (E21-E2C), E3 also counts EB-3 (E31-E3P), and CW1/IW1 and CW2/IW2 also
+// count the CW-1 Northern Mariana Islands workers and their families. The
+// descriptions from the spreadsheet only name one side, so say what the
+// numbers really cover until the consulate data rebuild splits them apart.
+const DESCRIPTION_OVERRIDES: Record<string, string> = {
+  e2: "EB-2 immigrant visas for people with advanced degrees or exceptional ability, counted together with E-2 visas for treaty investors and their spouses and children",
+  e3: "EB-3 immigrant visas for skilled workers and professionals, counted together with E-3 Australian professional visas",
+  cw1iw1:
+    "IW1 visas for widows and widowers of U.S. citizens, counted together with CW-1 Northern Mariana Islands worker visas",
+  cw2iw2:
+    "IW2 visas for children of IW1 visa holders, counted together with CW-2 visas for CW-1 workers' families",
+};
+
+function withDescriptionOverride(row: VisaClassRow): VisaClassRow {
+  return {
+    ...row,
+    description: DESCRIPTION_OVERRIDES[row.visaClassSlug] ?? row.description,
+  };
+}
+
 export async function getVisaClass(
   visaClassSlug: string,
 ): Promise<VisaClassRow | undefined> {
   const db = await openDb();
-  return await db.get<VisaClassRow>(
+  const row = await db.get<VisaClassRow>(
     `
       SELECT "Visa Class" AS visaClass, "Visa Class Slug" AS visaClassSlug, "Description" AS description
       FROM visa_slugs WHERE "Visa Class Slug" = ?
     `,
     visaClassSlug,
   );
+  return row === undefined ? undefined : withDescriptionOverride(row);
 }
 
 export async function getAllVisaClasses(): Promise<VisaClassRow[]> {
   const db = await openDb();
-  return await db.all<VisaClassRow[]>(
+  const rows = await db.all<VisaClassRow[]>(
     `
       SELECT "Visa Class" AS visaClass, "Visa Class Slug" AS visaClassSlug, "Description" AS description
       FROM visa_slugs
     `,
   );
+  return rows.map(withDescriptionOverride);
 }
+
 export interface BaselineRow {
   issuances: number;
 }
 
+/** The 2017-2020 average the pages used to compare against. The pages no
+ * longer show it, but a pair only gets a page if it has one, which keeps the
+ * set of consulate pages (and URLs) unchanged. */
 export async function getBaseline(
   postSlug: string,
   visaClassSlug: string,
@@ -135,53 +164,112 @@ export async function getBaseline(
     visaClassSlug,
   );
 }
-export interface ConsulateBaselineRow extends BaselineRow {
-  postSlug: string;
+
+/** The months are stored as "2025-09-01 00:00:00", in UTC. */
+function toIsoMonth(month: string): string {
+  return month.replace(" ", "T") + ".000Z";
 }
-export async function getConsulateBaselines(): Promise<ConsulateBaselineRow[]> {
+
+export interface RecentWindow {
+  /** The first of the last 12 months in the data, "2024-10-01T00:00:00.000Z" */
+  from: string;
+  /** The newest month in the data, "2025-09-01T00:00:00.000Z" */
+  to: string;
+}
+
+interface StoredRecentWindow {
+  /** The first of the last 12 months in the data, as stored: "2024-10-01 00:00:00" */
+  from: string;
+  /** The newest month in the data, as stored: "2025-09-01 00:00:00" */
+  to: string;
+}
+
+let recentWindowPromise: Promise<StoredRecentWindow> | undefined;
+
+// The last 12 months in the data, which are the same for every pair: each one
+// has a (zero-filled) row for every month. "Month" has no index, so finding
+// the newest one takes a full scan of the backlogs table, and every consulate
+// page asks for it; do it once per process, like opening the connection.
+function getStoredRecentWindow(): Promise<StoredRecentWindow> {
+  if (recentWindowPromise === undefined) {
+    recentWindowPromise = openDb().then(async (db) => {
+      const row = await db.get<{ from: string | null; to: string | null }>(
+        `SELECT datetime(MAX("Month"), '-11 months') AS "from", MAX("Month") AS "to" FROM backlogs`,
+      );
+      if (row === undefined || row.from === null || row.to === null)
+        throw new Error("The backlogs table is empty");
+      return { from: row.from, to: row.to };
+    });
+  }
+  return recentWindowPromise;
+}
+
+export async function getRecentWindow(): Promise<RecentWindow> {
+  const { from, to } = await getStoredRecentWindow();
+  return { from: toIsoMonth(from), to: toIsoMonth(to) };
+}
+
+export interface RecentPostIssuancesRow {
+  postSlug: string;
+  /** Visas issued in the last 12 months of the data */
+  issuances: number;
+}
+
+export async function getRecentIssuancesByPost(): Promise<
+  RecentPostIssuancesRow[]
+> {
   const db = await openDb();
-  return await db.all<ConsulateBaselineRow[]>(
+  const { from } = await getStoredRecentWindow();
+  return await db.all<RecentPostIssuancesRow[]>(
     `
-    SELECT "Post Slug" AS postSlug, sum("Issuances") AS issuances
-    FROM baselines
+    SELECT "Post Slug" AS postSlug, SUM("Issuances") AS issuances
+    FROM backlogs
+    WHERE "Month" >= ?
     GROUP BY 1
   `,
+    from,
   );
 }
-export interface VisaClassBaselineRow extends BaselineRow {
+
+export interface RecentVisaClassIssuancesRow {
   visaClassSlug: string;
+  /** Visas issued in the last 12 months of the data */
+  issuances: number;
 }
 
-export async function getVisaClassBaselines(
+export async function getRecentIssuancesByClass(
   postSlug: string,
-): Promise<VisaClassBaselineRow[]> {
+): Promise<RecentVisaClassIssuancesRow[]> {
   const db = await openDb();
-  return await db.all<VisaClassBaselineRow[]>(
+  const { from } = await getStoredRecentWindow();
+  return await db.all<RecentVisaClassIssuancesRow[]>(
     `
-    SELECT "Visa Class Slug" AS visaClassSlug, "Issuances" AS issuances
-    FROM baselines
-    WHERE "Post Slug" = ?
+    SELECT "Visa Class Slug" AS visaClassSlug, SUM("Issuances") AS issuances
+    FROM backlogs
+    WHERE "Post Slug" = ? AND "Month" >= ?
+    GROUP BY 1
   `,
     postSlug,
+    from,
   );
 }
 
-export interface BacklogRow {
+export interface IssuancesRow {
+  /** "2025-09-01T00:00:00.000Z" */
   month: string;
   issuances: number;
-  backlog: number | null;
-  monthsAhead: number | null;
-  expectedDelta: number | null;
 }
 
-export async function getBacklog(
+/** Visas issued each month, oldest first, with a row for every month in the
+ * data (zero when none were issued). */
+export async function getMonthlyIssuances(
   postSlug: string,
   visaClassSlug: string,
-): Promise<BacklogRow[]> {
+): Promise<IssuancesRow[]> {
   const db = await openDb();
-  const rows = await db.all<BacklogRow[]>(
+  const rows = await db.all<IssuancesRow[]>(
     `
-    SELECT "Month" AS month, "Issuances" AS issuances, "Backlog" AS backlog, "Months Ahead" AS monthsAhead, "Expected Delta" AS expectedDelta
+    SELECT "Month" AS month, "Issuances" AS issuances
     FROM backlogs
     WHERE "Post Slug" = ? AND "Visa Class Slug" = ?
     ORDER BY "Month"
@@ -189,11 +277,5 @@ export async function getBacklog(
     postSlug,
     visaClassSlug,
   );
-  return rows.map((row) => ({
-    ...row,
-    month: row.month.replace(" ", "T") + ".000Z",
-    backlog: row.backlog ?? null,
-    monthsAhead: row.monthsAhead ?? null,
-    expectedDelta: row.expectedDelta ?? null,
-  }));
+  return rows.map((row) => ({ ...row, month: toIsoMonth(row.month) }));
 }
