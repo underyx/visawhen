@@ -6,7 +6,14 @@ import NvcChart from "../components/NvcChart";
 import last from "lodash/last";
 import { jsonLdScriptProps } from "react-schemaorg";
 import { Dataset } from "schema-dts";
-import { Anchor, Stack, Text, Title } from "@mantine/core";
+import { Alert, Anchor, Stack, Text, Title } from "@mantine/core";
+import Link from "next/link";
+import {
+  addDays,
+  daysBetween,
+  formatDate,
+  useToday,
+} from "../components/Freshness";
 
 interface Props {
   data: NvcData;
@@ -20,17 +27,20 @@ export const getStaticProps: GetStaticProps<Props> = async () => ({
 
 const NVC_TIME_ZONE = "America/New_York";
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-// The dates are stored as UTC days; format them as such, or a visitor west of
-// Greenwich sees the day before.
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
-  dateStyle: "long",
-  timeZone: "UTC",
-});
+const NVC_TIMEFRAMES_URL =
+  "https://travel.state.gov/content/travel/en/us-visas/immigrate/nvc-timeframes.html";
+/** NVC updates its timeframes weekly, so data older than two weeks means our
+ * updates have stopped, and the numbers may be far off by now. */
+const MAX_AGE_DAYS = 14;
 
 /** The newest as-of date in the data, "2026-09-07" */
 function getLatestDate(data: NvcData): string {
   return last(Object.keys(data.creation)) as string;
+}
+
+/** The newest reading of a series: its as-of date and its number of days */
+function getLatestReading(series: NvcSeries): [string, number] {
+  return last(Object.entries(series)) as [string, number];
 }
 
 /** The calendar date and ISO weekday (Monday is 1) at the NVC right now. */
@@ -79,27 +89,31 @@ interface ChartHeadingProps {
   series: NvcSeries;
 }
 
+/** "Document review: 33-day queue on July 13, 2026" */
 function ChartHeading({
   children,
   series,
 }: React.PropsWithChildren<ChartHeadingProps>) {
+  const [date, days] = getLatestReading(series);
   return (
     <Title order={2}>
-      {children} takes {last(Object.values(series))} days
+      {children}: {days}-day queue on {formatDate(date)}
     </Title>
   );
 }
 
 export default function NvcBacklog({ data }: Props) {
   const nextUpdateText = useNextUpdateText(data);
+  const today = useToday();
   const latestDate = getLatestDate(data);
-  const description = `The National Visa Center is currently taking ${last(
-    Object.values(data.review),
-  )} days to review documents, ${last(
-    Object.values(data.creation),
-  )} days to create cases, and ${last(
-    Object.values(data.inquiry),
-  )} days to respond to inquiries.`;
+  const ageDays = today === null ? null : daysBetween(latestDate, today);
+  const stale = ageDays !== null && ageDays > MAX_AGE_DAYS;
+  const [reviewDate, reviewDays] = getLatestReading(data.review);
+  const [, creationDays] = getLatestReading(data.creation);
+  const [, inquiryDays] = getLatestReading(data.inquiry);
+  const description = `On ${formatDate(
+    latestDate,
+  )}, the National Visa Center was taking ${reviewDays} days to review documents, ${creationDays} days to create cases and ${inquiryDays} days to answer inquiries.`;
 
   return (
     <Stack gap="3rem">
@@ -135,8 +149,7 @@ export default function NvcBacklog({ data }: Props) {
               url: "https://underyx.me",
             },
             inLanguage: "en",
-            isBasedOn:
-              "https://travel.state.gov/content/travel/en/us-visas/immigrate/nvc-timeframes.html",
+            isBasedOn: NVC_TIMEFRAMES_URL,
             license: "https://github.com/underyx/visawhen/blob/main/LICENSE",
             temporalCoverage: "2020-11/..",
           })}
@@ -144,13 +157,38 @@ export default function NvcBacklog({ data }: Props) {
       </Head>
       <Stack gap="sm">
         <Title order={1}>NVC wait times</Title>
+        {stale && (
+          <Alert color="yellow">
+            Our newest reading is from {formatDate(latestDate)}, {ageDays} days
+            ago. The State Department&rsquo;s website is currently blocking our
+            automatic updates, so NVC may be faster or slower today. See{" "}
+            <Anchor
+              href={NVC_TIMEFRAMES_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              inherit
+            >
+              today&rsquo;s timeframes on NVC&rsquo;s own page
+            </Anchor>
+            .
+          </Alert>
+        )}
         <Text size="xl">
-          Last updated {dateFormatter.format(new Date(latestDate))}
-          {nextUpdateText === null ? "." : `, ${nextUpdateText}.`}
+          Last updated {formatDate(latestDate)}
+          {nextUpdateText === null || stale ? "." : `, ${nextUpdateText}.`}
         </Text>
         <Text>
           Here&rsquo;s how long you should expect to wait until the National
           Visa Center processes your case.
+        </Text>
+        <Text>
+          These timeframes do not apply to K (fiancé(e)) visas, diversity visas,
+          special immigrant visas or adoptions, per NVC. NVC usually takes
+          weeks;{" "}
+          <Anchor component={Link} href="/consulates">
+            the longest wait is usually the interview queue at your consulate
+          </Anchor>
+          .
         </Text>
       </Stack>
       <Stack gap="sm">
@@ -167,9 +205,15 @@ export default function NvcBacklog({ data }: Props) {
           are reviewed by NVC.
         </Text>
         <Text>
-          These numbers are anecdotally accurate: my case was processed in April
-          2021 exactly when this chart predicted.
+          On {formatDate(reviewDate)}, NVC was reviewing documents submitted on{" "}
+          {formatDate(addDays(reviewDate, -reviewDays))}.
         </Text>
+        {today !== null && !stale && (
+          <Text>
+            Submit your documents today and NVC will most likely review them
+            around <strong>{formatDate(addDays(today, reviewDays))}</strong>.
+          </Text>
+        )}
         <NvcChart id="review" series={data.review} />
       </Stack>
       <Stack gap="sm">

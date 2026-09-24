@@ -1,5 +1,5 @@
 import { NvcSeries } from "../api/nvc";
-import { add } from "date-fns";
+import { addDays } from "./Freshness";
 
 import * as echarts from "echarts/core";
 import { LineChart } from "echarts/charts";
@@ -27,7 +27,7 @@ interface Props {
   id: string;
 }
 
-const dateFormatter = new Intl.DateTimeFormat([], {
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
   year: "numeric",
   day: "numeric",
@@ -40,21 +40,22 @@ interface TooltipParams {
 }
 
 function Tooltip([series]: TooltipParams[]) {
-  const [dateString, backlogDays] = series.data;
-  const date = new Date(dateString);
-  const processingDate = add(date, {
-    days: -backlogDays,
-  });
+  const [date, backlogDays] = series.data;
+  // Date arithmetic on the ISO strings: date-fns would add days in the
+  // visitor's time zone, and land on the wrong day across a DST change.
+  const processingDate = addDays(date, -backlogDays);
   const tooltip = document.createElement("div");
   tooltip.appendChild(
     document.createTextNode(
-      `${backlogDays} days of backlog on ${dateFormatter.format(date)}`,
+      `${backlogDays} days of backlog on ${dateFormatter.format(
+        new Date(date),
+      )}`,
     ),
   );
   tooltip.appendChild(document.createElement("br"));
   tooltip.appendChild(
     document.createTextNode(
-      `(processed up to ${dateFormatter.format(processingDate)})`,
+      `(processed up to ${dateFormatter.format(new Date(processingDate))})`,
     ),
   );
 
@@ -108,7 +109,7 @@ export default function NvcChart({ id, series }: Props) {
           NVC Timeframes page
         </a>
         .<br />
-        New data shows up here within 10 minutes and is stored in a{" "}
+        The weekly readings are stored in a{" "}
         <a href="https://github.com/underyx/visawhen/blob/main/data/nvc/data.json">
           JSON file on GitHub
         </a>
