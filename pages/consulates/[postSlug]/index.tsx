@@ -7,6 +7,8 @@ import React, { useMemo } from "react";
 import {
   getAllPosts,
   getAllVisaClasses,
+  getIvSchedule,
+  getIvScheduleAsOf,
   getPost,
   getRecentIssuancesByClass,
   getRecentWindow,
@@ -15,7 +17,17 @@ import {
   RecentWindow,
   VisaClassRow,
 } from "../../../api/consulates";
-import { formatMonth, formatMonthlyRate } from "../../../components/consulates";
+import {
+  formatMonth,
+  formatMonthlyRate,
+  formatShortIvMonth,
+  IvSchedule,
+  monthsBehind,
+} from "../../../components/consulates";
+import IvScheduleCard, {
+  describeRelativeQueue,
+  listsPostAsCurrent,
+} from "../../../components/IvScheduleCard";
 import { ListRow, ListRows } from "../../../components/ListRow";
 import { normalize } from "../../../components/search";
 import {
@@ -39,6 +51,10 @@ interface Props {
   /** Visas issued per class in the last 12 months of the data */
   recentIssuances: RecentVisaClassIssuancesRow[];
   recentWindow: RecentWindow;
+  /** The date of State's newest IV Scheduling Status Tool update we have */
+  ivScheduleAsOf: string;
+  /** The post's line in it, or null when it does not list the post */
+  ivSchedule: IvSchedule | null;
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -65,6 +81,8 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       availableVisaClasses: await getVisaClassSlugsForPost(postSlug),
       recentIssuances: await getRecentIssuancesByClass(postSlug),
       recentWindow: await getRecentWindow(),
+      ivScheduleAsOf: await getIvScheduleAsOf(),
+      ivSchedule: await getIvSchedule(postSlug),
     },
   };
 };
@@ -86,6 +104,8 @@ export default function ConsulateSelect({
   availableVisaClasses,
   recentIssuances,
   recentWindow,
+  ivScheduleAsOf,
+  ivSchedule,
 }: Props) {
   const recentMap = useMemo<Map<string, number>>(
     () =>
@@ -110,12 +130,27 @@ export default function ConsulateSelect({
   }, [recentMap, visaClasses, term]);
 
   const canonicalUrl = `https://visawhen.com/consulates/${postSlug}`;
-  const title = `${postName} visas issued by class`;
-  const description = `How many visas ${postName} issued every month in each of ${
-    availableVisaClasses.length
-  } visa classes, from State Department statistics through ${formatMonth(
-    recentWindow.to,
-  )}.`;
+  // Posts State lists with a month for immediate relatives are titled by
+  // their interview queue; the rest keep the issuance title. The post itself
+  // is called current only when every category State lists is.
+  const relativeCutoff = ivSchedule?.relative ?? null;
+  const title =
+    ivSchedule === null || relativeCutoff === null
+      ? `${postName} visas issued by class`
+      : `${postName} immigrant visa interview wait: ${
+          monthsBehind(ivSchedule.asOf, relativeCutoff) > 0
+            ? `scheduling ${formatShortIvMonth(relativeCutoff)} cases`
+            : listsPostAsCurrent(ivSchedule)
+            ? "listed as current"
+            : "immediate relatives listed as current"
+        }`;
+  const description =
+    describeRelativeQueue(postName, ivSchedule) ??
+    `How many visas ${postName} issued every month in each of ${
+      availableVisaClasses.length
+    } visa classes, from State Department statistics through ${formatMonth(
+      recentWindow.to,
+    )}.`;
 
   return (
     <Stack>
@@ -137,6 +172,11 @@ export default function ConsulateSelect({
       >
         Change consulate
       </Button>
+      <IvScheduleCard
+        postName={postName}
+        asOf={ivScheduleAsOf}
+        schedule={ivSchedule}
+      />
       <Title order={2}>
         <Breadcrumbs
           separator="›"

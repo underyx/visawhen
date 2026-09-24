@@ -1,6 +1,8 @@
+import { readFile } from "fs/promises";
 import { join } from "path";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
+import type { IvCategory, IvSchedule } from "../components/consulates";
 
 const dataDir = join(process.cwd(), "data");
 
@@ -278,4 +280,53 @@ export async function getMonthlyIssuances(
     visaClassSlug,
   );
   return rows.map((row) => ({ ...row, month: toIsoMonth(row.month) }));
+}
+
+/** data/consulates/iv_schedule.json, written by iv_schedule.py */
+interface IvScheduleData {
+  source: string;
+  /** State's updates by date, "2026-09-23", each by post slug */
+  snapshots: Record<
+    string,
+    Record<string, Record<IvCategory, string | null> & { name: string }>
+  >;
+}
+
+let ivScheduleDataPromise: Promise<IvScheduleData> | undefined;
+
+function readIvScheduleData(): Promise<IvScheduleData> {
+  if (ivScheduleDataPromise === undefined) {
+    ivScheduleDataPromise = readFile(
+      join(dataDir, "consulates", "iv_schedule.json"),
+      "utf-8",
+    ).then((contents) => JSON.parse(contents));
+  }
+  return ivScheduleDataPromise;
+}
+
+/** The date of State's newest update of its IV Scheduling Status Tool that
+ * we have, "2026-09-23" */
+export async function getIvScheduleAsOf(): Promise<string> {
+  const { snapshots } = await readIvScheduleData();
+  const dates = Object.keys(snapshots).sort();
+  if (dates.length === 0)
+    throw new Error("data/consulates/iv_schedule.json has no snapshots");
+  return dates[dates.length - 1];
+}
+
+/** A post's line in the newest update of State's IV Scheduling Status Tool,
+ * or null when that update does not list the post. */
+export async function getIvSchedule(
+  postSlug: string,
+): Promise<IvSchedule | null> {
+  const { snapshots } = await readIvScheduleData();
+  const asOf = await getIvScheduleAsOf();
+  const row = snapshots[asOf][postSlug];
+  if (row === undefined) return null;
+  return {
+    asOf,
+    relative: row.relative,
+    preference: row.preference,
+    employment: row.employment,
+  };
 }

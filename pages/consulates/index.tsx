@@ -6,6 +6,7 @@ import Head from "next/head";
 import React, { useMemo } from "react";
 import {
   getAllPosts,
+  getIvScheduleAsOf,
   getRecentIssuancesByPost,
   getRecentWindow,
   PostRow,
@@ -13,6 +14,7 @@ import {
   RecentWindow,
 } from "../../api/consulates";
 import { formatMonth, formatMonthlyRate } from "../../components/consulates";
+import { formatShortDate } from "../../components/Freshness";
 import { ListRow, ListRows } from "../../components/ListRow";
 import { normalize } from "../../components/search";
 import { useInputState } from "@mantine/hooks";
@@ -22,6 +24,8 @@ interface Props {
   /** Visas issued per post in the last 12 months of the data */
   recentIssuances: RecentPostIssuancesRow[];
   recentWindow: RecentWindow;
+  /** The date of State's newest IV Scheduling Status Tool update we have */
+  ivScheduleAsOf: string;
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => ({
@@ -29,6 +33,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => ({
     posts: await getAllPosts(),
     recentIssuances: await getRecentIssuancesByPost(),
     recentWindow: await getRecentWindow(),
+    ivScheduleAsOf: await getIvScheduleAsOf(),
   },
 });
 
@@ -46,6 +51,7 @@ export default function ConsulateSelect({
   posts,
   recentIssuances,
   recentWindow,
+  ivScheduleAsOf,
 }: Props) {
   const recentMap = useMemo<Map<string, number>>(
     () => new Map(recentIssuances.map((row) => [row.postSlug, row.issuances])),
@@ -60,12 +66,10 @@ export default function ConsulateSelect({
     );
   }, [recentMap, posts, term]);
 
-  const title = "Visas issued by U.S. embassies and consulates";
-  const description = `How many visas each of ${
-    posts.length
-  } U.S. embassies and consulates issued every month, from State Department statistics through ${formatMonth(
-    recentWindow.to,
-  )}.`;
+  const title = "US consulates: immigrant visa interview queues";
+  const description = `Which month of documentarily complete cases each U.S. embassy and consulate is scheduling for immigrant visa interviews, from the State Department (updated ${formatShortDate(
+    ivScheduleAsOf,
+  )}).`;
 
   return (
     <Stack>
@@ -78,6 +82,11 @@ export default function ConsulateSelect({
         <meta property="og:url" content="https://visawhen.com/consulates" />
       </Head>
       <Title order={2}>Select your consulate</Title>
+      <Text>
+        Each consulate&rsquo;s page shows which month of documentarily complete
+        cases NVC is scheduling there for immigrant visa interviews (State
+        Department, updated {formatShortDate(ivScheduleAsOf)}).
+      </Text>
       <TextInput
         size="lg"
         leftSection={<SearchIcon />}

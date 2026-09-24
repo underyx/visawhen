@@ -10,6 +10,10 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
   dateStyle: "long",
   timeZone: "UTC",
 });
+const shortDateFormatter = new Intl.DateTimeFormat("en-US", {
+  dateStyle: "medium",
+  timeZone: "UTC",
+});
 
 // Today never changes while the page is open, as far as these pages care.
 const subscribe = () => () => {};
@@ -40,4 +44,9 @@ export function addDays(date: string, days: number): string {
 /** An ISO date as "July 13, 2026". */
 export function formatDate(date: string): string {
   return dateFormatter.format(new Date(date));
+}
+
+/** An ISO date as "Jul 13, 2026". */
+export function formatShortDate(date: string): string {
+  return shortDateFormatter.format(new Date(date));
 }

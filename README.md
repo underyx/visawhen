@@ -38,4 +38,6 @@ cd data/consulates && uv run jupyter nbconvert --to script --stdout visa-issuanc
 
 Both travel.state.gov and uscis.gov block most non-browser clients, so the scrapers fall back to the Wayback Machine; see the docstring at the top of each script for the details.
 
+The interview queues on the consulate pages come from State's [IV Scheduling Status Tool](https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/iv-wait-times.html), which only ever shows its latest monthly update. Nothing fetches it automatically yet: save the page from a browser, then run `cd data/consulates && uv run python iv_schedule.py --from-file page.html` to add that update to `data/consulates/iv_schedule.json`.
+
 Python code is checked with [pre-commit](https://pre-commit.com) (`pre-commit run --all-files`).

@@ -89,18 +89,17 @@ export default function Home() {
         </StepCard>
         <StepCard step={2} name="NVC" href="/nvc" action="Check NVC wait times">
           This is your step after the USCIS said they&rsquo;ve approved your
-          application, until the NVC says your case has been{" "}
-          <em>documentarily qualified</em>.
+          application, until the NVC says your case is{" "}
+          <em>documentarily complete</em>.
         </StepCard>
         <StepCard
           step={3}
           name="Consulate"
           href="/consulates"
-          action="Check consulate rates"
+          action="Check interview queues"
         >
-          This is your step after the NVC said your case has been{" "}
-          <em>documentarily qualified</em>, until you get your visa from an
-          embassy or consulate.
+          After NVC says your case is <em>documentarily complete</em>: see which
+          month of cases your embassy or consulate is scheduling interviews for.
         </StepCard>
       </SimpleGrid>
     </Stack>

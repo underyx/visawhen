@@ -4,6 +4,8 @@ import React from "react";
 import { findLast, sumBy } from "lodash";
 import {
   getBaseline,
+  getIvSchedule,
+  getIvScheduleAsOf,
   getMonthlyIssuances,
   getSlugPairs,
   getPost,
@@ -13,10 +15,15 @@ import {
 import Head from "next/head";
 import ConsulateChart from "../../../components/ConsulateChart";
 import {
+  CLASS_NOTES,
+  CLASS_QUEUE_SCOPES,
   formatCount,
   formatLongMonth,
   formatMonth,
+  IV_CATEGORY_BY_CLASS,
+  IvSchedule,
 } from "../../../components/consulates";
+import IvScheduleCard from "../../../components/IvScheduleCard";
 import { ChevronLeftIcon } from "../../../components/icons";
 import { Button, Group, Stack, Text, Title } from "@mantine/core";
 
@@ -40,6 +47,10 @@ interface Props {
   postName: string;
   visaClassName: string;
   visaClassDescription: string | null;
+  /** The date of State's newest IV Scheduling Status Tool update we have */
+  ivScheduleAsOf: string;
+  /** The post's line in it, or null when it does not list the post */
+  ivSchedule: IvSchedule | null;
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -96,6 +107,8 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       postName: post.post,
       visaClassName: visaClass.visaClass,
       visaClassDescription: visaClass.description,
+      ivScheduleAsOf: await getIvScheduleAsOf(),
+      ivSchedule: await getIvSchedule(postSlug),
     },
   };
 };
@@ -197,6 +210,8 @@ export default function ConsulateStats({
   postName,
   visaClassName,
   visaClassDescription,
+  ivScheduleAsOf,
+  ivSchedule,
 }: Props) {
   const firstMonth = issuances[0].month;
   const { summary, metaSummary } = summarize(
@@ -214,6 +229,10 @@ export default function ConsulateStats({
     firstMonth,
   )} from U.S. State Department statistics.`;
   const canonicalUrl = `https://visawhen.com/consulates/${postSlug}/${visaClassSlug}`;
+  // The interview queue for the classes State's scheduling tool covers, and
+  // a note for the other immigrant classes; nonimmigrant classes get neither.
+  const ivCategory = IV_CATEGORY_BY_CLASS[visaClassSlug];
+  const classNote = CLASS_NOTES[visaClassSlug];
 
   return (
     <Stack>
@@ -254,6 +273,16 @@ export default function ConsulateStats({
       </Title>
       {visaClassDescription !== null && (
         <Text size="xl">{visaClassDescription}</Text>
+      )}
+      {(ivCategory !== undefined || classNote !== undefined) && (
+        <IvScheduleCard
+          postName={postName}
+          asOf={ivScheduleAsOf}
+          schedule={ivSchedule}
+          first={ivCategory}
+          note={classNote}
+          scope={CLASS_QUEUE_SCOPES[visaClassSlug]}
+        />
       )}
       <Text>{summary}</Text>
       <Text>
