@@ -115,18 +115,22 @@ export const PRIORITY_DATE_CATEGORIES: Record<string, string[]> = {
 };
 
 /** What the "If you file today" table says instead of a range for a
- * priority-date category, per form and category: how USCIS goes about
- * them. Pending preference petitions are not approved yet; USCIS decides
- * them roughly as visa numbers for their priority dates come up, on its own
- * schedule, not in the order they were filed. */
-export const PRIORITY_DATE_TEXT: Record<string, Record<string, string>> = {
+ * priority-date category, per form and category, given USCIS's median for
+ * those it decided (formatMedian). USCIS does decide many of these each
+ * quarter (7,951 I-130 preference petitions approved and 8,883 denied in
+ * Apr-Jun 2026), so the text must not say they wait unapproved; the point
+ * is that USCIS's decision is not the end of the wait. */
+export const PRIORITY_DATE_TEXT: Record<
+  string,
+  Record<string, (median: string) => string>
+> = {
   "I-130": {
-    "all-other-relative":
-      "USCIS decides these petitions roughly as visa numbers come up for their priority dates, on its own schedule, not in the order they were filed; until then they wait, unapproved. When your relative can immigrate depends on the priority date:",
+    "all-other-relative": (median) =>
+      `USCIS's median for the ones it decided was ${median}, but approval is only the first step: when your relative can immigrate depends on the priority date:`,
   },
   "I-485": {
-    employment:
-      "USCIS can approve these only once the priority date is current, and decides them roughly as visa numbers come up. How long yours takes depends on your priority date:",
+    employment: (median) =>
+      `USCIS's median for the ones it decided was ${median}, but it can approve one only once the priority date is current, so how long yours takes depends on your priority date:`,
   },
 };
 

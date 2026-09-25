@@ -457,8 +457,9 @@ export default function UscisForm({
                     <Table.Td>{range.name}</Table.Td>
                     {range.priorityDate ? (
                       <Table.Td colSpan={2}>
-                        {PRIORITY_DATE_TEXT[form]?.[range.key] ??
-                          "Depends on your priority date:"}{" "}
+                        {PRIORITY_DATE_TEXT[form]?.[range.key]?.(
+                          formatMedian(range.median),
+                        ) ?? "Depends on your priority date:"}{" "}
                         see the{" "}
                         <Anchor
                           href={VISA_BULLETIN_URL}
