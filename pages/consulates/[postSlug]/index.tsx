@@ -21,6 +21,8 @@ import {
 } from "../../../api/consulates";
 import { checkPolicies } from "../../../api/policy";
 import {
+  applicantCountry,
+  CLASS_APPLICANT_COUNTRIES,
   describeInactivity,
   formatMonth,
   formatMonthlyRate,
@@ -35,7 +37,11 @@ import IvScheduleCard, {
 } from "../../../components/IvScheduleCard";
 import { ListItem, ListRow, ListRows } from "../../../components/ListRow";
 import PolicyBanner from "../../../components/PolicyBanner";
-import { hasEnded, scheduleOverrideFor } from "../../../components/policy";
+import {
+  hasEnded,
+  issuanceSuspensionFor,
+  scheduleOverrideFor,
+} from "../../../components/policy";
 import { formatShortDate, useToday } from "../../../components/Freshness";
 import { normalize } from "../../../components/search";
 import SearchStatus from "../../../components/SearchStatus";
@@ -79,7 +85,20 @@ interface Props {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = await getAllPosts();
-  checkPolicies(posts.map((row) => row.postSlug));
+  checkPolicies({
+    postSlugs: posts.map((row) => row.postSlug),
+    countries: [
+      ...posts.map(({ postSlug }) =>
+        applicantCountry(POST_COUNTRIES[postSlug] ?? null, postSlug),
+      ),
+      ...Object.values(CLASS_APPLICANT_COUNTRIES).flatMap((classes) =>
+        Object.values(classes ?? {}),
+      ),
+    ].filter((country): country is string => country !== null),
+    visaClassSlugs: (await getAllVisaClasses()).map(
+      ({ visaClassSlug }) => visaClassSlug,
+    ),
+  });
   return {
     paths: posts.map((row) => ({ params: { postSlug: row.postSlug } })),
     fallback: false,
@@ -182,12 +201,20 @@ export default function ConsulateSelect({
   // is called current only when every category State lists is. Where a
   // policy means the month is no queue, such as a pause of visa services,
   // the policy takes the title and description instead, with its end date if
-  // it has one, since the page may still be served after it. A post that
-  // looks closed (see describeInactivity) is titled by that instead, since
-  // State's tool can list a post that issues nothing as current.
+  // it has one, since the page may still be served after it. Next, where
+  // most applicants are nationals whose visas are suspended, that takes the
+  // title, since NVC scheduling their interviews does not mean a visa can be
+  // issued. A post that looks closed (see describeInactivity) is titled by
+  // that instead, since State's tool can list a post that issues nothing as
+  // current.
   const relativeCutoff = ivSchedule?.relative ?? null;
   const today = useToday();
   const scheduleOverride = scheduleOverrideFor(postSlug, ivScheduleAsOf, today);
+  const consulate = {
+    postSlug,
+    country: applicantCountry(country, postSlug),
+  };
+  const suspension = issuanceSuspensionFor(consulate.country);
   const issuedDescription = `How many visas ${postName} issued every month ${
     availableVisaClasses.length === 1
       ? "in one visa class"
@@ -211,6 +238,17 @@ export default function ConsulateSelect({
         : "reported; no State Department notice"
     }${ends === null ? "" : `, ${ends}`}, last checked ${formatShortDate(
       scheduleOverride.lastChecked,
+    )}). ${issuedDescription}`;
+  } else if (suspension !== null && consulate.country !== null) {
+    title = `${postName}: immigrant visas suspended for nationals of ${consulate.country}`;
+    description = `Most immigrant visa applicants at ${postName} are nationals of ${
+      consulate.country
+    }, whose immigrant visas are suspended: ${suspension.title} (${
+      suspension.status === "official"
+        ? "State Department notice"
+        : "reported; no State Department notice"
+    }, last checked ${formatShortDate(
+      suspension.lastChecked,
     )}). ${issuedDescription}`;
   } else if (inactivity !== null && inactivitySummary !== null) {
     title = `${postName}: ${inactivitySummary}`;
@@ -261,13 +299,22 @@ export default function ConsulateSelect({
           {inactivity}
         </Alert>
       )}
-      <PolicyBanner postSlug={postSlug} />
+      <PolicyBanner consulate={consulate} />
       <IvScheduleCard
         postName={postName}
         asOf={ivScheduleAsOf}
         schedule={ivSchedule}
         source={ivScheduleSource}
         scheduleOverride={scheduleOverride ?? undefined}
+        suspension={
+          suspension === null || consulate.country === null
+            ? undefined
+            : {
+                entry: suspension,
+                country: consulate.country,
+                applicants: "immigrant visa",
+              }
+        }
       />
       <Title order={2}>Visa classes at {postName}</Title>
       <TextInput

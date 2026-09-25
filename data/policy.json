@@ -98,9 +98,47 @@
     {
       "id": "pp-10998-suspension",
       "status": "official",
-      "title": "Visa suspensions for nationals of 39 countries",
-      "body": "Since January 1, 2026, Presidential Proclamation 10998 has suspended visas, with narrow exceptions, for nationals of Afghanistan, Burma, Burkina Faso, Chad, the Republic of the Congo, Equatorial Guinea, Eritrea, Haiti, Iran, Laos, Libya, Mali, Niger, Sierra Leone, Somalia, South Sudan, Sudan, Syria and Yemen (all visas), and of Angola, Antigua and Barbuda, Benin, Burundi, Cote d'Ivoire, Cuba, Dominica, Gabon, The Gambia, Malawi, Mauritania, Nigeria, Senegal, Tanzania, Togo, Tonga, Turkmenistan, Venezuela, Zambia and Zimbabwe (immigrant visas and some others). Spouses, children and parents of U.S. citizens are no longer exempt. It depends on your nationality, not on the embassy: dual nationals applying with a passport from a country not on the list are exempt.",
-      "scope": { "allConsulatePages": true, "pages": ["/nvc"] },
+      "title": "Visa suspensions for 39 nationalities and Palestinian Authority travel documents",
+      "body": "Since January 1, 2026, Presidential Proclamation 10998 has suspended visas, with narrow exceptions: all visas for nationals of Afghanistan, Burma, Burkina Faso, Chad, the Republic of the Congo, Equatorial Guinea, Eritrea, Haiti, Iran, Laos, Libya, Mali, Niger, Sierra Leone, Somalia, South Sudan, Sudan, Syria and Yemen, and for anyone traveling on travel documents issued or endorsed by the Palestinian Authority; all immigrant visas, and B-1/B-2, F, M and J visas, for nationals of Angola, Antigua and Barbuda, Benin, Burundi, Cote d'Ivoire, Cuba, Dominica, Gabon, The Gambia, Malawi, Mauritania, Nigeria, Senegal, Tanzania, Togo, Tonga, Venezuela, Zambia and Zimbabwe; and all immigrant visas for nationals of Turkmenistan. Spouses, children and parents of U.S. citizens, and Afghan special immigrants, are no longer exempt. You can still apply and be scheduled for an interview, but the State Department says you may be ineligible for a visa. It depends on your nationality, not on the embassy: dual nationals applying with a passport of a nationality not subject to a suspension are exempt.",
+      "scope": {
+        "allConsulatePages": true,
+        "posts": ["jerusalem"],
+        "countries": [
+          "Afghanistan",
+          "Burma",
+          "Burkina Faso",
+          "Chad",
+          "Republic of the Congo",
+          "Equatorial Guinea",
+          "Eritrea",
+          "Haiti",
+          "Laos",
+          "Mali",
+          "Niger",
+          "Sierra Leone",
+          "South Sudan",
+          "Sudan",
+          "Angola",
+          "Benin",
+          "Burundi",
+          "Côte d'Ivoire",
+          "Cuba",
+          "Gabon",
+          "Gambia",
+          "Malawi",
+          "Mauritania",
+          "Nigeria",
+          "Senegal",
+          "Tanzania",
+          "Togo",
+          "Venezuela",
+          "Zambia",
+          "Zimbabwe",
+          "Turkmenistan"
+        ],
+        "pages": ["/nvc"]
+      },
+      "suspendsIssuance": true,
       "start": "2026-01-01",
       "end": null,
       "sources": [
@@ -109,7 +147,7 @@
           "url": "https://travel.state.gov/content/travel/en/News/visas-news/suspension-of-visa-issuance-to-foreign-nationals-to-protect-the-security-of-the-united-states.html"
         }
       ],
-      "lastChecked": "2026-09-24"
+      "lastChecked": "2026-09-25"
     },
     {
       "id": "iv-pause-75-countries",

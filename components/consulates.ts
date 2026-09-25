@@ -128,6 +128,39 @@ export function summarizeInactivity(input: InactivityInput): string | null {
     : `no ${visas} issued since ${formatLongMonth(lastIssued)}`;
 }
 
+/** Visa classes whose applicants at a post are mostly nationals of another
+ * country than the one the post is in, by post slug, then class slug. SQ and
+ * SI visas are for Iraqis and Afghans only (see their descriptions), and
+ * State's list of the posts that process immigrant visas designates
+ * Islamabad for Afghanistan
+ * (https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/list-of-posts.html). */
+export const CLASS_APPLICANT_COUNTRIES: Partial<
+  Record<string, Partial<Record<string, string>>>
+> = {
+  islamabad: { sq: "Afghanistan", si: "Afghanistan" },
+};
+
+/** The country whose nationals make up most of the immigrant visa
+ * applicants on a post's page or one of its visa class pages, as the policy
+ * notices name it (data/policy.json's scope.countries): the post's own
+ * country, from api/searchTerms.ts's POST_COUNTRIES without the other names
+ * in parentheses ("Burma (Myanmar)" is "Burma"), since State requires
+ * immigrant visa applicants to interview in their country of residence or
+ * nationality, except for the classes in CLASS_APPLICANT_COUNTRIES. Null for
+ * a post with no country. */
+export function applicantCountry(
+  postCountry: string | null,
+  postSlug: string,
+  visaClassSlug?: string,
+): string | null {
+  const classCountry =
+    visaClassSlug === undefined
+      ? undefined
+      : CLASS_APPLICANT_COUNTRIES[postSlug]?.[visaClassSlug];
+  if (classCountry !== undefined) return classCountry;
+  return postCountry === null ? null : postCountry.replace(/ \(.*\)$/, "");
+}
+
 /** The three columns of State's IV Scheduling Status Tool */
 export type IvCategory = "relative" | "preference" | "employment";
 

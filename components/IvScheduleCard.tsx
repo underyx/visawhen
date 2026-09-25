@@ -159,6 +159,37 @@ interface Props {
    * keep its <title> and meta description from calling the post current or
    * naming the tool's month. */
   scheduleOverride?: PolicyEntry;
+  /** The notice, shown above the card, that suspends visas for the nationals
+   * of the country most of the page's applicants are nationals of
+   * (issuanceSuspensionFor() in policy.ts), with that country, "Cuba", and
+   * who the applicants are, "immigrant visa" or a class, "SQ". The card
+   * says that most applicants are affected, since NVC keeps scheduling
+   * their interviews. */
+  suspension?: { entry: PolicyEntry; country: string; applicants: string };
+}
+
+/** That most of a page's applicants are nationals whose visas are
+ * suspended, though NVC can still schedule their interviews. Not all of
+ * them: there are dual nationals and applicants of other nationalities. */
+function SuspensionNote({
+  postName,
+  suspension: { entry, country, applicants },
+}: {
+  postName: string;
+  suspension: NonNullable<Props["suspension"]>;
+}) {
+  return (
+    <Alert role="note" color="orange">
+      <Text size="sm">
+        Most {applicants} applicants at {postName} are nationals of {country},
+        whose immigrant visas are suspended (&ldquo;{entry.title}&rdquo;,
+        above). NVC can still schedule their interviews, but State says
+        applicants subject to the suspension may be ineligible for a visa.
+        Exceptions include dual nationals applying with a passport of a
+        nationality not subject to a suspension.
+      </Text>
+    </Alert>
+  );
 }
 
 /** Which month of documentarily complete cases NVC is scheduling interviews
@@ -171,6 +202,7 @@ export default function IvScheduleCard({
   first,
   note,
   scheduleOverride,
+  suspension,
 }: Props) {
   // The prerendered page is served for weeks, so whether the update is stale
   // is decided on the client only.
@@ -200,6 +232,9 @@ export default function IvScheduleCard({
           <Title order={2} size="h3">
             Interview scheduling at {postName}
           </Title>
+          {suspension !== undefined && (
+            <SuspensionNote postName={postName} suspension={suspension} />
+          )}
           <Text>{note}</Text>
         </Stack>
       </Paper>
@@ -252,6 +287,9 @@ export default function IvScheduleCard({
         <Title order={2} size="h3">
           Interview scheduling at {postName}
         </Title>
+        {suspension !== undefined && !overridden && (
+          <SuspensionNote postName={postName} suspension={suspension} />
+        )}
         {stale && (
           <Alert color="yellow">
             This is State&rsquo;s {updated} update, the newest we have;{" "}

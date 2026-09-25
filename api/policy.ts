@@ -1,5 +1,9 @@
 import policyData from "../data/policy.json";
-import { POLICY_PAGES } from "../components/policy";
+import {
+  POLICY_ENTRIES,
+  POLICY_PAGES,
+  PolicyScope,
+} from "../components/policy";
 
 // Checks data/policy.json when the site is built, so that no page shows a
 // notice without its dates or sources. The pages read the file through
@@ -44,13 +48,33 @@ function problemsWith(entry: Record<string, unknown>): string[] {
     [isText(entry.body), "body must be a non-empty string"],
     [
       (scope.posts === undefined || isTextList(scope.posts)) &&
+        (scope.countries === undefined || isTextList(scope.countries)) &&
         (scope.pages === undefined || isTextList(scope.pages)) &&
         (scope.allConsulatePages === undefined ||
           typeof scope.allConsulatePages === "boolean") &&
         (scope.posts !== undefined ||
+          scope.countries !== undefined ||
           scope.pages !== undefined ||
           scope.allConsulatePages === true),
-      "scope must name posts, pages or allConsulatePages: true",
+      "scope must name posts, countries, pages or allConsulatePages: true",
+    ],
+    [
+      scope.visaClasses === undefined ||
+        (isTextList(scope.visaClasses) &&
+          (scope.posts !== undefined ||
+            scope.countries !== undefined ||
+            scope.allConsulatePages === true)),
+      "scope.visaClasses must list visa class slugs, and only with posts, countries or allConsulatePages: true",
+    ],
+    [
+      entry.expanded === undefined || typeof entry.expanded === "boolean",
+      "expanded must be true or false",
+    ],
+    [
+      entry.suspendsIssuance === undefined ||
+        (typeof entry.suspendsIssuance === "boolean" &&
+          (entry.suspendsIssuance === false || scope.countries !== undefined)),
+      "suspendsIssuance must be true or false, and true only with scope.countries",
     ],
     [
       scope.exceptPosts === undefined ||
@@ -99,10 +123,21 @@ function problemsWith(entry: Record<string, unknown>): string[] {
 
 /** Fails the build when an entry is broken, and warns when entries name a
  * post the site has no page for (in `posts`, a notice that is never shown; in
- * `exceptPosts`, most likely a typo that leaves the post's pages showing it)
- * or when too many have no end date. `postSlugs` are the posts that have a
- * page. */
-export function checkPolicies(postSlugs: string[]): void {
+ * `exceptPosts`, most likely a typo that leaves the post's pages showing it),
+ * a country no post is in or a visa class the site does not know (a notice
+ * never shown), or when too many have no end date. `postSlugs` are the posts
+ * that have a page, `countries` the countries of their applicants (see
+ * applicantCountry() in components/consulates.ts), and `visaClassSlugs` the
+ * visa classes. */
+export function checkPolicies({
+  postSlugs,
+  countries,
+  visaClassSlugs,
+}: {
+  postSlugs: string[];
+  countries: string[];
+  visaClassSlugs: string[];
+}): void {
   const entries: Record<string, unknown>[] = policyData.entries;
   const seen = new Set<string>();
   const problems = entries.flatMap((entry, index) => {
@@ -121,19 +156,38 @@ export function checkPolicies(postSlugs: string[]): void {
       `data/policy.json is not valid:\n  ${problems.join("\n  ")}`,
     );
 
-  const known = new Set(postSlugs);
-  const unknown = policyData.entries.flatMap((entry) => {
-    const scope = entry.scope as { posts?: string[]; exceptPosts?: string[] };
-    return [...(scope.posts ?? []), ...(scope.exceptPosts ?? [])]
-      .filter((postSlug) => !known.has(postSlug))
-      .map((postSlug) => `${postSlug} (${entry.id})`);
-  });
-  if (unknown.length > 0)
-    console.warn(
-      `data/policy.json names posts that have no page (check the slugs): ${unknown.join(
-        ", ",
-      )}`,
+  const unknownIn = (
+    kind: string,
+    known: string[],
+    names: (scope: PolicyScope) => string[],
+  ) => {
+    const knownSet = new Set(known);
+    const unknown = POLICY_ENTRIES.flatMap((entry) =>
+      names(entry.scope)
+        .filter((name) => !knownSet.has(name))
+        .map((name) => `${name} (${entry.id})`),
     );
+    if (unknown.length > 0)
+      console.warn(
+        `data/policy.json names ${kind} (check the spelling): ${unknown.join(
+          ", ",
+        )}`,
+      );
+  };
+  unknownIn("posts that have no page", postSlugs, (scope) => [
+    ...(scope.posts ?? []),
+    ...(scope.exceptPosts ?? []),
+  ]);
+  unknownIn(
+    "countries that no post is in",
+    countries,
+    (scope) => scope.countries ?? [],
+  );
+  unknownIn(
+    "visa classes that have no page",
+    visaClassSlugs,
+    (scope) => scope.visaClasses ?? [],
+  );
 
   // A warning, not an error: failing the build would also hold back the
   // scheduled data deploys.
