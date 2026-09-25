@@ -4,6 +4,7 @@ import {
   Anchor,
   Badge,
   Button,
+  Chip,
   Group,
   Highlight,
   Stack,
@@ -17,7 +18,7 @@ import { sortBy } from "lodash";
 import { GetStaticPaths, GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import React, { useMemo } from "react";
+import React, { useId, useMemo, useState } from "react";
 import {
   getActiveForms,
   getActiveOffices,
@@ -31,22 +32,28 @@ import {
   formatMedian,
   formatRangeMonths,
   headlineRange,
+  PREMIUM_PROCESSING,
+  PRIORITY_DATE_TEXT,
   withoutMisleadingClearing,
 } from "../../../components/estimate";
 import { VISA_BULLETIN_URL } from "../../../components/links";
 import { RELATED_FORMS } from "../../../components/relatedForms";
 import {
+  ALL_CATEGORIES,
   approximately,
+  cleanData,
   formatCount,
+  formViews,
+  FormView,
   highlight,
-  lastMedianLabel,
   LEADING_OFFICE_CATEGORY,
   officeCategoryName,
   officeCategoryPoints,
+  officeCategoryWho,
+  officePointOptions,
   openingOfficeCategory,
-  processingTimeSeries,
-  ProcessingTimeSeries,
-  QuarterPoint,
+  quarterLabel,
+  republishedMedianQuarters,
   toPoints,
 } from "../../../components/uscis";
 import { OutcomesChart, WaitChart } from "../../../components/UscisChart";
@@ -76,22 +83,35 @@ interface Props {
   form: string;
   slug: string;
   title: string;
-  points: QuarterPoint[];
+  /** One per category of the form, the one the page is about first, then
+   * all categories together; just the latter for a form with one category */
+  views: FormView[];
   variants: Variant[];
-  processingTimeSeries: ProcessingTimeSeries[];
-  /** The quarter of USCIS's last median, when it has stopped publishing one */
-  lastMedian: string | null;
   /** What to expect if filing today, per category with a USCIS median */
   ranges: CategoryRange[];
+  /** The range the page leads with (headlineRange) */
+  headline: CategoryRange | null;
   source: string;
   offices: OfficeSummary[];
+  /** The quarter of the offices' numbers, "Apr–Jun 2026" */
+  officeLabel: string | null;
   /** The category the office numbers are for unless an office says
    * otherwise, "Immediate Relative"; null for all categories together */
   officeCategory: string | null;
+  /** The quarters whose medians repeat the quarter before's, which the
+   * charts leave out (republishedMedianQuarters) */
+  republished: { quarter: string; label: string }[];
 }
 
+/** What to know about a form's approval rate, where USCIS's counts are not
+ * what the words suggest. */
+const APPROVAL_NOTES: Record<string, string> = {
+  "I-589":
+    "About the approval rate: when an asylum office does not grant the application of someone without lawful status, it usually refers it to an immigration court rather than denying it. USCIS's report does not say whether it counts those referrals as denials, so read the rate as the share of USCIS's own decisions that granted asylum, not the share of applicants who end up with it.",
+};
+
 export const getStaticPaths: GetStaticPaths = async () => {
-  const data = await getData();
+  const data = cleanData(await getData());
   return {
     paths: getActiveForms(data).map((form) => ({
       params: { formSlug: form.slug },
@@ -103,88 +123,138 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   if (params === undefined || typeof params.formSlug !== "string")
     return { notFound: true };
-  const data = await getData();
+  const raw = await getData();
+  const data = cleanData(raw);
   const form = data.forms.find(({ slug }) => slug === params.formSlug);
   if (form === undefined) return { notFound: true };
-  const points = withoutMisleadingClearing(
-    toPoints(data.periods, form.quarters),
+  const republished = republishedMedianQuarters(raw.forms).flatMap(
+    (quarter) => {
+      const period = data.periods.find((p) => p.quarter === quarter);
+      return period === undefined
+        ? []
+        : [{ quarter, label: quarterLabel(period) }];
+    },
   );
-  const latest = points[points.length - 1];
+  const views = formViews(data.periods, form).map((view) => ({
+    ...view,
+    points: withoutMisleadingClearing(view.points),
+  }));
+  const total = views[views.length - 1].points;
+  const latest = total[total.length - 1];
   const variants = form.quarters[latest.quarter].variants;
+  const ranges = categoryRanges(form);
   // the office list shows the category each office's page opens with
   const officeCategory = (form.officeCategories ?? []).find(
     ({ key }) => key === LEADING_OFFICE_CATEGORY[form.form],
   );
+  const offices = getActiveOffices(form).map((office) => {
+    const officeTotal = toPoints(
+      data.periods,
+      office.quarters,
+      officePointOptions(form.form),
+    );
+    const categories = officeCategoryPoints(
+      data.periods,
+      form,
+      office.quarters,
+    );
+    const key = openingOfficeCategory(
+      form.form,
+      officeTotal,
+      categories.map(({ category, points }) => ({
+        key: category.key,
+        points,
+      })),
+    );
+    const opening = categories.find(({ category }) => category.key === key);
+    const officePoints = opening?.points ?? officeTotal;
+    const current = officePoints[officePoints.length - 1];
+    return {
+      slug: office.slug,
+      name: office.name,
+      stateCode: office.stateCode,
+      category:
+        officeCategory === undefined || key === officeCategory.key
+          ? null
+          : opening === undefined
+          ? "all categories"
+          : officeCategoryName(opening.category),
+      pending: current?.pending ?? null,
+      completions: current?.completions ?? null,
+      approximate: current?.approximate ?? false,
+      approved: current?.approved ?? null,
+      label: current?.label ?? null,
+    };
+  });
   return {
     props: {
       form: form.form,
       slug: form.slug,
       title: form.title,
-      points,
+      views,
       variants,
-      processingTimeSeries: processingTimeSeries(points, form),
-      lastMedian: lastMedianLabel(points),
-      ranges: categoryRanges(form),
+      ranges,
+      headline: headlineRange(ranges, form.form),
       source: form.sources[latest.quarter],
-      offices: getActiveOffices(form).map((office) => {
-        const total = toPoints(data.periods, office.quarters);
-        const categories = officeCategoryPoints(
-          data.periods,
-          form,
-          office.quarters,
-        );
-        const key = openingOfficeCategory(
-          form.form,
-          total,
-          categories.map(({ category, points }) => ({
-            key: category.key,
-            points,
-          })),
-        );
-        const opening = categories.find(({ category }) => category.key === key);
-        const officePoints = opening?.points ?? total;
-        const current = officePoints[officePoints.length - 1];
-        return {
-          slug: office.slug,
-          name: office.name,
-          stateCode: office.stateCode,
-          category:
-            officeCategory === undefined || key === officeCategory.key
-              ? null
-              : opening === undefined
-              ? "all categories"
-              : officeCategoryName(opening.category),
-          pending: current?.pending ?? null,
-          completions: current?.completions ?? null,
-          approximate: current?.approximate ?? false,
-          approved: current?.approved ?? null,
-        };
-      }),
+      offices: offices.map(({ label: _label, ...office }) => office),
+      officeLabel: offices.find(({ label }) => label !== null)?.label ?? null,
       officeCategory:
         officeCategory === undefined
           ? null
           : officeCategoryName(officeCategory),
+      republished,
     },
   };
 };
+
+/** "I-130 (Immediate Relative)", or "I-130 (all categories)" when the form
+ * has several, or just "I-130" */
+function who(form: string, view: FormView, views: FormView[]): string {
+  if (views.length === 1) return form;
+  return view.key === ALL_CATEGORIES
+    ? `${form} (all categories)`
+    : `${form} (${view.name})`;
+}
 
 export default function UscisForm({
   form,
   slug,
   title,
-  points,
+  views,
   variants,
-  processingTimeSeries,
-  lastMedian,
   ranges,
+  headline,
   source,
   offices,
+  officeLabel,
   officeCategory,
+  republished,
 }: Props) {
   const [term, setTerm] = useInputState("");
+  const [selected, setSelected] = useState(views[0].key);
+  // one name for the category radios, so they are one group to keyboards and
+  // screen readers
+  const categoryInputName = useId();
+  const view = views.find(({ key }) => key === selected) ?? views[0];
+  const { points } = view;
   const current = points[points.length - 1];
+  const isTotal = view.key === ALL_CATEGORIES;
+  // the newest quarter of the form, which a category may have no numbers for
+  const totalPoints = views[views.length - 1].points;
+  const newest = totalPoints[totalPoints.length - 1];
+  const opening = views[0].points[views[0].points.length - 1];
   const related = RELATED_FORMS[form];
-  const headline = headlineRange(ranges);
+  // the view's own range, when it has one: the headline for a form with one
+  // category, none for all categories together
+  const viewRange =
+    views.length === 1
+      ? headline
+      : ranges.find(
+          (range) =>
+            range.key === view.key &&
+            !range.priorityDate &&
+            range.suppressed === null,
+        ) ?? null;
   // whether any category gets a range, not just a reason why not
   const hasRange = ranges.some(
     ({ priorityDate, suppressed }) => !priorityDate && suppressed === null,
@@ -197,11 +267,12 @@ export default function UscisForm({
   const hasClearing = points.some(({ waitMonths }) => waitMonths !== null);
   const filteredOffices = useMemo<OfficeSummary[]>(() => {
     const normalizedTerm = normalize(term);
+    // by the number each row shows: its decisions (or approvals)
     return sortBy(
       offices.filter(({ name, stateCode }) =>
         normalize(`${name} ${stateCode ?? ""}`).includes(normalizedTerm),
       ),
-      [({ pending }) => -(pending ?? 0), "name"],
+      [({ completions, approved }) => -(completions ?? approved ?? 0), "name"],
     );
   }, [offices, term]);
 
@@ -213,24 +284,25 @@ export default function UscisForm({
       : `${form} (${headline.name})`;
   const pageTitle =
     headline === null
-      ? `${form} processing times (${current.label} data)`
+      ? `${form} processing times (${newest.label} data)`
       : `${form} processing time: ${formatRangeMonths(
           headline.q[1],
           headline.q[3],
         )}${headline.name === form ? "" : ` for ${headline.name}`} (${
-          current.label
+          newest.label
         } data)`;
+  // "I-130 (Immediate Relative)", or "I-589 (Application for Asylum ...)"
+  const openingWhat =
+    views.length > 1 ? who(form, views[0], views) : `${form} (${title})`;
   const description =
     headline === null
       ? `USCIS had ${formatCount(
-          current.pending,
-        )} ${form} (${title}) applications pending at the end of ${
-          current.label
-        }${
-          current.completions === null
+          opening.pending,
+        )} ${openingWhat} applications pending at the end of ${opening.label}${
+          opening.completions === null
             ? "."
-            : ` and decided ${current.approximate ? "about " : ""}${formatCount(
-                current.completions,
+            : ` and decided ${opening.approximate ? "about " : ""}${formatCount(
+                opening.completions,
               )} that quarter.`
         }`
       : `If you file ${article} ${headlineWhat} today, USCIS will most likely decide it in ${formatRangeMonths(
@@ -240,14 +312,28 @@ export default function UscisForm({
           headline.q[0],
           headline.q[4],
         )}. Based on USCIS's ${headline.median.toFixed(1)}-month median for ${
-          current.label
+          newest.label
+        }${
+          headline.premium ? ", premium and regular processing together" : ""
         }.`;
   const shocked = ranges.filter(
     ({ shock, shockRatio, priorityDate, suppressed }) =>
       shock && shockRatio !== null && !priorityDate && suppressed === null,
   );
+  const premium = PREMIUM_PROCESSING[form];
   const canonicalUrl = `https://visawhen.com/uscis/${slug}`;
   const sourceName = "All USCIS Application and Petition Form Types";
+  const viewWho = who(form, view, views);
+  const otherNames = views.slice(0, -1).map(({ name }) => name);
+  const whoText = isTotal
+    ? `${
+        otherNames.length === 2 ? "Both" : `All ${otherNames.length}`
+      } categories together: ${new Intl.ListFormat("en-US").format(
+        otherNames,
+      )}. Their queues move at different speeds, so this is nobody's own queue: pick your category to see yours.`
+    : officeCategoryWho(view.key) ??
+      variants.find(({ key }) => key === view.key)?.title ??
+      null;
 
   return (
     <Stack gap="xl">
@@ -277,8 +363,35 @@ export default function UscisForm({
             · {title}
           </Text>
         </Title>
+        {views.length > 1 && (
+          <Stack gap={6}>
+            <Chip.Group
+              multiple={false}
+              value={view.key}
+              onChange={(key) => setSelected(key)}
+            >
+              <Group gap="xs" role="radiogroup" aria-label="Category">
+                {views.map(({ key, name: viewName }) => (
+                  <Chip
+                    key={key}
+                    value={key}
+                    variant="outline"
+                    name={categoryInputName}
+                  >
+                    {viewName}
+                  </Chip>
+                ))}
+              </Group>
+            </Chip.Group>
+            {whoText !== null && (
+              <Text size="sm" c="dimmed">
+                {whoText}
+              </Text>
+            )}
+          </Stack>
+        )}
         <Text size="xl">
-          Latest USCIS data: {current.label}, from the{" "}
+          Latest USCIS data: {newest.label}, from the{" "}
           <Anchor href={source} target="_blank" rel="noopener">
             {sourceName}
           </Anchor>{" "}
@@ -286,13 +399,18 @@ export default function UscisForm({
         </Text>
         <UscisStats
           points={points}
-          headline={headline}
+          headline={viewRange}
           backlogSuppressed={backlogSuppressed}
         />
         <Text>
           <strong>Quarter-over-quarter highlight:</strong>{" "}
-          {highlight(points, "USCIS", `${form} applications`)}
+          {highlight(points, "USCIS", `${viewWho} applications`)}
         </Text>
+        {APPROVAL_NOTES[form] !== undefined && (
+          <Text size="sm" c="dimmed">
+            {APPROVAL_NOTES[form]}
+          </Text>
+        )}
         {related !== undefined && (
           <Text>
             {related.lead}{" "}
@@ -338,8 +456,10 @@ export default function UscisForm({
                   <Table.Tr key={range.key}>
                     <Table.Td>{range.name}</Table.Td>
                     {range.priorityDate ? (
-                      <Table.Td colSpan={3}>
-                        Depends on your priority date: see the{" "}
+                      <Table.Td colSpan={2}>
+                        {PRIORITY_DATE_TEXT[form]?.[range.key] ??
+                          "Depends on your priority date:"}{" "}
+                        see the{" "}
                         <Anchor
                           href={VISA_BULLETIN_URL}
                           target="_blank"
@@ -349,44 +469,47 @@ export default function UscisForm({
                           Visa Bulletin
                         </Anchor>
                         .
-                        <Text size="sm" c="dimmed">
-                          USCIS median for decided cases:{" "}
-                          {formatMedian(range.median)}
-                        </Text>
+                      </Table.Td>
+                    ) : range.suppressed === "too few decisions" ? (
+                      <Table.Td colSpan={2}>
+                        Too few decisions last quarter to estimate
+                      </Table.Td>
+                    ) : range.suppressed === "nearly stopped" ? (
+                      <Table.Td colSpan={2}>
+                        USCIS has nearly stopped deciding these:{" "}
+                        {Math.round((1 - (range.shockRatio ?? 0)) * 100)}% fewer
+                        decisions last quarter than its average over the four
+                        before
                       </Table.Td>
                     ) : (
                       <>
-                        {range.suppressed === "too few decisions" ? (
-                          <Table.Td colSpan={2}>
-                            Too few decisions last quarter to estimate
-                          </Table.Td>
-                        ) : range.suppressed === "nearly stopped" ? (
-                          <Table.Td colSpan={2}>
-                            USCIS has nearly stopped deciding these:{" "}
-                            {Math.round((1 - (range.shockRatio ?? 0)) * 100)}%
-                            fewer decisions last quarter than its average over
-                            the four before
-                          </Table.Td>
-                        ) : (
-                          <>
-                            <Table.Td>
-                              <RangeText low={range.q[1]} high={range.q[3]} />
-                            </Table.Td>
-                            <Table.Td>
-                              <RangeText low={range.q[0]} high={range.q[4]} />
-                            </Table.Td>
-                          </>
-                        )}
-                        <Table.Td ta="right">
-                          {formatMedian(range.median)}
+                        <Table.Td>
+                          <RangeText low={range.q[1]} high={range.q[3]} />
+                          {range.premium && (
+                            <Text size="sm" c="dimmed">
+                              premium and regular together
+                            </Text>
+                          )}
+                        </Table.Td>
+                        <Table.Td>
+                          <RangeText low={range.q[0]} high={range.q[4]} />
                         </Table.Td>
                       </>
                     )}
+                    <Table.Td ta="right">
+                      {formatMedian(range.median)}
+                      {range.priorityDate && (
+                        <Text size="sm" c="dimmed">
+                          for those decided in {newest.label}
+                        </Text>
+                      )}
+                    </Table.Td>
                   </Table.Tr>
                 ))}
               </Table.Tbody>
             </Table>
           </Table.ScrollContainer>
+          {premium !== undefined && <Alert color="blue">{premium.note}</Alert>}
           {shocked.length > 0 && (
             <Alert color="yellow">
               USCIS decided{" "}
@@ -398,7 +521,7 @@ export default function UscisForm({
                     )}% fewer ${name} cases`,
                 ),
               )}{" "}
-              in {current.label} than{" "}
+              in {newest.label} than{" "}
               {shocked.length === 1 ? "its average" : "their averages"} over the
               previous four quarters. We widen the range when this happens, but
               in past slowdowns like this the typical wait landed in the
@@ -411,22 +534,25 @@ export default function UscisForm({
       <Stack gap="sm">
         <Title order={2}>What happened to the applications</Title>
         <Text>
-          The bars are the {form} decisions USCIS made each quarter, approved in
-          blue and denied in red. The amber line is the backlog: how many
+          The bars are the {viewWho} decisions USCIS made each quarter, approved
+          in blue and denied in red. The amber line is the backlog: how many
           applications were still waiting at the end of that quarter, most of
           them filed in earlier ones. The dashed line is how many came in.
+          {view.splitLabel !== null &&
+            ` Before ${view.splitLabel}, USCIS's all-forms report had one row for every ${form}; the ${view.name} numbers for those quarters come from the national totals of its per-office ${form} report.`}
         </Text>
         <OutcomesChart
           points={points}
-          subject={form}
+          subject={viewWho}
           source={source}
           sourceName={sourceName}
+          breaks={view.breaks}
         />
       </Stack>
-      {(hasClearing || processingTimeSeries.length > 0) && (
+      {(hasClearing || view.processingTimeSeries.length > 0) && (
         <Stack gap="sm">
           <Title order={2}>
-            {processingTimeSeries.length > 0
+            {view.processingTimeSeries.length > 0
               ? "USCIS median and backlog over time"
               : "Backlog over time"}
           </Title>
@@ -436,28 +562,46 @@ export default function UscisForm({
             Time to clear backlog is how long USCIS would need to decide every
             pending case at last quarter&rsquo;s pace. It is not your wait: the
             pile includes cases on hold and{" "}
-            {ranges.some(({ priorityDate }) => priorityDate)
+            {ranges.some(
+              ({ key, priorityDate }) =>
+                priorityDate && (isTotal || key === view.key),
+            )
               ? "cases waiting for a visa number"
               : "cases USCIS cannot decide yet"}
             .
             {clearingGaps &&
               " The chart leaves it out for quarters in which USCIS decided fewer than 100, too few to divide by."}
-            {processingTimeSeries.length === 0
-              ? " USCIS does not publish a processing time for this form in these reports."
-              : lastMedian !== null &&
-                ` USCIS has not published a median for this form since ${lastMedian}.`}
+            {view.processingTimeSeries.length === 0
+              ? ` USCIS does not publish a processing time for ${
+                  isTotal ? "this form" : "this category"
+                } in these reports.`
+              : view.lastMedian !== null &&
+                ` USCIS has not published a median for ${
+                  isTotal ? "this form" : "this category"
+                } since ${view.lastMedian}.`}
+            {view.processingTimeSeries.length > 0 &&
+              republished
+                .filter(({ quarter }) =>
+                  points.some((point) => point.quarter === quarter),
+                )
+                .map(
+                  ({ label }) =>
+                    ` USCIS's ${label} report repeated the quarter before's medians, so the chart has none for ${label}.`,
+                )
+                .join("")}
           </Text>
           <WaitChart
             points={points}
-            subject={form}
+            subject={viewWho}
             suppressed={backlogSuppressed}
-            processingTimeSeries={processingTimeSeries}
+            processingTimeSeries={view.processingTimeSeries}
+            breaks={view.breaks}
           />
         </Stack>
       )}
       {variants.length > 1 && (
         <Stack gap="sm">
-          <Title order={2}>By category, {current.label}</Title>
+          <Title order={2}>By category, {newest.label}</Title>
           <Table.ScrollContainer minWidth={640}>
             <Table striped withTableBorder>
               <Table.Thead>
@@ -472,7 +616,10 @@ export default function UscisForm({
               </Table.Thead>
               <Table.Tbody>
                 {variants.map((variant) => (
-                  <Table.Tr key={variant.key}>
+                  <Table.Tr
+                    key={variant.key}
+                    fw={variant.key === view.key ? 700 : undefined}
+                  >
                     <Table.Td>{variant.title}</Table.Td>
                     <Table.Td ta="right">
                       {formatCount(variant.received)}
@@ -512,13 +659,20 @@ export default function UscisForm({
             >
               Look it up on USCIS&rsquo;s office locator
             </Anchor>
-            .
-            {officeCategory !== null &&
-              ` Next to each office is how many ${form} (${officeCategory}) cases it decided in the newest quarter${
-                offices.some(({ category }) => category !== null)
-                  ? "; for an office that handles few of those, the count is of its main category, named next to it"
-                  : ""
-              }. The office pages show every category.`}
+            .{" "}
+            {`Next to each office is how many ${
+              officeCategory === null ? form : `${form} (${officeCategory})`
+            } cases it decided, approved or denied, in ${
+              officeLabel ?? "the newest quarter"
+            }, and the offices are listed from the most to the fewest${
+              offices.some(({ category }) => category !== null)
+                ? "; for an office that handles few of those, or almost never approves them, the count is of its main category, named next to it"
+                : ""
+            }.${
+              officeCategory === null
+                ? ""
+                : " The office pages show every category."
+            }`}
           </Text>
           <TextInput
             size="lg"
