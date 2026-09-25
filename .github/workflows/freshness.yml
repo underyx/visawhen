@@ -24,6 +24,9 @@ jobs:
       actions: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # the steps below pass the token to gh themselves
+          persist-credentials: false
       # Standard library only, so the runner's own Python does.
       - name: Check each source and sync the stale-data issues
         env:

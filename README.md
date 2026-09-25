@@ -4,7 +4,9 @@ Data on US visa wait times at the National Visa Center and at US embassies/consu
 
 ## How it works
 
-The site is a static [Next.js](https://nextjs.org) export: `next build` renders every page (one per consulate and visa class, one per USCIS form and field office) to `out/`, which GitHub Actions deploys to Netlify and Cloudflare Workers on every push to `main`.
+The site is a static [Next.js](https://nextjs.org) export: `next build` renders every page (one per consulate and visa class, one per USCIS form and field office) to `out/`, which GitHub Actions deploys to Netlify and Cloudflare Workers on every push to `main` (`.github/workflows/deploy.yml`, which also describes how visawhen.com is served). Only `main` is deployed.
+
+Pull requests run pre-commit, ESLint, `tsc` and a full build, with a read-only token and no secrets; one that touches `data/uscis` also rebuilds `forms.json` from the reports cached on `main` (`forms.py --offline`) and fails when it differs from the committed file.
 
 The data lives in this repository and is refreshed by scheduled workflows that commit their results and trigger a deploy:
 
@@ -36,8 +38,8 @@ Each scraper is its own [uv](https://docs.astral.sh/uv/) project under `data/`:
 ```sh
 cd data/nvc && uv run python main.py
 cd data/uscis && uv run python forms.py          # add --offline to reparse the cached reports only
-cd data/consulates && uv run jupyter nbconvert --to script --stdout visa-issuances.ipynb | uv run python -
-cd data/consulates && uv run jupyter nbconvert --to script --stdout baselines.ipynb | uv run python -
+cd data/consulates && uv run jupyter nbconvert --to script --stdout visa-issuances.ipynb | uv run python -   # writes all_months.pkl
+cd data/consulates && uv run jupyter nbconvert --to script --stdout baselines.ipynb | uv run python -        # reads it, writes consulates.sqlite and dump/
 cd data/consulates && uv run python iv_schedule.py --fetch   # or --from-file page.html, for a page saved from a browser
 ```
 
@@ -65,4 +67,4 @@ GitHub disables scheduled workflows in a public repository after 60 days without
 
 The policy notices on the consulate and NVC pages (posts that paused or moved their visa services, visa suspensions by nationality) are written by hand in `data/policy.json`, each with its sources and the date someone last checked it against them (`lastChecked`). Re-check them about weekly: a page says an entry may be out of date once that date is more than 30 days old. `end` is the day an entry ended or is due to end, the first day it no longer applies: from that day the page says "Ended" instead of "Ends", the interview card gives State's months again once State publishes an update dated on or after that day, and 60 days later the page drops the entry. `start` is the day it took effect: an entry announced ahead of time is not shown or applied before then. `"status": "reported"` marks an entry that has no State Department notice; publish one only when at least two independent reputable sources report it. `"overridesSchedule": true` keeps the interview card from presenting State's month as a queue at the entry's posts. `scope` names post slugs (`posts`), every consulate page (`allConsulatePages`), posts left out of that (`exceptPosts`, for instance where a worldwide pause is reported to have ended) or other pages by path (`pages`, currently only `/nvc`); `"immigrantVisasOnly": true` in `scope` leaves an entry about immigrant visas only off the pages of the nonimmigrant visa classes that do not go through NVC (all but the K visas). On the consulate pages, the entries about the post itself are shown in full and the rest collapsed, with their titles listed. The build fails when an entry lacks its dates or sources or names a page that shows no notices, and warns when more than 5 entries have no end date.
 
-Python code is checked with [pre-commit](https://pre-commit.com) (`pre-commit run --all-files`).
+The files are checked with [pre-commit](https://pre-commit.com) (ruff and mypy for Python, Prettier for the rest): `git add -A && pre-commit run --all-files`, or `uvx pre-commit run --all-files` after the `git add`. pre-commit only sees the files git tracks, so a new file is not checked until it is staged.

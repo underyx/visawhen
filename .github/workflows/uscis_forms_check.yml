@@ -1,0 +1,68 @@
+# For pull requests that touch data/uscis (such as Dependabot's updates of the
+# parsers' packages): rebuild forms.json from the reports that the scheduled
+# workflow (uscis_forms_update_schedule.yml) cached on main, with
+# `forms.py --offline`, and fail when it differs from the committed forms.json.
+# A pull request that changes the parsed data on purpose commits the
+# regenerated forms.json with it.
+name: Check the USCIS forms parser
+
+on:
+  pull_request:
+    paths:
+      - "data/uscis/**"
+      - ".github/workflows/uscis_forms_check.yml"
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: data/uscis
+
+jobs:
+  check-forms:
+    name: Rebuild forms.json from the cached reports
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up uv
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+        with:
+          python-version: "3.13"
+          enable-cache: true
+          cache-dependency-glob: data/uscis/uv.lock
+      # A pull request can read the caches of its base branch; it only
+      # restores here and never saves.
+      - name: Restore downloaded reports
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: data/uscis/reports/
+          key: ${{ runner.os }}-uscis-reports-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-uscis-reports-
+      - name: Install dependencies
+        run: uv sync --locked
+      # Without every report forms.json cites (no cache yet, or one from
+      # before a report was added), the rebuild would differ for that reason
+      # alone.
+      - name: Check that every report is cached
+        id: cache
+        run: |
+          if uv run python -c 'import sys, forms; sys.exit(0 if forms.cache_is_complete() else 1)'; then
+            echo "complete=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "complete=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::The reports cached on main do not include every report forms.json cites; not rebuilding it"
+          fi
+      - name: Rebuild forms.json
+        if: steps.cache.outputs.complete == 'true'
+        run: uv run python -u forms.py --offline
+      - name: Compare with the committed forms.json
+        if: steps.cache.outputs.complete == 'true'
+        run: |
+          if ! git diff --exit-code --stat -- forms.json; then
+            echo "::error file=data/uscis/forms.json::forms.py --offline does not rebuild the committed forms.json from the cached reports; run it and commit the result if the change is intended"
+            exit 1
+          fi

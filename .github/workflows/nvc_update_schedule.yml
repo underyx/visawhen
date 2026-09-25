@@ -17,6 +17,11 @@ defaults:
   run:
     working-directory: data/nvc
 
+# Only the job that commits the data can push; the build and deploy jobs,
+# which run third-party code, get a read-only token.
+permissions:
+  contents: read
+
 jobs:
   update-nvc-data:
     name: Update NVC data
@@ -69,13 +74,13 @@ jobs:
     # !cancelled(): build what was committed even when one of the two scripts
     # failed
     if: ${{ !cancelled() && needs.update-nvc-data.outputs.updated == 'true' }}
-    uses: underyx/visawhen/.github/workflows/build.yml@main
+    uses: ./.github/workflows/build.yml
     needs: [update-nvc-data]
     with:
       ref: ${{ needs.update-nvc-data.outputs.new-commit-sha }}
 
   deploy:
-    uses: underyx/visawhen/.github/workflows/deploy.yml@main
+    uses: ./.github/workflows/deploy.yml
     needs: [build]
     # When nothing was pushed, build is skipped, and so is this job.
     # !cancelled(): deploy even when one of the two scripts failed.

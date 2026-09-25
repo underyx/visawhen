@@ -9,19 +9,25 @@ on:
         type: string
     outputs:
       artifact-name:
-        description: "Name of the uploaded artifact containing out.tar.gz and wrangler.jsonc"
+        description: "Name of the uploaded artifact containing out.tar.gz, wrangler.jsonc and the deploy tools' package files"
         value: ${{ jobs.build.outputs.artifact-name }}
 
 jobs:
   build:
     name: Build with Next.js
     runs-on: ubuntu-24.04
+    # The install and the build run third-party code (sqlite3's install script,
+    # every package next build loads), so the job gets a read-only token, and
+    # checkout does not leave it in .git/config.
+    permissions:
+      contents: read
     outputs:
       artifact-name: ${{ steps.name-artifact.outputs.artifact-name }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.ref }}
+          persist-credentials: false
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -31,25 +37,34 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ github.workspace }}/.next/cache
-          # Generate a new cache whenever packages or source files change.
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/yarn.lock') }}-${{ hashFiles('**.[jt]sx?') }}
+          # A new cache whenever packages or source files change; a data-only
+          # commit reuses the cache as it is. (hashFiles takes globs, not
+          # regular expressions.)
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/yarn.lock') }}-${{ hashFiles('**/*.js', '**/*.mjs', '**/*.ts', '**/*.tsx', '**/*.css', '!.yarn/**', '!**/node_modules/**') }}
           # If source files changed but packages didn't, rebuild from a prior cache.
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/yarn.lock') }}-
 
-      - run: pipx install sqlite-diffable
+      # The version data/consulates/uv.lock pins, which wrote the dump
+      - run: pipx install sqlite-diffable==0.6
       - run: yarn
       - run: yarn export
 
+      # out/version.txt says which commit a host is serving; deploy.yml reads
+      # it so that an older build never replaces a newer one.
       - id: name-artifact
-        name: Set artifact name
-        run: echo "artifact-name=website-${{ github.sha }}" >> "$GITHUB_OUTPUT"
+        name: Record the commit and name the artifact
+        run: |
+          sha=$(git rev-parse HEAD)
+          echo "$sha" > out/version.txt
+          echo "artifact-name=website-$sha" >> "$GITHUB_OUTPUT"
 
       - name: Create tar archive
         run: tar czf out.tar.gz -C ${{ github.workspace }}/out .
 
-      # wrangler.jsonc travels with the build so deploy.yml needs no checkout
-      # and deploys the Cloudflare config of the ref that was built.
+      # wrangler.jsonc and the deploy tools' package files travel with the
+      # build, so deploy.yml needs no checkout and deploys with the Cloudflare
+      # config and the CLI versions of the commit that was built.
       - name: Upload tar archive
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -57,3 +72,7 @@ jobs:
           path: |
             out.tar.gz
             wrangler.jsonc
+            .github/deploy-tools/package.json
+            .github/deploy-tools/package-lock.json
+          # .github is a hidden directory, which upload-artifact skips by default
+          include-hidden-files: true

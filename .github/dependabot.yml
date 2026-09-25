@@ -1,11 +1,17 @@
 version: 2
 updates:
+  # Version updates wait until a release is a few days old (cooldown), so that
+  # a compromised release is likely to have been caught and pulled first.
+  # Security updates are not delayed.
+
   # Actions are pinned to commit SHAs with a "# vX.Y.Z" comment; Dependabot
   # keeps both the SHA and the comment up to date.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     groups:
       github-actions:
         patterns:
@@ -15,23 +21,50 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     groups:
       npm-minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      # @types/node follows the Node.js major in .node-version (24); a new
+      # major of the types would describe APIs that Node.js does not have.
+      - dependency-name: "@types/node"
+        update-types:
+          - "version-update:semver-major"
+
+  # netlify-cli and wrangler, which .github/workflows/deploy.yml runs with the
+  # deploy tokens in their environment.
+  - package-ecosystem: "npm"
+    directory: "/.github/deploy-tools"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      deploy-tools:
+        patterns:
+          - "*"
 
   - package-ecosystem: "uv"
     directory: "/data/nvc"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: "uv"
     directory: "/data/consulates"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: "uv"
     directory: "/data/uscis"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7

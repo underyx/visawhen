@@ -11,8 +11,10 @@ defaults:
   run:
     working-directory: data/uscis
 
+# Only the job that commits the data can push; the build and deploy jobs,
+# which run third-party code, get a read-only token.
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   update-forms-data:
@@ -68,13 +70,13 @@ jobs:
 
   build:
     if: needs.update-forms-data.outputs.updated == 'true'
-    uses: underyx/visawhen/.github/workflows/build.yml@main
+    uses: ./.github/workflows/build.yml
     needs: [update-forms-data]
     with:
       ref: ${{ needs.update-forms-data.outputs.new-commit-sha }}
 
   deploy:
-    uses: underyx/visawhen/.github/workflows/deploy.yml@main
+    uses: ./.github/workflows/deploy.yml
     needs: [build]
     # When nothing was pushed, build is skipped; a skipped dependency already
     # skips this job (no `always()`), but be explicit about it.
