@@ -174,9 +174,17 @@ export const IV_CATEGORIES: IvCategory[] = [
 /** A post's line in one of State's monthly updates of its IV Scheduling
  * Status Tool: per category, the month of documentarily complete cases NVC
  * is scheduling interviews for, "2026-02", or null where State lists N/A. */
-export interface IvSchedule extends Record<IvCategory, string | null> {
+export interface IvScheduleLine extends Record<IvCategory, string | null> {
   /** The date of State's update, "2026-09-23" */
   asOf: string;
+}
+
+/** A post's line in State's newest update, with its line in the update
+ * before, since the month can move backwards as well as forwards */
+export interface IvSchedule extends IvScheduleLine {
+  /** The post's line in the update before the newest, or null when there
+   * is none or it does not list the post */
+  previous: IvScheduleLine | null;
 }
 
 /** The visa classes each column of the tool covers */

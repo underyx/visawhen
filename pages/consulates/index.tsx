@@ -110,8 +110,8 @@ export default function ConsulateSelect({
     );
   }, [recentMap, posts, term]);
 
-  const title = "US consulates: immigrant visa interview queues";
-  const description = `Which month of documentarily complete cases U.S. embassies and consulates are scheduling for immigrant visa interviews, from the State Department's scheduling tool (updated ${formatShortDate(
+  const title = "US consulates: immigrant visa interview scheduling";
+  const description = `The month of documentarily complete cases for which NVC is scheduling most immigrant visa interviews at U.S. embassies and consulates, from the State Department's scheduling tool (updated ${formatShortDate(
     ivScheduleAsOf,
   )}), and how many visas each one issued, by visa class.`;
 
@@ -132,8 +132,8 @@ export default function ConsulateSelect({
         <Anchor href={ivScheduleSource} target="_blank" rel="noopener">
           interview-scheduling tool
         </Anchor>
-        , their page shows which month of documentarily complete cases NVC is
-        scheduling there for immigrant visa interviews (updated{" "}
+        , their page shows the month of documentarily complete cases for which
+        NVC is scheduling most immigrant visa interviews there (updated{" "}
         {formatShortDate(ivScheduleAsOf)}). Every post&rsquo;s page shows how
         many visas of each class it issued, from State Department figures
         through {formatMonth(recentWindow.to)}.

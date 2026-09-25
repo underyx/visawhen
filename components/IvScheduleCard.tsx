@@ -36,38 +36,84 @@ interface QueueSentence {
   current: boolean;
 }
 
-/** "NVC is scheduling cases that became documentarily complete in February
- * 2026 (7 months before State's update)." A current month is said of the
- * whole post only for the one line that stands for all three categories,
- * since a post can be current in one category and years behind in another.
- * With `dated`, the update's date goes in too, for text that is read without
- * the card around it. */
+/** A category's month in State's update before the newest: the update's
+ * date, "2026-04-02", and the month, "2025-12" */
+interface PreviousMonth {
+  asOf: string;
+  cutoff: string;
+}
+
+/** What the update before said, for the end of the sentence: " (December
+ * 2025 in State’s previous update, of Apr 2, 2026)", with "; it has moved
+ * back" where the month went backwards, or "" when there was no previous
+ * month, or it and the newest one both are current. */
+function describePrevious(
+  cutoff: string,
+  current: boolean,
+  previous: PreviousMonth | null,
+): string {
+  if (previous === null) return "";
+  const update = `State’s previous update, of ${formatShortDate(
+    previous.asOf,
+  )}`;
+  const previousCurrent = monthsBehind(previous.asOf, previous.cutoff) <= 0;
+  if (previousCurrent)
+    return current ? "" : `; ${update} listed these cases as current`;
+  if (previous.cutoff === cutoff) return `; the same month as in ${update}`;
+  return `; ${formatIvMonth(previous.cutoff)} in ${update}${
+    cutoff < previous.cutoff ? ", so it has moved back" : ""
+  }`;
+}
+
+/** "NVC is scheduling most interviews for cases that became documentarily
+ * complete in December 2024; April 2025 in State’s previous update, of Apr
+ * 2, 2026, so it has moved back." State's own words are the month "for which
+ * NVC is scheduling most interviews", and the month can move backwards, so
+ * the sentence neither drops "most" nor reads it as a wait. A current month
+ * is said of the whole post only for the one line that stands for all three
+ * categories, since a post can be current in one category and years behind
+ * in another. With `dated`, the update's date goes in too, for text that is
+ * read without the card around it. */
 function describeQueue(
   asOf: string,
   cutoff: string,
+  previous: PreviousMonth | null,
   wholePost: boolean,
   dated: boolean,
 ): QueueSentence {
-  const lag = monthsBehind(asOf, cutoff);
+  const current = monthsBehind(asOf, cutoff) <= 0;
   const month = formatIvMonth(cutoff);
-  const update = dated ? ` of ${formatShortDate(asOf)}` : "";
-  if (lag <= 0)
-    return {
-      before: `State lists ${
+  const update = dated
+    ? `${current ? " in its" : ", in State’s"} update of ${formatShortDate(
+        asOf,
+      )}`
+    : "";
+  const before = current
+    ? `State lists ${
         wholePost ? "this post" : "these cases"
-      } as current (cases that became documentarily complete in `,
-      month,
-      after: dated ? `) in its update${update}.` : ").",
-      current: true,
-    };
+      } as current (cases that became documentarily complete in `
+    : "NVC is scheduling most interviews for cases that became documentarily complete in ";
   return {
-    before: "NVC is scheduling cases that became documentarily complete in ",
+    before,
     month,
-    after: ` (${lag} ${
-      lag === 1 ? "month" : "months"
-    } before State’s update${update}).`,
-    current: false,
+    after: `${current ? ")" : ""}${update}${describePrevious(
+      cutoff,
+      current,
+      previous,
+    )}.`,
+    current,
   };
+}
+
+/** A category's month in the update before the newest, if it gave one */
+function previousMonth(
+  schedule: IvSchedule,
+  category: IvCategory,
+): PreviousMonth | null {
+  const { previous } = schedule;
+  if (previous === null) return null;
+  const cutoff = previous[category];
+  return cutoff === null ? null : { asOf: previous.asOf, cutoff };
 }
 
 /** The months State gives for a post, leaving out N/A */
@@ -97,13 +143,14 @@ export function describeRelativeQueue(
   const { before, month, after, current } = describeQueue(
     schedule.asOf,
     schedule.relative,
+    previousMonth(schedule, "relative"),
     false,
     true,
   );
   return `${postName} immigrant visas for spouses, children and parents of U.S. citizens: ${before}${month}${after}${
     current
       ? " Current can also mean the post is not scheduling these cases; check the embassy’s website."
-      : ""
+      : " The month is not a wait time, and it can move backwards."
   }`;
 }
 
@@ -111,16 +158,18 @@ interface LineProps {
   label: string;
   asOf: string;
   cutoff: string | null;
+  previous: PreviousMonth | null;
   wholePost: boolean;
 }
 
-function QueueLine({ label, asOf, cutoff, wholePost }: LineProps) {
+function QueueLine({ label, asOf, cutoff, previous, wholePost }: LineProps) {
   let text: React.ReactNode;
   if (cutoff === null) text = "State lists no month (N/A).";
   else {
     const { before, month, after } = describeQueue(
       asOf,
       cutoff,
+      previous,
       wholePost,
       false,
     );
@@ -259,14 +308,37 @@ export default function IvScheduleCard({
   const wholePost =
     schedule !== null &&
     IV_CATEGORIES.every((category) => schedule[category] === schedule.relative);
-  const lines: { label: string; cutoff: string | null }[] =
+  // The one line's previous month too is given only when the previous
+  // update had one month for all three categories.
+  const previousWhole =
+    schedule !== null &&
+    schedule.previous !== null &&
+    IV_CATEGORIES.every(
+      (category) =>
+        schedule.previous !== null &&
+        schedule.previous[category] === schedule.previous.relative,
+    );
+  const lines: {
+    label: string;
+    cutoff: string | null;
+    previous: PreviousMonth | null;
+  }[] =
     schedule === null
       ? []
       : wholePost
-      ? [{ label: "All three categories", cutoff: schedule.relative }]
+      ? [
+          {
+            label: "All three categories",
+            cutoff: schedule.relative,
+            previous: previousWhole
+              ? previousMonth(schedule, "relative")
+              : null,
+          },
+        ]
       : categories.map((category) => ({
           label: CATEGORY_LABELS[category],
           cutoff: schedule[category],
+          previous: previousMonth(schedule, category),
         }));
   const cutoffs = schedule === null ? [] : listedCutoffs(schedule);
   // An override that ends later applies in the prerendered page, which
@@ -359,12 +431,13 @@ export default function IvScheduleCard({
           </Text>
         ) : (
           <>
-            {lines.map(({ label, cutoff }) => (
+            {lines.map(({ label, cutoff, previous }) => (
               <QueueLine
                 key={label}
                 label={label}
                 asOf={asOf}
                 cutoff={cutoff}
+                previous={previous}
                 wholePost={wholePost}
               />
             ))}
@@ -405,8 +478,10 @@ export default function IvScheduleCard({
         {hasQueue && (
           <Text size="sm">
             Compare this with the month NVC told you your case was documentarily
-            complete. Preference and employment cases also need a current
-            priority date in the{" "}
+            complete. It is not a wait time: it is the month most interviews are
+            being scheduled for, and it can move backwards from one of
+            State&rsquo;s updates to the next. Preference and employment cases
+            also need a current priority date in the{" "}
             <Anchor
               href={VISA_BULLETIN_URL}
               target="_blank"

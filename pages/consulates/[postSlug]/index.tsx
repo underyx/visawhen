@@ -286,9 +286,11 @@ export default function ConsulateSelect({
     title =
       ivSchedule === null || relativeCutoff === null
         ? `${postName} visas issued by class`
-        : `${postName} immigrant visa interview wait: ${
+        : // Not a wait: the month is the one "for which NVC is scheduling
+          // most interviews", in State's words, and it can move backwards.
+          `${postName} immigrant visa interview scheduling: ${
             monthsBehind(ivSchedule.asOf, relativeCutoff) > 0
-              ? `scheduling ${formatShortIvMonth(relativeCutoff)} cases`
+              ? `mostly ${formatShortIvMonth(relativeCutoff)} cases`
               : listsPostAsCurrent(ivSchedule)
               ? "listed as current"
               : "immediate relatives listed as current"

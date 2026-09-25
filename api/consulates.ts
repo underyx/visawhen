@@ -2,7 +2,11 @@ import { readFile } from "fs/promises";
 import { join } from "path";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
-import type { IvCategory, IvSchedule } from "../components/consulates";
+import type {
+  IvCategory,
+  IvSchedule,
+  IvScheduleLine,
+} from "../components/consulates";
 
 const dataDir = join(process.cwd(), "data");
 
@@ -361,13 +365,13 @@ export async function getIvSchedulePostCount(): Promise<number> {
   return Object.keys(snapshots[await getIvScheduleAsOf()]).length;
 }
 
-/** A post's line in the newest update of State's IV Scheduling Status Tool,
- * or null when that update does not list the post. */
-export async function getIvSchedule(
+/** A post's line in the update of State's IV Scheduling Status Tool of
+ * `asOf`, or null when that update does not list the post */
+function ivScheduleLine(
+  snapshots: IvScheduleData["snapshots"],
+  asOf: string,
   postSlug: string,
-): Promise<IvSchedule | null> {
-  const { snapshots } = await readIvScheduleData();
-  const asOf = await getIvScheduleAsOf();
+): IvScheduleLine | null {
   const row = snapshots[asOf][postSlug];
   if (row === undefined) return null;
   return {
@@ -375,5 +379,26 @@ export async function getIvSchedule(
     relative: row.relative,
     preference: row.preference,
     employment: row.employment,
+  };
+}
+
+/** A post's line in the newest update of State's IV Scheduling Status Tool,
+ * with its line in the update before, or null when the newest update does
+ * not list the post. */
+export async function getIvSchedule(
+  postSlug: string,
+): Promise<IvSchedule | null> {
+  const { snapshots } = await readIvScheduleData();
+  const dates = Object.keys(snapshots).sort();
+  const asOf = dates[dates.length - 1];
+  const line = ivScheduleLine(snapshots, asOf, postSlug);
+  if (line === null) return null;
+  const previousAsOf = dates.length > 1 ? dates[dates.length - 2] : null;
+  return {
+    ...line,
+    previous:
+      previousAsOf === null
+        ? null
+        : ivScheduleLine(snapshots, previousAsOf, postSlug),
   };
 }
