@@ -26,6 +26,11 @@ const ADJUSTMENT_FILING_CHARTS_URL =
 const IMMEDIATE_RELATIVE_ELIGIBILITY_URL =
   "https://www.uscis.gov/green-card/green-card-eligibility/green-card-for-immediate-relatives-of-us-citizen";
 
+/** USCIS's page on the registration an H-1B cap petition has to be selected
+ * in first */
+const H1B_REGISTRATION_URL =
+  "https://www.uscis.gov/working-in-the-united-states/temporary-workers/h-1b-specialty-occupations-and-fashion-models/h-1b-electronic-registration-process";
+
 /** How the Visa Bulletin's two charts apply, for the preference paths */
 function PriorityDateCharts() {
   return (
@@ -258,8 +263,16 @@ export default function Home() {
           who="B, F, J, H, L, O and other nonimmigrant visas."
           steps={[
             <>
-              Work visas start with an{" "}
-              <To href="/uscis/i-129">I-129 petition</To> from the employer.
+              Most employer-sponsored work visas (H, L, O, P, Q and R) start
+              with an <To href="/uscis/i-129">I-129 petition</To> from the
+              employer. For an H-1B under the annual cap, the employer first
+              registers the worker in{" "}
+              <To href={H1B_REGISTRATION_URL}>
+                USCIS&rsquo;s H-1B registration
+              </To>{" "}
+              and can file only if the worker is selected. For E and TN visas,
+              the I-129 is used only to change or extend status inside the US,
+              and J exchange visitors do not use it.
             </>,
             <>
               Visa appointment waits at each consulate: the State
