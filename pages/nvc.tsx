@@ -15,6 +15,12 @@ import {
   useToday,
 } from "../components/Freshness";
 import PolicyBanner from "../components/PolicyBanner";
+import {
+  front,
+  getStall,
+  reviewRange,
+  ReviewRange,
+} from "../components/nvcReview";
 import { NVC_TIMEFRAMES_URL } from "../components/links";
 
 interface Props {
@@ -41,46 +47,6 @@ function getLatestReading(series: NvcSeries): [string, number] {
   return last(Object.entries(series)) as [string, number];
 }
 
-/** How far from the estimate NVC's document reviews have landed. In a
- * backtest over NVC's own timeframes since November 2020, taking for each
- * day the review time NVC showed that day, 9 in 10 of the documents
- * submitted were reviewed within a week of it, or within 40% of it when that
- * is longer. The misses were mostly in 2021-2022, when the backlog grew and
- * shrank by weeks. */
-const REVIEW_MARGIN_DAYS = 7;
-const REVIEW_MARGIN_SHARE = 0.4;
-
-/** Readings further apart than this are not consecutive weekly updates. */
-const MAX_UPDATE_GAP_DAYS = 21;
-/** A queue whose front, the submission date NVC has reached, moved less than
- * this over its last two updates has stalled. */
-const STALL_DAYS = 3;
-
-/** Where a queue's front stood over its last two updates, when it has barely
- * moved: its N days then only measure how old a queue that is not moving
- * is, and grow week by week (in June and July 2026, document review sat at
- * June 8-10 for five weeks while its days went from 7 to 33). Null while it
- * moves, or when the last readings are not consecutive weekly updates. */
-function getStall(
-  series: NvcSeries,
-): { from: [string, string]; to: [string, string] } | null {
-  const readings = Object.entries(series).slice(-3);
-  if (readings.length < 3) return null;
-  for (let index = 1; index < readings.length; index++)
-    if (
-      daysBetween(readings[index - 1][0], readings[index][0]) >
-      MAX_UPDATE_GAP_DAYS
-    )
-      return null;
-  const [firstDate, firstDays] = readings[0];
-  const [lastDate, lastDays] = readings[readings.length - 1];
-  const firstFront = addDays(firstDate, -firstDays);
-  const lastFront = addDays(lastDate, -lastDays);
-  return daysBetween(firstFront, lastFront) > STALL_DAYS
-    ? null
-    : { from: [firstDate, firstFront], to: [lastDate, lastFront] };
-}
-
 /** Says that a queue has stalled, when it has (getStall). */
 function StallNotice({ series, what }: { series: NvcSeries; what: string }) {
   const stall = getStall(series);
@@ -89,17 +55,12 @@ function StallNotice({ series, what }: { series: NvcSeries; what: string }) {
   return (
     <Alert color="yellow" role="note">
       NVC&rsquo;s {what} has barely moved: on {formatDate(stall.from[0])} it had
-      reached those submitted on {formatDate(stall.from[1])}, and on{" "}
-      {formatDate(stall.to[0])} those submitted on {formatDate(stall.to[1])}.
-      While it stays stuck, the {lastDays} days grow every week, and anything
+      reached those submitted on {formatDate(front(stall.from))}, and on{" "}
+      {formatDate(stall.to[0])} those submitted on {formatDate(front(stall.to))}
+      . While it stays stuck, the {lastDays} days grow every week, and anything
       submitted now may take longer than that.
     </Alert>
   );
-}
-
-/** The later of two ISO dates */
-function maxDate(a: string, b: string): string {
-  return a < b ? b : a;
 }
 
 interface ReviewEstimateProps {
@@ -108,38 +69,81 @@ interface ReviewEstimateProps {
   series: NvcSeries;
 }
 
-/** When NVC will most likely review documents submitted today, or on a date
- * the visitor enters, with the range 9 in 10 past reviews landed in. The
- * estimate is the date plus NVC's newest review time: NVC reviews documents
- * in the order they came in, so documents submitted on a date are reached
- * about that many days after it, as long as the queue neither grows nor
- * shrinks. For a past date this uses what NVC has said since, rather than
- * the review time it showed that day, which after weeks without readings
- * can be far off. */
-function ReviewEstimate({ today, series }: ReviewEstimateProps) {
-  const [submitted, setSubmitted] = useState("");
-  const [reviewDate, reviewDays] = getLatestReading(series);
-  const valid = /^\d{4}-\d{2}-\d{2}$/.test(submitted) && submitted <= today;
-  const from = valid ? submitted : today;
-  const margin = Math.max(
-    REVIEW_MARGIN_DAYS,
-    Math.round(REVIEW_MARGIN_SHARE * reviewDays),
-  );
-  // the newest submission date NVC had reached on the newest reading
-  const reached = addDays(reviewDate, -reviewDays);
-  // For documents submitted after that front, the estimate and its range
-  // can fall before today, by when NVC may or may not have reached them: no
-  // estimate or bound shown is before today, which is after the submission
-  // date too.
-  const estimate = addDays(from, reviewDays);
-  const lower = maxDate(addDays(from, reviewDays - margin), today);
-  const upper = addDays(from, reviewDays + margin);
-  const range = (
+/** What a range rests on, and how far it has held up (reviewRange). */
+function RangeBasis({ range }: { range: ReviewRange }) {
+  const [latestDate, latestDays] = range.latest;
+  const { pace } = range;
+  // within a week of each other, the two say the same
+  const paceApart =
+    pace !== null && Math.abs(daysBetween(range.queueDate, pace.date)) > 7;
+  return (
     <>
-      Checked against NVC&rsquo;s own timeframes since November 2020, 9 reviews
-      in 10 came within {margin} days of an estimate like this
+      At NVC&rsquo;s newest review time, {latestDays} days on{" "}
+      {formatDate(latestDate)}, it would reach them around{" "}
+      {formatDate(range.queueDate)}.
+      {pace !== null && paceApart && (
+        <>
+          {" "}
+          But its queue has been{" "}
+          {pace.date > range.queueDate ? "growing" : "shrinking"}: between{" "}
+          {formatDate(pace.from[0])} and {formatDate(latestDate)} it moved from
+          documents submitted on {formatDate(front(pace.from))} to those
+          submitted on {formatDate(front(range.latest))},{" "}
+          {daysBetween(front(pace.from), front(range.latest))} days&rsquo; worth
+          in {daysBetween(pace.from[0], latestDate)} days. At that pace, it
+          would reach them around {formatDate(pace.date)}.
+        </>
+      )}
+      {range.burstDays !== null && (
+        <>
+          {" "}
+          NVC has lately moved in bursts and pauses, so the range also reaches
+          to its longest review time of the last six weeks, {
+            range.burstDays
+          }{" "}
+          days.
+        </>
+      )}{" "}
+      {range.gap !== null ? (
+        <>
+          We have no readings of NVC&rsquo;s page between{" "}
+          {formatDate(range.gap[0])} and {formatDate(range.gap[1])}, so we
+          cannot tell whether NVC moved evenly in between or in bursts and
+          pauses, as it did in June 2026: take this range as rougher than usual.
+        </>
+      ) : range.growing ? (
+        <>
+          Checked against NVC&rsquo;s own timeframes since November 2020, more
+          than 9 reviews in 10 landed in a range worked out like this, but while
+          the queue was growing, as it is now, only about 4 in 5 did, and the
+          rest came sooner.
+        </>
+      ) : (
+        <>
+          Checked against NVC&rsquo;s own timeframes since November 2020, more
+          than 9 reviews in 10 landed in a range worked out like this.
+        </>
+      )}
     </>
   );
+}
+
+/** When NVC will most likely review documents submitted today, or on a date
+ * the visitor enters, as a range (reviewRange). For a past date this uses
+ * what NVC has said since, rather than the review time it showed that day,
+ * which after weeks without readings can be far off. */
+function ReviewEstimate({ today, series }: ReviewEstimateProps) {
+  const [submitted, setSubmitted] = useState("");
+  const latest = getLatestReading(series);
+  const valid = /^\d{4}-\d{2}-\d{2}$/.test(submitted) && submitted <= today;
+  const from = valid ? submitted : today;
+  const [reviewDate] = latest;
+  // the newest submission date NVC had reached on the newest reading
+  const reached = front(latest);
+  const range = valid && from <= reached ? null : reviewRange(series, from);
+  const what = valid
+    ? `Documents submitted on ${formatDate(from)}`
+    : "Documents submitted today";
   let text: React.ReactNode;
   if (valid && from <= reached)
     text = (
@@ -149,30 +153,35 @@ function ReviewEstimate({ today, series }: ReviewEstimateProps) {
         documents submitted on {formatDate(from)}.
       </>
     );
-  else if (upper < today)
+  // a stall: the notice above says so, and there is no pace to go by
+  else if (range === null) return null;
+  else if (range.upper < today)
     text = (
       <>
-        At the pace NVC showed on {formatDate(reviewDate)}, it has most likely
-        reviewed documents submitted on {formatDate(from)} by now.
+        At the pace NVC showed up to {formatDate(reviewDate)}, it has most
+        likely reviewed documents submitted on {formatDate(from)} by now.
       </>
     );
-  else if (estimate < today)
+  // The range can start before today, by when NVC may or may not have
+  // reached documents submitted a while ago: no bound shown is before today,
+  // which is after the submission date too.
+  else if (range.lower < today)
     text = (
       <>
-        Documents submitted on {formatDate(from)}: at the pace NVC showed on{" "}
-        {formatDate(reviewDate)}, it would have reached them by now, so it may
-        already have reviewed them. {range}: here, most likely by{" "}
-        <strong>{formatDate(upper)}</strong>.
+        {what}: NVC{" "}
+        {valid && from < today
+          ? "may already have reviewed them, and will most likely have"
+          : "will most likely review them"}{" "}
+        by <strong>{formatDate(range.upper)}</strong>.{" "}
+        <RangeBasis range={range} />
       </>
     );
   else
     text = (
       <>
-        {valid
-          ? `Documents submitted on ${formatDate(from)}: NVC will`
-          : "Submit your documents today and NVC will"}{" "}
-        most likely review them around <strong>{formatDate(estimate)}</strong>.{" "}
-        {range}: here, between {formatDate(lower)} and {formatDate(upper)}.
+        {what}: NVC will most likely review them between{" "}
+        <strong>{formatDate(range.lower)}</strong> and{" "}
+        <strong>{formatDate(range.upper)}</strong>. <RangeBasis range={range} />
       </>
     );
   return (
@@ -316,7 +325,7 @@ export default function NvcBacklog({ data }: Props) {
           {formatDate(addDays(reviewDate, -reviewDays))}.
         </Text>
         <StallNotice series={data.review} what="document review" />
-        {today !== null && !stale && getStall(data.review) === null && (
+        {today !== null && !stale && (
           <ReviewEstimate today={today} series={data.review} />
         )}
         <NvcChart id="review" series={data.review} />
