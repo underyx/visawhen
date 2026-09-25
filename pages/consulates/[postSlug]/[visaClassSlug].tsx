@@ -387,7 +387,12 @@ export default function ConsulateStats({
   const ivCategory = IV_CATEGORY_BY_CLASS[visaClassSlug];
   const classNote = CLASS_NOTES[visaClassSlug];
   const today = useToday();
-  const consulate = { postSlug, visaClassSlug, country };
+  const consulate = {
+    postSlug,
+    visaClassSlug,
+    country,
+    nonimmigrant: visaType === "NIV",
+  };
   // Only on immigrant classes: the K visas, which also show the card, are
   // nonimmigrant visas, which some suspensions do not cover.
   const suspension = visaType === "IV" ? issuanceSuspensionFor(country) : null;

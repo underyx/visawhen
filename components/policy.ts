@@ -57,10 +57,11 @@ export interface PolicyEntry {
   title: string;
   body: string;
   scope: PolicyScope;
-  /** Whether it is shown expanded on every page it is shown on, rather than
-   * collapsed with the other site-wide entries: for an entry without which
-   * the interview-scheduling card cannot be read anywhere, such as a
-   * worldwide pause of interviews */
+  /** Whether it is shown expanded on every page it is shown on but the
+   * nonimmigrant classes' (the K visas' among them), rather than collapsed
+   * with the other site-wide entries: for an entry without which the
+   * interview-scheduling card cannot be read anywhere, such as a worldwide
+   * pause of immigrant visa interviews */
   expanded?: boolean;
   /** Whether State's IV Scheduling Status Tool month is no queue at the
    * entry's posts while it lasts, e.g. because they schedule no interviews.
@@ -100,6 +101,8 @@ export interface ConsulatePage {
   /** The country whose nationals make up most of the page's immigrant visa
    * applicants, "Cuba" (see applicantCountry() in consulates.ts), or null */
   country: string | null;
+  /** Whether it is a nonimmigrant class's page, the K visas' included */
+  nonimmigrant?: boolean;
 }
 
 /** Whether an entry names a page's post, or the country its applicants are
@@ -134,11 +137,12 @@ function appliesToPage(entry: PolicyEntry, page: ConsulatePage): boolean {
 
 /** Whether an entry is about a consulate page in particular, and so is shown
  * expanded on it: one that names its post, the country its applicants are
- * nationals of or its visa class, or that is shown expanded everywhere.
- * Entries that reach a page otherwise are shown collapsed. */
+ * nationals of or its visa class, or that is `expanded`, unless the page is
+ * a nonimmigrant class's. Entries that reach a page otherwise are shown
+ * collapsed. */
 export function isAboutPage(entry: PolicyEntry, page: ConsulatePage): boolean {
   return (
-    entry.expanded === true ||
+    (entry.expanded === true && page.nonimmigrant !== true) ||
     namesPost(entry, page) ||
     entry.scope.visaClasses !== undefined
   );

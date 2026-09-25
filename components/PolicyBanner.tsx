@@ -129,10 +129,10 @@ export default function PolicyBanner({ consulate, immigrant, page }: Props) {
   const shown = policiesFor({ consulate, page, immigrant }).filter(
     (entry) => hasStarted(entry, today) && !hasExpired(entry, today),
   );
-  const expandedEntries = shown.filter(
-    (entry) =>
-      entry.expanded === true ||
-      (consulate !== undefined && isAboutPage(entry, consulate)),
+  const expandedEntries = shown.filter((entry) =>
+    consulate === undefined
+      ? entry.expanded === true
+      : isAboutPage(entry, consulate),
   );
   const otherEntries = shown.filter(
     (entry) => !expandedEntries.includes(entry),
