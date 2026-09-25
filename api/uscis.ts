@@ -92,6 +92,11 @@ export interface Form {
 
 export interface UscisData {
   periods: Period[];
+  /** The quarters whose all-forms report repeated the quarter before's
+   * medians, which forms.py dropped ("2024-Q2"). Absent from a forms.json
+   * written before forms.py recorded them, whose medians for those quarters
+   * are still in it (see republishedMedianQuarters in components/uscis.ts). */
+  republishedMedianQuarters?: string[];
   forms: Form[];
 }
 

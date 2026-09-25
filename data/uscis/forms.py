@@ -1611,9 +1611,11 @@ REPUBLISHED_MEDIAN_SHARE = 0.5
 REPUBLISHED_MEDIAN_MIN_SERIES = 10
 
 
-def drop_republished_medians(forms: dict[str, dict[str, Any]]) -> None:
+def drop_republished_medians(forms: dict[str, dict[str, Any]]) -> list[str]:
     """Drop the medians of a quarter whose report repeats the quarter before's
-    (REPUBLISHED_MEDIAN_SHARE): they say nothing about that quarter."""
+    (REPUBLISHED_MEDIAN_SHARE): they say nothing about that quarter. Returns
+    those quarters, which forms.json lists, so that the pages can say why
+    they have no medians for them."""
     quarters = sorted({q for entry in forms.values() for q in entry["quarters"]})
     republished = []
     for previous, quarter in pairwise(quarters):
@@ -1641,6 +1643,7 @@ def drop_republished_medians(forms: dict[str, dict[str, Any]]) -> None:
         for entry in forms.values():
             for variant in entry["quarters"].get(quarter, {}).get("variants", []):
                 variant["processingTime"] = None
+    return republished
 
 
 def build_dataset(
@@ -1685,7 +1688,7 @@ def build_dataset(
         main = max(rows, key=lambda row: row.counts[0] or 0)
         entry["title"] = FORM_TITLES.get(form, base_title(main.title))
         entry["category"] = main.category
-    drop_republished_medians(forms)
+    republished = drop_republished_medians(forms)
 
     for family_name, reports in office_reports.items():
         family = FAMILIES[family_name]
@@ -1758,6 +1761,8 @@ def build_dataset(
         )
     return {
         "periods": periods,
+        # the quarters whose medians drop_republished_medians dropped
+        "republishedMedianQuarters": republished,
         "forms": sorted(forms.values(), key=lambda entry: entry["form"]),
     }
 

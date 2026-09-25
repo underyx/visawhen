@@ -278,8 +278,15 @@ const REPUBLISHED_MEDIAN_MIN_SERIES = 10;
 
 /** The quarters whose all-forms report repeats the quarter before's medians
  * (REPUBLISHED_MEDIAN_SHARE): those medians say nothing about the quarter,
- * and the pages treat them as not published. */
-export function republishedMedianQuarters(forms: Form[]): string[] {
+ * and the pages treat them as not published and say why. forms.py drops
+ * them and lists the quarters in forms.json, where this can no longer find
+ * them; for a forms.json written before it did, this finds them itself. */
+export function republishedMedianQuarters(data: UscisData): string[] {
+  return data.republishedMedianQuarters ?? findRepublishedMedians(data.forms);
+}
+
+/** The quarters republishedMedianQuarters finds in the medians themselves */
+function findRepublishedMedians(forms: Form[]): string[] {
   const quarters = [
     ...new Set(forms.flatMap((form) => Object.keys(form.quarters))),
   ].sort();
@@ -334,7 +341,7 @@ const cleaned = new WeakMap<UscisData, UscisData>();
 export function cleanData(data: UscisData): UscisData {
   const known = cleaned.get(data);
   if (known !== undefined) return known;
-  const republished = republishedMedianQuarters(data.forms);
+  const republished = republishedMedianQuarters(data);
   const result: UscisData = {
     ...data,
     forms: data.forms.map((form) => ({

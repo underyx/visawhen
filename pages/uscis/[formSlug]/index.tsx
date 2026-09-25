@@ -127,14 +127,12 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const data = cleanData(raw);
   const form = data.forms.find(({ slug }) => slug === params.formSlug);
   if (form === undefined) return { notFound: true };
-  const republished = republishedMedianQuarters(raw.forms).flatMap(
-    (quarter) => {
-      const period = data.periods.find((p) => p.quarter === quarter);
-      return period === undefined
-        ? []
-        : [{ quarter, label: quarterLabel(period) }];
-    },
-  );
+  const republished = republishedMedianQuarters(raw).flatMap((quarter) => {
+    const period = data.periods.find((p) => p.quarter === quarter);
+    return period === undefined
+      ? []
+      : [{ quarter, label: quarterLabel(period) }];
+  });
   const views = formViews(data.periods, form).map((view) => ({
     ...view,
     points: withoutMisleadingClearing(view.points),
