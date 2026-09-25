@@ -9,11 +9,13 @@ import {
 } from "./estimate";
 import { addMonths, formatMonthRange, useToday } from "./Freshness";
 import {
+  approximately,
   formatChange,
   formatCount,
   formatMonths,
   formatPercent,
   QuarterPoint,
+  WITHHELD_ESTIMATE,
 } from "./uscis";
 
 // a non-breaking space keeps the cards the same height when one has no
@@ -102,6 +104,13 @@ export default function UscisStats({
   const previous = points[points.length - 2];
   const trend = backlogTrend(previous?.waitMonths, current.waitMonths);
   const pendingChange = formatChange(previous?.pending, current.pending);
+  // which decisions USCIS withheld as too few to disclose, when it did
+  const withheld =
+    current.approved === null && current.denied === null
+      ? "Approvals and denials"
+      : current.approved === null
+      ? "Approvals"
+      : "Denials";
   return (
     <Stack gap="sm">
       {headline !== null && (
@@ -127,7 +136,10 @@ export default function UscisStats({
           label="Time to clear backlog"
           value={
             backlogSuppressed === null ? (
-              formatMonths(current.waitMonths)
+              approximately(
+                formatMonths(current.waitMonths),
+                current.approximate,
+              )
             ) : (
               <Text fw={700} lh={1.3}>
                 {`Not shown: ${backlogSuppressed}`}
@@ -147,9 +159,13 @@ export default function UscisStats({
           <Stat
             label="Pending applications"
             value={formatCount(current.pending)}
-            line={`${pendingChange}, cases moved ${
-              pendingChange.startsWith("+") ? "in" : "out"
-            }`}
+            line={
+              pendingChange === "unchanged"
+                ? pendingChange
+                : `${pendingChange}, cases moved ${
+                    pendingChange.startsWith("+") ? "in" : "out"
+                  }`
+            }
             lineColor="dimmed"
           />
         ) : (
@@ -161,11 +177,21 @@ export default function UscisStats({
           />
         )}
         {current.completions === null && current.approved !== null ? (
-          // USCIS withholds small counts: the approvals are what is known
+          // the approvals are what is known
           <Stat
             label={`Approved in ${current.label}`}
             value={formatCount(current.approved)}
-            line="USCIS withheld the denials"
+            line="USCIS did not publish the denials"
+            lineColor="dimmed"
+          />
+        ) : current.approximate ? (
+          // USCIS withholds counts too small to disclose
+          <Stat
+            label={`Decided in ${current.label}`}
+            value={approximately(formatCount(current.completions), true)}
+            line={`${withheld} withheld by USCIS as too few, counted as ${WITHHELD_ESTIMATE}${
+              withheld === "Approvals and denials" ? " each" : ""
+            }`}
             lineColor="dimmed"
           />
         ) : (
@@ -178,7 +204,10 @@ export default function UscisStats({
         )}
         <ChangeStat
           label="Approval rate"
-          value={formatPercent(current.approvalRate)}
+          value={approximately(
+            formatPercent(current.approvalRate),
+            current.approximate,
+          )}
           change={
             current.approvalRate === null ||
             previous?.approvalRate === null ||

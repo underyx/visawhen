@@ -11,6 +11,8 @@ import ReactEChartsCore from "echarts-for-react/lib/core";
 import { Paper } from "@mantine/core";
 import numeral from "numeral";
 import {
+  approximately,
+  CHART_QUARTERS,
   formatCount,
   formatMonths,
   ProcessingTimeSeries,
@@ -60,7 +62,7 @@ function SourceCaption({ source, what }: { source: string; what: string }) {
 
 /** How much of the chart to show initially: the last six years. */
 function initialZoomStart(points: QuarterPoint[]): number {
-  return Math.max(0, 100 - 100 * (24 / points.length));
+  return Math.max(0, 100 - 100 * (CHART_QUARTERS / points.length));
 }
 
 /** Bars for the decisions made in each quarter (approved and denied,
@@ -91,8 +93,9 @@ export function OutcomesChart({
                 `Approved: ${formatCount(point.approved)}`,
                 `Denied: ${formatCount(point.denied)}`,
                 `Pending at quarter end: ${formatCount(point.pending)}`,
-                `Time to clear backlog at that pace: ${formatMonths(
-                  point.waitMonths,
+                `Time to clear backlog at that pace: ${approximately(
+                  formatMonths(point.waitMonths),
+                  point.approximate,
                 )}`,
               ].join("<br />");
             },
@@ -172,14 +175,18 @@ export function WaitChart({
               const point = points[params[0].dataIndex];
               return [
                 `<strong>${point.label}</strong>`,
-                `${estimateName}: ${formatMonths(point.waitMonths)}`,
-                `(${formatCount(point.pending)} pending, ${formatCount(
-                  point.completions,
+                `${estimateName}: ${approximately(
+                  formatMonths(point.waitMonths),
+                  point.approximate,
+                )}`,
+                `(${formatCount(point.pending)} pending, ${approximately(
+                  formatCount(point.completions),
+                  point.approximate,
                 )} decided)`,
                 ...processingTimeSeries.map(
                   (series) =>
                     `${officialName(series)}: ${formatMonths(
-                      point.processingTimes[series.title] ?? null,
+                      point.processingTimes[series.key] ?? null,
                     )}`,
                 ),
               ].join("<br />");
@@ -212,7 +219,7 @@ export function WaitChart({
               name: officialName(series),
               type: "line",
               data: points.map(
-                (point) => point.processingTimes[series.title] ?? null,
+                (point) => point.processingTimes[series.key] ?? null,
               ),
               lineStyle: { width: 2, type: "dashed" },
               symbolSize: 8,

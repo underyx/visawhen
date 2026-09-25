@@ -1,9 +1,18 @@
 import { ChevronLeftIcon } from "../../../components/icons";
-import { Anchor, Button, Group, Stack, Text, Title } from "@mantine/core";
+import {
+  Anchor,
+  Button,
+  Chip,
+  Group,
+  Stack,
+  Table,
+  Text,
+  Title,
+} from "@mantine/core";
 import { GetStaticPaths, GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import React from "react";
+import React, { useId, useState } from "react";
 import {
   getActiveForms,
   getActiveOffices,
@@ -14,22 +23,48 @@ import {
   CASES_MOVED,
   categoryRanges,
   CategoryRange,
+  casesMovedQuarters,
   clearingSuppressed,
   formatRangeMonths,
   headlineRange,
   officeEstimateSuppressed,
+  VISA_BULLETIN_URL,
   withoutMisleadingClearing,
 } from "../../../components/estimate";
 import {
+  ALL_CATEGORIES,
+  approximately,
   formatCount,
   formatMonths,
   highlight,
+  NATIONAL_OFFICE_CATEGORIES,
+  officeCategoryCounts,
+  officeCategoryName,
+  officeCategoryPoints,
+  officeCategoryWho,
+  openingOfficeCategory,
   QuarterPoint,
   quarterLabel,
   toPoints,
 } from "../../../components/uscis";
 import { OutcomesChart, WaitChart } from "../../../components/UscisChart";
 import UscisStats, { RangeText } from "../../../components/UscisStats";
+
+/** The office's numbers for one category of the per-office report, or for
+ * all of them together (ALL_CATEGORIES). */
+interface CategoryView {
+  key: string;
+  /** "Immediate Relative", or "All categories" */
+  name: string;
+  points: QuarterPoint[];
+  /** The time to clear the whole country's backlog in the same category and
+   * quarter, from the per-office report's national totals */
+  nationalWaitMonths: number | null;
+  /** What a filer in this category can expect nationally: the all-forms
+   * report's same category, or for all categories together the form's main
+   * one. Null when the all-forms report has no such category. */
+  nationalRange: CategoryRange | null;
+}
 
 interface Props {
   form: string;
@@ -38,13 +73,20 @@ interface Props {
   slug: string;
   name: string;
   stateCode: string | null;
-  points: QuarterPoint[];
-  nationalWaitMonths: number | null;
-  /** What a filer in the form's main category can expect nationally */
-  nationalRange: CategoryRange | null;
+  /** One per category the office pages of this form break down, then all
+   * categories together; just the latter for most forms */
+  views: CategoryView[];
+  /** The view the page opens with: the category most of the office's
+   * visitors are in (openingOfficeCategory) */
+  defaultView: string;
+  /** The quarters in which USCIS moved cases between offices, going by the
+   * office's pending count of all categories together; they apply to every
+   * view */
+  moved: string[];
   /** The quarter of USCIS's national median, "Apr–Jun 2026" */
   nationalLabel: string;
-  /** Whether some of the pending cases wait on the Visa Bulletin */
+  /** Whether some of the pending cases of all categories together wait on
+   * the Visa Bulletin */
   waitsForVisas: boolean;
   source: string;
 }
@@ -72,13 +114,47 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const form = data.forms.find(({ slug }) => slug === params.formSlug);
   const office = form?.offices.find(({ slug }) => slug === params.officeSlug);
   if (form === undefined || office === undefined) return { notFound: true };
-  const points = withoutMisleadingClearing(
-    toPoints(data.periods, office.quarters),
-    true,
-  );
-  const latest = points[points.length - 1].quarter;
-  const nationalPoints = toPoints(data.periods, form.officeTotals);
   const ranges = categoryRanges(form);
+  const sameNationally = NATIONAL_OFFICE_CATEGORIES[form.form] ?? [];
+  const total = toPoints(data.periods, office.quarters);
+  // decided once for the office, so that every view agrees
+  const moved = casesMovedQuarters(total);
+  // the categories this office has numbers for, on forms whose pages break
+  // them down
+  const categories = officeCategoryPoints(data.periods, form, office.quarters);
+  const view = (
+    key: string,
+    name: string,
+    counts: QuarterPoint[],
+  ): CategoryView => {
+    const points = withoutMisleadingClearing(counts, moved);
+    const latest = points[points.length - 1].quarter;
+    const nationalPoints = toPoints(
+      data.periods,
+      officeCategoryCounts(form.officeTotals, key),
+    );
+    return {
+      key,
+      name,
+      points,
+      nationalWaitMonths:
+        nationalPoints.find((point) => point.quarter === latest)?.waitMonths ??
+        null,
+      nationalRange:
+        key === ALL_CATEGORIES
+          ? headlineRange(ranges)
+          : sameNationally.includes(key)
+          ? ranges.find((range) => range.key === key) ?? null
+          : null,
+    };
+  };
+  const views = [
+    ...categories.map(({ category, points }) =>
+      view(category.key, officeCategoryName(category), points),
+    ),
+    view(ALL_CATEGORIES, "All categories", total),
+  ];
+  const latest = total[total.length - 1].quarter;
   const nationalQuarter = latestQuarter(form.quarters);
   const nationalPeriod = data.periods.find(
     (period) => period.quarter === nationalQuarter,
@@ -91,11 +167,16 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       slug: office.slug,
       name: office.name,
       stateCode: office.stateCode,
-      points,
-      nationalWaitMonths:
-        nationalPoints.find((point) => point.quarter === latest)?.waitMonths ??
-        null,
-      nationalRange: headlineRange(ranges),
+      views,
+      defaultView: openingOfficeCategory(
+        form.form,
+        total,
+        categories.map(({ category, points }) => ({
+          key: category.key,
+          points,
+        })),
+      ),
+      moved,
       waitsForVisas: ranges.some(({ priorityDate }) => priorityDate),
       nationalLabel:
         nationalPeriod === undefined ? "" : quarterLabel(nationalPeriod),
@@ -106,6 +187,51 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   };
 };
 
+/** "I-130 (Immediate Relative)", or just "I-130" for all categories together */
+function who(form: string, view: CategoryView): string {
+  return view.key === ALL_CATEGORIES ? form : `${form} (${view.name})`;
+}
+
+/** What USCIS's national numbers say a filer in the view's category can
+ * expect, as the sentence the page leads with; nothing when they say
+ * nothing. */
+function NationalRange({
+  form,
+  view,
+  nationalLabel,
+}: {
+  form: string;
+  view: CategoryView;
+  nationalLabel: string;
+}) {
+  const range = view.nationalRange;
+  if (range === null) return null;
+  const rangeWho = range.name === form ? form : `${form} (${range.name})`;
+  if (range.priorityDate)
+    return (
+      <>
+        For {rangeWho} cases, the wait depends on the priority date: see the{" "}
+        <Anchor href={VISA_BULLETIN_URL} target="_blank" rel="noopener" inherit>
+          Visa Bulletin
+        </Anchor>
+        .{" "}
+      </>
+    );
+  if (range.suppressed !== null) return null;
+  return (
+    <>
+      Nationally, {rangeWho} filers can expect a decision in{" "}
+      <RangeText low={range.q[1]} high={range.q[3]} /> if they file today, going
+      by USCIS&rsquo;s median for {nationalLabel}.{" "}
+      {range.shock &&
+        range.shockRatio !== null &&
+        `USCIS decided ${Math.round(
+          (1 - range.shockRatio) * 100,
+        )}% fewer of these that quarter than its average over the four before, so plan for the later end. `}
+    </>
+  );
+}
+
 export default function UscisOffice({
   form,
   formSlug,
@@ -113,26 +239,31 @@ export default function UscisOffice({
   slug,
   name,
   stateCode,
-  points,
-  nationalWaitMonths,
-  nationalRange,
+  views,
+  defaultView,
   nationalLabel,
+  moved,
   waitsForVisas,
   source,
 }: Props) {
+  const [selected, setSelected] = useState(defaultView);
+  // one name for the category radios, so they are one group to keyboards and
+  // screen readers
+  const categoryInputName = useId();
+  const view =
+    views.find(({ key }) => key === selected) ?? views[views.length - 1];
+  const { points } = view;
   const current = points[points.length - 1];
-  const backlogSuppressed = officeEstimateSuppressed(points);
+  const isTotal = view.key === ALL_CATEGORIES;
+  // the office's newest quarter, which a category may have no numbers for
+  const total = views[views.length - 1].points;
+  const newest = total[total.length - 1];
+  const backlogSuppressed = officeEstimateSuppressed(points, moved);
   // quarters the chart leaves the time to clear the backlog out of
   const clearingGaps = points.some(
-    (point, index) =>
-      clearingSuppressed(point, points[index - 1], true) !== null,
+    (point) => clearingSuppressed(point, moved) !== null,
   );
   const hasClearing = points.some(({ waitMonths }) => waitMonths !== null);
-  // "I-130 (Immediate Relative)", or just "N-400"
-  const nationalWho =
-    nationalRange === null || nationalRange.name === form
-      ? form
-      : `${form} (${nationalRange.name})`;
   const fullName = stateCode === null ? name : `${name}, ${stateCode}`;
   // "the San Francisco office", but "the Nebraska Service Center"
   const isCenter = /\bCenter$/.test(name);
@@ -140,33 +271,53 @@ export default function UscisOffice({
   const title = `${form} processing times at ${
     isCenter ? `the ${fullName}` : `the ${fullName} office`
   }`;
+  const viewWaitsForVisas = isTotal
+    ? waitsForVisas
+    : view.nationalRange?.priorityDate ?? false;
+
+  // The description is of the view the page opens with, which is what
+  // search engines and visitors without JavaScript see.
+  const opening =
+    views.find(({ key }) => key === defaultView) ?? views[views.length - 1];
+  const openingCurrent = opening.points[opening.points.length - 1];
+  const openingWhat =
+    opening.key === ALL_CATEGORIES
+      ? `${form} (${formTitle})`
+      : `${form} (${opening.name})`;
   // USCIS withholds small counts; with the denials withheld, say what is known
   const decided =
-    current.completions !== null
-      ? `decided ${formatCount(current.completions)}`
-      : current.approved !== null
-      ? `approved ${formatCount(current.approved)}`
+    openingCurrent.completions !== null
+      ? `decided ${openingCurrent.approximate ? "about " : ""}${formatCount(
+          openingCurrent.completions,
+        )}`
+      : openingCurrent.approved !== null
+      ? `approved ${formatCount(openingCurrent.approved)}`
       : null;
+  const openingRange = opening.nationalRange;
   const description = `${
     isCenter ? `USCIS's ${fullName}` : `The ${fullName} USCIS office`
   } ${
     decided === null
       ? `had ${formatCount(
-          current.pending,
-        )} ${form} (${formTitle}) applications pending at the end of ${
-          current.label
+          openingCurrent.pending,
+        )} ${openingWhat} applications pending at the end of ${
+          openingCurrent.label
         }.`
-      : `${decided} ${form} (${formTitle}) applications in ${
-          current.label
-        } and had ${formatCount(current.pending)} pending at its end.`
+      : `${decided} ${openingWhat} applications in ${
+          openingCurrent.label
+        } and had ${formatCount(openingCurrent.pending)} pending at its end.`
   }${
-    nationalRange === null
+    openingRange === null ||
+    openingRange.priorityDate ||
+    openingRange.suppressed !== null
       ? ""
-      : ` USCIS does not publish processing times per office; nationally, ${nationalWho} filers can expect a decision in ${formatRangeMonths(
-          nationalRange.q[1],
-          nationalRange.q[3],
+      : ` USCIS does not publish processing times per office; nationally, ${
+          openingRange.name === form ? form : `${form} (${openingRange.name})`
+        } filers can expect a decision in ${formatRangeMonths(
+          openingRange.q[1],
+          openingRange.q[3],
         )} if they file today${
-          nationalRange.shock ? ", likely toward the later end" : ""
+          openingRange.shock ? ", likely toward the later end" : ""
         }.`
   }`;
   const canonicalUrl = `https://visawhen.com/uscis/${formSlug}/${slug}`;
@@ -175,19 +326,20 @@ export default function UscisOffice({
   const comparison =
     backlogSuppressed !== null ||
     current.waitMonths === null ||
-    nationalWaitMonths === null
+    view.nationalWaitMonths === null
       ? null
-      : current.waitMonths > nationalWaitMonths * 1.2
-      ? `That is longer than the ${formatMonths(
-          nationalWaitMonths,
-        )} it would take the country as a whole.`
-      : current.waitMonths < nationalWaitMonths * 0.8
-      ? `That is shorter than the ${formatMonths(
-          nationalWaitMonths,
-        )} it would take the country as a whole.`
-      : `That is about the same as the ${formatMonths(
-          nationalWaitMonths,
-        )} it would take the country as a whole.`;
+      : `That is ${
+          current.waitMonths > view.nationalWaitMonths * 1.2
+            ? "longer than"
+            : current.waitMonths < view.nationalWaitMonths * 0.8
+            ? "shorter than"
+            : "about the same as"
+        } the ${formatMonths(
+          view.nationalWaitMonths,
+        )} it would take the country as a whole${
+          isTotal ? "" : ` for ${view.name} cases`
+        }.`;
+  const whoText = isTotal ? null : officeCategoryWho(view.key);
 
   return (
     <Stack gap="xl">
@@ -223,23 +375,43 @@ export default function UscisOffice({
         <Title order={1}>
           {form} processing at {fullName}
         </Title>
+        {views.length > 1 && (
+          <Stack gap={6}>
+            <Chip.Group
+              multiple={false}
+              value={view.key}
+              onChange={(key) => setSelected(key)}
+            >
+              <Group gap="xs" role="radiogroup" aria-label="Category">
+                {views.map(({ key, name: viewName }) => (
+                  <Chip
+                    key={key}
+                    value={key}
+                    variant="outline"
+                    name={categoryInputName}
+                  >
+                    {viewName}
+                  </Chip>
+                ))}
+              </Group>
+            </Chip.Group>
+            <Text size="sm" c="dimmed">
+              {whoText ??
+                `All categories together: ${new Intl.ListFormat("en-US").format(
+                  views.slice(0, -1).map(({ name: viewName }) => viewName),
+                )}.`}
+            </Text>
+          </Stack>
+        )}
         <Text size="xl">
           USCIS does not publish processing times per office.{" "}
-          {nationalRange !== null && (
-            <>
-              Nationally, {nationalWho} filers can expect a decision in{" "}
-              <RangeText low={nationalRange.q[1]} high={nationalRange.q[3]} />{" "}
-              if they file today, going by USCIS&rsquo;s median for{" "}
-              {nationalLabel}.{" "}
-              {nationalRange.shock &&
-                nationalRange.shockRatio !== null &&
-                `USCIS decided ${Math.round(
-                  (1 - nationalRange.shockRatio) * 100,
-                )}% fewer of these that quarter than its average over the four before, so plan for the later end. `}
-            </>
-          )}
+          <NationalRange
+            form={form}
+            view={view}
+            nationalLabel={nationalLabel}
+          />
           <Anchor component={Link} href={`/uscis/${formSlug}`} inherit>
-            {nationalRange !== null
+            {view.nationalRange !== null && !view.nationalRange.priorityDate
               ? `See the national ${form} range for each category`
               : `See the national ${form} numbers`}
           </Anchor>
@@ -258,19 +430,74 @@ export default function UscisOffice({
           {highlight(
             points,
             officePhrase,
-            `${form} applications`,
+            `${who(form, view)} applications`,
             backlogSuppressed === CASES_MOVED,
           )}
           {comparison !== null && ` ${comparison}`}
         </Text>
       </Stack>
+      {views.length > 1 && (
+        <Stack gap="sm">
+          <Title order={2}>By category, {newest.label}</Title>
+          <Table.ScrollContainer minWidth={560}>
+            <Table striped withTableBorder>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Category</Table.Th>
+                  <Table.Th ta="right">Received</Table.Th>
+                  <Table.Th ta="right">Decided</Table.Th>
+                  <Table.Th ta="right">Pending</Table.Th>
+                  <Table.Th ta="right">Time to clear backlog</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {views.map((row) => {
+                  const point = row.points.find(
+                    ({ quarter }) => quarter === newest.quarter,
+                  );
+                  if (point === undefined) return null;
+                  return (
+                    <Table.Tr
+                      key={row.key}
+                      fw={row.key === view.key ? 700 : undefined}
+                    >
+                      <Table.Td>{row.name}</Table.Td>
+                      <Table.Td ta="right">
+                        {formatCount(point.received)}
+                      </Table.Td>
+                      <Table.Td ta="right">
+                        {approximately(
+                          formatCount(point.completions),
+                          point.approximate,
+                        )}
+                      </Table.Td>
+                      <Table.Td ta="right">
+                        {formatCount(point.pending)}
+                      </Table.Td>
+                      <Table.Td ta="right">
+                        {clearingSuppressed(point, moved) !== null
+                          ? "not shown"
+                          : approximately(
+                              formatMonths(point.waitMonths),
+                              point.approximate,
+                            )}
+                      </Table.Td>
+                    </Table.Tr>
+                  );
+                })}
+              </Table.Tbody>
+            </Table>
+          </Table.ScrollContainer>
+        </Stack>
+      )}
       <Stack gap="sm">
         <Title order={2}>What happened to the applications</Title>
         <Text>
-          The bars are the {form} decisions {officePhrase} made each quarter,
-          approved in blue and denied in red. The amber line is its backlog: how
-          many applications were still waiting at the end of that quarter, most
-          of them filed in earlier ones. The dashed line is how many came in.
+          The bars are the {who(form, view)} decisions {officePhrase} made each
+          quarter, approved in blue and denied in red. The amber line is its
+          backlog: how many applications were still waiting at the end of that
+          quarter, most of them filed in earlier ones. The dashed line is how
+          many came in.
         </Text>
         <OutcomesChart
           points={points}
@@ -284,7 +511,7 @@ export default function UscisOffice({
           Time to clear backlog is how long the office would need to decide
           every pending case at last quarter&rsquo;s pace. It is not your wait:
           the pile includes cases on hold and{" "}
-          {waitsForVisas
+          {viewWaitsForVisas
             ? "cases waiting for a visa number"
             : "cases USCIS cannot decide yet"}
           , and USCIS sometimes moves pending cases between offices.
@@ -293,7 +520,11 @@ export default function UscisOffice({
               hasClearing
                 ? "The chart leaves it out for"
                 : "It is not shown for"
-            } quarters in which the office decided fewer than 100 cases, or in which its pending count more than doubled or halved, which means USCIS moved cases between offices.`}
+            } quarters in which the office decided fewer than 100 ${
+              isTotal ? "cases" : "of these cases"
+            }, or in which its pending count${
+              views.length > 1 ? ", all categories together," : ""
+            } more than doubled or halved, which means USCIS moved cases between offices.`}
         </Text>
         {hasClearing && <WaitChart points={points} processingTimeSeries={[]} />}
       </Stack>

@@ -102,12 +102,13 @@ export function planningRange(median: number, level: PressureLevel): number[] {
   );
 }
 
-/** Categories whose wait depends on the visitor's priority date and the Visa
- * Bulletin, not on USCIS's pace, so a range from the median would mislead. */
-export const PRIORITY_DATE_CATEGORIES = [
-  "Petition for Alien Relative (All Other Relative)",
-  "Application to Register Permanent Residence or Adjust Status (Employment)",
-];
+/** Categories (Variant.key, per form) whose wait depends on the visitor's
+ * priority date and the Visa Bulletin, not on USCIS's pace, so a range from
+ * the median would mislead. */
+export const PRIORITY_DATE_CATEGORIES: Record<string, string[]> = {
+  "I-130": ["all-other-relative"],
+  "I-485": ["employment"],
+};
 
 export const VISA_BULLETIN_URL =
   "https://travel.state.gov/content/travel/en/legal/visa-law0/visa-bulletin.html";
@@ -127,6 +128,8 @@ export type Suppression = "too few decisions" | "nearly stopped";
 /** One category of a form, as the "If you file today" table and headline
  * show it. */
 export interface CategoryRange {
+  /** The category (Variant.key) */
+  key: string;
   /** The all-forms report's row title */
   title: string;
   /** What to call the category: "Immediate Relative", "Advance Parole", or
@@ -160,7 +163,7 @@ export function categoryRanges(form: Form): CategoryRange[] {
       const median = variant.processingTime as number;
       const history = quarters.map((quarter) => {
         const same = form.quarters[quarter].variants.find(
-          ({ title }) => title === variant.title,
+          ({ key }) => key === variant.key,
         );
         return same === undefined ||
           same.approved === null ||
@@ -176,8 +179,9 @@ export function categoryRanges(form: Form): CategoryRange[] {
       const { shock, ratio } = decisionShock(history);
       const level = shock ? "high" : pressureLevel(pileMonths, median);
       return {
+        key: variant.key,
         title: variant.title,
-        name: categoryName(variant.title, form, variants.length),
+        name: categoryName(variant, form, variants.length),
         received: variant.received,
         median,
         level,
@@ -189,7 +193,9 @@ export function categoryRanges(form: Form): CategoryRange[] {
             : ratio !== null && ratio < STALLED_RATIO
             ? "nearly stopped"
             : null,
-        priorityDate: PRIORITY_DATE_CATEGORIES.includes(variant.title),
+        priorityDate: (PRIORITY_DATE_CATEGORIES[form.form] ?? []).includes(
+          variant.key,
+        ),
         q: planningRange(median, level),
       };
     });
@@ -231,28 +237,40 @@ export function formatMedian(months: number): string {
 export const TOO_FEW_DECISIONS = "too few decisions";
 export const CASES_MOVED = "USCIS moved cases between offices";
 
+/** The quarters (QuarterPoint.quarter) in which an office's pending count
+ * more than doubled or halved since the quarter before: USCIS moving cases
+ * between offices, not the office speeding up or falling behind. Worked out
+ * from all of the office's categories together (`total`) and applied to
+ * every one of them: a small category's count swings that much on its own
+ * (2 to 6), and a category that got fewer of the moved cases than the others
+ * would read as the office falling behind (Jacksonville's I-130 immediate
+ * relatives went from 3,237 to 6,299 in Apr-Jun 2026, its total from 3,383
+ * to 16,206). */
+export function casesMovedQuarters(total: QuarterPoint[]): string[] {
+  return total
+    .filter((point, index) => {
+      const previous = total[index - 1]?.pending ?? null;
+      return (
+        point.pending !== null &&
+        previous !== null &&
+        (point.pending > 2 * previous || point.pending < 0.5 * previous)
+      );
+    })
+    .map(({ quarter }) => quarter);
+}
+
 /** Why the time to clear the backlog at one quarter's pace would mislead, or
- * null when it would not (or cannot be worked out at all): fewer than 100
- * decisions to divide by, or, for an office (`office`), a pending count that
- * more than doubled or halved since the quarter before, which is USCIS
- * moving cases between offices rather than the office speeding up or slowing
- * down. */
+ * null when it would not (or cannot be worked out at all): an office's
+ * quarter in which USCIS moved cases between offices (`moved`, from
+ * casesMovedQuarters; checked first, as the pages then also say so about the
+ * pending count), or fewer than 100 decisions to divide by. */
 export function clearingSuppressed(
   point: QuarterPoint,
-  previous: QuarterPoint | undefined,
-  office: boolean,
+  moved: readonly string[] = [],
 ): string | null {
+  if (moved.includes(point.quarter)) return CASES_MOVED;
   if (point.completions === null) return null;
   if (point.completions < MIN_DECISIONS) return TOO_FEW_DECISIONS;
-  if (
-    office &&
-    point.pending !== null &&
-    previous?.pending !== null &&
-    previous?.pending !== undefined &&
-    (point.pending > 2 * previous.pending ||
-      point.pending < 0.5 * previous.pending)
-  )
-    return CASES_MOVED;
   return null;
 }
 
@@ -261,24 +279,23 @@ export function clearingSuppressed(
  * highlight all leave the same quarters out. */
 export function withoutMisleadingClearing(
   points: QuarterPoint[],
-  office: boolean,
+  moved: readonly string[] = [],
 ): QuarterPoint[] {
-  return points.map((point, index) =>
-    point.waitMonths !== null &&
-    clearingSuppressed(point, points[index - 1], office) !== null
+  return points.map((point) =>
+    point.waitMonths !== null && clearingSuppressed(point, moved) !== null
       ? { ...point, waitMonths: null }
       : point,
   );
 }
 
-/** Why an office's time to clear its backlog in its newest quarter would
+/** Why the time to clear the backlog in the newest of the points would
  * mislead, or null when it would not. */
 export function officeEstimateSuppressed(
   points: QuarterPoint[],
+  moved: readonly string[] = [],
 ): string | null {
   const current = points[points.length - 1];
-  if (current === undefined) return null;
-  return clearingSuppressed(current, points[points.length - 2], true);
+  return current === undefined ? null : clearingSuppressed(current, moved);
 }
 
 /** Which way the time to clear the backlog moved since the quarter before:

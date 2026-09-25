@@ -9,8 +9,11 @@ Citizenship Data page, as CSV, PDF or (since FY2024) XLSX:
   some, per category, e.g. I-130 immediate relatives vs. other relatives) the
   forms received, approved and denied in the quarter, the ones pending at its
   end and, since FY2022, USCIS's median processing time. Since FY2014.
-* Per-office reports for N-400 (since FY2014), I-485 (since FY2014) and I-130
-  (since FY2020): the same four counts per field office or service center.
+* Per-office reports for N-400, I-485 and I-130 (all since FY2014): the same
+  four counts per field office or service center,
+  per category (I-130 immediate relatives vs. other relatives, I-485 family,
+  employment, humanitarian and other, N-400 civilian vs. military) and in
+  total.
 
 Sources, in order:
 
@@ -22,11 +25,16 @@ Sources, in order:
    up here within a day.
 
 Downloaded reports are cached in reports/ (gitignored, cached between
-workflow runs); the parsed dataset is written to forms.json.
+workflow runs) under their URL's path, so a report USCIS republishes under a
+new name (a "_v2" or "_final" file) is downloaded rather than taken for the
+one already cached; the parsed dataset is written to forms.json.
 
 Exit codes: 0 when the dataset was (re)built; 1 when a report cannot be
 fetched from any source or no longer parses (a layout change), so that the
 workflow fails loudly instead of silently publishing a hole in the history.
+Numbers that parse but look wrong (offices that do not add up to the report's
+total, a national count far from the per-office report's) are printed as
+GitHub Actions warnings instead, since USCIS's own reports have such defects.
 
 `--offline` skips discovery and rebuilds the dataset from the cached reports
 alone, for iterating on the parsers.
@@ -43,12 +51,14 @@ import time
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass
+from dataclasses import field
 from datetime import date
 from datetime import timedelta
 from itertools import pairwise
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote
+from urllib.parse import urlsplit
 
 import pdfplumber
 import requests
@@ -102,9 +112,16 @@ class ReportFamily:
     listing_query: str
     # Below this many rows, a report is considered misparsed
     min_rows: int
-    # Per-office reports: the number of (Received, Approved, Denied, Pending)
-    # column groups, the last one being the total of the others
-    groups: int | None = None
+    # Per-office reports: the labels of the category column groups, each of
+    # (Received, Approved, Denied, Pending), which a last "Total" group
+    # follows. The CSV and XLSX reports name them in their header; the PDFs'
+    # text layer does not keep the header's columns, so these are used there.
+    categories: tuple[str, ...] = ()
+
+    @property
+    def groups(self) -> int:
+        """Column groups per office row: the categories and the total."""
+        return len(self.categories) + 1
 
 
 FAMILIES = {
@@ -114,12 +131,32 @@ FAMILIES = {
         "All USCIS Application and Petition Form Types",
         30,
     ),
-    # regular, military, total
-    "N-400": ReportFamily("N-400", ("n400_perf",), "N-400 Naturalization", 60, 3),
-    # immediate relative, other relative, total
-    "I-130": ReportFamily("I-130", ("i130_perf",), "I-130 Alien Relative", 20, 3),
-    # family, employment, humanitarian, other, total
-    "I-485": ReportFamily("I-485", ("i485_perf",), "I-485 Adjustment of Status", 60, 5),
+    "N-400": ReportFamily(
+        "N-400",
+        ("n400_perf",),
+        "N-400 Naturalization",
+        60,
+        ("Naturalization", "Naturalization (Military)"),
+    ),
+    "I-130": ReportFamily(
+        "I-130",
+        ("i130_perf",),
+        "I-130 Alien Relative",
+        20,
+        ("Immediate Relative", "All Other Relative"),
+    ),
+    "I-485": ReportFamily(
+        "I-485",
+        ("i485_perf",),
+        "I-485 Adjustment of Status",
+        60,
+        (
+            "Family-based",
+            "Employment-based received at service center",
+            "Humanitarian-based",
+            "Others",
+        ),
+    ),
 }
 # The listing page also links a CSV next to most PDFs and, for FY2013 and
 # earlier, reports with other names and layouts; those are not handled.
@@ -131,6 +168,8 @@ REPORT_FILENAME = re.compile(
 FORMAT_PRIORITY = {"xlsx": 0, "csv": 1, "pdf": 2}
 # Reports for FY2013 and earlier have different names and layouts
 MIN_FISCAL_YEAR = 2014
+# Cache files of the layout before reports/ mirrored the URL paths
+LEGACY_CACHE_NAME = re.compile(r"[a-z0-9_-]+_fy\d{4}q[1-4]\.(?:xlsx|csv|pdf)")
 
 STATES = {
     "Alabama": "AL",
@@ -207,13 +246,114 @@ NAME_FIXES = {
     "SSC": "Texas Service Center",
     "YSC": "Potomac Service Center",
 }
+# The FY2014-FY2015 reports list the service centers under a "Service Center"
+# heading by their state's name alone, without a code
+SERVICE_CENTER_CODES = {
+    "California": "WSC",
+    "Vermont": "ESC",
+    "Nebraska": "NSC",
+    "Texas": "SSC",
+    "Potomac": "YSC",
+}
+SERVICE_CENTER_HEADING = re.compile(r"^service\s*cent", re.IGNORECASE)
+# Section headings, which some reports fill with zeros
+HEADING = re.compile(r"^(?:field office|service cent)", re.IGNORECASE)
 # Immigrant visas (a State Department form) and immigration court
 # adjustments: not USCIS adjudications, and only reported since FY2026
 SKIPPED_CATEGORIES = {"Supplemental Processing"}
 
-# received, approved, denied and pending
-Counts = list[int | None]
-# "D" is a count withheld for privacy, "H" one withheld so "D" cannot be derived
+# The form's name where the all-forms report has no row titled after the whole
+# form: since FY2026 the I-131's rows are its categories, the largest of which
+# is advance parole.
+FORM_TITLES = {
+    "I-131": "Application for Travel Documents, Parole Documents, and Arrival/Departure Records",
+}
+# A stable key for each category row of the forms the all-forms report splits
+# into categories, by the row's title (compared ignoring case and spacing), so
+# that a category keeps its history when USCIS retitles its row. A form's only
+# row in a quarter is "all" unless listed here. The I-130 and I-765 rows from
+# before USCIS split them by category ("all") cover every category and are
+# deliberately not joined to any one of them.
+VARIANT_KEYS: dict[str, dict[str, str]] = {
+    "I-130": {
+        "Immediate and Preference Relatives": "all",
+        "Petition for Alien Relative": "all",
+        "Petition for Alien Relative (Immediate Relative)": "immediate-relative",
+        "Petition for Alien Relative (All Other Relative)": "all-other-relative",
+    },
+    "I-131": {
+        "Reentry Permit/Refugee Travel Document": "travel-document",
+        "Application for Travel Document": "travel-document",
+        "Application for Travel Documents, Parole Documents, and Arrival/Departure Records": "travel-document",
+        "Advance Parole": "advance-parole",
+        "Application for Travel Document (Advance Parole)": "advance-parole",
+        "Application for Advance Parole Document for Aliens Inside the United States": "advance-parole",
+        "Application for Travel Document (Parole-in-Place)": "parole-in-place",
+        "Application for Travel Document, Parole Documents, and Arrival/Departure Records (Parole in Place)": "parole-in-place",
+        "Application for Travel Documents, Parole Documents, and Arrival/Departure Records (Parole in Place)": "parole-in-place",
+        "Application for Travel Document (Humanitarian Parole)": "humanitarian-parole",
+        "Application for Initial Parole Document for Aliens Outside the United States": "initial-parole",
+    },
+    "I-485": {
+        "Family-Based Adjustments": "family",
+        "Employment-Based Adjustments": "employment",
+        "Asylum Adjustments": "asylum",
+        "Refugee Adjustments": "refugee",
+        "Cuban Adjustment Act": "cuban",
+        "Indo Chinese Adjustments": "indo-chinese",
+        "Other Adjustments of Status": "other",
+        "Application to Register Permanent Residence or Adjust Status (Family)": "family",
+        "Application to Register Permanent Residence or Adjust Status (Employment)": "employment",
+        "Application to Register Permanent Residence or Adjust Status (Asylum)": "asylum",
+        "Application to Register Permanent Residence or Adjust Status (Refugee)": "refugee",
+        "Application to Register Permanent Residence or Adjust Status (Cuban)": "cuban",
+        "Application to Register Permanent Residence or Adjust Status (Indo-Chinese)": "indo-chinese",
+        "Application to Register Permanent Residence or Adjust Status (Other)": "other",
+    },
+    # Petitions filed before the EB-5 Reform and Integrity Act of 2022, which
+    # USCIS has reported as "Legacy" since it split off standalone investors
+    "I-526": {
+        "Petitions by Entrepreneurs": "legacy",
+        "Immigrant Petition by Alien Investor": "legacy",
+        "Immigrant Petition by Alien Investor (Legacy)": "legacy",
+        "Immigrant Petition by Standalone Investor": "standalone",
+    },
+    "I-765": {
+        "Employment Authorization Documents": "all",
+        "Application for Employment Authorization": "all",
+        "Application for Employment Authorization (Asylum)": "asylum",
+        "Application for Employment Authorization (Adjustment Of Status)": "adjustment-of-status",
+        "Application for Employment Authorization (DACA)": "daca",
+        "Application for Employment Authorization (All Other)": "all-other",
+    },
+    "N-400": {
+        "Non-Military Naturalization": "civilian",
+        "Application for Naturalization": "civilian",
+        "Military Naturalization": "military",
+        "Application for Naturalization (Military)": "military",
+    },
+}
+# The per-office reports' categories, by a word of their label, first match
+# first: (form, word, key)
+OFFICE_CATEGORY_KEYS = (
+    ("I-130", "immediate", "immediate-relative"),
+    ("I-130", "other", "all-other-relative"),
+    ("I-485", "family", "family"),
+    ("I-485", "employment", "employment"),
+    ("I-485", "humanitarian", "humanitarian"),
+    ("I-485", "other", "other"),
+    ("N-400", "military", "military"),
+    ("N-400", "naturalization", "civilian"),
+)
+# National pending (all-forms report) vs. the per-office report's total, above
+# which a quarter is flagged: the two reports come from separate queries and
+# differ by up to 10% in a few quarters (I-130 in July-September 2019), but a
+# misread report is further off (FY2024's fractional cells: 25%).
+NATIONAL_VS_OFFICES_TOLERANCE = 0.15
+
+FIELDS = ("received", "approved", "denied", "pending")
+# "D" is a count withheld for privacy, "H" one withheld so "D" cannot be
+# derived; a decimal is a count USCIS apportioned between categories
 VALUE_TOKEN = re.compile(r"^(?:\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?|D|H|-|N/?A)?$")
 NUMBER = re.compile(r"^(?:\d{1,3}(?:,\d{3})+|\d{1,3})$")
 # A value, or a piece of one that PDF extraction split off ("1" ",925,486")
@@ -223,18 +363,23 @@ OFFICE_CODE = re.compile(r"^[A-Z]{3}$")
 # A "Received" column header (with its footnote digit), as opposed to the
 # "Employment-based received at service center" category label above it
 RECEIVED_HEADER = re.compile(r"\breceived\s*\d*$", re.IGNORECASE)
-# A form number, possibly with a footnote digit or two glued on ("I-6007", "N-400 17")
+# A form number, possibly with a footnote digit or two glued on ("I-6007",
+# "N-400 17"). I-90 is the only two-digit form, so "I-908" is I-90 with
+# footnote 8 unless it is another form: see form_number().
 FORM_KEY = re.compile(r"^(?P<form>[A-Z]{1,4}-\d{2,3}[A-Z]{0,2})\s*\d{0,2}$")
 # The office name may itself contain a three-letter word ("Dover AFB DVD"); the
 # code is the last one before the counts.
+PDF_VALUES = r"(?P<values>(?:[\d,]+|D|H|-|N/?A)(?:\s+(?:[\d,]+|D|H|-|N/?A)){7,})"
 PDF_OFFICE_LINE = re.compile(
-    r"^(?P<name>[A-Za-z][A-Za-z .'()-]*)\s+(?P<code>[A-Z]{3})\s+(?P<values>(?:[\d,]+|D|H|-|N/?A)(?:\s+(?:[\d,]+|D|H|-|N/?A)){7,})\s*$"
+    rf"^(?P<name>[A-Za-z][A-Za-z .'()-]*)\s+(?P<code>[A-Z]{{3}})\s+{PDF_VALUES}\s*$"
 )
 PDF_TOTAL_LINE = re.compile(r"^(?:Grand\s+)?Total\s+(?P<values>.+)$", re.IGNORECASE)
 # Reports before FY2017 name the offices without a code
 PDF_CODELESS_OFFICE_LINE = re.compile(
-    r"^(?P<name>[A-Za-z][A-Za-z .'()-]*?)\s+(?P<values>(?:[\d,]+|D|H|-|N/?A)(?:\s+(?:[\d,]+|D|H|-|N/?A)){7,})\s*$"
+    rf"^(?P<name>[A-Za-z][A-Za-z .'()-]*?)\s+{PDF_VALUES}\s*$"
 )
+# What an office line that none of the above read looks like: a code and counts
+PDF_UNREAD_OFFICE_LINE = re.compile(rf"\b[A-Z]{{3}}\s+{PDF_VALUES}\s*$")
 PDF_FORM_LINE = re.compile(
     r"^(?P<form>[A-Z]{1,4}-\d{2,3}[A-Z]{0,2})(?:\s\d{1,2})?\s+(?P<rest>[A-Za-z(].*)$"
 )
@@ -250,8 +395,11 @@ class Report:
 
     @classmethod
     def from_url(cls, url: str) -> Report | None:
-        url = url.split("?")[0]
-        filename = url.rsplit("/", 1)[-1].lower()
+        url = canonical_url(url)
+        parts = urlsplit(url)
+        if parts.netloc != "www.uscis.gov" or ".." in parts.path:
+            return None
+        filename = parts.path.rsplit("/", 1)[-1].lower()
         family = next(
             (
                 name
@@ -271,7 +419,7 @@ class Report:
             family=family,
             fiscal_year=fiscal_year,
             fiscal_quarter=int(match["q"]),
-            priority=FORMAT_PRIORITY[match["ext"]],
+            priority=FORMAT_PRIORITY[match["ext"].lower()],
             url=url,
         )
 
@@ -281,14 +429,58 @@ class Report:
 
     @property
     def cache_path(self) -> Path:
-        return (
-            REPORTS_DIR
-            / f"{self.family.lower()}_fy{self.fiscal_year}q{self.fiscal_quarter}.{self.ext}"
-        )
+        """The downloaded file: reports/ mirrors the URL's path, so every file USCIS publishes has its own."""
+        return REPORTS_DIR / urlsplit(self.url).path.lstrip("/")
 
     @property
     def key(self) -> tuple[int, int]:
         return (self.fiscal_year, self.fiscal_quarter)
+
+    @property
+    def rank(self) -> tuple[bool, int, int, bool, int, str]:
+        """How to choose among the files for one family and quarter, best (smallest) first.
+
+        A complete report before a state-only or territory-only extract (for
+        FY2023 Q3 USCIS published an I-130 report that ends at Wisconsin next
+        to the complete one), a republished version ("_v2", "_v1.1") before
+        the one it corrects, a "_final" before a draft, then the most
+        structured format. The URL only breaks ties, so the choice is stable.
+        """
+        name = self.url.rsplit("/", 1)[-1].lower()
+        version = re.search(r"_v(\d+)(?:\.(\d+))?\.\w+$", name)
+        return (
+            bool(re.search(r"_(?:state|territory)_", name)),
+            -int(version[1]) if version else 0,
+            -int(version[2] or 0) if version else 0,
+            "_final" not in name,
+            self.priority,
+            self.url,
+        )
+
+
+def canonical_url(url: str) -> str:
+    """A report's URL without its query, over https: the Wayback Machine has
+    captured some files under http://, which must not pass for another file."""
+    url = url.split("?")[0].split("#")[0]
+    return re.sub(r"^http://", "https://", url, flags=re.IGNORECASE)
+
+
+def best_reports(reports: list[Report] | set[Report]) -> list[Report]:
+    """The best file (Report.rank) for each family and quarter, in chronological order per family."""
+    candidates: dict[tuple[str, int, int], list[Report]] = defaultdict(list)
+    for report in reports:
+        candidates[(report.family, *report.key)].append(report)
+    best = []
+    for (family, fiscal_year, fiscal_quarter), group in sorted(candidates.items()):
+        group.sort(key=lambda report: report.rank)
+        chosen = group[0]
+        others = [report for report in group[1:] if report.ext == chosen.ext]
+        if others:
+            print(
+                f"{family} FY{fiscal_year} Q{fiscal_quarter}: using {chosen.url}, not {', '.join(r.url for r in others)}"
+            )
+        best.append(chosen)
+    return sorted(best)
 
 
 def calendar_quarter(fiscal_year: int, fiscal_quarter: int) -> tuple[str, date, date]:
@@ -305,12 +497,38 @@ def calendar_quarter(fiscal_year: int, fiscal_quarter: int) -> tuple[str, date, 
     return f"{year}-Q{(first_month - 1) // 3 + 1}", start, end
 
 
+@dataclass(frozen=True)
+class Counts:
+    """Received, approved, denied and pending; None for a count USCIS withheld or did not publish."""
+
+    values: tuple[int | None, int | None, int | None, int | None]
+    # Which of them USCIS withheld as too small to disclose ("D": where the
+    # N-400 and I-485 offices add up to the report's total, the remainder
+    # usually works out at 1 to 9 per "D"), as opposed to ones it did not
+    # publish ("N/A", blank) or withheld so a "D" cannot be worked out ("H",
+    # any size)
+    withheld: frozenset[str] = frozenset()
+
+    def __getitem__(self, index: int) -> int | None:
+        return self.values[index]
+
+    def as_dict(self) -> dict[str, Any]:
+        result: dict[str, Any] = dict(zip(FIELDS, self.values, strict=True))
+        if self.withheld:
+            result["withheld"] = [name for name in FIELDS if name in self.withheld]
+        return result
+
+
 @dataclass
 class OfficeRow:
     state: str | None
     name: str
     code: str | None
+    # the total over the report's categories
     counts: Counts
+    # per category of the report (OfficeReport.categories), None where the
+    # row has no numbers for it
+    categories: list[Counts | None] = field(default_factory=list)
 
 
 @dataclass
@@ -318,10 +536,12 @@ class OfficeReport:
     offices: list[OfficeRow]
     # Every "Total" row found: the grand total at the top, and in FY2017-FY2020
     # reports also a subtotal at the end of the international offices section.
-    totals: list[Counts]
+    totals: list[OfficeRow]
+    # The labels of the report's categories, without their footnote digits
+    categories: list[str]
 
     @property
-    def total(self) -> Counts | None:
+    def total(self) -> OfficeRow | None:
         """The report's grand total, or None when no trustworthy one was found.
 
         The grand total is the largest total row; it is dropped when it comes out
@@ -329,10 +549,10 @@ class OfficeReport:
         """
         received_sum = sum(row.counts[0] or 0 for row in self.offices)
         candidates = [
-            values for values in self.totals if (values[0] or 0) >= 0.9 * received_sum
+            row for row in self.totals if (row.counts[0] or 0) >= 0.9 * received_sum
         ]
         return (
-            max(candidates, key=lambda values: values[0] or 0) if candidates else None
+            max(candidates, key=lambda row: row.counts[0] or 0) if candidates else None
         )
 
 
@@ -393,10 +613,17 @@ def wayback_captures(url_prefix: str) -> dict[str, str]:
         },
         timeout=CDX_TIMEOUT,
     )
-    rows = r.json()
+    try:
+        rows = r.json()
+    except ValueError:
+        # an empty answer, or the archive's "Temporarily Offline" page, both
+        # with HTTP 200; no captures at all is "[]"
+        raise RuntimeError(
+            f"the Wayback Machine's CDX index answered without JSON for {url_prefix}"
+        ) from None
     captures: dict[str, str] = {}
     for timestamp, original in rows[1:]:
-        original = original.split("?")[0]
+        original = canonical_url(original)
         if timestamp > captures.get(original, ""):
             captures[original] = timestamp
     return captures
@@ -460,9 +687,21 @@ def download_report(report: Report, captures: dict[str, str]) -> bytes:
         content = fetch_capture(timestamp, report.url)
     if not looks_like(report.ext, content):
         raise RuntimeError(f"{report.url} did not come back as a {report.ext} file")
-    REPORTS_DIR.mkdir(exist_ok=True)
+    report.cache_path.parent.mkdir(parents=True, exist_ok=True)
     report.cache_path.write_bytes(content)
     return content
+
+
+def legacy_cache() -> list[Path]:
+    """The files cached under the old names ("i-130_fy2024q1.xlsx"), which did
+    not say which of a quarter's files they were, so are not read any more."""
+    if not REPORTS_DIR.is_dir():
+        return []
+    return [
+        path
+        for path in REPORTS_DIR.iterdir()
+        if path.is_file() and LEGACY_CACHE_NAME.fullmatch(path.name)
+    ]
 
 
 # --- discovery ----------------------------------------------------------------
@@ -485,8 +724,8 @@ def listing_url(family: ReportFamily) -> str:
     return f"{LISTING_URL}?query={quote(family.listing_query)}&items_per_page=100"
 
 
-def discover_reports() -> tuple[list[Report], dict[str, str]]:
-    """Every known report (one per family and quarter, best format) and the Wayback captures of report files."""
+def discover_reports() -> tuple[set[Report], dict[str, str]]:
+    """Every report file found (see best_reports for the ones used) and the Wayback captures of report files."""
     captures: dict[str, str] = {}
     for directory in DOCUMENT_DIRS:
         for family in FAMILIES.values():
@@ -511,19 +750,25 @@ def discover_reports() -> tuple[list[Report], dict[str, str]]:
         )
         reports |= listed
 
-    best: dict[tuple[str, int, int], Report] = {}
-    for report in sorted(reports):
-        best.setdefault((report.family, *report.key), report)
-    return sorted(best.values()), captures
+    return reports, captures
 
 
 # --- parsing helpers ----------------------------------------------------------
 
 
 def parse_value(text: str) -> int | None:
-    """One cell: a count, 0 for "-" (represents zero), None for withheld ("D", "H"), "N/A" and blanks."""
+    """One cell: a count, 0 for "-" (represents zero), None for withheld ("D", "H"), "N/A" and blanks.
+
+    Since FY2024 some XLSX cells are fractions (USCIS apportions some counts
+    between categories, e.g. 59172.344 I-131 advance parole approvals):
+    they are rounded, not dropped.
+    """
     text = text.strip().replace(",", "")
-    return int(text) if text.isdigit() else 0 if text == "-" else None
+    if text == "-":
+        return 0
+    if re.fullmatch(r"\d+(?:\.\d+)?", text):
+        return round(float(text))
+    return None
 
 
 def parse_counts(cells: list[str]) -> Counts | None:
@@ -535,7 +780,11 @@ def parse_counts(cells: list[str]) -> Counts | None:
         or not all(VALUE_TOKEN.match(c) for c in cells)
     ):
         return None
-    return [parse_value(cell) for cell in cells]
+    received, approved, denied, pending = (parse_value(cell) for cell in cells)
+    return Counts(
+        (received, approved, denied, pending),
+        frozenset(name for name, cell in zip(FIELDS, cells, strict=True) if cell == "D"),
+    )
 
 
 def parse_months(text: str) -> float | None:
@@ -559,9 +808,25 @@ def is_total_label(text: str) -> bool:
     )
 
 
+def without_footnote(label: str) -> str:
+    """A header label without the footnote number glued to it ("Immediate Relative1")."""
+    return re.sub(r"\s*\d+$", "", label).strip()
+
+
 def normalize_dashes(text: str) -> str:
     """Some reports write their zeros with a Unicode hyphen or dash."""
     return re.sub("[\u2010\u2011\u2012\u2013\u2014\u2212]", "-", text)
+
+
+def restore_x(line: str) -> str:
+    """The FY2020 Q2 I-130 PDF's text layer has every "x" replaced by "N/A"
+    ("TeN/Aas", "PhoeniN/A PHO", "MEN/A"); a real "N/A" stands on its own."""
+
+    def letter(match: re.Match[str]) -> str:
+        before = line[match.start() - 1] if match.start() > 0 else ""
+        return "x" if before.islower() else "X"
+
+    return re.sub(r"(?<=[A-Za-z])N/A|N/A(?=[a-z])", letter, line)
 
 
 def grid_of(report: Report, content: bytes) -> list[list[str]]:
@@ -609,7 +874,7 @@ def pdf_lines(content: bytes) -> list[str]:
                 line.append(word)
             if line:
                 lines.append(join(line))
-    return [normalize_dashes(line.strip()) for line in lines]
+    return [restore_x(normalize_dashes(line.strip())) for line in lines]
 
 
 def parse_addend(text: str) -> int | tuple[int, int]:
@@ -628,14 +893,17 @@ def sums_to(addends: list[str], total: str) -> bool:
     return low <= (parse_value(total) or 0) <= high
 
 
+def column_sums_to_total(values: list[str], groups: int, column: int) -> bool:
+    """Whether, in one column (0 received ... 3 pending), a per-office row's category groups add up to its total group."""
+    return sums_to(
+        [values[4 * g + column] for g in range(groups - 1)],
+        values[4 * (groups - 1) + column],
+    )
+
+
 def groups_sum_to_total(values: list[str], groups: int) -> bool:
     """A per-office row is consistent when, per column, the category groups add up to the total group."""
-    return all(
-        sums_to(
-            [values[4 * g + c] for g in range(groups - 1)], values[4 * (groups - 1) + c]
-        )
-        for c in range(4)
-    )
+    return all(column_sums_to_total(values, groups, c) for c in range(4))
 
 
 def rejoin_numbers(
@@ -676,109 +944,197 @@ def rejoin_numbers(
     return found[0] if len(found) == 1 else None
 
 
+def unsplit_tokens(tokens: list[str], count: int) -> bool:
+    """Whether the tokens are already exactly `count` well-formed values, which
+    is then the only way to read them: merging any two would leave too few."""
+    return len(tokens) == count and all(
+        token and VALUE_TOKEN.match(token) for token in tokens
+    )
+
+
 # --- per-office reports -------------------------------------------------------
+
+
+def group_labels(grid: list[list[str]], header: int, starts: list[int]) -> list[str]:
+    """The label of each column group: the nearest cell above the "Received" header row within the group's four columns ("Immediate Relative1", "Total")."""
+    labels = []
+    for start in starts:
+        label = ""
+        for row in reversed(grid[max(0, header - 4) : header]):
+            if cells := [cell for cell in row[start : start + 4] if cell]:
+                label = cells[0]
+                break
+        labels.append(without_footnote(label))
+    return labels
 
 
 def parse_office_grid(grid: list[list[str]]) -> OfficeReport:
     """Parse the CSV/XLSX layout: label columns, then per category (Received, Approved, Denied, Pending), the last category being the total."""
-    first_column: int | None = None
-    total_columns: list[int] | None = None
-    for row in grid:
-        received = [i for i, cell in enumerate(row) if RECEIVED_HEADER.search(cell)]
-        if len(received) >= 2:
-            first_column = received[0]
-            total_columns = [received[-1] + k for k in range(4)]
-            break
-    if first_column is None or total_columns is None:
+    header, starts = next(
+        (
+            (i, received)
+            for i, row in enumerate(grid)
+            if len(received := [j for j, c in enumerate(row) if RECEIVED_HEADER.search(c)])
+            >= 2
+        ),
+        (None, []),
+    )
+    if header is None:
         raise ValueError("no header row with 'Received' columns")
+    first_column = starts[0]
+    labels = group_labels(grid, header, starts)
+    if not is_total_label(labels[-1]):
+        raise ValueError(f"the last column group is {labels[-1]!r}, not the total")
 
     offices: list[OfficeRow] = []
-    totals: list[Counts] = []
+    totals: list[OfficeRow] = []
     state: str | None = None
-    for row in grid:
-        cells = row + [""] * (max(total_columns) + 1 - len(row))
-        labels = cells[:first_column]
-        code = next((c for c in labels if OFFICE_CODE.match(c)), None)
-        names = [c for c in labels if c and c != code]
+    service_centers = False
+    # the international offices (FY2017-FY2020), which are not USCIS field offices
+    international = False
+    for row in grid[header + 1 :]:
+        cells = row + [""] * (starts[-1] + 4 - len(row))
+        row_labels = cells[:first_column]
+        code = next((c for c in row_labels if OFFICE_CODE.match(c)), None)
+        names = [c for c in row_labels if c and c != code]
         if not names:
             continue
         name = names[-1]
-        counts = parse_counts([cells[i] for i in total_columns])
-        if is_total_label(name) and counts is not None:
-            totals.append(counts)
-        elif counts is None:
+        groups = [parse_counts(cells[start : start + 4]) for start in starts]
+        counts = groups[-1]
+        if counts is None:
             # A heading: a state, a country in the international offices
             # section, "Service Centers", or a label like "Field Office by
             # State". Only checked on rows without counts, as the Washington
             # field office (in DC) shares its name with the state.
-            if labels[0]:
+            if row_labels[0]:
                 state = state_name(name)
+                service_centers = bool(SERVICE_CENTER_HEADING.match(name))
+                international = international or "international" in name.lower()
             continue
+        line = OfficeRow(state, name, code, counts, groups[:-1])
+        if is_total_label(name):
+            totals.append(line)
         elif code is not None:
-            offices.append(OfficeRow(state, name, code, counts))
-        elif labels[0] or state is None:
+            offices.append(line)
+        elif service_centers and not row_labels[0]:
+            # FY2014-FY2015: the service centers by their state's name alone
+            offices.append(
+                OfficeRow(None, name, SERVICE_CENTER_CODES.get(name), counts, groups[:-1])
+            )
+        elif row_labels[0] or state is None:
             # No office code and either the name sits in the state column or it
             # is under a country heading: an international office (code "N/A"
             # in later reports) or a stray line, not a field office.
-            if labels[0] and state_name(name) is not None:
+            if row_labels[0] and state_name(name) is not None:
                 state = state_name(name)
-            continue
+            elif not international and not HEADING.match(name) and any(counts.values):
+                print(f"::warning::skipped a row that is not a known office: {row}")
         else:
-            offices.append(OfficeRow(state, name, code, counts))
-    return OfficeReport(offices, totals)
+            offices.append(line)
+    return OfficeReport(offices, totals, labels[:-1])
 
 
-def parse_office_pdf(content: bytes, groups: int) -> OfficeReport:
+def parse_office_pdf(content: bytes, family: ReportFamily) -> OfficeReport:
     """Parse the PDF layout from its text layer: one office per line, followed by its counts per category."""
-    offices: list[OfficeRow] = []
-    totals: list[Counts] = []
-    state: str | None = None
+    groups = family.groups
     count = 4 * groups
+    offices: list[OfficeRow] = []
+    totals: list[OfficeRow] = []
+    state: str | None = None
+    service_centers = False
 
-    def values_of(text: str) -> Counts | None:
+    def values_of(line: str, text: str) -> list[Counts | None] | None:
         # Digits often come out split ("1 94,819"); the per-category counts
         # must add up to the total ones, which settles most of the ambiguity.
+        tokens = text.split()
         values = rejoin_numbers(
-            text.split(), count, lambda values: groups_sum_to_total(values, groups)
+            tokens, count, lambda values: groups_sum_to_total(values, groups)
         )
-        return parse_counts(values[-4:]) if values is not None else None
+        if values is None and unsplit_tokens(tokens, count):
+            # Nothing to rejoin, but the categories do not add up to the
+            # total: a mistake in USCIS's arithmetic, or a withheld ("D")
+            # count larger than usual. Kept when only one column is off.
+            off = [c for c in range(4) if not column_sums_to_total(tokens, groups, c)]
+            if len(off) == 1:
+                print(
+                    f"::warning::the categories' {FIELDS[off[0]]} do not add up to the total in {line!r}; kept as published"
+                )
+                values = tokens
+        if values is None:
+            return None
+        return [parse_counts(values[4 * g : 4 * g + 4]) for g in range(groups)]
 
     for line in pdf_lines(content):
-        if (known_state := state_name(line)) is not None:
-            state = known_state
-        elif (match := PDF_TOTAL_LINE.match(line)) is not None:
-            if (counts := values_of(match["values"])) is not None:
-                totals.append(counts)
+        if (match := PDF_TOTAL_LINE.match(line)) is not None:
+            if (parsed := values_of(line, match["values"])) is not None and (
+                total := parsed[-1]
+            ) is not None:
+                totals.append(OfficeRow(None, "Total", None, total, parsed[:-1]))
         elif (match := PDF_OFFICE_LINE.match(line)) is not None:
-            if (counts := values_of(match["values"])) is not None:
-                offices.append(OfficeRow(state, match["name"], match["code"], counts))
+            if (parsed := values_of(line, match["values"])) is not None and (
+                counts := parsed[-1]
+            ) is not None:
+                offices.append(
+                    OfficeRow(state, match["name"], match["code"], counts, parsed[:-1])
+                )
             else:
                 print(f"::warning::cannot read the numbers of {line!r}")
-        elif (
-            state is not None
-            and (match := PDF_CODELESS_OFFICE_LINE.match(line)) is not None
-            and (counts := values_of(match["values"])) is not None
+        elif (match := PDF_CODELESS_OFFICE_LINE.match(line)) is not None and (
+            service_centers or state is not None
         ):
-            offices.append(OfficeRow(state, match["name"], None, counts))
+            # Reports before FY2017: offices without codes, and service
+            # centers by their state's name alone (checked before the state
+            # headings, as "California 224 25,046 ..." would read as one)
+            if (parsed := values_of(line, match["values"])) is not None and (
+                counts := parsed[-1]
+            ) is not None:
+                name = match["name"]
+                offices.append(
+                    OfficeRow(None, name, SERVICE_CENTER_CODES.get(name), counts, parsed[:-1])
+                    if service_centers
+                    else OfficeRow(state, name, None, counts, parsed[:-1])
+                )
+            else:
+                print(f"::warning::cannot read the numbers of {line!r}")
+        elif (known_state := state_name(line)) is not None:
+            state, service_centers = known_state, False
         elif re.fullmatch(r"[A-Za-z][A-Za-z .'&-]+", line):
             # a heading that is not a state: a country in the international
-            # offices section, or "Service Centers"
+            # offices section, or "Service Center"
             state = None
-    return OfficeReport(offices, totals)
+            service_centers = bool(SERVICE_CENTER_HEADING.match(line))
+        elif PDF_UNREAD_OFFICE_LINE.search(line):
+            print(f"::warning::skipped a line that looks like an office: {line!r}")
+    return OfficeReport(offices, totals, list(family.categories))
 
 
 def parse_office_report(report: Report, content: bytes) -> OfficeReport:
     family = FAMILIES[report.family]
-    assert family.groups is not None
     parsed = (
-        parse_office_pdf(content, family.groups)
+        parse_office_pdf(content, family)
         if report.ext == "pdf"
         else parse_office_grid(grid_of(report, content))
     )
-    if len(parsed.offices) < FAMILIES[report.family].min_rows:
+    if len(parsed.offices) < family.min_rows:
         raise ValueError(
             f"only {len(parsed.offices)} offices parsed from {report.url}; the layout must have changed"
         )
+    if len(parsed.categories) != family.groups - 1:
+        print(
+            f"::warning::{report.url} has the categories {parsed.categories}, expected {list(family.categories)}"
+        )
+    # The offices should add up to the report's own total: they do not when
+    # rows were skipped, or in USCIS's own defective reports (the scrambled
+    # FY2017 Q1 service center rows).
+    if (total := parsed.total) is not None:
+        for index in (0, 3):
+            expected = total.counts[index]
+            summed = sum(row.counts[index] or 0 for row in parsed.offices)
+            if expected and abs(summed - expected) > 0.1 * expected:
+                print(
+                    f"::warning::{report.url}: the offices' {FIELDS[index]} add up to {summed:,}, the report's total is {expected:,}"
+                )
     return parsed
 
 
@@ -793,6 +1149,14 @@ class ColumnGroup:
     denied: int
     pending: int
     processing_time: int | None
+
+
+def form_number(form: str, title: str) -> str:
+    """The form number, with a footnote digit glued to "I-90" taken off: FY2016
+    Q1 lists I-90 with footnote 8 as "I-908"."""
+    if re.fullmatch(r"I-90\d", form) and "permanent resident card" in title.lower():
+        return "I-90"
+    return form
 
 
 def all_forms_groups(
@@ -881,7 +1245,7 @@ def parse_all_forms_grid(report: Report, grid: list[list[str]]) -> list[FormRow]
                 FormRow(
                     report.fiscal_year,
                     group.fiscal_quarter,
-                    form_match["form"],
+                    form_number(form_match["form"], title),
                     title,
                     category,
                     counts,
@@ -946,6 +1310,7 @@ def parse_all_forms_pdf(report: Report, content: bytes) -> list[FormRow]:
         while split > 0 and NUMBER_FRAGMENT.match(words[split - 1]):
             split -= 1
         title = " ".join(words[:split])
+        form = form_number(match["form"], title)
         tokens = words[split:]
         values = rejoin_numbers(tokens, value_count, consistent)
         if values is None and not cumulative and len(tokens) == value_count - 1:
@@ -953,9 +1318,25 @@ def parse_all_forms_pdf(report: Report, content: bytes) -> list[FormRow]:
             values = rejoin_numbers(
                 [*tokens[:5], "N/A", *tokens[5:]], value_count, consistent
             )
+        if values is None and cumulative and unsplit_tokens(tokens, value_count):
+            # Nothing to rejoin, but USCIS's year-to-date received or approved
+            # is not the sum of its quarters: kept when only one of the two is off.
+            off = [
+                FIELDS[c]
+                for c in range(2)
+                if not sums_to(
+                    [tokens[4 * q + c] for q in range(quarters)],
+                    tokens[4 * quarters + c],
+                )
+            ]
+            if len(off) == 1:
+                print(
+                    f"::warning::FY{report.fiscal_year} Q{report.fiscal_quarter}: the quarters' {off[0]} of {form} {title!r} do not add up to the year to date; kept as published"
+                )
+                values = tokens
         if values is None:
             print(
-                f"::warning::FY{report.fiscal_year} Q{report.fiscal_quarter}: cannot read the numbers of {match['form']} {title!r}: {' '.join(words[split:])}"
+                f"::warning::FY{report.fiscal_year} Q{report.fiscal_quarter}: cannot read the numbers of {form} {title!r}: {' '.join(words[split:])}"
             )
             continue
         if not cumulative:
@@ -965,7 +1346,7 @@ def parse_all_forms_pdf(report: Report, content: bytes) -> list[FormRow]:
                     FormRow(
                         report.fiscal_year,
                         quarters,
-                        match["form"],
+                        form,
                         title,
                         category,
                         counts,
@@ -980,7 +1361,7 @@ def parse_all_forms_pdf(report: Report, content: bytes) -> list[FormRow]:
                     FormRow(
                         report.fiscal_year,
                         quarter,
-                        match["form"],
+                        form,
                         title,
                         category,
                         counts,
@@ -1018,22 +1399,18 @@ def slugify(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
 
 
-def counts_dict(counts: Counts) -> dict[str, int | None]:
-    received, approved, denied, pending = counts
-    return {
-        "received": received,
-        "approved": approved,
-        "denied": denied,
-        "pending": pending,
-    }
-
-
-def sum_counts(rows: list[Counts]) -> dict[str, int | None]:
-    """Per field, the sum of the rows that have it, or None when none does."""
-    result: dict[str, int | None] = {}
-    for i, key in enumerate(("received", "approved", "denied", "pending")):
+def sum_counts(rows: list[Counts]) -> dict[str, Any]:
+    """Per field, the sum of the rows that have it, or None when none does
+    (withheld when some row withheld it as too small to disclose)."""
+    result: dict[str, Any] = {}
+    withheld = []
+    for i, name in enumerate(FIELDS):
         values: list[int] = [v for row in rows if (v := row[i]) is not None]
-        result[key] = sum(values) if values else None
+        result[name] = sum(values) if values else None
+        if not values and any(name in row.withheld for row in rows):
+            withheld.append(name)
+    if withheld:
+        result["withheld"] = withheld
     return result
 
 
@@ -1042,10 +1419,83 @@ def base_title(title: str) -> str:
     return re.sub(r"\s+\([^()]*(?:\([^()]*\)[^()]*)*\)\s*$", "", title) or title
 
 
+def normalize_title(title: str) -> str:
+    return re.sub(r"\s+", " ", title).strip().lower()
+
+
+NORMALIZED_VARIANT_KEYS = {
+    form: {normalize_title(title): key for title, key in keys.items()}
+    for form, keys in VARIANT_KEYS.items()
+}
+
+
+def variant_keys(form: str, titles: list[str]) -> list[str]:
+    """A stable key for each category row of a form in one quarter (see VARIANT_KEYS)."""
+    known = NORMALIZED_VARIANT_KEYS.get(form, {})
+    keys: list[str] = []
+    for title in titles:
+        key = known.get(normalize_title(title))
+        if key is None:
+            if len(titles) == 1:
+                key = "all"
+            else:
+                category = re.search(
+                    r"\s\(([^()]*(?:\([^()]*\)[^()]*)*)\)\s*$", title
+                )
+                key = slugify(category[1] if category else title)
+                print(
+                    f"::warning::{form}: no category key for {title!r}, so {key!r}; add it to VARIANT_KEYS to keep the category's history joined across USCIS's renames"
+                )
+        if key in keys:
+            unique = f"{key}-{slugify(title)}"
+            print(
+                f"::warning::{form}: two rows of one quarter have the category key {key!r}; {title!r} gets {unique!r}"
+            )
+            key = unique
+        keys.append(key)
+    return keys
+
+
+def office_category_key(form: str, label: str) -> str:
+    key = next(
+        (
+            key
+            for key_form, word, key in OFFICE_CATEGORY_KEYS
+            if key_form == form and word in label.lower()
+        ),
+        None,
+    )
+    if key is None:
+        key = slugify(label)
+        print(
+            f"::warning::{form}: no category key for the per-office category {label!r}, so {key!r}; add it to OFFICE_CATEGORY_KEYS"
+        )
+    return key
+
+
+def office_quarter(row: OfficeRow, keys: list[str]) -> dict[str, Any]:
+    """An office's (or the report total's) counts, with its categories' when the report has several."""
+    quarter = row.counts.as_dict()
+    if len(keys) > 1:
+        quarter["categories"] = {
+            key: counts.as_dict()
+            for key, counts in zip(keys, row.categories, strict=True)
+            if counts is not None
+        }
+    return quarter
+
+
 def build_offices(
+    family: ReportFamily,
     reports: list[tuple[Report, OfficeReport]],
-) -> tuple[list[dict[str, Any]], dict[str, dict[str, int | None]], dict[str, str]]:
-    """One form's office pages, its per-quarter totals and the report each quarter came from."""
+) -> tuple[
+    list[dict[str, Any]],
+    dict[str, dict[str, Any]],
+    dict[str, str],
+    list[dict[str, str]],
+]:
+    """One form's office pages, its per-quarter totals, the report each quarter came from and the reports' categories."""
+    assert family.form is not None
     # Reports before FY2017 name the offices without their codes; resolve those
     # names against every report that has both, most specific match first.
     codes_by_name: dict[tuple[str | None, str], str] = {}
@@ -1058,10 +1508,23 @@ def build_offices(
                 codes_by_name.setdefault((None, normalize_name(row.name)), row.code)
 
     offices: dict[str, dict[str, Any]] = {}
-    totals: dict[str, dict[str, int | None]] = {}
+    totals: dict[str, dict[str, Any]] = {}
     sources: dict[str, str] = {}
+    # key -> label, the newest report's
+    categories: dict[str, str] = {}
     for report, parsed in reports:
         quarter, _, _ = calendar_quarter(*report.key)
+        labels = parsed.categories
+        keys = [office_category_key(family.form, label) for label in labels]
+        if len(set(keys)) != len(keys):
+            # the quarter's totals are still good: only its categories go
+            print(
+                f"::warning::{report.url}: the categories {labels} are not told apart; left out"
+            )
+            keys, labels = [], []
+        for key, label in zip(keys, labels, strict=True):
+            categories.pop(key, None)
+            categories[key] = label
         rows: list[OfficeRow] = []
         for row in parsed.offices:
             code = (
@@ -1074,17 +1537,24 @@ def build_offices(
                     f"::warning::{report.family} {quarter}: no office code known for {row.name!r} ({row.state}); skipped"
                 )
                 continue
-            rows.append(OfficeRow(row.state, row.name, code, row.counts))
+            rows.append(row)
             # The newest report a code appears in names it; reports are in chronological order.
             office = offices.setdefault(code, {"code": code, "quarters": {}})
             office["name"] = NAME_FIXES.get(code, row.name)
             office["state"] = row.state
-            office["quarters"][quarter] = counts_dict(row.counts)
-        totals[quarter] = (
-            counts_dict(parsed.total)
-            if parsed.total is not None
-            else sum_counts([row.counts for row in rows])
-        )
+            office["quarters"][quarter] = office_quarter(row, keys)
+        total = parsed.total
+        if total is not None:
+            totals[quarter] = office_quarter(total, keys)
+        else:
+            totals[quarter] = sum_counts([row.counts for row in rows])
+            if len(keys) > 1:
+                totals[quarter]["categories"] = {
+                    key: sum_counts(
+                        [c for row in rows if (c := row.categories[i]) is not None]
+                    )
+                    for i, key in enumerate(keys)
+                }
         sources[quarter] = report.url
 
     for office in offices.values():
@@ -1096,7 +1566,25 @@ def build_offices(
         raise ValueError(
             f"duplicate office slugs: {sorted(s for s in slugs if slugs.count(s) > 1)}"
         )
-    return sorted(offices.values(), key=lambda office: office["code"]), totals, sources
+    return (
+        sorted(offices.values(), key=lambda office: office["code"]),
+        totals,
+        sources,
+        [{"key": key, "label": label} for key, label in categories.items()],
+    )
+
+
+def check_national_vs_offices(entry: dict[str, Any]) -> None:
+    """Warn when the all-forms report's pending count for a form is far from
+    its per-office report's total: one of the two was misread (FY2024's
+    fractional cells made the national I-485 count a third too low)."""
+    for quarter, totals in sorted(entry["officeTotals"].items()):
+        national = entry["quarters"].get(quarter, {}).get("pending")
+        offices = totals.get("pending")
+        if national and offices and abs(national / offices - 1) > NATIONAL_VS_OFFICES_TOLERANCE:
+            print(
+                f"::warning::{entry['form']} {quarter}: {national:,} pending nationwide in the all-forms report, {offices:,} in the per-office report"
+            )
 
 
 def build_dataset(
@@ -1123,32 +1611,34 @@ def build_dataset(
         entry = forms.setdefault(
             form, {"form": form, "slug": slugify(form), "quarters": {}, "sources": {}}
         )
+        keys = variant_keys(form, [row.title for row in rows])
         entry["quarters"][quarter] = {
             **sum_counts([row.counts for row in rows]),
             "variants": [
                 {
+                    "key": key,
                     "title": row.title,
-                    **counts_dict(row.counts),
+                    **row.counts.as_dict(),
                     "processingTime": row.processing_time,
                 }
-                for row in rows
+                for key, row in zip(keys, rows, strict=True)
             ],
         }
         entry["sources"][quarter] = sources_by_quarter[(form, fiscal)]
         # the newest report names and categorizes the form
         main = max(rows, key=lambda row: row.counts[0] or 0)
-        entry["title"] = base_title(main.title)
+        entry["title"] = FORM_TITLES.get(form, base_title(main.title))
         entry["category"] = main.category
 
-    for family, reports in office_reports.items():
-        office_form = FAMILIES[family].form
-        assert office_form is not None
-        offices, totals, sources = build_offices(reports)
+    for family_name, reports in office_reports.items():
+        family = FAMILIES[family_name]
+        assert family.form is not None
+        offices, totals, sources, categories = build_offices(family, reports)
         entry = forms.setdefault(
-            office_form,
+            family.form,
             {
-                "form": office_form,
-                "slug": slugify(office_form),
+                "form": family.form,
+                "slug": slugify(family.form),
                 "quarters": {},
                 "sources": {},
             },
@@ -1156,12 +1646,34 @@ def build_dataset(
         entry["offices"] = offices
         entry["officeTotals"] = totals
         entry["officeSources"] = sources
+        entry["officeCategories"] = categories
+        check_national_vs_offices(entry)
     for entry in forms.values():
         entry.setdefault("offices", [])
         entry.setdefault("officeTotals", {})
         entry.setdefault("officeSources", {})
+        entry.setdefault("officeCategories", [])
         entry.setdefault("title", entry["form"])
         entry.setdefault("category", None)
+
+    # A form that drops out of the newest report stops having a page; say so,
+    # as a misread form number ("I-908" for I-90) would look just like it.
+    national_quarters = sorted({q for e in forms.values() for q in e["quarters"]})
+    previous, newest = [None, None, *national_quarters][-2:]
+    gone = sorted(
+        e["form"]
+        for e in forms.values()
+        if previous in e["quarters"] and newest not in e["quarters"]
+    )
+    new = sorted(
+        e["form"]
+        for e in forms.values()
+        if newest in e["quarters"] and previous not in e["quarters"]
+    )
+    if gone:
+        print(
+            f"::warning::{', '.join(gone)} in the {previous} report but not in the {newest} one (new in it: {', '.join(new) or 'none'})"
+        )
 
     quarters = sorted(
         {
@@ -1193,26 +1705,44 @@ def build_dataset(
     }
 
 
-def cached_reports() -> list[Report]:
-    """The reports in the cache directory, for iterating on the parsers offline."""
-    reports = []
-    for path in sorted(REPORTS_DIR.iterdir()):
-        match = re.fullmatch(
-            r"(?P<family>.+)_fy(?P<fy>\d{4})q(?P<q>[1-4])\.(?P<ext>\w+)", path.name
-        )
-        if match is None:
-            continue
-        family = next(name for name in FAMILIES if name.lower() == match["family"])
-        reports.append(
-            Report(
-                family,
-                int(match["fy"]),
-                int(match["q"]),
-                FORMAT_PRIORITY[match["ext"]],
-                path.name,
+def cached_reports() -> set[Report]:
+    """Every report file in the cache."""
+    if not REPORTS_DIR.is_dir():
+        return set()
+    return {
+        report
+        for path in REPORTS_DIR.rglob("*")
+        if path.is_file()
+        and (
+            report := Report.from_url(
+                f"{USCIS}/{path.relative_to(REPORTS_DIR).as_posix()}"
             )
         )
-    return sorted(reports)
+        is not None
+    }
+
+
+def check_history(previous: dict[str, Any], dataset: dict[str, Any]) -> None:
+    """Fail when the new dataset lost a quarter of a form the previous one
+    had: the Wayback Machine's CDX index sometimes answers a query with only
+    some of the files it has (on one run, none of FY2014-FY2016's all-forms
+    reports), and USCIS does not withdraw published quarters. A form gone
+    altogether is only warned about, as a misread form number ("I-908") goes
+    that way when the parser is fixed."""
+    new = {form["form"]: form for form in dataset["forms"]}
+    lost = []
+    for form in previous["forms"]:
+        if form["form"] not in new:
+            print(f"::warning::{form['form']} is no longer in {OUTPUT_PATH.name}")
+            continue
+        for field_name in ("quarters", "officeTotals"):
+            missing = sorted(set(form[field_name]) - set(new[form["form"]][field_name]))
+            if missing:
+                lost.append(f"{form['form']} {field_name} {', '.join(missing)}")
+    if lost:
+        raise RuntimeError(
+            f"quarters {OUTPUT_PATH.name} had are missing, so a report was not found: {'; '.join(lost)}"
+        )
 
 
 def new_quarter_due(today: date) -> bool:
@@ -1240,13 +1770,42 @@ def cache_is_complete() -> bool:
     )
 
 
+def to_json(dataset: dict[str, Any]) -> str:
+    """forms.json as Prettier (the repository's pre-commit hook) formats it, so
+    that the file this script writes and a reformatted commit of it are the
+    same: indented, but with a short list of strings on one line."""
+    text = json.dumps(dataset, indent=2, sort_keys=True)
+
+    def one_line(match: re.Match[str]) -> str:
+        items = [line.strip().rstrip(",") for line in match["items"].splitlines()]
+        line = f"{match['head']}[{', '.join(items)}]"
+        fits = len(line) + len(match["comma"]) <= 80
+        return line + match["comma"] if fits else match[0]
+
+    return re.sub(
+        r'^(?P<head>[ ]*(?:"[^"\n]*": )?)\[\n(?P<items>(?:[ ]+"[^"\n]*",?\n)+)[ ]*\](?P<comma>,?)$',
+        one_line,
+        text,
+        flags=re.MULTILINE,
+    )
+
+
 def main() -> int:
     captures: dict[str, str] = {}
-    if "--offline" in sys.argv:
-        reports = cached_reports()
-    else:
+    offline = "--offline" in sys.argv
+    legacy = legacy_cache()
+    if offline and legacy:
+        print(
+            f"::warning::{REPORTS_DIR} has reports cached under their old file names ({len(legacy)}), which are not read any more;"
+            " run once without --offline to download them again"
+        )
+    # The cache holds every report used before, so a report that discovery
+    # misses (the Wayback Machine's index is patchy) is still used.
+    reports = cached_reports()
+    if not offline:
         try:
-            reports, captures = discover_reports()
+            discovered, captures = discover_reports()
+            reports |= discovered
         except RuntimeError as e:
             # The Wayback Machine is down. With no new quarter due and every
             # report forms.json was built from already cached, there is
@@ -1257,9 +1816,13 @@ def main() -> int:
                 f"::warning::{e}; no new quarter is due yet and every report is cached, so {OUTPUT_PATH.name} is left as it is"
             )
             return 0
+        # discovery works, so reports are downloaded again under their new
+        # names as needed: the old files are of no use
+        for path in legacy:
+            path.unlink()
     all_forms: list[tuple[Report, list[FormRow]]] = []
     office_reports: dict[str, list[tuple[Report, OfficeReport]]] = defaultdict(list)
-    for report in reports:
+    for report in best_reports(reports):
         content = download_report(report, captures)
         if report.family == "all_forms":
             rows = parse_all_forms_report(report, content)
@@ -1276,7 +1839,9 @@ def main() -> int:
                 f" total {'from report' if parsed.total else 'summed'}"
             )
     dataset = build_dataset(all_forms, office_reports)
-    OUTPUT_PATH.write_text(json.dumps(dataset, indent=2, sort_keys=True) + "\n")
+    if OUTPUT_PATH.exists():
+        check_history(json.loads(OUTPUT_PATH.read_text()), dataset)
+    OUTPUT_PATH.write_text(to_json(dataset) + "\n")
     print(
         f"wrote {OUTPUT_PATH}: {len(dataset['forms'])} forms over {len(dataset['periods'])} quarters"
     )

@@ -35,8 +35,14 @@ import {
   withoutMisleadingClearing,
 } from "../../../components/estimate";
 import {
+  approximately,
   formatCount,
   highlight,
+  lastMedianLabel,
+  LEADING_OFFICE_CATEGORY,
+  officeCategoryName,
+  officeCategoryPoints,
+  openingOfficeCategory,
   processingTimeSeries,
   ProcessingTimeSeries,
   QuarterPoint,
@@ -51,10 +57,16 @@ interface OfficeSummary {
   slug: string;
   name: string;
   stateCode: string | null;
+  /** The category the rest are for, when it is not the form's leading one
+   * (Props.officeCategory): the office's main category, at an office that
+   * handles few of the leading one (openingOfficeCategory) */
+  category: string | null;
   pending: number | null;
   /** Decisions in the office's newest quarter */
   completions: number | null;
-  /** Approvals in it, for when USCIS withheld the denials */
+  /** Whether `completions` counts a number USCIS withheld as too small */
+  approximate: boolean;
+  /** Approvals in it, for when USCIS did not publish the denials */
   approved: number | null;
 }
 
@@ -65,10 +77,15 @@ interface Props {
   points: QuarterPoint[];
   variants: Variant[];
   processingTimeSeries: ProcessingTimeSeries[];
+  /** The quarter of USCIS's last median, when it has stopped publishing one */
+  lastMedian: string | null;
   /** What to expect if filing today, per category with a USCIS median */
   ranges: CategoryRange[];
   source: string;
   offices: OfficeSummary[];
+  /** The category the office numbers are for unless an office says
+   * otherwise, "Immediate Relative"; null for all categories together */
+  officeCategory: string | null;
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -89,10 +106,13 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   if (form === undefined) return { notFound: true };
   const points = withoutMisleadingClearing(
     toPoints(data.periods, form.quarters),
-    false,
   );
   const latest = points[points.length - 1];
   const variants = form.quarters[latest.quarter].variants;
+  // the office list shows the category each office's page opens with
+  const officeCategory = (form.officeCategories ?? []).find(
+    ({ key }) => key === LEADING_OFFICE_CATEGORY[form.form],
+  );
   return {
     props: {
       form: form.form,
@@ -100,21 +120,48 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       title: form.title,
       points,
       variants,
-      processingTimeSeries: processingTimeSeries(points, variants, form),
+      processingTimeSeries: processingTimeSeries(points, form),
+      lastMedian: lastMedianLabel(points),
       ranges: categoryRanges(form),
       source: form.sources[latest.quarter],
       offices: getActiveOffices(form).map((office) => {
-        const officePoints = toPoints(data.periods, office.quarters);
+        const total = toPoints(data.periods, office.quarters);
+        const categories = officeCategoryPoints(
+          data.periods,
+          form,
+          office.quarters,
+        );
+        const key = openingOfficeCategory(
+          form.form,
+          total,
+          categories.map(({ category, points }) => ({
+            key: category.key,
+            points,
+          })),
+        );
+        const opening = categories.find(({ category }) => category.key === key);
+        const officePoints = opening?.points ?? total;
         const current = officePoints[officePoints.length - 1];
         return {
           slug: office.slug,
           name: office.name,
           stateCode: office.stateCode,
-          pending: current.pending,
-          completions: current.completions,
-          approved: current.approved,
+          category:
+            officeCategory === undefined || key === officeCategory.key
+              ? null
+              : opening === undefined
+              ? "all categories"
+              : officeCategoryName(opening.category),
+          pending: current?.pending ?? null,
+          completions: current?.completions ?? null,
+          approximate: current?.approximate ?? false,
+          approved: current?.approved ?? null,
         };
       }),
+      officeCategory:
+        officeCategory === undefined
+          ? null
+          : officeCategoryName(officeCategory),
     },
   };
 };
@@ -126,23 +173,23 @@ export default function UscisForm({
   points,
   variants,
   processingTimeSeries,
+  lastMedian,
   ranges,
   source,
   offices,
+  officeCategory,
 }: Props) {
   const [term, setTerm] = useInputState("");
   const current = points[points.length - 1];
-  const previous = points[points.length - 2];
   const headline = headlineRange(ranges);
   // whether any category gets a range, not just a reason why not
   const hasRange = ranges.some(
     ({ priorityDate, suppressed }) => !priorityDate && suppressed === null,
   );
-  const backlogSuppressed = clearingSuppressed(current, previous, false);
+  const backlogSuppressed = clearingSuppressed(current);
   // quarters the chart leaves the time to clear the backlog out of
   const clearingGaps = points.some(
-    (point, index) =>
-      clearingSuppressed(point, points[index - 1], false) !== null,
+    (point) => clearingSuppressed(point) !== null,
   );
   const hasClearing = points.some(({ waitMonths }) => waitMonths !== null);
   const filteredOffices = useMemo<OfficeSummary[]>(() => {
@@ -176,7 +223,13 @@ export default function UscisForm({
           current.pending,
         )} ${form} (${title}) applications pending at the end of ${
           current.label
-        } and decided ${formatCount(current.completions)} that quarter.`
+        }${
+          current.completions === null
+            ? "."
+            : ` and decided ${current.approximate ? "about " : ""}${formatCount(
+                current.completions,
+              )} that quarter.`
+        }`
       : `If you file ${article} ${headlineWhat} today, USCIS will most likely decide it in ${formatRangeMonths(
           headline.q[1],
           headline.q[3],
@@ -258,7 +311,7 @@ export default function UscisForm({
               </Table.Thead>
               <Table.Tbody>
                 {ranges.map((range) => (
-                  <Table.Tr key={range.title}>
+                  <Table.Tr key={range.key}>
                     <Table.Td>{range.name}</Table.Td>
                     {range.priorityDate ? (
                       <Table.Td colSpan={3}>
@@ -364,8 +417,10 @@ export default function UscisForm({
             .
             {clearingGaps &&
               " The chart leaves it out for quarters in which USCIS decided fewer than 100, too few to divide by."}
-            {processingTimeSeries.length === 0 &&
-              " USCIS does not publish a processing time for this form in these reports."}
+            {processingTimeSeries.length === 0
+              ? " USCIS does not publish a processing time for this form in these reports."
+              : lastMedian !== null &&
+                ` USCIS has not published a median for this form since ${lastMedian}.`}
           </Text>
           <WaitChart
             points={points}
@@ -390,7 +445,7 @@ export default function UscisForm({
               </Table.Thead>
               <Table.Tbody>
                 {variants.map((variant) => (
-                  <Table.Tr key={variant.title}>
+                  <Table.Tr key={variant.key}>
                     <Table.Td>{variant.title}</Table.Td>
                     <Table.Td ta="right">
                       {formatCount(variant.received)}
@@ -431,6 +486,12 @@ export default function UscisForm({
               Look it up on USCIS&rsquo;s office locator
             </Anchor>
             .
+            {officeCategory !== null &&
+              ` Next to each office is how many ${form} (${officeCategory}) cases it decided in the newest quarter${
+                offices.some(({ category }) => category !== null)
+                  ? "; for an office that handles few of those, the count is of its main category, named next to it"
+                  : ""
+              }. The office pages show every category.`}
           </Text>
           <TextInput
             size="lg"
@@ -445,15 +506,17 @@ export default function UscisForm({
                 slug: officeSlug,
                 name,
                 stateCode,
+                category,
                 completions,
+                approximate,
                 approved,
               }) => (
                 <ListRow
                   key={officeSlug}
                   href={`/uscis/${slug}/${officeSlug}`}
                   rightSection={
-                    // USCIS withholds small counts: with the denials
-                    // withheld, the approvals are all there is to show
+                    // with the denials unpublished, the approvals are all
+                    // there is to show
                     (completions !== null || approved !== null) && (
                       <Badge
                         size="lg"
@@ -463,9 +526,14 @@ export default function UscisForm({
                         tt="none"
                         fw={500}
                       >
-                        {completions !== null
-                          ? `${formatCount(completions)} decided`
-                          : `${formatCount(approved)} approved`}
+                        {`${
+                          completions !== null
+                            ? `${approximately(
+                                formatCount(completions),
+                                approximate,
+                              )} decided`
+                            : `${formatCount(approved)} approved`
+                        }${category === null ? "" : ` · ${category}`}`}
                       </Badge>
                     )
                   }
