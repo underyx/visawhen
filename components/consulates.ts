@@ -84,9 +84,8 @@ function findInactivity({
   if (quiet(lastIssued)) return { visas: "visas", lastIssued };
   if (
     immigrant &&
-    !listedInTool &&
-    lastImmigrantIssued !== null &&
-    quiet(lastImmigrantIssued)
+    quiet(lastImmigrantIssued) &&
+    (lastImmigrantIssued !== null || listedInTool)
   )
     return { visas: "immigrant visas", lastIssued: lastImmigrantIssued };
   return null;
@@ -95,11 +94,13 @@ function findInactivity({
 /** For a post that looks closed, a sentence that says what the data shows:
  * that it issued no visas in the last 12 months of the data, whatever else
  * lists it, or, with `immigrant` (its own page and its immigrant visa class
- * pages), that it issued immigrant visas but none in the last 12 months,
- * when State's IV Scheduling Status Tool, which is months newer, does not
- * list it either. Null for every other post, including those that issued
- * other visas but never an immigrant one in the data: they handle
- * nonimmigrant visas only, which the interview-queue card already says. */
+ * pages), that it issued no immigrant visas in the last 12 months, even
+ * when State's IV Scheduling Status Tool lists it, often as current:
+ * Nicosia, none since November 2024, and Vancouver, none at all in the
+ * data. Null for every other post, including those that issued other visas
+ * but never an immigrant one in the data and that the tool does not list:
+ * they handle nonimmigrant visas only, which the interview-queue card
+ * already says. */
 export function describeInactivity(input: InactivityInput): string | null {
   const inactivity = findInactivity(input);
   if (inactivity === null) return null;
@@ -128,6 +129,39 @@ export function summarizeInactivity(input: InactivityInput): string | null {
     : `no ${visas} issued since ${formatLongMonth(lastIssued)}`;
 }
 
+/** Visa classes whose applicants at a post are mostly nationals of another
+ * country than the one the post is in, by post slug, then class slug. SQ and
+ * SI visas are for Iraqis and Afghans only (see their descriptions), and
+ * State's list of the posts that process immigrant visas designates
+ * Islamabad for Afghanistan
+ * (https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/list-of-posts.html). */
+export const CLASS_APPLICANT_COUNTRIES: Partial<
+  Record<string, Partial<Record<string, string>>>
+> = {
+  islamabad: { sq: "Afghanistan", si: "Afghanistan" },
+};
+
+/** The country whose nationals make up most of the immigrant visa
+ * applicants on a post's page or one of its visa class pages, as the policy
+ * notices name it (data/policy.json's scope.countries): the post's own
+ * country, from api/searchTerms.ts's POST_COUNTRIES without the other names
+ * in parentheses ("Burma (Myanmar)" is "Burma"), since State requires
+ * immigrant visa applicants to interview in their country of residence or
+ * nationality, except for the classes in CLASS_APPLICANT_COUNTRIES. Null for
+ * a post with no country. */
+export function applicantCountry(
+  postCountry: string | null,
+  postSlug: string,
+  visaClassSlug?: string,
+): string | null {
+  const classCountry =
+    visaClassSlug === undefined
+      ? undefined
+      : CLASS_APPLICANT_COUNTRIES[postSlug]?.[visaClassSlug];
+  if (classCountry !== undefined) return classCountry;
+  return postCountry === null ? null : postCountry.replace(/ \(.*\)$/, "");
+}
+
 /** The three columns of State's IV Scheduling Status Tool */
 export type IvCategory = "relative" | "preference" | "employment";
 
@@ -140,9 +174,17 @@ export const IV_CATEGORIES: IvCategory[] = [
 /** A post's line in one of State's monthly updates of its IV Scheduling
  * Status Tool: per category, the month of documentarily complete cases NVC
  * is scheduling interviews for, "2026-02", or null where State lists N/A. */
-export interface IvSchedule extends Record<IvCategory, string | null> {
+export interface IvScheduleLine extends Record<IvCategory, string | null> {
   /** The date of State's update, "2026-09-23" */
   asOf: string;
+}
+
+/** A post's line in State's newest update, with its line in the update
+ * before, since the month can move backwards as well as forwards */
+export interface IvSchedule extends IvScheduleLine {
+  /** The post's line in the update before the newest, or null when there
+   * is none or it does not list the post */
+  previous: IvScheduleLine | null;
 }
 
 /** The visa classes each column of the tool covers */
@@ -151,6 +193,24 @@ const IV_CLASSES: Record<IvCategory, string[]> = {
   preference: ["f1-family", "f2a", "f2b", "f3", "f4"],
   employment: ["eb-1", "eb-2", "eb-3", "ew", "eb-5"],
 };
+
+/** Fewer family and employment immigrant visas than this in 12 months, about
+ * four a month, and a post State's tool lists as current is not called
+ * current: at New Delhi (29, most of its immigrant visas being adoptions),
+ * Amsterdam (27) or Moscow (none), "current" says nothing about a queue. */
+export const FEW_IMMIGRANT_VISAS = 50;
+
+/** How many visas of the classes State's tool covers, the family and
+ * employment immigrant visas, the rows count */
+export function countToolClassIssuances(
+  rows: { visaClassSlug: string; issuances: number }[],
+): number {
+  return rows
+    .filter(
+      ({ visaClassSlug }) => IV_CATEGORY_BY_CLASS[visaClassSlug] !== undefined,
+    )
+    .reduce((sum, { issuances }) => sum + issuances, 0);
+}
 
 /** The tool's column for each visa class it covers */
 export const IV_CATEGORY_BY_CLASS: Partial<Record<string, IvCategory>> =

@@ -10,6 +10,7 @@ import {
   getPostActivity,
   getSlugPairs,
   getPost,
+  getRecentIssuancesByClass,
   getVisaClass,
   getVisaClassSlugsForPost,
   IssuancesRow,
@@ -18,7 +19,10 @@ import {
 import Head from "next/head";
 import ConsulateChart from "../../../components/ConsulateChart";
 import {
+  applicantCountry,
+  CLASS_APPLICANT_COUNTRIES,
   CLASS_NOTES,
+  countToolClassIssuances,
   describeInactivity,
   formatCount,
   formatLongMonth,
@@ -30,7 +34,11 @@ import {
 } from "../../../components/consulates";
 import IvScheduleCard from "../../../components/IvScheduleCard";
 import PolicyBanner from "../../../components/PolicyBanner";
-import { scheduleOverrideFor } from "../../../components/policy";
+import {
+  issuanceSuspensionFor,
+  scheduleOverrideFor,
+} from "../../../components/policy";
+import { POST_COUNTRIES } from "../../../api/searchTerms";
 import { useToday } from "../../../components/Freshness";
 import { ChevronLeftIcon } from "../../../components/icons";
 import {
@@ -51,7 +59,15 @@ interface Recent {
   from: string;
   /** The newest month in the data, "2025-09-01T00:00:00.000Z" */
   to: string;
+  /** Visas issued in the newest RECENT_MONTHS months of the data */
+  newest: number;
+  /** Visas issued in the rest of the last 12 months, the months before those */
+  rest: number;
 }
+
+/** How many of the newest months are checked for a sudden drop, which a
+ * 12-month total hides: a suspension or pause that started in them. */
+const RECENT_MONTHS = 2;
 
 interface Props {
   postSlug: string;
@@ -76,6 +92,12 @@ interface Props {
   ivSchedule: IvSchedule | null;
   /** The tool's address */
   ivScheduleSource: string;
+  /** How many family and employment immigrant visas, the classes State's
+   * tool covers, the post issued in the last 12 months of the data */
+  recentToolIssued: number;
+  /** The country whose nationals make up most of the page's immigrant visa
+   * applicants, "Cuba", or null (see applicantCountry) */
+  country: string | null;
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -128,6 +150,8 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
         prev12: sumBy(issuances.slice(-24, -12), "issuances"),
         from: last12Rows[0].month,
         to: last12Rows[last12Rows.length - 1].month,
+        newest: sumBy(last12Rows.slice(-RECENT_MONTHS), "issuances"),
+        rest: sumBy(last12Rows.slice(0, -RECENT_MONTHS), "issuances"),
       },
       lastIssuedMonth:
         findLast(issuances, (row) => row.issuances > 0)?.month ?? null,
@@ -150,13 +174,23 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       ivScheduleAsOf: await getIvScheduleAsOf(),
       ivSchedule,
       ivScheduleSource: await getIvScheduleSource(),
+      recentToolIssued: countToolClassIssuances(
+        await getRecentIssuancesByClass(postSlug),
+      ),
+      country: applicantCountry(
+        POST_COUNTRIES[postSlug] ?? null,
+        postSlug,
+        visaClassSlug,
+      ),
     },
   };
 };
 
 /** Below this many visas in the year before, a percentage change is mostly
- * noise, so the page gives the count instead. */
-const MIN_COMPARABLE = 10;
+ * noise, so the page gives the count instead: from 10 to 38, Almaty's EB-5
+ * visas were "up 280%", and 101 pages said more than 100% from a base of
+ * 10 to 29. */
+const MIN_COMPARABLE = 50;
 /** Changes within this many percent count as about the same. */
 const SAME_PERCENT = 10;
 
@@ -180,15 +214,87 @@ function visas(count: number): string {
   return count === 1 ? "visa" : "visas";
 }
 
+/** Below this many visas a month, on average, in the months before the
+ * newest RECENT_MONTHS, a drop in those is too small to call out. */
+const MIN_DROP_RATE = 5;
+/** The newest months are called out when they fall below this share of the
+ * months before them. */
+const DROP_SHARE = 0.25;
+
+/** The month `months` months before a month in the data */
+function monthsBefore(month: string, months: number): string {
+  const date = new Date(month);
+  return new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth() - months),
+  ).toISOString();
+}
+
+/** Two months of the data joined by `joiner`, with the year once when they
+ * share it: "January and February 2026", "March to December 2025",
+ * "December 2025 and January 2026" */
+function monthPair(
+  first: string,
+  last: string,
+  joiner: string,
+  short: boolean,
+): string {
+  const format = short ? formatMonth : formatLongMonth;
+  const [firstMonth, firstYear] = format(first).split(" ");
+  const [, lastYear] = format(last).split(" ");
+  return `${
+    firstYear === lastYear ? firstMonth : format(first)
+  } ${joiner} ${format(last)}`;
+}
+
+/** The newest RECENT_MONTHS (two) months up to `to`: "January and February
+ * 2026" */
+function newestMonths(to: string, short: boolean): string {
+  return monthPair(monthsBefore(to, RECENT_MONTHS - 1), to, "and", short);
+}
+
+/** When the newest RECENT_MONTHS months fall far below the months before
+ * them, which the 12-month figures hide, a sentence that says so for the
+ * page ("But it issued only 1 in January and February 2026, against about
+ * 139 a month from March to December 2025.") and one for the meta
+ * description; otherwise null. */
+function describeDrop({ from, to, newest, rest }: Recent): {
+  sentence: string;
+  meta: string;
+} | null {
+  const restMonths = 12 - RECENT_MONTHS;
+  const restRate = rest / restMonths;
+  if (
+    restRate < MIN_DROP_RATE ||
+    newest > DROP_SHARE * restRate * RECENT_MONTHS
+  )
+    return null;
+  const issued = newest === 0 ? "none" : `only ${formatCount(newest)}`;
+  return {
+    sentence: `But it issued ${issued} in ${newestMonths(
+      to,
+      false,
+    )}, against about ${formatCount(restRate)} a month from ${monthPair(
+      from,
+      monthsBefore(to, RECENT_MONTHS),
+      "to",
+      false,
+    )}.`,
+    meta: `${
+      newest === 0 ? "None" : `Only ${formatCount(newest)}`
+    } in ${newestMonths(to, true)}.`,
+  };
+}
+
 /** The paragraph on the page, and the start of its meta description */
 function summarize(
-  { last12, prev12, from, to }: Recent,
+  recent: Recent,
   firstMonth: string,
   lastIssuedMonth: string | null,
   postName: string,
   visaClassName: string,
   visaClassDescription: string | null,
 ): { summary: string; metaSummary: string } {
+  const { last12, prev12, from, to } = recent;
   const range = `from ${formatMonth(from)} to ${formatMonth(to)}`;
   const described =
     visaClassDescription === null ? "" : ` (${visaClassDescription})`;
@@ -197,6 +303,7 @@ function summarize(
     const issued = `${formatCount(last12)} ${visaClassName} ${visas(last12)}`;
     const monthly =
       last12 >= 12 ? `, about ${formatCount(last12 / 12)} a month` : "";
+    const drop = describeDrop(recent);
     return {
       summary: `From ${formatMonth(from)} to ${formatMonth(
         to,
@@ -204,12 +311,12 @@ function summarize(
         last12,
         prev12,
         "the 12 months before",
-      )}.`,
+      )}.${drop === null ? "" : ` ${drop.sentence}`}`,
       metaSummary: `${postName} issued ${issued}${described} ${range}, ${comparison(
         last12,
         prev12,
         "the year before",
-      )}.`,
+      )}.${drop === null ? "" : ` ${drop.meta}`}`,
     };
   }
 
@@ -257,6 +364,8 @@ export default function ConsulateStats({
   ivScheduleAsOf,
   ivSchedule,
   ivScheduleSource,
+  recentToolIssued,
+  country,
 }: Props) {
   const firstMonth = issuances[0].month;
   const { summary, metaSummary } = summarize(
@@ -280,6 +389,15 @@ export default function ConsulateStats({
   const ivCategory = IV_CATEGORY_BY_CLASS[visaClassSlug];
   const classNote = CLASS_NOTES[visaClassSlug];
   const today = useToday();
+  const consulate = {
+    postSlug,
+    visaClassSlug,
+    country,
+    nonimmigrant: visaType === "NIV",
+  };
+  // Only on immigrant classes: the K visas, which also show the card, are
+  // nonimmigrant visas, which some suspensions do not cover.
+  const suspension = visaType === "IV" ? issuanceSuspensionFor(country) : null;
 
   return (
     <Stack>
@@ -340,7 +458,7 @@ export default function ConsulateStats({
         </Alert>
       )}
       <PolicyBanner
-        postSlug={postSlug}
+        consulate={consulate}
         immigrant={
           visaType === "IV" || NVC_NONIMMIGRANT_CLASSES.includes(visaClassSlug)
         }
@@ -356,14 +474,32 @@ export default function ConsulateStats({
           scheduleOverride={
             scheduleOverrideFor(postSlug, ivScheduleAsOf, today) ?? undefined
           }
+          recentIssued={{
+            count: recentToolIssued,
+            from: recent.from,
+            to: recent.to,
+          }}
+          suspension={
+            suspension === null || country === null
+              ? undefined
+              : {
+                  entry: suspension,
+                  country,
+                  applicants:
+                    CLASS_APPLICANT_COUNTRIES[postSlug]?.[visaClassSlug] ===
+                    undefined
+                      ? "immigrant visa"
+                      : visaClassName,
+                }
+          }
         />
       )}
       <Text>{summary}</Text>
       <Text size="sm" c="dimmed">
         This counts visas issued, which shows how busy the post is, not how long
         you will wait. The State Department data here ends in{" "}
-        {formatLongMonth(recent.to)}, so it does not show any slowdowns or
-        pauses since then.
+        {formatLongMonth(recent.to)}, so it cannot show what has changed since
+        then, such as pauses that started or ended later.
       </Text>
       <ConsulateChart
         issuances={issuances}

@@ -18,6 +18,60 @@
       "lastChecked": "2026-09-24"
     },
     {
+      "id": "beirut-limited-services",
+      "status": "official",
+      "title": "Routine visa processing not available",
+      "body": "The State Department's notice of February 25, 2026, which is still posted, says that routine visa processing is not currently available at the U.S. Embassy in Beirut, which is prioritizing emergency services for U.S. citizens after the State Department ordered its non-emergency staff to leave on February 23. Applicants who had an interview scheduled in Beirut are to be emailed a new, later date. The State Department's scheduling tool has given Beirut the same month for spouses, children and parents of U.S. citizens, February 2026, since its April 2 update. Check lb.usembassy.gov/visas for updates.",
+      "scope": { "posts": ["beirut"] },
+      "overridesSchedule": true,
+      "start": "2026-02-25",
+      "end": null,
+      "sources": [
+        {
+          "label": "State Department: Limited Services Available at the U.S. Embassy in Lebanon",
+          "url": "https://travel.state.gov/content/travel/en/News/visas-news/limited-services-available-at-the-us-embassy-in-lebanon.html"
+        }
+      ],
+      "lastChecked": "2026-09-25"
+    },
+    {
+      "id": "khartoum-no-consular-operations",
+      "status": "official",
+      "title": "No consular operations at this embassy",
+      "body": "The State Department says there are no consular operations in Khartoum. Its list of the embassies and consulates that process immigrant visas sends applicants from Sudan to the U.S. Embassy in Cairo.",
+      "scope": { "posts": ["khartoum"] },
+      "overridesSchedule": true,
+      "start": "2026-07-15",
+      "end": null,
+      "sources": [
+        {
+          "label": "State Department: Realignment of U.S. Visa Services in Africa to Regional Hubs (July 15, 2026)",
+          "url": "https://travel.state.gov/content/travel/en/News/visas-news/realignment-of-us-visa-services-in-africa-to-regional-hubs.html"
+        },
+        {
+          "label": "State Department: List of U.S. Embassies and Consulates that Process Immigrant Visas",
+          "url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/list-of-posts.html"
+        }
+      ],
+      "lastChecked": "2026-09-25"
+    },
+    {
+      "id": "jerusalem-tel-aviv-limited-services",
+      "status": "official",
+      "title": "February notice of limited visa services is still posted",
+      "body": "On February 27, 2026, after authorizing the departure of non-emergency staff from Israel, the State Department said that routine visa processing was not currently available at the U.S. Embassy in Jerusalem and its Branch Office in Tel Aviv, and that applicants with interviews from March 2 to 6 would be emailed about rescheduling when services resumed. The notice is still posted, unchanged, and does not say whether services have resumed. The State Department's scheduling tool has since moved the month it gives Jerusalem for spouses, children and parents of U.S. citizens from February 2026, in its April 2 update, to August 2026, in its September 23 update. Check il.usembassy.gov/visas for the embassy's current status.",
+      "scope": { "posts": ["jerusalem", "tel-aviv"] },
+      "start": "2026-02-27",
+      "end": null,
+      "sources": [
+        {
+          "label": "State Department: Limited Visa Services Available at the U.S. Embassy in Jerusalem and Branch Office in Tel Aviv",
+          "url": "https://travel.state.gov/content/travel/en/News/visas-news/limited-visa-services-available-at-us-embassy-in-jerusalem-and-branch-office-in-tel-aviv.html"
+        }
+      ],
+      "lastChecked": "2026-09-25"
+    },
+    {
       "id": "africa-regional-hubs",
       "status": "official",
       "title": "Visa services moved to a regional hub",
@@ -66,18 +120,19 @@
       "id": "iv-interviews-postponed-public-charge-training",
       "status": "reported",
       "title": "Immigrant visa interviews reportedly postponed for public charge training",
-      "body": "From late August 2026, U.S. embassies and consulates reportedly postponed immigrant visa interviews while their consular officers were trained on new public charge guidance, emailing applicants with interviews booked that they would be rescheduled. On August 27, the Associated Press quoted a State Department official saying the pause was not expected to last beyond early to mid-September. On September 8, Reuters reported that processing had resumed for Hungary and Poland while the pause continued elsewhere, and that it could last months, according to a person familiar with the matter. No report we have found says whether it is still in place at other posts. The State Department acknowledged the pause in a statement on August 25 but has posted no notice about it on its website. NVC and consulates may reschedule interviews, including ones already booked, while it lasts.",
+      "body": "U.S. embassies and consulates have reportedly postponed immigrant visa interviews while their consular officers are trained on new public charge guidance, emailing applicants with interviews booked that they will be rescheduled. Reports differ on when this started. On August 27, the Associated Press quoted a State Department official saying the pause began in early August and was not expected to last beyond early to mid-September; a State Department statement quoted by Fox News on August 26 said its training initiative launched in early August. On September 8, Reuters reported that the pause came after the August 21 court ruling against the 75-country pause, that the government told a court interviews were rescheduled through August 31, that processing had resumed for Hungary and Poland while the pause continued elsewhere, and that it could last months, according to a person familiar with the matter. No report we have found says whether it is still in place at other posts. The State Department acknowledged the pause in a statement on August 25 but has posted no notice about it on its website. NVC and consulates may reschedule interviews, including ones already booked, while it lasts.",
       "scope": {
         "allConsulatePages": true,
         "exceptPosts": ["budapest", "krakow", "warsaw"],
         "pages": ["/nvc"],
         "immigrantVisasOnly": true
       },
-      "start": "2026-08-25",
+      "expanded": true,
+      "start": "2026-08-01",
       "end": null,
       "sources": [
         {
-          "label": "Fox News: Trump admin pauses immigrant visa interviews for public charge training (August 26, 2026)",
+          "label": "Fox News: Trump admin pauses visa appointments worldwide amid heightened screening for applicants (August 26, 2026)",
           "url": "https://www.foxnews.com/politics/trump-immigrant-visa-interview-pause"
         },
         {
@@ -98,9 +153,47 @@
     {
       "id": "pp-10998-suspension",
       "status": "official",
-      "title": "Visa suspensions for nationals of 39 countries",
-      "body": "Since January 1, 2026, Presidential Proclamation 10998 has suspended visas, with narrow exceptions, for nationals of Afghanistan, Burma, Burkina Faso, Chad, the Republic of the Congo, Equatorial Guinea, Eritrea, Haiti, Iran, Laos, Libya, Mali, Niger, Sierra Leone, Somalia, South Sudan, Sudan, Syria and Yemen (all visas), and of Angola, Antigua and Barbuda, Benin, Burundi, Cote d'Ivoire, Cuba, Dominica, Gabon, The Gambia, Malawi, Mauritania, Nigeria, Senegal, Tanzania, Togo, Tonga, Turkmenistan, Venezuela, Zambia and Zimbabwe (immigrant visas and some others). Spouses, children and parents of U.S. citizens are no longer exempt. It depends on your nationality, not on the embassy: dual nationals applying with a passport from a country not on the list are exempt.",
-      "scope": { "allConsulatePages": true, "pages": ["/nvc"] },
+      "title": "Visa suspensions for 39 nationalities and Palestinian Authority travel documents",
+      "body": "Since January 1, 2026, Presidential Proclamation 10998 has suspended visas, with narrow exceptions: all visas for nationals of Afghanistan, Burma, Burkina Faso, Chad, the Republic of the Congo, Equatorial Guinea, Eritrea, Haiti, Iran, Laos, Libya, Mali, Niger, Sierra Leone, Somalia, South Sudan, Sudan, Syria and Yemen, and for anyone traveling on travel documents issued or endorsed by the Palestinian Authority; all immigrant visas, and B-1/B-2, F, M and J visas, for nationals of Angola, Antigua and Barbuda, Benin, Burundi, Cote d'Ivoire, Cuba, Dominica, Gabon, The Gambia, Malawi, Mauritania, Nigeria, Senegal, Tanzania, Togo, Tonga, Venezuela, Zambia and Zimbabwe; and all immigrant visas for nationals of Turkmenistan. Spouses, children and parents of U.S. citizens, and Afghan special immigrants, are no longer exempt. You can still apply and be scheduled for an interview, but the State Department says you may be ineligible for a visa. It depends on your nationality, not on the embassy: dual nationals applying with a passport of a nationality not subject to a suspension are exempt.",
+      "scope": {
+        "allConsulatePages": true,
+        "posts": ["jerusalem"],
+        "countries": [
+          "Afghanistan",
+          "Burma",
+          "Burkina Faso",
+          "Chad",
+          "Republic of the Congo",
+          "Equatorial Guinea",
+          "Eritrea",
+          "Haiti",
+          "Laos",
+          "Mali",
+          "Niger",
+          "Sierra Leone",
+          "South Sudan",
+          "Sudan",
+          "Angola",
+          "Benin",
+          "Burundi",
+          "Côte d'Ivoire",
+          "Cuba",
+          "Gabon",
+          "Gambia",
+          "Malawi",
+          "Mauritania",
+          "Nigeria",
+          "Senegal",
+          "Tanzania",
+          "Togo",
+          "Venezuela",
+          "Zambia",
+          "Zimbabwe",
+          "Turkmenistan"
+        ],
+        "pages": ["/nvc"]
+      },
+      "suspendsIssuance": true,
       "start": "2026-01-01",
       "end": null,
       "sources": [
@@ -109,7 +202,7 @@
           "url": "https://travel.state.gov/content/travel/en/News/visas-news/suspension-of-visa-issuance-to-foreign-nationals-to-protect-the-security-of-the-united-states.html"
         }
       ],
-      "lastChecked": "2026-09-24"
+      "lastChecked": "2026-09-25"
     },
     {
       "id": "iv-pause-75-countries",
@@ -126,6 +219,62 @@
         }
       ],
       "lastChecked": "2026-09-24"
+    },
+    {
+      "id": "dv-issuance-pause",
+      "status": "official",
+      "title": "Diversity visa issuance pause has ended",
+      "body": "In December 2025 the State Department paused diversity visa issuance: applicants could still apply and be interviewed, but no diversity visas were issued. As of August 28, 2026, under a court order in Medani v. Trump, the State Department says the pause is no longer in effect. Its notice, updated August 31, 2026, still carries the December announcement of the pause below that statement. Eligibility for a DV-2026 visa ends on September 30, 2026, the end of the fiscal year, and visas may run out before then.",
+      "scope": { "allConsulatePages": true, "visaClasses": ["dv"] },
+      "start": "2025-12-23",
+      "end": "2026-08-28",
+      "sources": [
+        {
+          "label": "State Department: Diversity Visa Issuance Updated Guidance",
+          "url": "https://travel.state.gov/content/travel/en/News/visas-news/diversity-visa-issuance-updated-guidance.html"
+        },
+        {
+          "label": "State Department: Update on Diversity Visa (DV) Program 2026",
+          "url": "https://travel.state.gov/content/travel/en/News/visas-news/update-on-dv-program-2026.html"
+        },
+        {
+          "label": "BAL Immigration News: State Department update on diversity visa issuance pause",
+          "url": "https://www.bal.com/immigration-news/united-states-state-department-update-on-diversity-visa-issuance-pause/"
+        }
+      ],
+      "lastChecked": "2026-09-25"
+    },
+    {
+      "id": "india-eb-2-limit-fy2026",
+      "status": "official",
+      "title": "EB-2 visas for India used up until October 1",
+      "body": "The State Department has issued all the EB-2 immigrant visas available in fiscal year 2026 to applicants chargeable to India, so embassies and consulates may not issue these visas for the rest of the fiscal year. The annual limits reset on October 1, 2026, when they may resume issuing them to qualified applicants.",
+      "scope": { "countries": ["India"], "visaClasses": ["eb-2"] },
+      "start": "2026-05-22",
+      "end": "2026-10-01",
+      "sources": [
+        {
+          "label": "State Department: India Per-Country Limit Reached in the EB-2 Category",
+          "url": "https://travel.state.gov/content/travel/en/News/visas-news/india-per-country-limit-reached-in-the-eb-2-category.html"
+        }
+      ],
+      "lastChecked": "2026-09-25"
+    },
+    {
+      "id": "india-eb-5-unreserved-limit-fy2026",
+      "status": "official",
+      "title": "Unreserved EB-5 visas for India used up until October 1",
+      "body": "As of June 5, 2026, the State Department has issued all the unreserved EB-5 immigrant visas available in fiscal year 2026 to applicants chargeable to India: the C5, T5, I5, R5, RU and NU categories, not the rural, high-unemployment and infrastructure set-asides that this page also counts. Embassies and consulates may not issue visas in these categories for the rest of the fiscal year. The annual limits reset on October 1, 2026, when they may resume issuing them to qualified applicants.",
+      "scope": { "countries": ["India"], "visaClasses": ["eb-5"] },
+      "start": "2026-06-05",
+      "end": "2026-10-01",
+      "sources": [
+        {
+          "label": "State Department: India Per-Country Limit Reached in the EB-5 Unreserved Category",
+          "url": "https://travel.state.gov/content/travel/en/News/visas-news/india-per-country-limit-reached-in-the-eb-5-unreserved-category.html"
+        }
+      ],
+      "lastChecked": "2026-09-25"
     }
   ]
 }
