@@ -17,6 +17,7 @@ import {
   RecentWindow,
   VisaClassRow,
 } from "../../../api/consulates";
+import { checkPolicies } from "../../../api/policy";
 import {
   formatMonth,
   formatMonthlyRate,
@@ -29,6 +30,9 @@ import IvScheduleCard, {
   listsPostAsCurrent,
 } from "../../../components/IvScheduleCard";
 import { ListRow, ListRows } from "../../../components/ListRow";
+import PolicyBanner from "../../../components/PolicyBanner";
+import { hasEnded, scheduleOverrideFor } from "../../../components/policy";
+import { formatShortDate } from "../../../components/Freshness";
 import { normalize } from "../../../components/search";
 import {
   Badge,
@@ -59,6 +63,7 @@ interface Props {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = await getAllPosts();
+  checkPolicies(posts.map((row) => row.postSlug));
   return {
     paths: posts.map((row) => ({ params: { postSlug: row.postSlug } })),
     fallback: false,
@@ -132,25 +137,50 @@ export default function ConsulateSelect({
   const canonicalUrl = `https://visawhen.com/consulates/${postSlug}`;
   // Posts State lists with a month for immediate relatives are titled by
   // their interview queue; the rest keep the issuance title. The post itself
-  // is called current only when every category State lists is.
+  // is called current only when every category State lists is. Where a
+  // policy means the month is no queue, such as a pause of visa services,
+  // the policy takes the title and description instead, with its end date if
+  // it has one, since the page may still be served after it.
   const relativeCutoff = ivSchedule?.relative ?? null;
-  const title =
-    ivSchedule === null || relativeCutoff === null
-      ? `${postName} visas issued by class`
-      : `${postName} immigrant visa interview wait: ${
-          monthsBehind(ivSchedule.asOf, relativeCutoff) > 0
-            ? `scheduling ${formatShortIvMonth(relativeCutoff)} cases`
-            : listsPostAsCurrent(ivSchedule)
-            ? "listed as current"
-            : "immediate relatives listed as current"
-        }`;
-  const description =
-    describeRelativeQueue(postName, ivSchedule) ??
-    `How many visas ${postName} issued every month in each of ${
-      availableVisaClasses.length
-    } visa classes, from State Department statistics through ${formatMonth(
-      recentWindow.to,
-    )}.`;
+  const scheduleOverride = scheduleOverrideFor(postSlug, ivScheduleAsOf);
+  const issuedDescription = `How many visas ${postName} issued every month in each of ${
+    availableVisaClasses.length
+  } visa classes, from State Department statistics through ${formatMonth(
+    recentWindow.to,
+  )}.`;
+  let title: string;
+  let description: string;
+  if (scheduleOverride !== null) {
+    const ends =
+      scheduleOverride.end === null
+        ? null
+        : `${
+            hasEnded(scheduleOverride, null) ? "ended" : "ends"
+          } ${formatShortDate(scheduleOverride.end)}`;
+    title = `${postName}: ${scheduleOverride.title}${
+      ends === null ? "" : ` (${ends})`
+    }`;
+    description = `${postName}: ${scheduleOverride.title} (${
+      scheduleOverride.status === "official"
+        ? "State Department notice"
+        : "reported; no State Department notice"
+    }${ends === null ? "" : `, ${ends}`}, last checked ${formatShortDate(
+      scheduleOverride.lastChecked,
+    )}). ${issuedDescription}`;
+  } else {
+    title =
+      ivSchedule === null || relativeCutoff === null
+        ? `${postName} visas issued by class`
+        : `${postName} immigrant visa interview wait: ${
+            monthsBehind(ivSchedule.asOf, relativeCutoff) > 0
+              ? `scheduling ${formatShortIvMonth(relativeCutoff)} cases`
+              : listsPostAsCurrent(ivSchedule)
+              ? "listed as current"
+              : "immediate relatives listed as current"
+          }`;
+    description =
+      describeRelativeQueue(postName, ivSchedule) ?? issuedDescription;
+  }
 
   return (
     <Stack>
@@ -172,10 +202,12 @@ export default function ConsulateSelect({
       >
         Change consulate
       </Button>
+      <PolicyBanner postSlug={postSlug} />
       <IvScheduleCard
         postName={postName}
         asOf={ivScheduleAsOf}
         schedule={ivSchedule}
+        scheduleOverride={scheduleOverride ?? undefined}
       />
       <Title order={2}>
         <Breadcrumbs

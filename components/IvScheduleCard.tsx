@@ -9,6 +9,7 @@ import {
   monthsBehind,
 } from "./consulates";
 import { daysBetween, formatShortDate, useToday } from "./Freshness";
+import { hasEnded, overridesUpdate, PolicyEntry } from "./policy";
 
 const VISA_BULLETIN_URL =
   "https://travel.state.gov/content/travel/en/legal/visa-law0/visa-bulletin.html";
@@ -109,25 +110,11 @@ interface LineProps {
   asOf: string;
   cutoff: string | null;
   wholePost: boolean;
-  scheduleOverride: string | undefined;
 }
 
-function QueueLine({
-  label,
-  asOf,
-  cutoff,
-  wholePost,
-  scheduleOverride,
-}: LineProps) {
+function QueueLine({ label, asOf, cutoff, wholePost }: LineProps) {
   let text: React.ReactNode;
   if (cutoff === null) text = "State lists no month (N/A).";
-  else if (scheduleOverride !== undefined)
-    text = (
-      <>
-        State&rsquo;s tool lists {formatIvMonth(cutoff)}, but {scheduleOverride}{" "}
-        (see above).
-      </>
-    );
   else {
     const { before, month, after } = describeQueue(
       asOf,
@@ -167,12 +154,13 @@ interface Props {
   /** Which of the page's cases the queue is for, when the page also counts
    * visas the tool does not cover */
   scope?: string;
-  /** Why the tool's months are not a queue at this post right now, e.g.
-   * "visa services are paused at this embassy", given by a notice shown above
-   * the card. Each category then says so instead of giving a queue. A page
-   * that passes this must also keep its <title> and meta description from
-   * calling the post current or naming the tool's month. */
-  scheduleOverride?: string;
+  /** The notice, shown above the card, under which the tool's months are no
+   * queue at this post, such as a pause of visa services there
+   * (scheduleOverrideFor() in policy.ts). Until it ends, the card says so in
+   * one line instead of giving a queue. A page that passes this must also
+   * keep its <title> and meta description from calling the post current or
+   * naming the tool's month. */
+  scheduleOverride?: PolicyEntry;
 }
 
 /** Which month of documentarily complete cases NVC is scheduling interviews
@@ -243,7 +231,17 @@ export default function IvScheduleCard({
           cutoff: schedule[category],
         }));
   const cutoffs = schedule === null ? [] : listedCutoffs(schedule);
-  const hasQueue = scheduleOverride === undefined && cutoffs.length > 0;
+  // An override that ends later applies in the prerendered page, which
+  // cannot know today's date, and on the client until it ends; after that it
+  // still applies until State publishes an update dated on or after its end.
+  const overridden =
+    scheduleOverride !== undefined &&
+    overridesUpdate(scheduleOverride, asOf, today);
+  const overrideEnded =
+    overridden &&
+    scheduleOverride !== undefined &&
+    hasEnded(scheduleOverride, today);
+  const hasQueue = !overridden && cutoffs.length > 0;
   // "Current" can also mean a post is not scheduling the cases at all. Say
   // that of the whole post only when State lists it as current in every
   // category; where another category has a backlog, the post is clearly
@@ -270,11 +268,34 @@ export default function IvScheduleCard({
         {schedule === null ? (
           <Text>
             {postName} is not listed in State&rsquo;s interview-scheduling tool;
-            it may not process immigrant visas.
+            {overridden
+              ? " see the notice above."
+              : " it may not process immigrant visas."}
+          </Text>
+        ) : overridden && cutoffs.length > 0 ? (
+          <Text>
+            State&rsquo;s tool still lists{" "}
+            {new Set(cutoffs).size === 1
+              ? `a month for ${postName}; don’t rely on it`
+              : `months for ${postName}; don’t rely on them`}
+            {overrideEnded && scheduleOverride.end !== null ? (
+              <>
+                : its {updated} update predates the end of &ldquo;
+                {scheduleOverride.title}&rdquo; on{" "}
+                {formatShortDate(scheduleOverride.end)}. Wait for State&rsquo;s
+                next update.
+              </>
+            ) : (
+              <>
+                {" "}
+                while the notice above, &ldquo;{scheduleOverride.title}&rdquo;,
+                is in effect.
+              </>
+            )}
           </Text>
         ) : (
           <>
-            {scope !== undefined && <Text>{scope}</Text>}
+            {scope !== undefined && !overridden && <Text>{scope}</Text>}
             {lines.map(({ label, cutoff }) => (
               <QueueLine
                 key={label}
@@ -282,7 +303,6 @@ export default function IvScheduleCard({
                 asOf={asOf}
                 cutoff={cutoff}
                 wholePost={wholePost}
-                scheduleOverride={scheduleOverride}
               />
             ))}
           </>

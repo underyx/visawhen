@@ -24,6 +24,8 @@ import {
   IvSchedule,
 } from "../../../components/consulates";
 import IvScheduleCard from "../../../components/IvScheduleCard";
+import PolicyBanner from "../../../components/PolicyBanner";
+import { scheduleOverrideFor } from "../../../components/policy";
 import { ChevronLeftIcon } from "../../../components/icons";
 import { Button, Group, Stack, Text, Title } from "@mantine/core";
 
@@ -274,6 +276,7 @@ export default function ConsulateStats({
       {visaClassDescription !== null && (
         <Text size="xl">{visaClassDescription}</Text>
       )}
+      <PolicyBanner postSlug={postSlug} />
       {(ivCategory !== undefined || classNote !== undefined) && (
         <IvScheduleCard
           postName={postName}
@@ -282,6 +285,9 @@ export default function ConsulateStats({
           first={ivCategory}
           note={classNote}
           scope={CLASS_QUEUE_SCOPES[visaClassSlug]}
+          scheduleOverride={
+            scheduleOverrideFor(postSlug, ivScheduleAsOf) ?? undefined
+          }
         />
       )}
       <Text>{summary}</Text>

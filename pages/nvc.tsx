@@ -14,6 +14,7 @@ import {
   formatDate,
   useToday,
 } from "../components/Freshness";
+import PolicyBanner from "../components/PolicyBanner";
 
 interface Props {
   data: NvcData;
@@ -157,6 +158,7 @@ export default function NvcBacklog({ data }: Props) {
       </Head>
       <Stack gap="sm">
         <Title order={1}>NVC wait times</Title>
+        <PolicyBanner page="/nvc" />
         {stale && (
           <Alert color="yellow">
             Our newest reading is from {formatDate(latestDate)}, {ageDays} days
