@@ -18,6 +18,60 @@
       "lastChecked": "2026-09-24"
     },
     {
+      "id": "beirut-limited-services",
+      "status": "official",
+      "title": "Routine visa processing not available",
+      "body": "The State Department's notice of February 25, 2026, which is still posted, says that routine visa processing is not currently available at the U.S. Embassy in Beirut, which is prioritizing emergency services for U.S. citizens after the State Department ordered its non-emergency staff to leave on February 23. Applicants who had an interview scheduled in Beirut are to be emailed a new, later date. The State Department's scheduling tool has given Beirut the same month for spouses, children and parents of U.S. citizens, February 2026, since its April 2 update. Check lb.usembassy.gov/visas for updates.",
+      "scope": { "posts": ["beirut"] },
+      "overridesSchedule": true,
+      "start": "2026-02-25",
+      "end": null,
+      "sources": [
+        {
+          "label": "State Department: Limited Services Available at the U.S. Embassy in Lebanon",
+          "url": "https://travel.state.gov/content/travel/en/News/visas-news/limited-services-available-at-the-us-embassy-in-lebanon.html"
+        }
+      ],
+      "lastChecked": "2026-09-25"
+    },
+    {
+      "id": "khartoum-no-consular-operations",
+      "status": "official",
+      "title": "No consular operations at this embassy",
+      "body": "The State Department says there are no consular operations in Khartoum. Its list of the embassies and consulates that process immigrant visas sends applicants from Sudan to the U.S. Embassy in Cairo.",
+      "scope": { "posts": ["khartoum"] },
+      "overridesSchedule": true,
+      "start": "2026-07-15",
+      "end": null,
+      "sources": [
+        {
+          "label": "State Department: Realignment of U.S. Visa Services in Africa to Regional Hubs (July 15, 2026)",
+          "url": "https://travel.state.gov/content/travel/en/News/visas-news/realignment-of-us-visa-services-in-africa-to-regional-hubs.html"
+        },
+        {
+          "label": "State Department: List of U.S. Embassies and Consulates that Process Immigrant Visas",
+          "url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/list-of-posts.html"
+        }
+      ],
+      "lastChecked": "2026-09-25"
+    },
+    {
+      "id": "jerusalem-tel-aviv-limited-services",
+      "status": "official",
+      "title": "February notice of limited visa services is still posted",
+      "body": "On February 27, 2026, after authorizing the departure of non-emergency staff from Israel, the State Department said that routine visa processing was not currently available at the U.S. Embassy in Jerusalem and its Branch Office in Tel Aviv, and that applicants with interviews from March 2 to 6 would be emailed about rescheduling when services resumed. The notice is still posted, unchanged, and does not say whether services have resumed. The State Department's scheduling tool has since moved the month it gives Jerusalem for spouses, children and parents of U.S. citizens from February 2026, in its April 2 update, to August 2026, in its September 23 update. Check il.usembassy.gov/visas for the embassy's current status.",
+      "scope": { "posts": ["jerusalem", "tel-aviv"] },
+      "start": "2026-02-27",
+      "end": null,
+      "sources": [
+        {
+          "label": "State Department: Limited Visa Services Available at the U.S. Embassy in Jerusalem and Branch Office in Tel Aviv",
+          "url": "https://travel.state.gov/content/travel/en/News/visas-news/limited-visa-services-available-at-us-embassy-in-jerusalem-and-branch-office-in-tel-aviv.html"
+        }
+      ],
+      "lastChecked": "2026-09-25"
+    },
+    {
       "id": "africa-regional-hubs",
       "status": "official",
       "title": "Visa services moved to a regional hub",

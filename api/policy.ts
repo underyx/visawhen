@@ -11,8 +11,10 @@ import {
 // getStaticPaths.
 
 /** More entries with no end date than this is more than anyone re-checks
- * every week. */
-const MAX_OPEN_ENDED = 5;
+ * every week. Seven are open in September 2026, three of them one post's
+ * notice each (Beirut, Khartoum, Jerusalem), which take a minute to
+ * re-check. */
+const MAX_OPEN_ENDED = 8;
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
