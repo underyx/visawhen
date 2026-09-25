@@ -187,9 +187,22 @@ function ReviewEstimate({ today, series }: ReviewEstimateProps) {
   return (
     <Stack gap="xs">
       <Text>{text}</Text>
+      <Text size="sm">
+        A review can end in a request for corrections. You then correct your
+        documents and submit them again, which puts your case{" "}
+        <Anchor
+          href="https://travel.state.gov/content/travel/en/us-visas/immigrate/the-immigrant-visa-process/step-8-scan-collected-documents/step-9-upload-and-submit-scanned-documents.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          inherit
+        >
+          in line for review
+        </Anchor>{" "}
+        again, so enter the date you last submitted them.
+      </Text>
       <TextInput
         type="date"
-        label="Already submitted? Enter the date"
+        label="Already submitted? Enter the date you last submitted"
         max={today}
         value={submitted}
         onChange={(event) => setSubmitted(event.currentTarget.value)}
