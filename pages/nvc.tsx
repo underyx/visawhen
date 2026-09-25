@@ -21,7 +21,7 @@ import {
   reviewRange,
   ReviewRange,
 } from "../components/nvcReview";
-import { NVC_TIMEFRAMES_URL } from "../components/links";
+import { NVC_TIMEFRAMES_URL, VISA_BULLETIN_URL } from "../components/links";
 
 interface Props {
   data: NvcData;
@@ -361,18 +361,29 @@ export default function NvcBacklog({ data }: Props) {
           <Text size="xl">Last updated {formatDate(latestDate)}.</Text>
         )}
         <Text>
-          Here&rsquo;s how long you should expect to wait until the National
-          Visa Center processes your case. NVC usually updates these timeframes
+          How long the National Visa Center is taking to create cases, review
+          documents and answer inquiries. NVC usually updates these timeframes
           every week, and we check its page for new ones every day.
         </Text>
         <Text>
           These timeframes do not apply to K (fiancé(e)) visas, diversity visas,
-          special immigrant visas or adoptions, per NVC. NVC usually takes
-          weeks;{" "}
+          special immigrant visas or adoptions, per NVC. For spouses, parents
+          and children of US citizens, NVC usually takes weeks, and{" "}
           <Anchor component={Link} href="/consulates">
             the longest wait is usually the interview queue at your consulate
           </Anchor>
-          .
+          . In the family and employment preference categories, the longest wait
+          is usually for your priority date, often years: once the{" "}
+          <Anchor
+            href={VISA_BULLETIN_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Visa Bulletin
+          </Anchor>
+          &rsquo;s Dates for Filing chart passes it, NVC can tell you to send
+          your documents, but you can only get an interview once your priority
+          date is current in its Final Action Dates chart.
         </Text>
       </Stack>
       <Stack gap="sm">
