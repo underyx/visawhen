@@ -16,6 +16,26 @@ import {
   VISA_BULLETIN_URL,
 } from "../components/links";
 
+/** USCIS's page saying, each month, which Visa Bulletin chart decides who
+ * may file an I-485 in each preference category */
+const ADJUSTMENT_FILING_CHARTS_URL =
+  "https://www.uscis.gov/green-card/green-card-processes-and-procedures/visa-availability-priority-dates/adjustment-of-status-filing-charts-from-the-visa-bulletin";
+
+/** How the Visa Bulletin's two charts apply, for the preference paths */
+function PriorityDateCharts() {
+  return (
+    <>
+      The <To href={VISA_BULLETIN_URL}>Visa Bulletin</To> has two charts. In the
+      US, USCIS says each month which of them decides when you can file the
+      I-485, on its{" "}
+      <To href={ADJUSTMENT_FILING_CHARTS_URL}>filing charts page</To>. Abroad,
+      NVC can have you send your documents once the Dates for Filing chart
+      passes your date, before an interview is possible: that needs your date to
+      be current in the Final Action Dates chart.
+    </>
+  );
+}
+
 /** A link to a page of this site, or to an official one in a new tab */
 function To({ href, children }: React.PropsWithChildren<{ href: string }>) {
   return href.startsWith("/") ? (
@@ -185,9 +205,8 @@ export default function Home() {
               <To href="/uscis/i-140">I-140 petition</To>, filed with USCIS.
             </>,
             <>
-              Your priority date: in most categories you wait until the{" "}
-              <To href={VISA_BULLETIN_URL}>Visa Bulletin</To> shows it as
-              current.
+              Your priority date: in most categories you wait for it to be
+              reached. <PriorityDateCharts />
             </>,
             <>
               In the US:{" "}
@@ -208,9 +227,8 @@ export default function Home() {
               relative with USCIS.
             </>,
             <>
-              Your priority date: you wait, often for years, until the{" "}
-              <To href={VISA_BULLETIN_URL}>Visa Bulletin</To> shows it as
-              current.
+              Your priority date: you wait, often for years, for it to be
+              reached. <PriorityDateCharts />
             </>,
             <>
               Abroad: <To href="/nvc">the National Visa Center</To> and an{" "}
