@@ -569,7 +569,7 @@ export function highlight(
           pendingChange === null ? "" : ` (${pendingChange})`
         }, but that quarter's filings minus its decisions come to ${formatSigned(
           current.received - current.completions,
-        )}: the count is out of line with USCIS's own numbers, so we don't read it as USCIS catching up or falling behind.`,
+        )}, which doesn't account for the change, so we don't read it as USCIS catching up or falling behind.`,
       );
     else if (
       pendingChange === null &&

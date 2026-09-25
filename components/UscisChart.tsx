@@ -66,7 +66,7 @@ const LEGEND = { type: "scroll", top: 0 } as const;
 /** What a diamond on a pending count or on the time to clear the backlog
  * means (QuarterPoint.suspect). */
 const SUSPECT_NOTE =
-  "A diamond marks a pending count out of line with the quarter before and the quarter's filings and decisions: it is what USCIS reported, but likely a miscount or a change in what it counted, so the pages draw no conclusions from it.";
+  "A diamond marks a pending count that doesn't match the quarter before's count plus the quarter's filings minus its decisions: it is what USCIS reported, but USCIS doesn't say why they differ, so the pages draw no conclusions from it.";
 
 function SourceCaption({ source, what }: { source: string; what: string }) {
   return (
@@ -165,7 +165,7 @@ function marked(value: number | null, suspect: boolean, color: string) {
 function pointNotes(point: QuarterPoint): string[] {
   return [
     ...(point.suspect
-      ? ["Pending count out of line with filings and decisions"]
+      ? ["Pending count doesn't match filings minus decisions"]
       : []),
     ...(point.fromOfficeReport
       ? ["From the national totals of USCIS's per-office report"]
