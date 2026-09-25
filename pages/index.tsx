@@ -21,6 +21,11 @@ import {
 const ADJUSTMENT_FILING_CHARTS_URL =
   "https://www.uscis.gov/green-card/green-card-processes-and-procedures/visa-availability-priority-dates/adjustment-of-status-filing-charts-from-the-visa-bulletin";
 
+/** USCIS's eligibility page for immediate relatives' green cards, which says
+ * who can adjust status in the US */
+const IMMEDIATE_RELATIVE_ELIGIBILITY_URL =
+  "https://www.uscis.gov/green-card/green-card-eligibility/green-card-for-immediate-relatives-of-us-citizen";
+
 /** How the Visa Bulletin's two charts apply, for the preference paths */
 function PriorityDateCharts() {
   return (
@@ -130,7 +135,17 @@ export default function Home() {
         />
         <Path
           title="Spouse of a US citizen, living in the US"
-          who="Getting a green card without leaving the US (adjustment of status)."
+          who={
+            <>
+              Getting a green card without leaving the US (adjustment of
+              status). This is generally for people who were{" "}
+              <To href={IMMEDIATE_RELATIVE_ELIGIBILITY_URL}>
+                inspected and admitted or paroled
+              </To>{" "}
+              into the US, as with a visa; if you entered another way, talk to
+              an immigration lawyer before filing.
+            </>
+          }
           steps={[
             <>
               <To href="/uscis/i-130">I-130 petition</To> and{" "}
