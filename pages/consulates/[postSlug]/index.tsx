@@ -32,7 +32,7 @@ import IvScheduleCard, {
 import { ListRow, ListRows } from "../../../components/ListRow";
 import PolicyBanner from "../../../components/PolicyBanner";
 import { hasEnded, scheduleOverrideFor } from "../../../components/policy";
-import { formatShortDate } from "../../../components/Freshness";
+import { formatShortDate, useToday } from "../../../components/Freshness";
 import { normalize } from "../../../components/search";
 import {
   Badge,
@@ -142,7 +142,8 @@ export default function ConsulateSelect({
   // the policy takes the title and description instead, with its end date if
   // it has one, since the page may still be served after it.
   const relativeCutoff = ivSchedule?.relative ?? null;
-  const scheduleOverride = scheduleOverrideFor(postSlug, ivScheduleAsOf);
+  const today = useToday();
+  const scheduleOverride = scheduleOverrideFor(postSlug, ivScheduleAsOf, today);
   const issuedDescription = `How many visas ${postName} issued every month in each of ${
     availableVisaClasses.length
   } visa classes, from State Department statistics through ${formatMonth(

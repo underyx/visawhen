@@ -26,6 +26,7 @@ import {
 import IvScheduleCard from "../../../components/IvScheduleCard";
 import PolicyBanner from "../../../components/PolicyBanner";
 import { scheduleOverrideFor } from "../../../components/policy";
+import { useToday } from "../../../components/Freshness";
 import { ChevronLeftIcon } from "../../../components/icons";
 import { Button, Group, Stack, Text, Title } from "@mantine/core";
 
@@ -235,6 +236,7 @@ export default function ConsulateStats({
   // a note for the other immigrant classes; nonimmigrant classes get neither.
   const ivCategory = IV_CATEGORY_BY_CLASS[visaClassSlug];
   const classNote = CLASS_NOTES[visaClassSlug];
+  const today = useToday();
 
   return (
     <Stack>
@@ -286,7 +288,7 @@ export default function ConsulateStats({
           note={classNote}
           scope={CLASS_QUEUE_SCOPES[visaClassSlug]}
           scheduleOverride={
-            scheduleOverrideFor(postSlug, ivScheduleAsOf) ?? undefined
+            scheduleOverrideFor(postSlug, ivScheduleAsOf, today) ?? undefined
           }
         />
       )}

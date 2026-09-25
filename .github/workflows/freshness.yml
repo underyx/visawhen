@@ -1,0 +1,73 @@
+# Opens one issue per data source whose newest data is older than that source's
+# publishing schedule allows, keeps it up to date and closes it when new data
+# arrives (see data/freshness.py). The scrapers' runs stay green when a source
+# is unreachable or has nothing new, so without this a stalled source goes
+# unnoticed.
+name: Check data freshness
+
+on:
+  schedule:
+    - cron: 17 7 * * *
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  check-freshness:
+    name: Check data freshness
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      # to open, update and close the stale-data issues
+      issues: write
+      # to keep the scheduled workflows enabled (the last step)
+      actions: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Standard library only, so the runner's own Python does.
+      - name: Check each source and sync the stale-data issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -u data/freshness.py --github
+      # GitHub disables scheduled workflows in a public repository after 60
+      # days without repository activity, and months can pass without a data
+      # commit (USCIS publishes quarterly; NVC and consulate data have stalled
+      # before). Enabling a workflow through the API keeps it enabled without
+      # committing anything, as keepalive-workflow's API mode does. This
+      # workflow is scheduled too, so it keeps itself enabled as well.
+      #
+      # Only workflows that are enabled, or that GitHub disabled for
+      # inactivity, are enabled: one the owner disabled by hand
+      # (disabled_manually) stays disabled. A failed call does not stop the
+      # loop: the step goes on to the next workflow and fails at the end.
+      - name: Keep the scheduled workflows enabled
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          failed=0
+          for file in $(grep -l '^  schedule:' .github/workflows/*.yml); do
+            workflow=$(basename "$file")
+            api="repos/$GITHUB_REPOSITORY/actions/workflows/$workflow"
+            if ! state=$(gh api "$api" --jq .state); then
+              echo "::error::Could not read the state of $workflow, so it was not kept enabled"
+              failed=1
+              continue
+            fi
+            case "$state" in
+              active | disabled_inactivity)
+                echo "Enabling $workflow (state: $state)"
+                if ! gh api --silent --method PUT "$api/enable"; then
+                  echo "::error::Could not enable $workflow (state: $state)"
+                  failed=1
+                fi
+                ;;
+              disabled_manually)
+                echo "Skipping $workflow: disabled by hand, so it stays disabled"
+                ;;
+              *)
+                echo "Skipping $workflow (state: $state)"
+                ;;
+            esac
+          done
+          exit "$failed"

@@ -10,7 +10,13 @@ import {
 } from "@mantine/core";
 import React from "react";
 import { daysBetween, formatShortDate, useToday } from "./Freshness";
-import { hasEnded, isAboutPost, PolicyEntry, policiesFor } from "./policy";
+import {
+  hasEnded,
+  hasStarted,
+  isAboutPost,
+  PolicyEntry,
+  policiesFor,
+} from "./policy";
 
 /** How long an entry stays up after it ends */
 const SHOW_ENDED_DAYS = 60;
@@ -109,14 +115,15 @@ type Props =
 
 /** The policies that affect a page's visas, from data/policy.json: those
  * about the page's post in full, and the rest, such as those about every
- * post, in one collapsed section, so that thousands of pages do not open with
- * the same banners. */
+ * post, in one collapsed section that lists their titles, so that thousands of
+ * pages do not open with the same banners. */
 export default function PolicyBanner({ postSlug, page }: Props) {
-  // The prerendered page is served for weeks, so which entries have expired
-  // or gone unchecked too long is decided on the client only.
+  // The prerendered page is served for weeks, so which entries have started,
+  // have expired or have gone unchecked too long is decided on the client
+  // only.
   const today = useToday();
   const shown = policiesFor({ postSlug, page }).filter(
-    (entry) => !hasExpired(entry, today),
+    (entry) => hasStarted(entry, today) && !hasExpired(entry, today),
   );
   const postEntries =
     postSlug === undefined
@@ -145,8 +152,16 @@ export default function PolicyBanner({ postSlug, page }: Props) {
         // every page until someone opens them.
         <Accordion variant="contained" order={2} keepMounted={false}>
           <Accordion.Item value="policies">
+            {/* The titles are listed under the label, so that what the
+            entries are about shows without opening them. Spans: the control
+            is a button. */}
             <Accordion.Control>
-              {`Policy changes that may affect your visa (${otherEntries.length})`}
+              <Text span display="block" inherit>
+                {`Policy changes that may affect your visa (${otherEntries.length})`}
+              </Text>
+              <Text span display="block" size="sm" c="dimmed">
+                {otherEntries.map((entry) => entry.title).join("; ")}
+              </Text>
             </Accordion.Control>
             <Accordion.Panel>
               <Stack gap="lg">

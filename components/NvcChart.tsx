@@ -1,5 +1,5 @@
 import { NvcSeries } from "../api/nvc";
-import { addDays } from "./Freshness";
+import { addDays, daysBetween } from "./Freshness";
 
 import * as echarts from "echarts/core";
 import { LineChart } from "echarts/charts";
@@ -34,13 +34,39 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
   timeZone: "UTC",
 });
 
+/** Readings further apart than this, three weeks, have several weeks with no
+ * reading between them, which the chart shows as a break in the line instead
+ * of joining the readings across it. Shorter gaps, a missing week or two, are
+ * joined, as the caption says. */
+const MAX_GAP_DAYS = 21;
+
+/** A point of the line: [date, days], or [date, null] for a break in it */
+type Point = [string, number | null];
+
+/** The readings, with a break wherever weeks of readings are missing */
+function chartPoints(series: NvcSeries): Point[] {
+  const points: Point[] = [];
+  let previous: string | null = null;
+  for (const [date, days] of Object.entries(series)) {
+    if (previous !== null) {
+      const gap = daysBetween(previous, date);
+      if (gap > MAX_GAP_DAYS)
+        points.push([addDays(previous, Math.round(gap / 2)), null]);
+    }
+    points.push([date, days]);
+    previous = date;
+  }
+  return points;
+}
+
 interface TooltipParams {
-  /** The point under the cursor, as passed to the series: [date, days] */
-  data: [string, number];
+  /** The point under the cursor, as passed to the series */
+  data: Point;
 }
 
 function Tooltip([series]: TooltipParams[]) {
   const [date, backlogDays] = series.data;
+  if (backlogDays === null) return "No readings for these weeks";
   // Date arithmetic on the ISO strings: date-fns would add days in the
   // visitor's time zone, and land on the wrong day across a DST change.
   const processingDate = addDays(date, -backlogDays);
@@ -98,7 +124,7 @@ export default function NvcChart({ id, series }: Props) {
               name: id,
               type: "line",
               smooth: true,
-              data: Object.entries(series),
+              data: chartPoints(series),
             },
           ],
         }}
@@ -113,7 +139,9 @@ export default function NvcChart({ id, series }: Props) {
         <a href="https://github.com/underyx/visawhen/blob/main/data/nvc/data.json">
           JSON file on GitHub
         </a>
-        .
+        . Breaks in the line are stretches of several weeks with no readings;
+        where a week or two is missing, the line joins the readings on either
+        side.
       </figcaption>
     </Paper>
   );

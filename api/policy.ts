@@ -1,4 +1,5 @@
 import policyData from "../data/policy.json";
+import { POLICY_PAGES } from "../components/policy";
 
 // Checks data/policy.json when the site is built, so that no page shows a
 // notice without its dates or sources. The pages read the file through
@@ -52,6 +53,19 @@ function problemsWith(entry: Record<string, unknown>): string[] {
       "scope must name posts, pages or allConsulatePages: true",
     ],
     [
+      scope.exceptPosts === undefined ||
+        (isTextList(scope.exceptPosts) && scope.allConsulatePages === true),
+      "scope.exceptPosts must list post slugs, and only with allConsulatePages: true",
+    ],
+    [
+      scope.pages === undefined ||
+        (Array.isArray(scope.pages) &&
+          scope.pages.every((page) => POLICY_PAGES.includes(page))),
+      `scope.pages may only name pages that show notices: ${POLICY_PAGES.join(
+        ", ",
+      )}`,
+    ],
+    [
       entry.overridesSchedule === undefined ||
         typeof entry.overridesSchedule === "boolean",
       "overridesSchedule must be true or false",
@@ -79,8 +93,10 @@ function problemsWith(entry: Record<string, unknown>): string[] {
 }
 
 /** Fails the build when an entry is broken, and warns when entries name a
- * post the site has no page for (their notices would never be shown) or when
- * too many have no end date. `postSlugs` are the posts that have a page. */
+ * post the site has no page for (in `posts`, a notice that is never shown; in
+ * `exceptPosts`, most likely a typo that leaves the post's pages showing it)
+ * or when too many have no end date. `postSlugs` are the posts that have a
+ * page. */
 export function checkPolicies(postSlugs: string[]): void {
   const entries: Record<string, unknown>[] = policyData.entries;
   const seen = new Set<string>();
@@ -101,14 +117,15 @@ export function checkPolicies(postSlugs: string[]): void {
     );
 
   const known = new Set(postSlugs);
-  const unknown = policyData.entries.flatMap((entry) =>
-    ((entry.scope as { posts?: string[] }).posts ?? [])
+  const unknown = policyData.entries.flatMap((entry) => {
+    const scope = entry.scope as { posts?: string[]; exceptPosts?: string[] };
+    return [...(scope.posts ?? []), ...(scope.exceptPosts ?? [])]
       .filter((postSlug) => !known.has(postSlug))
-      .map((postSlug) => `${postSlug} (${entry.id})`),
-  );
+      .map((postSlug) => `${postSlug} (${entry.id})`);
+  });
   if (unknown.length > 0)
     console.warn(
-      `data/policy.json names posts that have no page, so their notices are not shown: ${unknown.join(
+      `data/policy.json names posts that have no page (check the slugs): ${unknown.join(
         ", ",
       )}`,
     );

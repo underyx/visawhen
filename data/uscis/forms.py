@@ -73,6 +73,10 @@ TIMEOUT = 60
 CDX_TIMEOUT = (10, 90)
 SAVE_TIMEOUT = 180
 WAYBACK_ATTEMPTS = 6
+# USCIS publishes a quarter's reports no sooner than this many days after the
+# quarter ends (FY2026 Q3, which ended June 30, appeared in early September),
+# so until then a failed discovery cannot have missed a new quarter.
+EARLIEST_PUBLICATION_DAYS = 45
 
 session = requests.Session()
 session.headers.update(
@@ -1211,12 +1215,48 @@ def cached_reports() -> list[Report]:
     return sorted(reports)
 
 
+def new_quarter_due(today: date) -> bool:
+    """Whether USCIS may have published a quarter newer than forms.json's newest."""
+    newest = json.loads(OUTPUT_PATH.read_text())["periods"][-1]
+    fiscal_year, fiscal_quarter = newest["fiscalYear"], newest["fiscalQuarter"] + 1
+    if fiscal_quarter > 4:
+        fiscal_year, fiscal_quarter = fiscal_year + 1, 1
+    _key, _start, end = calendar_quarter(fiscal_year, fiscal_quarter)
+    return today >= end + timedelta(days=EARLIEST_PUBLICATION_DAYS)
+
+
+def cache_is_complete() -> bool:
+    """Whether reports/ holds every report forms.json was built from."""
+    dataset = json.loads(OUTPUT_PATH.read_text())
+    urls = {
+        url
+        for form in dataset["forms"]
+        for sources in (form["sources"], form["officeSources"])
+        for url in sources.values()
+    }
+    return all(
+        (report := Report.from_url(url)) is not None and report.cache_path.exists()
+        for url in urls
+    )
+
+
 def main() -> int:
     captures: dict[str, str] = {}
     if "--offline" in sys.argv:
         reports = cached_reports()
     else:
-        reports, captures = discover_reports()
+        try:
+            reports, captures = discover_reports()
+        except RuntimeError as e:
+            # The Wayback Machine is down. With no new quarter due and every
+            # report forms.json was built from already cached, there is
+            # nothing discovery could add, so this is no reason to fail.
+            if new_quarter_due(date.today()) or not cache_is_complete():
+                raise
+            print(
+                f"::warning::{e}; no new quarter is due yet and every report is cached, so {OUTPUT_PATH.name} is left as it is"
+            )
+            return 0
     all_forms: list[tuple[Report, list[FormRow]]] = []
     office_reports: dict[str, list[tuple[Report, OfficeReport]]] = defaultdict(list)
     for report in reports:

@@ -1,4 +1,7 @@
-name: Update NVC data
+# Also fetches State's IV Scheduling Status Tool (the consulate pages'
+# interview queues), which lives on the same site and is fetched the same way:
+# one workflow, so the two never race each other to push to main.
+name: Update NVC and interview-queue data
 
 on:
   schedule:
@@ -36,19 +39,36 @@ jobs:
       - name: Install dependencies
         run: uv sync --locked
       - name: Run script
-        run: uv run python main.py
+        run: uv run python -u main.py
+      # Adds a snapshot only when State's "Last Updated" date is newer than the
+      # newest one in iv_schedule.json. It needs three packages, not the whole
+      # consulates project (pandas, pypdf, jupyter...). It runs, and whatever
+      # either step wrote is committed, even when the other step failed; the
+      # job still fails then.
+      - name: Fetch the interview-queue snapshot
+        if: ${{ !cancelled() }}
+        working-directory: data/consulates
+        run: >-
+          uv run --no-project
+          --with 'requests>=2.34.2,<3' --with 'beautifulsoup4>=4.15.0,<5' --with 'lxml>=6.1.2,<7'
+          python -u iv_schedule.py --fetch
       - name: Commit changes
         id: commit
+        if: ${{ !cancelled() }}
         uses: EndBug/add-and-commit@cc9c08ba6c8df3b93a8f2db63e89b98368ae2ae8 # v11.1.1
         with:
+          message: Update NVC and interview-queue data
           # The default (`git fetch --tags --force`) pulls the whole history of
           # the 100 MB data dumps into the shallow clone: 3-4 minutes per run.
           fetch: false
       - id: head_commit
+        if: ${{ !cancelled() }}
         run: echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
   build:
-    if: needs.update-nvc-data.outputs.updated == 'true'
+    # !cancelled(): build what was committed even when one of the two scripts
+    # failed
+    if: ${{ !cancelled() && needs.update-nvc-data.outputs.updated == 'true' }}
     uses: underyx/visawhen/.github/workflows/build.yml@main
     needs: [update-nvc-data]
     with:
@@ -57,9 +77,9 @@ jobs:
   deploy:
     uses: underyx/visawhen/.github/workflows/deploy.yml@main
     needs: [build]
-    # When nothing was pushed, build is skipped; a skipped dependency already
-    # skips this job (no `always()`), but be explicit about it.
-    if: needs.build.result == 'success'
+    # When nothing was pushed, build is skipped, and so is this job.
+    # !cancelled(): deploy even when one of the two scripts failed.
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
     with:
       artifact-name: ${{ needs.build.outputs.artifact-name }}
     secrets:

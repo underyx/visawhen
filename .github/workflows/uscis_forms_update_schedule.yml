@@ -46,8 +46,9 @@ jobs:
             ${{ runner.os }}-uscis-reports-
       - name: Install dependencies
         run: uv sync --locked
+      # -u: unbuffered, so the log shows each line when it happens
       - name: Run script
-        run: uv run python forms.py
+        run: uv run python -u forms.py
       - name: Save downloaded reports
         if: always()
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0

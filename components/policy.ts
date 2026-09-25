@@ -29,6 +29,9 @@ export interface PolicyScope {
   /** Shown, collapsed with the other site-wide entries, on every post's page
    * and its visa class pages */
   allConsulatePages?: boolean;
+  /** Post slugs, "budapest", whose pages an `allConsulatePages` entry is not
+   * shown on, such as posts a worldwide pause is reported not to apply to */
+  exceptPosts?: string[];
   /** Other pages by path, "/nvc", where it is shown collapsed too */
   pages?: string[];
 }
@@ -55,6 +58,10 @@ export interface PolicyEntry {
 /** Every entry in the file, in its order */
 export const POLICY_ENTRIES = policyData.entries as PolicyEntry[];
 
+/** The pages other than the consulate pages that show notices, the only
+ * values `scope.pages` may take (the build checks it, see api/policy.ts) */
+export const POLICY_PAGES = ["/nvc"];
+
 /** Whether an entry is about a post in particular, and so is shown expanded
  * on its pages; entries that reach a page otherwise are shown collapsed. */
 export function isAboutPost(entry: PolicyEntry, postSlug: string): boolean {
@@ -62,7 +69,11 @@ export function isAboutPost(entry: PolicyEntry, postSlug: string): boolean {
 }
 
 function appliesToPost(entry: PolicyEntry, postSlug: string): boolean {
-  return entry.scope.allConsulatePages === true || isAboutPost(entry, postSlug);
+  return (
+    (entry.scope.allConsulatePages === true &&
+      !(entry.scope.exceptPosts?.includes(postSlug) ?? false)) ||
+    isAboutPost(entry, postSlug)
+  );
 }
 
 /** The entries for a page, in the file's order: for a post's own page and
@@ -79,6 +90,17 @@ export function policiesFor({
     (entry) =>
       (postSlug !== undefined && appliesToPost(entry, postSlug)) ||
       (page !== undefined && (entry.scope.pages?.includes(page) ?? false)),
+  );
+}
+
+/** Whether an entry has taken effect, on or after its `start` day: by the
+ * time it was last checked, which the prerendered page can say, or by
+ * `today`, which only the client knows and which is null while prerendering
+ * and hydrating. An entry announced ahead of time is not shown or applied
+ * before it starts. */
+export function hasStarted(entry: PolicyEntry, today: string | null): boolean {
+  return (
+    entry.start <= entry.lastChecked || (today !== null && today >= entry.start)
   );
 }
 
@@ -108,11 +130,14 @@ export function overridesUpdate(
  * queue at a post, such as a pause of all visa services there, or null. When
  * several apply (Juba is both paused and moved to a hub), the one that lasts
  * longest wins, so the card does not start showing a queue when the shorter
- * one ends. The prerendered page cannot know today's date, so an entry due to
- * end later counts there; IvScheduleCard re-checks it on the client. */
+ * one ends. An entry counts from its start, by `today` on the client and by
+ * the day it was last checked while prerendering (`today` null). The
+ * prerendered page cannot know today's date, so an entry due to end later
+ * counts there; IvScheduleCard re-checks that on the client. */
 export function scheduleOverrideFor(
   postSlug: string,
   asOf: string,
+  today: string | null,
 ): PolicyEntry | null {
   const lastsUntil = (entry: PolicyEntry) => entry.end ?? "9999-12-31";
   return (
@@ -120,6 +145,7 @@ export function scheduleOverrideFor(
       (entry) =>
         entry.overridesSchedule === true &&
         appliesToPost(entry, postSlug) &&
+        hasStarted(entry, today) &&
         overridesUpdate(entry, asOf, null),
     ).sort((a, b) => lastsUntil(b).localeCompare(lastsUntil(a)))[0] ?? null
   );

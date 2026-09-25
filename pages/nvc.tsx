@@ -1,7 +1,7 @@
 import { GetStaticProps } from "next";
 import Head from "next/head";
 import { getData, NvcData, NvcSeries } from "../api/nvc";
-import React, { useSyncExternalStore } from "react";
+import React from "react";
 import NvcChart from "../components/NvcChart";
 import last from "lodash/last";
 import { jsonLdScriptProps } from "react-schemaorg";
@@ -26,8 +26,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => ({
   },
 });
 
-const NVC_TIME_ZONE = "America/New_York";
-const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const NVC_TIMEFRAMES_URL =
   "https://travel.state.gov/content/travel/en/us-visas/immigrate/nvc-timeframes.html";
 /** NVC updates its timeframes weekly, so data older than two weeks means our
@@ -42,48 +40,6 @@ function getLatestDate(data: NvcData): string {
 /** The newest reading of a series: its as-of date and its number of days */
 function getLatestReading(series: NvcSeries): [string, number] {
   return last(Object.entries(series)) as [string, number];
-}
-
-/** The calendar date and ISO weekday (Monday is 1) at the NVC right now. */
-function nvcToday(now: Date): { date: string; isoDay: number } {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: NVC_TIME_ZONE,
-    weekday: "short",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(now);
-  const part = (type: Intl.DateTimeFormatPartTypes) =>
-    parts.find((candidate) => candidate.type === type)?.value ?? "";
-  return {
-    date: `${part("year")}-${part("month")}-${part("day")}`,
-    isoDay: WEEKDAYS.indexOf(part("weekday")) + 1,
-  };
-}
-
-/** "next update expected in 3 days": the NVC updates its page on Mondays. */
-function getNextUpdateText(data: NvcData, now: Date): string {
-  const { date, isoDay } = nvcToday(now);
-  const daysTillNewData =
-    isoDay === 1 && getLatestDate(data) !== date ? 0 : 8 - isoDay;
-  return `next update expected ${
-    daysTillNewData === 0
-      ? "later today"
-      : daysTillNewData === 1
-      ? "tomorrow"
-      : `in ${daysTillNewData} days`
-  } (Eastern Time)`;
-}
-
-/** The text depends on the current date, so it is rendered on the client
- * only: the prerendered HTML is served for days after it was built, and
- * would otherwise disagree with what React renders on hydration. */
-function useNextUpdateText(data: NvcData): string | null {
-  return useSyncExternalStore(
-    () => () => {},
-    () => getNextUpdateText(data, new Date()),
-    () => null,
-  );
 }
 
 interface ChartHeadingProps {
@@ -104,7 +60,6 @@ function ChartHeading({
 }
 
 export default function NvcBacklog({ data }: Props) {
-  const nextUpdateText = useNextUpdateText(data);
   const today = useToday();
   const latestDate = getLatestDate(data);
   const ageDays = today === null ? null : daysBetween(latestDate, today);
@@ -162,8 +117,8 @@ export default function NvcBacklog({ data }: Props) {
         {stale && (
           <Alert color="yellow">
             Our newest reading is from {formatDate(latestDate)}, {ageDays} days
-            ago. The State Department&rsquo;s website is currently blocking our
-            automatic updates, so NVC may be faster or slower today. See{" "}
+            ago, although NVC usually updates its timeframes every week. NVC may
+            be faster or slower today. See{" "}
             <Anchor
               href={NVC_TIMEFRAMES_URL}
               target="_blank"
@@ -175,13 +130,11 @@ export default function NvcBacklog({ data }: Props) {
             .
           </Alert>
         )}
-        <Text size="xl">
-          Last updated {formatDate(latestDate)}
-          {nextUpdateText === null || stale ? "." : `, ${nextUpdateText}.`}
-        </Text>
+        <Text size="xl">Last updated {formatDate(latestDate)}.</Text>
         <Text>
           Here&rsquo;s how long you should expect to wait until the National
-          Visa Center processes your case.
+          Visa Center processes your case. NVC usually updates these timeframes
+          every week, and we check its page for new ones every day.
         </Text>
         <Text>
           These timeframes do not apply to K (fiancé(e)) visas, diversity visas,

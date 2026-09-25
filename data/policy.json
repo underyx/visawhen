@@ -63,6 +63,38 @@
       "lastChecked": "2026-09-24"
     },
     {
+      "id": "iv-interviews-postponed-public-charge-training",
+      "status": "reported",
+      "title": "Immigrant visa interviews reportedly postponed for public charge training",
+      "body": "From late August 2026, U.S. embassies and consulates reportedly postponed immigrant visa interviews while their consular officers were trained on new public charge guidance, emailing applicants with interviews booked that they would be rescheduled. On August 27, the Associated Press quoted a State Department official saying the pause was not expected to last beyond early to mid-September. On September 8, Reuters reported that processing had resumed for Hungary and Poland while the pause continued elsewhere, and that it could last months, according to a person familiar with the matter. No report we have found says whether it is still in place at other posts. The State Department acknowledged the pause in a statement on August 25 but has posted no notice about it on its website. NVC and consulates may reschedule interviews, including ones already booked, while it lasts.",
+      "scope": {
+        "allConsulatePages": true,
+        "exceptPosts": ["budapest", "krakow", "warsaw"],
+        "pages": ["/nvc"]
+      },
+      "start": "2026-08-25",
+      "end": null,
+      "sources": [
+        {
+          "label": "Fox News: Trump admin pauses immigrant visa interviews for public charge training (August 26, 2026)",
+          "url": "https://www.foxnews.com/politics/trump-immigrant-visa-interview-pause"
+        },
+        {
+          "label": "Associated Press, via NBC News: Trump administration pauses all immigrant visa applications amid new screening policy (August 27, 2026)",
+          "url": "https://www.nbcnews.com/news/us-news/trump-administration-pauses-immigrant-visa-applications-new-screening-rcna594669"
+        },
+        {
+          "label": "Ogletree: State Department Pauses Immigrant Visa Interviews for New Public Charge Guidance Training (August 31, 2026)",
+          "url": "https://ogletree.com/insights-resources/blog-posts/state-department-pauses-immigrant-visa-interviews-for-new-public-charge-guidance-training/"
+        },
+        {
+          "label": "Reuters, via Yahoo News: US resumes immigrant visa processing for Hungary, Poland as pause remains elsewhere (September 8, 2026)",
+          "url": "https://www.yahoo.com/news/articles/exclusive-us-resumes-immigrant-visa-211243675.html"
+        }
+      ],
+      "lastChecked": "2026-09-25"
+    },
+    {
       "id": "pp-10998-suspension",
       "status": "official",
       "title": "Immigrant visas suspended for nationals of 39 countries",
