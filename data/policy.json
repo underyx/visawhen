@@ -70,7 +70,8 @@
       "scope": {
         "allConsulatePages": true,
         "exceptPosts": ["budapest", "krakow", "warsaw"],
-        "pages": ["/nvc"]
+        "pages": ["/nvc"],
+        "immigrantVisasOnly": true
       },
       "start": "2026-08-25",
       "end": null,
@@ -115,7 +116,7 @@
       "status": "official",
       "title": "75-country immigrant visa pause has ended",
       "body": "From January 21 to August 21, 2026, the State Department paused immigrant visa issuance to nationals of 75 countries. A court order in CLINIC v. Rubio ended the pause on August 21, 2026.",
-      "scope": { "allConsulatePages": true },
+      "scope": { "allConsulatePages": true, "immigrantVisasOnly": true },
       "start": "2026-01-21",
       "end": "2026-08-21",
       "sources": [

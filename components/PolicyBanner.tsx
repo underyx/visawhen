@@ -108,21 +108,23 @@ function EntryDetails({
 }
 
 type Props =
-  /** A post's own page or one of its visa class pages, "kampala" */
-  | { postSlug: string; page?: undefined }
+  /** A post's own page or one of its visa class pages, "kampala". The page
+   * of a nonimmigrant class that does not go through NVC passes `immigrant`
+   * false, and leaves out the notices about immigrant visas only. */
+  | { postSlug: string; immigrant?: boolean; page?: undefined }
   /** Any other page, by its path, "/nvc" */
-  | { page: string; postSlug?: undefined };
+  | { page: string; postSlug?: undefined; immigrant?: undefined };
 
 /** The policies that affect a page's visas, from data/policy.json: those
  * about the page's post in full, and the rest, such as those about every
  * post, in one collapsed section that lists their titles, so that thousands of
  * pages do not open with the same banners. */
-export default function PolicyBanner({ postSlug, page }: Props) {
+export default function PolicyBanner({ postSlug, immigrant, page }: Props) {
   // The prerendered page is served for weeks, so which entries have started,
   // have expired or have gone unchecked too long is decided on the client
   // only.
   const today = useToday();
-  const shown = policiesFor({ postSlug, page }).filter(
+  const shown = policiesFor({ postSlug, page, immigrant }).filter(
     (entry) => hasStarted(entry, today) && !hasExpired(entry, today),
   );
   const postEntries =

@@ -10,6 +10,7 @@ import {
   getIvSchedule,
   getIvScheduleAsOf,
   getPost,
+  getPostActivity,
   getRecentIssuancesByClass,
   getRecentWindow,
   getVisaClassSlugsForPost,
@@ -19,6 +20,7 @@ import {
 } from "../../../api/consulates";
 import { checkPolicies } from "../../../api/policy";
 import {
+  describeInactivity,
   formatMonth,
   formatMonthlyRate,
   formatShortIvMonth,
@@ -35,6 +37,7 @@ import { hasEnded, scheduleOverrideFor } from "../../../components/policy";
 import { formatShortDate, useToday } from "../../../components/Freshness";
 import { normalize } from "../../../components/search";
 import {
+  Alert,
   Badge,
   Breadcrumbs,
   Button,
@@ -59,6 +62,9 @@ interface Props {
   ivScheduleAsOf: string;
   /** The post's line in it, or null when it does not list the post */
   ivSchedule: IvSchedule | null;
+  /** That the post has issued no immigrant visas, or no visas, for a year,
+   * if it has not (see describeInactivity) */
+  inactivity: string | null;
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -77,6 +83,8 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
   const postInfo = await getPost(postSlug);
   if (postInfo === undefined) return { notFound: true };
+  const recentWindow = await getRecentWindow();
+  const ivSchedule = await getIvSchedule(postSlug);
 
   return {
     props: {
@@ -85,9 +93,17 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       visaClasses: await getAllVisaClasses(),
       availableVisaClasses: await getVisaClassSlugsForPost(postSlug),
       recentIssuances: await getRecentIssuancesByClass(postSlug),
-      recentWindow: await getRecentWindow(),
+      recentWindow,
       ivScheduleAsOf: await getIvScheduleAsOf(),
-      ivSchedule: await getIvSchedule(postSlug),
+      ivSchedule,
+      inactivity: describeInactivity({
+        postName: postInfo.post,
+        activity: await getPostActivity(postSlug),
+        dataStart: recentWindow.first,
+        dataEnd: recentWindow.to,
+        immigrant: true,
+        listedInTool: ivSchedule !== null,
+      }),
     },
   };
 };
@@ -111,6 +127,7 @@ export default function ConsulateSelect({
   recentWindow,
   ivScheduleAsOf,
   ivSchedule,
+  inactivity,
 }: Props) {
   const recentMap = useMemo<Map<string, number>>(
     () =>
@@ -144,11 +161,11 @@ export default function ConsulateSelect({
   const relativeCutoff = ivSchedule?.relative ?? null;
   const today = useToday();
   const scheduleOverride = scheduleOverrideFor(postSlug, ivScheduleAsOf, today);
-  const issuedDescription = `How many visas ${postName} issued every month in each of ${
-    availableVisaClasses.length
-  } visa classes, from State Department statistics through ${formatMonth(
-    recentWindow.to,
-  )}.`;
+  const issuedDescription = `How many visas ${postName} issued every month ${
+    availableVisaClasses.length === 1
+      ? "in one visa class"
+      : `in each of ${availableVisaClasses.length} visa classes`
+  }, from State Department statistics through ${formatMonth(recentWindow.to)}.`;
   let title: string;
   let description: string;
   if (scheduleOverride !== null) {
@@ -180,7 +197,10 @@ export default function ConsulateSelect({
               : "immediate relatives listed as current"
           }`;
     description =
-      describeRelativeQueue(postName, ivSchedule) ?? issuedDescription;
+      describeRelativeQueue(postName, ivSchedule) ??
+      (inactivity === null
+        ? issuedDescription
+        : `${inactivity} ${issuedDescription}`);
   }
 
   return (
@@ -203,6 +223,13 @@ export default function ConsulateSelect({
       >
         Change consulate
       </Button>
+      {inactivity !== null && (
+        // role="note": a standing statement, which screen readers should not
+        // announce on load as they do Mantine's default role="alert"
+        <Alert role="note" color="gray">
+          {inactivity}
+        </Alert>
+      )}
       <PolicyBanner postSlug={postSlug} />
       <IvScheduleCard
         postName={postName}

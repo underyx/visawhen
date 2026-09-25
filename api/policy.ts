@@ -66,6 +66,11 @@ function problemsWith(entry: Record<string, unknown>): string[] {
       )}`,
     ],
     [
+      scope.immigrantVisasOnly === undefined ||
+        typeof scope.immigrantVisasOnly === "boolean",
+      "scope.immigrantVisasOnly must be true or false",
+    ],
+    [
       entry.overridesSchedule === undefined ||
         typeof entry.overridesSchedule === "boolean",
       "overridesSchedule must be true or false",

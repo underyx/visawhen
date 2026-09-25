@@ -3,7 +3,8 @@
     "columns": [
         "Visa Class Slug",
         "Visa Class",
+        "Visa Type",
         "Description"
     ],
-    "schema": "CREATE TABLE \"visa_slugs\" (\n\"Visa Class Slug\" TEXT,\n  \"Visa Class\" TEXT,\n  \"Description\" TEXT\n)"
+    "schema": "CREATE TABLE \"visa_slugs\" (\n\"Visa Class Slug\" TEXT,\n  \"Visa Class\" TEXT,\n  \"Visa Type\" TEXT,\n  \"Description\" TEXT\n)"
 }

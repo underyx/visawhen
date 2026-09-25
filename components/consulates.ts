@@ -1,3 +1,5 @@
+import type { PostActivity } from "../api/consulates";
+
 // Whole numbers up to 999, then thousands with up to one decimal: "462",
 // "1.5K", "57.8K".
 const compactRateFormatter = new Intl.NumberFormat("en-US", {
@@ -45,6 +47,64 @@ export function formatCount(count: number): string {
   return Math.round(count).toLocaleString("en-US");
 }
 
+/** Whole months from one month in the data to another:
+ * ("2025-02-01T00:00:00.000Z", "2026-02-01T00:00:00.000Z") is 12. */
+function monthsBetween(from: string, to: string): number {
+  const [fromYear, fromMonth] = from.split("-").map(Number);
+  const [toYear, toMonth] = to.split("-").map(Number);
+  return toYear * 12 + toMonth - (fromYear * 12 + fromMonth);
+}
+
+/** For a post that looks closed, a sentence that says what the data shows:
+ * that it issued no visas in the last 12 months of the data, whatever else
+ * lists it, or, with `immigrant` (its own page and its immigrant visa class
+ * pages), that it issued immigrant visas but none in the last 12 months,
+ * when State's IV Scheduling Status Tool, which is months newer, does not
+ * list it either. Null for every other post, including those that issued
+ * other visas but never an immigrant one in the data: they handle
+ * nonimmigrant visas only, which the interview-queue card already says. */
+export function describeInactivity({
+  postName,
+  activity,
+  dataStart,
+  dataEnd,
+  immigrant,
+  listedInTool,
+}: {
+  postName: string;
+  activity: PostActivity;
+  /** The oldest and newest months in the data */
+  dataStart: string;
+  dataEnd: string;
+  immigrant: boolean;
+  /** Whether State's newest IV Scheduling Status Tool update lists the post */
+  listedInTool: boolean;
+}): string | null {
+  const quiet = (month: string | null) =>
+    month === null || monthsBetween(month, dataEnd) >= 12;
+  const since = (visas: string, lastIssued: string) =>
+    `${postName} has issued no ${visas} since ${formatLongMonth(
+      lastIssued,
+    )}, according to the State Department’s monthly figures, which run to ${formatLongMonth(
+      dataEnd,
+    )}.`;
+  const { lastIssued, lastImmigrantIssued } = activity;
+  if (quiet(lastIssued))
+    return lastIssued === null
+      ? `${postName} issued no visas in any month of the State Department’s figures, ${formatLongMonth(
+          dataStart,
+        )} to ${formatLongMonth(dataEnd)}.`
+      : since("visas", lastIssued);
+  if (
+    immigrant &&
+    !listedInTool &&
+    lastImmigrantIssued !== null &&
+    quiet(lastImmigrantIssued)
+  )
+    return since("immigrant visas", lastImmigrantIssued);
+  return null;
+}
+
 /** The three columns of State's IV Scheduling Status Tool */
 export type IvCategory = "relative" | "preference" | "employment";
 
@@ -68,48 +128,8 @@ export const IV_SCHEDULE_URL =
 /** The visa classes each column of the tool covers */
 const IV_CLASSES: Record<IvCategory, string[]> = {
   relative: ["cr1ir1", "cr2ir2", "ir5"],
-  preference: [
-    "f11",
-    "f12",
-    "c21f21",
-    "c22f22",
-    "c23f23",
-    "c24f24",
-    "c25f25",
-    "cx1fx1",
-    "cx2fx2",
-    "cx3fx3",
-    "c31f31",
-    "c32f32",
-    "c33f33",
-    "f41",
-    "f42",
-    "f43",
-  ],
-  employment: [
-    "e11",
-    "e12",
-    "e13",
-    "e14",
-    "e15",
-    "e2",
-    "e3",
-    "ew3",
-    "ew4",
-    "ew5",
-    "c51",
-    "c52",
-    "c53",
-    "t51",
-    "t52",
-    "t53",
-    "i51",
-    "i52",
-    "i53",
-    "r51",
-    "r52",
-    "r53",
-  ],
+  preference: ["f1-family", "f2a", "f2b", "f3", "f4"],
+  employment: ["eb-1", "eb-2", "eb-3", "ew", "eb-5"],
 };
 
 /** The tool's column for each visa class it covers */
@@ -141,63 +161,56 @@ const SELF_PETITION_NOTE = notListedNote(
 const RETURNING_RESIDENT_NOTE = notListedNote("returning residents (SB-1)");
 const SPECIAL_IMMIGRANT_NOTE = notListedNote("special immigrants");
 const AMERASIAN_NOTE = notListedNote("Amerasian immigrants");
+const U_VISA_FAMILY_NOTE = notListedNote("family members of U visa holders");
 
-/** Why an immigrant visa class has no column in State's IV Scheduling Status
- * Tool */
+/** Why a visa class that goes through NVC has no column in State's IV
+ * Scheduling Status Tool: the immigrant classes it does not cover, and the K
+ * visas, which are nonimmigrant visas but go through NVC too */
 export const CLASS_NOTES: Partial<Record<string, string>> = {
   k1: FIANCE_NOTE,
   k2: FIANCE_NOTE,
   k3: K3_NOTE,
   k4: K3_NOTE,
-  dv1: DV_NOTE,
-  dv2: DV_NOTE,
-  dv3: DV_NOTE,
+  dv: DV_NOTE,
   ir3: ADOPTION_NOTE,
   ir4: ADOPTION_NOTE,
   ih3: ADOPTION_NOTE,
   ih4: ADOPTION_NOTE,
-  cw1iw1: WIDOW_NOTE,
-  cw2iw2: WIDOW_NOTE,
+  iw: WIDOW_NOTE,
   ib1: SELF_PETITION_NOTE,
   ib2: SELF_PETITION_NOTE,
-  ib3: SELF_PETITION_NOTE,
-  b21: SELF_PETITION_NOTE,
-  b22: SELF_PETITION_NOTE,
-  b23: SELF_PETITION_NOTE,
-  b24: SELF_PETITION_NOTE,
-  bx1: SELF_PETITION_NOTE,
-  bx2: SELF_PETITION_NOTE,
-  bx3: SELF_PETITION_NOTE,
+  b2a: SELF_PETITION_NOTE,
+  b2b: SELF_PETITION_NOTE,
+  bx: SELF_PETITION_NOTE,
   sb1: RETURNING_RESIDENT_NOTE,
-  sd1: SPECIAL_IMMIGRANT_NOTE,
-  sd2: SPECIAL_IMMIGRANT_NOTE,
-  sd3: SPECIAL_IMMIGRANT_NOTE,
-  se1: SPECIAL_IMMIGRANT_NOTE,
-  se2: SPECIAL_IMMIGRANT_NOTE,
-  se3: SPECIAL_IMMIGRANT_NOTE,
-  si1: SPECIAL_IMMIGRANT_NOTE,
-  si2: SPECIAL_IMMIGRANT_NOTE,
-  si3: SPECIAL_IMMIGRANT_NOTE,
-  sk1: SPECIAL_IMMIGRANT_NOTE,
-  sk2: SPECIAL_IMMIGRANT_NOTE,
-  sk3: SPECIAL_IMMIGRANT_NOTE,
-  sq1: SPECIAL_IMMIGRANT_NOTE,
-  sq2: SPECIAL_IMMIGRANT_NOTE,
-  sq3: SPECIAL_IMMIGRANT_NOTE,
-  sr1: SPECIAL_IMMIGRANT_NOTE,
-  sr2: SPECIAL_IMMIGRANT_NOTE,
-  sr3: SPECIAL_IMMIGRANT_NOTE,
-  am1: AMERASIAN_NOTE,
-  am2: AMERASIAN_NOTE,
-  am3: AMERASIAN_NOTE,
+  bc: SPECIAL_IMMIGRANT_NOTE,
+  sd: SPECIAL_IMMIGRANT_NOTE,
+  se: SPECIAL_IMMIGRANT_NOTE,
+  si: SPECIAL_IMMIGRANT_NOTE,
+  sk: SPECIAL_IMMIGRANT_NOTE,
+  sq: SPECIAL_IMMIGRANT_NOTE,
+  cq: SPECIAL_IMMIGRANT_NOTE,
+  sr: SPECIAL_IMMIGRANT_NOTE,
+  am: AMERASIAN_NOTE,
+  su: U_VISA_FAMILY_NOTE,
 };
 
-/** For the classes whose pages also count a nonimmigrant visa that shares
- * their symbol (see DESCRIPTION_OVERRIDES in api/consulates.ts): which cases
- * the tool's employment queue is for. */
-export const CLASS_QUEUE_SCOPES: Partial<Record<string, string>> = {
-  e2: "The employment queue is for EB-2 immigrant visas only, not for the E-2 treaty investor visas this page also counts.",
-  e3: "The employment queue is for EB-3 immigrant visas only, not for the E-3 Australian professional visas this page also counts.",
+/** The nonimmigrant classes that go through NVC like immigrant visas: the K
+ * visas for fiancé(e)s and spouses of U.S. citizens and their children */
+export const NVC_NONIMMIGRANT_CLASSES = ["k1", "k2", "k3", "k4"];
+
+/** For the nonimmigrant classes whose code State also uses for an immigrant
+ * class, the slug of that immigrant class's page. Until the class split,
+ * these pages counted both, e.g. Manila's E3 page mostly EB-3 visas, so they
+ * point visitors who bookmarked them to the immigrant page. */
+export const IMMIGRANT_COUNTERPARTS: Partial<Record<string, string>> = {
+  e1: "eb-1",
+  e2: "eb-2",
+  e3: "eb-3",
+  f1: "f1-family",
+  t5: "eb-5",
+  u1: "su",
+  c2: "f2a",
 };
 
 /** How many months before State's update a month in its tool is:

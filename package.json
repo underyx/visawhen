@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "yarn ensure-db && next dev --webpack",
-    "build": "yarn ensure-db && next build --webpack && next-sitemap",
+    "build": "yarn ensure-db && next build --webpack && next-sitemap && node scripts/check-redirects.mjs",
     "export": "yarn build",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",

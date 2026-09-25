@@ -34,6 +34,10 @@ export interface PolicyScope {
   exceptPosts?: string[];
   /** Other pages by path, "/nvc", where it is shown collapsed too */
   pages?: string[];
+  /** About immigrant visas only: not shown on the pages of nonimmigrant visa
+   * classes that do not go through NVC (a post's own page covers every
+   * class, so it still shows there) */
+  immigrantVisasOnly?: boolean;
 }
 
 export interface PolicyEntry {
@@ -78,18 +82,23 @@ function appliesToPost(entry: PolicyEntry, postSlug: string): boolean {
 
 /** The entries for a page, in the file's order: for a post's own page and
  * its visa class pages by `postSlug`, "kampala", and for any other page by
- * `page`, its path, "/nvc". */
+ * `page`, its path, "/nvc". Without `immigrant`, for the page of a
+ * nonimmigrant class that does not go through NVC, the entries about
+ * immigrant visas only are left out. */
 export function policiesFor({
   postSlug,
   page,
+  immigrant = true,
 }: {
   postSlug?: string;
   page?: string;
+  immigrant?: boolean;
 }): PolicyEntry[] {
   return POLICY_ENTRIES.filter(
     (entry) =>
-      (postSlug !== undefined && appliesToPost(entry, postSlug)) ||
-      (page !== undefined && (entry.scope.pages?.includes(page) ?? false)),
+      (immigrant || entry.scope.immigrantVisasOnly !== true) &&
+      ((postSlug !== undefined && appliesToPost(entry, postSlug)) ||
+        (page !== undefined && (entry.scope.pages?.includes(page) ?? false))),
   );
 }
 

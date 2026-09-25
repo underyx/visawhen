@@ -151,9 +151,6 @@ interface Props {
   /** Shown instead of the categories, for visa classes the tool does not
    * cover */
   note?: string;
-  /** Which of the page's cases the queue is for, when the page also counts
-   * visas the tool does not cover */
-  scope?: string;
   /** The notice, shown above the card, under which the tool's months are no
    * queue at this post, such as a pause of visa services there
    * (scheduleOverrideFor() in policy.ts). Until it ends, the card says so in
@@ -171,7 +168,6 @@ export default function IvScheduleCard({
   schedule,
   first,
   note,
-  scope,
   scheduleOverride,
 }: Props) {
   // The prerendered page is served for weeks, so whether the update is stale
@@ -295,7 +291,6 @@ export default function IvScheduleCard({
           </Text>
         ) : (
           <>
-            {scope !== undefined && !overridden && <Text>{scope}</Text>}
             {lines.map(({ label, cutoff }) => (
               <QueueLine
                 key={label}

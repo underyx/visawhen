@@ -1,4 +1,4 @@
-import { IssuancesRow } from "../api/consulates";
+import { IssuancesRow, VisaType } from "../api/consulates";
 import { formatMonth } from "./consulates";
 
 import * as echarts from "echarts/core";
@@ -24,11 +24,25 @@ echarts.use([
   SVGRenderer,
 ]);
 
+/** State's listing of the monthly reports the counts come from */
+const SOURCES: Record<VisaType, { kind: string; url: string }> = {
+  IV: {
+    kind: "immigrant",
+    url: "https://travel.state.gov/content/travel/en/legal/visa-law0/visa-statistics/immigrant-visa-statistics/monthly-immigrant-visa-issuances.html",
+  },
+  NIV: {
+    kind: "nonimmigrant",
+    url: "https://travel.state.gov/content/travel/en/legal/visa-law0/visa-statistics/nonimmigrant-visa-statistics/monthly-nonimmigrant-visa-issuances.html",
+  },
+};
+
 interface Props {
   issuances: IssuancesRow[];
+  visaType: VisaType;
 }
 
-export default function ConsulateChart({ issuances }: Props) {
+export default function ConsulateChart({ issuances, visaType }: Props) {
+  const source = SOURCES[visaType];
   return (
     <Paper shadow="xs" p="md" mx={0} component="figure">
       <ReactEChartsCore
@@ -69,15 +83,9 @@ export default function ConsulateChart({ issuances }: Props) {
         }}
       />
       <figcaption>
-        Source: the U.S. Department of State&rsquo;s monthly{" "}
-        <a href="https://travel.state.gov/content/travel/en/legal/visa-law0/visa-statistics/immigrant-visa-statistics/monthly-immigrant-visa-issuances.html">
-          immigrant
-        </a>{" "}
-        and{" "}
-        <a href="https://travel.state.gov/content/travel/en/legal/visa-law0/visa-statistics/nonimmigrant-visa-statistics/monthly-nonimmigrant-visa-issuances.html">
-          nonimmigrant
-        </a>{" "}
-        visa issuance statistics.
+        Source: the U.S. Department of State&rsquo;s{" "}
+        <a href={source.url}>monthly {source.kind} visa issuance statistics</a>
+        .
         <br />
         The monthly counts are stored in{" "}
         <a href="https://github.com/underyx/visawhen/blob/main/data/consulates/dump">

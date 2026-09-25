@@ -7,6 +7,7 @@ import React, { useMemo } from "react";
 import {
   getAllPosts,
   getIvScheduleAsOf,
+  getLastIssuedByPost,
   getRecentIssuancesByPost,
   getRecentWindow,
   PostRow,
@@ -26,16 +27,27 @@ interface Props {
   recentWindow: RecentWindow;
   /** The date of State's newest IV Scheduling Status Tool update we have */
   ivScheduleAsOf: string;
+  /** For the posts that issued no visas in the last 12 months of the data:
+   * the newest month they issued any in, by post slug */
+  lastIssued: Record<string, string>;
 }
 
-export const getStaticProps: GetStaticProps<Props> = async () => ({
-  props: {
-    posts: await getAllPosts(),
-    recentIssuances: await getRecentIssuancesByPost(),
-    recentWindow: await getRecentWindow(),
-    ivScheduleAsOf: await getIvScheduleAsOf(),
-  },
-});
+export const getStaticProps: GetStaticProps<Props> = async () => {
+  const recentWindow = await getRecentWindow();
+  return {
+    props: {
+      posts: await getAllPosts(),
+      recentIssuances: await getRecentIssuancesByPost(),
+      recentWindow,
+      ivScheduleAsOf: await getIvScheduleAsOf(),
+      lastIssued: Object.fromEntries(
+        Object.entries(await getLastIssuedByPost()).filter(
+          ([, month]) => month < recentWindow.from,
+        ),
+      ),
+    },
+  };
+};
 
 function sortItems(
   posts: PostRow[],
@@ -52,6 +64,7 @@ export default function ConsulateSelect({
   recentIssuances,
   recentWindow,
   ivScheduleAsOf,
+  lastIssued,
 }: Props) {
   const recentMap = useMemo<Map<string, number>>(
     () => new Map(recentIssuances.map((row) => [row.postSlug, row.issuances])),
@@ -113,7 +126,11 @@ export default function ConsulateSelect({
                 tt="none"
                 fw={500}
               >
-                {formatMonthlyRate((recentMap.get(postSlug) ?? 0) / 12)}
+                {(recentMap.get(postSlug) ?? 0) > 0
+                  ? formatMonthlyRate((recentMap.get(postSlug) ?? 0) / 12)
+                  : postSlug in lastIssued
+                  ? `none since ${formatMonth(lastIssued[postSlug])}`
+                  : "none issued"}
               </Badge>
             }
             label={<Highlight highlight={term}>{post}</Highlight>}

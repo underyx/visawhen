@@ -3,32 +3,44 @@ import { GetStaticPaths, GetStaticProps } from "next";
 import React from "react";
 import { findLast, sumBy } from "lodash";
 import {
-  getBaseline,
   getIvSchedule,
   getIvScheduleAsOf,
   getMonthlyIssuances,
+  getPostActivity,
   getSlugPairs,
   getPost,
   getVisaClass,
+  getVisaClassSlugsForPost,
   IssuancesRow,
+  VisaType,
 } from "../../../api/consulates";
 import Head from "next/head";
 import ConsulateChart from "../../../components/ConsulateChart";
 import {
   CLASS_NOTES,
-  CLASS_QUEUE_SCOPES,
+  describeInactivity,
   formatCount,
   formatLongMonth,
   formatMonth,
+  IMMIGRANT_COUNTERPARTS,
   IV_CATEGORY_BY_CLASS,
   IvSchedule,
+  NVC_NONIMMIGRANT_CLASSES,
 } from "../../../components/consulates";
 import IvScheduleCard from "../../../components/IvScheduleCard";
 import PolicyBanner from "../../../components/PolicyBanner";
 import { scheduleOverrideFor } from "../../../components/policy";
 import { useToday } from "../../../components/Freshness";
 import { ChevronLeftIcon } from "../../../components/icons";
-import { Button, Group, Stack, Text, Title } from "@mantine/core";
+import {
+  Alert,
+  Anchor,
+  Button,
+  Group,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
 
 /** Visas issued in the last 12 months of the data and the 12 before those */
 interface Recent {
@@ -49,7 +61,14 @@ interface Props {
   lastIssuedMonth: string | null;
   postName: string;
   visaClassName: string;
+  visaType: VisaType;
   visaClassDescription: string | null;
+  /** That the post has issued no visas, or no immigrant visas for an
+   * immigrant class, for a year, if it has not (see describeInactivity) */
+  inactivity: string | null;
+  /** For a nonimmigrant class whose code State also uses for an immigrant
+   * class, that class's page at the post, if it has one */
+  immigrantCounterpart: { slug: string; name: string } | null;
   /** The date of State's newest IV Scheduling Status Tool update we have */
   ivScheduleAsOf: string;
   /** The post's line in it, or null when it does not list the post */
@@ -78,21 +97,23 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const post = await getPost(postSlug);
   const visaClass = await getVisaClass(visaClassSlug);
   const issuances = await getMonthlyIssuances(postSlug, visaClassSlug);
-  // The pages no longer show the baseline, but only pairs that have one get
-  // a page, as before, so no page (or URL) comes or goes.
-  const baseline = await getBaseline(postSlug, visaClassSlug);
 
-  if (
-    post === undefined ||
-    visaClass === undefined ||
-    issuances.length === 0 ||
-    baseline === undefined
-  )
+  if (post === undefined || visaClass === undefined || issuances.length === 0)
     return { notFound: true };
 
   // Every pair has a row for every month in the data (zero when none were
   // issued), so the last 12 rows are the last 12 months.
   const last12Rows = issuances.slice(-12);
+  const ivSchedule = await getIvSchedule(postSlug);
+  const counterpartSlug =
+    visaClass.visaType === "NIV"
+      ? IMMIGRANT_COUNTERPARTS[visaClassSlug]
+      : undefined;
+  const counterpart =
+    counterpartSlug !== undefined &&
+    (await getVisaClassSlugsForPost(postSlug)).includes(counterpartSlug)
+      ? await getVisaClass(counterpartSlug)
+      : undefined;
 
   return {
     props: {
@@ -109,9 +130,22 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
         findLast(issuances, (row) => row.issuances > 0)?.month ?? null,
       postName: post.post,
       visaClassName: visaClass.visaClass,
+      visaType: visaClass.visaType,
       visaClassDescription: visaClass.description,
+      inactivity: describeInactivity({
+        postName: post.post,
+        activity: await getPostActivity(postSlug),
+        dataStart: issuances[0].month,
+        dataEnd: last12Rows[last12Rows.length - 1].month,
+        immigrant: visaClass.visaType === "IV",
+        listedInTool: ivSchedule !== null,
+      }),
+      immigrantCounterpart:
+        counterpart === undefined
+          ? null
+          : { slug: counterpart.visaClassSlug, name: counterpart.visaClass },
       ivScheduleAsOf: await getIvScheduleAsOf(),
-      ivSchedule: await getIvSchedule(postSlug),
+      ivSchedule,
     },
   };
 };
@@ -212,7 +246,10 @@ export default function ConsulateStats({
   lastIssuedMonth,
   postName,
   visaClassName,
+  visaType,
   visaClassDescription,
+  inactivity,
+  immigrantCounterpart,
   ivScheduleAsOf,
   ivSchedule,
 }: Props) {
@@ -233,7 +270,8 @@ export default function ConsulateStats({
   )} from U.S. State Department statistics.`;
   const canonicalUrl = `https://visawhen.com/consulates/${postSlug}/${visaClassSlug}`;
   // The interview queue for the classes State's scheduling tool covers, and
-  // a note for the other immigrant classes; nonimmigrant classes get neither.
+  // a note for the other classes that go through NVC (the other immigrant
+  // classes and the K visas); other nonimmigrant classes get neither.
   const ivCategory = IV_CATEGORY_BY_CLASS[visaClassSlug];
   const classNote = CLASS_NOTES[visaClassSlug];
   const today = useToday();
@@ -275,10 +313,33 @@ export default function ConsulateStats({
       <Title order={1}>
         {postName}: {visaClassName} visas issued
       </Title>
-      {visaClassDescription !== null && (
-        <Text size="xl">{visaClassDescription}</Text>
+      <Text size="xl">
+        {visaType === "IV" ? "Immigrant" : "Nonimmigrant"} visa
+        {visaClassDescription !== null && `: ${visaClassDescription}`}
+      </Text>
+      {immigrantCounterpart !== null && (
+        // Plain anchor, as for "Change visa class" above
+        <Text>
+          Looking for {immigrantCounterpart.name} immigrant visas? See{" "}
+          <Anchor href={`/consulates/${postSlug}/${immigrantCounterpart.slug}`}>
+            {postName}&rsquo;s {immigrantCounterpart.name} page
+          </Anchor>
+          .
+        </Text>
       )}
-      <PolicyBanner postSlug={postSlug} />
+      {inactivity !== null && (
+        // role="note": a standing statement, which screen readers should not
+        // announce on load as they do Mantine's default role="alert"
+        <Alert role="note" color="gray">
+          {inactivity}
+        </Alert>
+      )}
+      <PolicyBanner
+        postSlug={postSlug}
+        immigrant={
+          visaType === "IV" || NVC_NONIMMIGRANT_CLASSES.includes(visaClassSlug)
+        }
+      />
       {(ivCategory !== undefined || classNote !== undefined) && (
         <IvScheduleCard
           postName={postName}
@@ -286,7 +347,6 @@ export default function ConsulateStats({
           schedule={ivSchedule}
           first={ivCategory}
           note={classNote}
-          scope={CLASS_QUEUE_SCOPES[visaClassSlug]}
           scheduleOverride={
             scheduleOverrideFor(postSlug, ivScheduleAsOf, today) ?? undefined
           }
@@ -299,7 +359,7 @@ export default function ConsulateStats({
         {formatLongMonth(recent.to)}, so it does not show any slowdowns or
         pauses since then.
       </Text>
-      <ConsulateChart issuances={issuances} />
+      <ConsulateChart issuances={issuances} visaType={visaType} />
     </Stack>
   );
 }
