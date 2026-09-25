@@ -29,6 +29,7 @@ import {
   formatMonth,
   IMMIGRANT_COUNTERPARTS,
   IV_CATEGORY_BY_CLASS,
+  IV_POSTS_ELSEWHERE,
   IvSchedule,
   NVC_NONIMMIGRANT_CLASSES,
 } from "../../../components/consulates";
@@ -479,6 +480,8 @@ export default function ConsulateStats({
             from: recent.from,
             to: recent.to,
           }}
+          elsewhere={IV_POSTS_ELSEWHERE[postSlug]}
+          inactive={inactivity !== null}
           suspension={
             suspension === null || country === null
               ? undefined

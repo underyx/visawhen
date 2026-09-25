@@ -25,18 +25,22 @@ import {
   CLASS_APPLICANT_COUNTRIES,
   countToolClassIssuances,
   describeInactivity,
+  describeIvPostElsewhere,
   FEW_IMMIGRANT_VISAS,
   formatCount,
   formatMonth,
   formatMonthlyRate,
   formatShortIvMonth,
+  IV_POSTS_ELSEWHERE,
   IvSchedule,
   monthsBehind,
   summarizeInactivity,
+  summarizeIvPostElsewhere,
 } from "../../../components/consulates";
 import IvScheduleCard, {
   describeRelativeQueue,
   listsPostAsCurrent,
+  showsSuspension,
 } from "../../../components/IvScheduleCard";
 import { ListItem, ListRow, ListRows } from "../../../components/ListRow";
 import PolicyBanner from "../../../components/PolicyBanner";
@@ -204,13 +208,17 @@ export default function ConsulateSelect({
   // is called current only when every category State lists is. Where a
   // policy means the month is no queue, such as a pause of visa services,
   // the policy takes the title and description instead, with its end date if
-  // it has one, since the page may still be served after it. Next, where
-  // most applicants are nationals whose visas are suspended, that takes the
-  // title, since NVC scheduling their interviews does not mean a visa can be
-  // issued. A post that looks closed (see describeInactivity) is titled by
-  // that instead, since State's tool can list a post that issues nothing as
-  // current, and so is one listed as current that issued fewer than
-  // FEW_IMMIGRANT_VISAS of the visas the tool covers.
+  // it has one, since the page may still be served after it. Next, a post
+  // that looks closed (see describeInactivity) is titled by that, since
+  // State's tool can list a post that issues nothing as current; then one
+  // whose country State's list of immigrant visa posts sends elsewhere
+  // (IV_POSTS_ELSEWHERE), by where it sends it. Next, where most applicants
+  // are nationals whose visas are suspended, that takes the title, since NVC
+  // scheduling their interviews does not mean a visa can be issued; but only
+  // at a post that processes immigrant visas (showsSuspension): Caracas and
+  // Kabul have issued none for years. Last, a post listed as current that
+  // issued fewer than FEW_IMMIGRANT_VISAS of the visas the tool covers is
+  // titled by what it issued.
   const relativeCutoff = ivSchedule?.relative ?? null;
   const today = useToday();
   const scheduleOverride = scheduleOverrideFor(postSlug, ivScheduleAsOf, today);
@@ -218,13 +226,24 @@ export default function ConsulateSelect({
     postSlug,
     country: applicantCountry(country, postSlug),
   };
-  const suspension = issuanceSuspensionFor(consulate.country);
+  const elsewhere = IV_POSTS_ELSEWHERE[postSlug];
+  const suspension = showsSuspension({
+    schedule: ivSchedule,
+    inactive: inactivity !== null,
+    elsewhere,
+  })
+    ? issuanceSuspensionFor(consulate.country)
+    : null;
   const recentToolIssued = countToolClassIssuances(recentIssuances);
   const issuedDescription = `How many visas ${postName} issued every month ${
     availableVisaClasses.length === 1
       ? "in one visa class"
       : `in each of ${availableVisaClasses.length} visa classes`
   }, from State Department statistics through ${formatMonth(recentWindow.to)}.`;
+  const elsewhereDescription =
+    elsewhere === undefined
+      ? ""
+      : `${describeIvPostElsewhere(postName, elsewhere)} `;
   let title: string;
   let description: string;
   if (scheduleOverride !== null) {
@@ -243,7 +262,13 @@ export default function ConsulateSelect({
         : "reported; no State Department notice"
     }${ends === null ? "" : `, ${ends}`}, last checked ${formatShortDate(
       scheduleOverride.lastChecked,
-    )}). ${issuedDescription}`;
+    )}). ${elsewhereDescription}${issuedDescription}`;
+  } else if (inactivity !== null && inactivitySummary !== null) {
+    title = `${postName}: ${inactivitySummary}`;
+    description = `${inactivity} ${elsewhereDescription}${issuedDescription}`;
+  } else if (elsewhere !== undefined) {
+    title = summarizeIvPostElsewhere(postName, elsewhere);
+    description = `${elsewhereDescription}${issuedDescription}`;
   } else if (suspension !== null && consulate.country !== null) {
     title = `${postName}: immigrant visas suspended for nationals of ${consulate.country}`;
     description = `Most immigrant visa applicants at ${postName} are nationals of ${
@@ -255,9 +280,6 @@ export default function ConsulateSelect({
     }, last checked ${formatShortDate(
       suspension.lastChecked,
     )}). ${issuedDescription}`;
-  } else if (inactivity !== null && inactivitySummary !== null) {
-    title = `${postName}: ${inactivitySummary}`;
-    description = `${inactivity} ${issuedDescription}`;
   } else if (
     ivSchedule !== null &&
     relativeCutoff !== null &&
@@ -342,6 +364,8 @@ export default function ConsulateSelect({
           from: recentWindow.from,
           to: recentWindow.to,
         }}
+        elsewhere={elsewhere}
+        inactive={inactivity !== null}
         suspension={
           suspension === null || consulate.country === null
             ? undefined

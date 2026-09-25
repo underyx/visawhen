@@ -7,11 +7,17 @@ import {
   formatLongMonth,
   IV_CATEGORIES,
   IvCategory,
+  IvPostElsewhere,
   IvSchedule,
   monthsBehind,
 } from "./consulates";
 import { daysBetween, formatShortDate, useToday } from "./Freshness";
-import { EMBASSIES_URL, VISA_BULLETIN_URL } from "./links";
+import {
+  AFRICA_HUBS_URL,
+  EMBASSIES_URL,
+  IV_POSTS_URL,
+  VISA_BULLETIN_URL,
+} from "./links";
 import { hasEnded, overridesUpdate, PolicyEntry } from "./policy";
 /** State updates the tool monthly, so an update older than this means we
  * have missed at least one. */
@@ -123,6 +129,32 @@ function listedCutoffs(schedule: IvSchedule): string[] {
   );
 }
 
+/** Whether a page's interview-scheduling card says that most of the post's
+ * immigrant visa applicants are nationals whose visas are suspended, and
+ * its title may: only where the post looks like it processes immigrant
+ * visas, listed in State's tool with a month, not designated away from by
+ * State's list of immigrant visa posts (`elsewhere`) and not `inactive`
+ * (describeInactivity). Caracas has issued nothing since 2019 and is not in
+ * the tool, Kabul nothing since 2021 and is N/A in it, and State sends
+ * Venezuela's and Afghanistan's applicants to Bogota and Islamabad: most
+ * applicants there are no one. */
+export function showsSuspension({
+  schedule,
+  inactive,
+  elsewhere,
+}: {
+  schedule: IvSchedule | null;
+  inactive: boolean;
+  elsewhere: IvPostElsewhere | undefined;
+}): boolean {
+  return (
+    schedule !== null &&
+    listedCutoffs(schedule).length > 0 &&
+    !inactive &&
+    elsewhere === undefined
+  );
+}
+
 /** Whether State lists every category it gives a month for at the post as
  * current, so that the post as a whole is listed as current */
 export function listsPostAsCurrent(schedule: IvSchedule): boolean {
@@ -224,6 +256,76 @@ interface Props {
    * fewer than FEW_IMMIGRANT_VISAS, the card says so wherever the tool lists
    * a category as current. */
   recentIssued?: { count: number; from: string; to: string };
+  /** Where State's list of immigrant visa posts sends the post's country
+   * instead (IV_POSTS_ELSEWHERE in consulates.ts), which the card says */
+  elsewhere?: IvPostElsewhere;
+  /** Whether the post has issued no immigrant visas for a year or more
+   * (describeInactivity), so that `suspension` is not said of it */
+  inactive?: boolean;
+}
+
+/** That State's list of immigrant visa posts names another post for the
+ * post's country, with links to it and to the list */
+function ElsewhereNote({
+  postName,
+  elsewhere: { country, posts, alsoHub },
+}: {
+  postName: string;
+  elsewhere: IvPostElsewhere;
+}) {
+  return (
+    <Alert role="note" color="orange">
+      <Text size="sm">
+        State&rsquo;s{" "}
+        <Anchor
+          href={IV_POSTS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          inherit
+        >
+          list of the embassies and consulates that process immigrant visas
+        </Anchor>{" "}
+        names{" "}
+        {posts.map(({ slug, name, only }, index) => (
+          <React.Fragment key={slug}>
+            {index > 0 && (index === posts.length - 1 ? " and " : ", ")}
+            {/* Plain anchor: the consulate page's _next/data JSON is not
+                deployed (see the note in components/ListRow.tsx) */}
+            <Anchor href={`/consulates/${slug}`} inherit>
+              {name}
+            </Anchor>
+            {only !== undefined && ` (${only} only)`}
+          </React.Fragment>
+        ))}{" "}
+        for {country}, not {postName}.
+        {alsoHub === true && (
+          <>
+            {" "}
+            State&rsquo;s{" "}
+            <Anchor
+              href={AFRICA_HUBS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              inherit
+            >
+              July 15, 2026 notice on realigning visa services in Africa
+            </Anchor>{" "}
+            names {postName} as a regional visa hub, though; check the
+            embassy&rsquo;s own website, listed at{" "}
+            <Anchor
+              href={EMBASSIES_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              inherit
+            >
+              usembassy.gov
+            </Anchor>
+            .
+          </>
+        )}
+      </Text>
+    </Alert>
+  );
 }
 
 /** That most of a page's applicants are nationals whose visas are
@@ -262,6 +364,8 @@ export default function IvScheduleCard({
   scheduleOverride,
   suspension,
   recentIssued,
+  elsewhere,
+  inactive = false,
 }: Props) {
   // The prerendered page is served for weeks, so whether the update is stale
   // is decided on the client only.
@@ -284,6 +388,10 @@ export default function IvScheduleCard({
     </Anchor>
   );
 
+  const suspended =
+    suspension !== undefined &&
+    showsSuspension({ schedule, inactive, elsewhere });
+
   if (note !== undefined)
     return (
       <Paper withBorder p="md" radius="md">
@@ -291,7 +399,10 @@ export default function IvScheduleCard({
           <Title order={2} size="h3">
             Interview scheduling at {postName}
           </Title>
-          {suspension !== undefined && (
+          {elsewhere !== undefined && (
+            <ElsewhereNote postName={postName} elsewhere={elsewhere} />
+          )}
+          {suspended && suspension !== undefined && (
             <SuspensionNote postName={postName} suspension={suspension} />
           )}
           <Text>{note}</Text>
@@ -371,7 +482,10 @@ export default function IvScheduleCard({
         <Title order={2} size="h3">
           Interview scheduling at {postName}
         </Title>
-        {suspension !== undefined && !overridden && (
+        {elsewhere !== undefined && (
+          <ElsewhereNote postName={postName} elsewhere={elsewhere} />
+        )}
+        {suspended && suspension !== undefined && !overridden && (
           <SuspensionNote postName={postName} suspension={suspension} />
         )}
         {stale && (
