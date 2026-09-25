@@ -280,7 +280,13 @@ export function OutcomesChart({
               symbolSize: 8,
             },
             {
-              name: routed.length > 0 ? "Filed (or routed here)" : "Filed",
+              // as in the text: only for routing in the quarters shown at
+              // first; an older quarter's tooltip still says it
+              name: points
+                .slice(-CHART_QUARTERS)
+                .some(({ quarter }) => routed.includes(quarter))
+                ? "Filed (or routed here)"
+                : "Filed",
               type: "line",
               data: points.map((point) => point.received),
               lineStyle: { width: 2, type: "dashed" },
