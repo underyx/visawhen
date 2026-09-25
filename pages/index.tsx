@@ -13,6 +13,7 @@ import React from "react";
 import {
   DOL_PROCESSING_TIMES_URL,
   GLOBAL_VISA_WAIT_TIMES_URL,
+  I751_URL,
   VISA_BULLETIN_URL,
 } from "../components/links";
 
@@ -56,6 +57,22 @@ function To({ href, children }: React.PropsWithChildren<{ href: string }>) {
     <Anchor href={href} target="_blank" rel="noopener">
       {children}
     </Anchor>
+  );
+}
+
+/** When a conditional resident files the I-751, as uscis.gov/i-751 puts
+ * it: jointly "during the 90-day period immediately before your
+ * conditional residence expires", or individually, "with a request to
+ * waive the joint filing requirement", "at any time before your
+ * conditional permanent resident status expires". */
+function I751Timing() {
+  return (
+    <>
+      <To href="/uscis/i-751">I-751 to remove the conditions</To>, filed with
+      your spouse in the 90 days before the card expires, not earlier; or, with
+      a <To href={I751_URL}>waiver of the joint filing requirement</To> (after a
+      divorce, for example), any time before it expires.
+    </>
   );
 }
 
@@ -133,8 +150,7 @@ export default function Home() {
             <>
               A spouse married less than 2 years when they enter the US on the
               visa gets a 2-year conditional green card (usually on a CR-1
-              visa): <To href="/uscis/i-751">I-751 to remove the conditions</To>
-              , filed in the 90 days before the card expires.
+              visa): <I751Timing />
             </>,
           ]}
         />
@@ -165,9 +181,7 @@ export default function Home() {
             </>,
             <>
               If you were married less than 2 years when you got your green
-              card, it is a 2-year conditional one:{" "}
-              <To href="/uscis/i-751">I-751 to remove the conditions</To>, filed
-              in the 90 days before it expires, not earlier.
+              card, it is a 2-year conditional one: <I751Timing />
             </>,
           ]}
         />
@@ -195,9 +209,7 @@ export default function Home() {
             <>
               If you have been married less than 2 years when the I-485 is
               approved, as most K-1 couples are, you get a 2-year conditional
-              green card:{" "}
-              <To href="/uscis/i-751">I-751 to remove the conditions</To>, filed
-              in the 90 days before it expires.
+              green card: <I751Timing />
             </>,
           ]}
         />

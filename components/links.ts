@@ -32,6 +32,10 @@ export const GLOBAL_VISA_WAIT_TIMES_URL =
 /** The list of U.S. embassies' and consulates' own websites */
 export const EMBASSIES_URL = "https://www.usembassy.gov/";
 
+/** USCIS's page for Form I-751, Petition to Remove Conditions on
+ * Residence */
+export const I751_URL = "https://www.uscis.gov/i-751";
+
 /** State's List of U.S. Embassies and Consulates that Process Immigrant
  * Visas */
 export const IV_POSTS_URL =
