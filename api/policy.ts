@@ -69,6 +69,25 @@ function problemsWith(entry: Record<string, unknown>): string[] {
       "scope.visaClasses must list visa class slugs, and only with posts, countries or allConsulatePages: true",
     ],
     [
+      scope.countryVisas === undefined ||
+        (Array.isArray(scope.countryVisas) &&
+          scope.countryVisas.length > 0 &&
+          scope.countryVisas.every(
+            (group: Record<string, unknown>) =>
+              isTextList(group.countries) &&
+              group.countries.every(
+                (country) =>
+                  Array.isArray(scope.countries) &&
+                  scope.countries.includes(country),
+              ) &&
+              typeof group.immigrant === "boolean" &&
+              (group.nonimmigrantClasses === "all" ||
+                (Array.isArray(group.nonimmigrantClasses) &&
+                  group.nonimmigrantClasses.every(isText))),
+          )),
+      'scope.countryVisas must list {countries, immigrant, nonimmigrantClasses}, each of whose countries is in scope.countries, with immigrant true or false and nonimmigrantClasses "all" or visa class slugs',
+    ],
+    [
       entry.expanded === undefined || typeof entry.expanded === "boolean",
       "expanded must be true or false",
     ],
@@ -185,11 +204,12 @@ export function checkPolicies({
     countries,
     (scope) => scope.countries ?? [],
   );
-  unknownIn(
-    "visa classes that have no page",
-    visaClassSlugs,
-    (scope) => scope.visaClasses ?? [],
-  );
+  unknownIn("visa classes that have no page", visaClassSlugs, (scope) => [
+    ...(scope.visaClasses ?? []),
+    ...(scope.countryVisas ?? []).flatMap(({ nonimmigrantClasses }) =>
+      nonimmigrantClasses === "all" ? [] : nonimmigrantClasses,
+    ),
+  ]);
 
   // A warning, not an error: failing the build would also hold back the
   // scheduled data deploys.

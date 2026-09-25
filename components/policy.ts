@@ -30,7 +30,8 @@ export interface PolicyScope {
    * parentheses ("Cuba", "Burma", "Côte d'Ivoire"; see applicantCountry() in
    * consulates.ts): the entry is about their nationals, who make up most of
    * the immigrant visa applicants at the posts in them, and it is shown
-   * expanded on those posts' pages. List only countries the site has a post
+   * expanded on those posts' pages (on their visa class pages, only for the
+   * classes `countryVisas` says it covers). List only countries the site has a post
    * in: the build warns about the others. */
   countries?: string[];
   /** Shown, collapsed with the other site-wide entries, on every post's page
@@ -39,6 +40,13 @@ export interface PolicyScope {
   /** Post slugs, "budapest", whose pages an `allConsulatePages` entry is not
    * shown on, such as posts a worldwide pause is reported not to apply to */
   exceptPosts?: string[];
+  /** For an entry about the nationals of `countries` that covers some visa
+   * classes only for some of them: which classes, per group of those
+   * countries. A country in no group is covered for every class. On a visa
+   * class page the class does not cover, the entry is not about the page's
+   * country (see namesPost): it is shown collapsed there, if at all. A
+   * post's own page covers every class, so it is about it there. */
+  countryVisas?: CountryVisas[];
   /** Visa class slugs, "dv": of the consulate pages the rest of the scope
    * names, the entry is shown, expanded, only on these classes' pages, and
    * not on a post's own page, which covers every class */
@@ -49,6 +57,18 @@ export interface PolicyScope {
    * classes that do not go through NVC (a post's own page covers every
    * class, so it still shows there) */
   immigrantVisasOnly?: boolean;
+}
+
+/** The visas an entry covers for the nationals of some of its countries:
+ * Presidential Proclamation 10998 suspends every visa for nationals of 19
+ * countries, immigrant visas and B-1/B-2, F, M and J visas for those of 19
+ * others, and immigrant visas only for those of Turkmenistan. */
+export interface CountryVisas {
+  countries: string[];
+  /** Whether it covers immigrant visas */
+  immigrant: boolean;
+  /** The nonimmigrant visa class slugs it covers, "b1b2", or "all" */
+  nonimmigrantClasses: string[] | "all";
 }
 
 export interface PolicyEntry {
@@ -105,15 +125,44 @@ export interface ConsulatePage {
   nonimmigrant?: boolean;
 }
 
-/** Whether an entry names a page's post, or the country its applicants are
- * nationals of */
-function namesPost(
+/** The group of `scope.countryVisas` a country is in, if any */
+function countryVisasFor(
   entry: PolicyEntry,
-  { postSlug, country }: ConsulatePage,
+  country: string,
+): CountryVisas | undefined {
+  return entry.scope.countryVisas?.find(({ countries }) =>
+    countries.includes(country),
+  );
+}
+
+/** Whether an entry about the nationals of `country` covers a page's visas:
+ * every visa on a post's own page, and on a visa class page, its class, by
+ * `scope.countryVisas` */
+function coversPageClass(
+  entry: PolicyEntry,
+  country: string,
+  { visaClassSlug, nonimmigrant }: ConsulatePage,
 ): boolean {
+  const group = countryVisasFor(entry, country);
+  if (group === undefined || visaClassSlug === undefined) return true;
+  if (nonimmigrant !== true) return group.immigrant;
+  return (
+    group.nonimmigrantClasses === "all" ||
+    group.nonimmigrantClasses.includes(visaClassSlug)
+  );
+}
+
+/** Whether an entry names a page's post, or the country its applicants are
+ * nationals of, for the page's visas: Proclamation 10998 is about Lagos's
+ * B-1/B-2 page, since it suspends those visas for Nigerians, but not about
+ * its H-1B page. */
+function namesPost(entry: PolicyEntry, page: ConsulatePage): boolean {
+  const { postSlug, country } = page;
   return (
     (entry.scope.posts?.includes(postSlug) ?? false) ||
-    (country !== null && (entry.scope.countries?.includes(country) ?? false))
+    (country !== null &&
+      (entry.scope.countries?.includes(country) ?? false) &&
+      coversPageClass(entry, country, page))
   );
 }
 
@@ -175,8 +224,9 @@ export function policiesFor({
   );
 }
 
-/** The entry that suspends visas for the nationals of `country`, the country
- * most of a page's immigrant visa applicants are nationals of, if one does:
+/** The entry that suspends immigrant visas for the nationals of `country`,
+ * the country most of a page's immigrant visa applicants are nationals of,
+ * if one does:
  * one that has started and not ended by the day it was last checked, which
  * the prerendered page can say (see hasStarted and hasEnded). */
 export function issuanceSuspensionFor(
@@ -188,6 +238,7 @@ export function issuanceSuspensionFor(
       (entry) =>
         entry.suspendsIssuance === true &&
         (entry.scope.countries?.includes(country) ?? false) &&
+        (countryVisasFor(entry, country)?.immigrant ?? true) &&
         hasStarted(entry, null) &&
         !hasEnded(entry, null),
     ) ?? null

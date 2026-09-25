@@ -191,6 +191,64 @@
           "Zimbabwe",
           "Turkmenistan"
         ],
+        "countryVisas": [
+          {
+            "countries": [
+              "Afghanistan",
+              "Burma",
+              "Burkina Faso",
+              "Chad",
+              "Republic of the Congo",
+              "Equatorial Guinea",
+              "Eritrea",
+              "Haiti",
+              "Laos",
+              "Mali",
+              "Niger",
+              "Sierra Leone",
+              "South Sudan",
+              "Sudan"
+            ],
+            "immigrant": true,
+            "nonimmigrantClasses": "all"
+          },
+          {
+            "countries": [
+              "Angola",
+              "Benin",
+              "Burundi",
+              "Côte d'Ivoire",
+              "Cuba",
+              "Gabon",
+              "Gambia",
+              "Malawi",
+              "Mauritania",
+              "Nigeria",
+              "Senegal",
+              "Tanzania",
+              "Togo",
+              "Venezuela",
+              "Zambia",
+              "Zimbabwe"
+            ],
+            "immigrant": true,
+            "nonimmigrantClasses": [
+              "b1b2",
+              "bbbccbbbcv",
+              "f1",
+              "f2",
+              "m1",
+              "m2",
+              "j1",
+              "j2"
+            ]
+          },
+          {
+            "countries": ["Turkmenistan"],
+            "immigrant": true,
+            "nonimmigrantClasses": []
+          }
+        ],
         "pages": ["/nvc"]
       },
       "suspendsIssuance": true,
