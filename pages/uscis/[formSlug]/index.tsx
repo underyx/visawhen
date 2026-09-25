@@ -383,7 +383,9 @@ export default function UscisForm({
         Change form
       </Button>
       <Stack gap="sm">
-        <Title order={1}>
+        {/* overflowWrap: a title such as the I-899's "Determination/Reasonable"
+            is one word wider than a phone */}
+        <Title order={1} style={{ overflowWrap: "anywhere" }}>
           {form} processing times
           <Text component="span" inherit c="dimmed">
             {" "}
