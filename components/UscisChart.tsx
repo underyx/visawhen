@@ -49,8 +49,7 @@ function SourceCaption({ source, what }: { source: string; what: string }) {
       </a>{" "}
       page.
       <br />
-      New quarters show up here within a day of USCIS publishing them and are
-      stored in a{" "}
+      The numbers are stored in a{" "}
       <a href="https://github.com/underyx/visawhen/blob/main/data/uscis/forms.json">
         JSON file on GitHub
       </a>
@@ -92,7 +91,7 @@ export function OutcomesChart({
                 `Approved: ${formatCount(point.approved)}`,
                 `Denied: ${formatCount(point.denied)}`,
                 `Pending at quarter end: ${formatCount(point.pending)}`,
-                `Estimated wait at that pace: ${formatMonths(
+                `Time to clear backlog at that pace: ${formatMonths(
                   point.waitMonths,
                 )}`,
               ].join("<br />");
@@ -148,13 +147,14 @@ export function OutcomesChart({
 }
 
 /** Lines: the months it would take to decide every pending application at
- * each quarter's pace of decisions, next to USCIS's own median processing
- * time where it publishes one. */
+ * each quarter's pace of decisions (the time to clear the backlog, which is
+ * not a wait), next to USCIS's own median processing time where it publishes
+ * one. */
 export function WaitChart({
   points,
   processingTimeSeries,
 }: Props & { processingTimeSeries: ProcessingTimeSeries[] }) {
-  const estimateName = "Estimated wait at the quarter's pace";
+  const estimateName = "Time to clear backlog";
   const officialName = ({ label }: ProcessingTimeSeries) =>
     label === "" ? "USCIS median processing time" : `USCIS median: ${label}`;
   return (
@@ -221,7 +221,7 @@ export function WaitChart({
         }}
       />
       <figcaption>
-        The estimated wait is the pending applications at the end of each
+        Time to clear backlog is the pending applications at the end of each
         quarter, divided by the decisions (approvals and denials) made per month
         during it.
         {processingTimeSeries.length > 0 &&

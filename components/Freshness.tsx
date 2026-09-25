@@ -14,6 +14,18 @@ const shortDateFormatter = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
   timeZone: "UTC",
 });
+const monthYearFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
+const monthOnlyFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  timeZone: "UTC",
+});
+
+/** The average length of a month in days. */
+const MONTH_DAYS = 30.44;
 
 // Today never changes while the page is open, as far as these pages care.
 const subscribe = () => () => {};
@@ -49,4 +61,28 @@ export function formatDate(date: string): string {
 /** An ISO date as "Jul 13, 2026". */
 export function formatShortDate(date: string): string {
   return shortDateFormatter.format(new Date(date));
+}
+
+/** The ISO date some months after another, counting average months:
+ * ("2026-09-24", 11.2) is "2027-08-24". */
+export function addMonths(date: string, months: number): string {
+  return addDays(date, Math.round(months * MONTH_DAYS));
+}
+
+/** An ISO date as "Aug 2027". */
+export function formatMonthYear(date: string): string {
+  return monthYearFormatter.format(new Date(date));
+}
+
+/** Two ISO dates as a range of months: "Aug 2027 - Jul 2028", "Apr - Sep
+ * 2027" within a year, or "Apr 2027" when both fall in the same month.
+ * Non-breaking spaces keep each month with its year and the dash with the
+ * start, so a narrow table cell wraps the range only between its ends. */
+export function formatMonthRange(from: string, to: string): string {
+  const start = formatMonthYear(from).replace(" ", "\u00a0");
+  const end = formatMonthYear(to).replace(" ", "\u00a0");
+  if (start === end) return start;
+  if (from.slice(0, 4) === to.slice(0, 4))
+    return `${monthOnlyFormatter.format(new Date(from))}\u00a0- ${end}`;
+  return `${start}\u00a0- ${end}`;
 }

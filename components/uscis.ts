@@ -9,7 +9,7 @@ export interface QuarterPoint extends QuarterCounts {
   /** Decisions made in the quarter: approvals plus denials */
   completions: number | null;
   /** Months it would take to decide every pending application at the
-   * quarter's pace of decisions */
+   * quarter's pace of decisions: the time to clear the backlog, not a wait */
   waitMonths: number | null;
   /** Share of the quarter's decisions that were approvals, 0-1 */
   approvalRate: number | null;
@@ -76,12 +76,13 @@ export function toPoints(
     });
 }
 
+/** Always in months: the time to clear a backlog put in years reads like a
+ * wait, which it is not. */
 export function formatMonths(months: number | null): string {
   if (months === null) return "n/a";
   if (months < 10) return `${months.toFixed(1)} months`;
-  if (months < 36) return `${Math.round(months)} months`;
-  if (months < 240) return `${(months / 12).toFixed(1)} years`;
-  return "20+ years";
+  if (months < 240) return `${Math.round(months)} months`;
+  return "240+ months";
 }
 
 export function formatCount(count: number | null): string {
@@ -111,11 +112,14 @@ export function formatChange(
   return `${change > 0 ? "+" : "−"}${Math.abs(change)}%`;
 }
 
-/** The one-sentence quarter-over-quarter summary shown above the charts. */
+/** The quarter-over-quarter summary shown above the charts. `casesMoved`
+ * says the pending count jumped because USCIS moved cases between offices,
+ * so the sentence does not read like the office fell behind or caught up. */
 export function highlight(
   points: QuarterPoint[],
   subject: string,
   what: string,
+  casesMoved = false,
 ): string {
   const current = points[points.length - 1];
   const previous = points[points.length - 2];
@@ -123,16 +127,23 @@ export function highlight(
   const sentences: string[] = [];
   const pendingChange = formatChange(previous?.pending, current.pending);
   if (current.pending !== null) {
+    const grew = pendingChange?.startsWith("+") ?? false;
+    const moved =
+      casesMoved && pendingChange !== null && pendingChange !== "unchanged"
+        ? grew
+          ? " as USCIS moved cases in from other offices"
+          : " as USCIS moved cases to other offices"
+        : "";
     sentences.push(
       `The pile of pending ${what} at ${subject} ${
         pendingChange === null
           ? "stood at"
           : pendingChange === "unchanged"
           ? "stayed at"
-          : pendingChange.startsWith("+")
+          : grew
           ? `grew ${pendingChange.slice(1)} to`
           : `shrank ${pendingChange.slice(1)} to`
-      } ${formatCount(current.pending)} in ${current.label}.`,
+      } ${formatCount(current.pending)} in ${current.label}${moved}.`,
     );
   }
   if (current.waitMonths !== null) {
@@ -174,13 +185,45 @@ export function variantLabel(title: string, formTitle: string): string {
   return rest === "" ? "Standard" : rest;
 }
 
+/** Names for categories whose row title has no short name in it. USCIS
+ * titles a form's main category after the form itself ("Standard" by
+ * variantLabel), which says nothing next to the form's other categories;
+ * the I-131 rows are all long titles; "All Other" reads like a fragment. */
+const CATEGORY_NAMES: Record<string, string> = {
+  "Application for Advance Parole Document for Aliens Inside the United States":
+    "Advance Parole",
+  "Application for Travel Documents, Parole Documents, and Arrival/Departure Records":
+    "Other Travel Documents",
+  "Application for Initial Parole Document for Aliens Outside the United States":
+    "Initial Parole (outside the US)",
+  "Application for Naturalization": "Civilian",
+  "Immigrant Petition by Standalone Investor": "Standalone Investor",
+  "Application for Employment Authorization (All Other)": "Other Categories",
+};
+
+/** What the pages call a category of a form: the form number when the form
+ * has only the one category in the quarter (`categoryCount`, counting every
+ * row, with a median or not), otherwise a short name that tells it apart
+ * from the others, falling back to the full row title. */
+export function categoryName(
+  title: string,
+  form: { form: string; title: string },
+  categoryCount: number,
+): string {
+  if (categoryCount === 1) return form.form;
+  const named = CATEGORY_NAMES[title];
+  if (named !== undefined) return named;
+  const label = variantLabel(title, form.title);
+  return label === "Standard" ? title : label;
+}
+
 /** The categories of a form whose USCIS median processing time is worth a
  * line on the chart: the ones with the most received in the newest quarter,
  * at most four so the legend stays readable. */
 export function processingTimeSeries(
   points: QuarterPoint[],
   variants: Variant[],
-  formTitle: string,
+  form: { form: string; title: string },
 ): ProcessingTimeSeries[] {
   const titles = [...variants]
     .filter((variant) => variant.processingTime !== null)
@@ -193,6 +236,7 @@ export function processingTimeSeries(
     )
     .map((title) => ({
       title,
-      label: titles.length === 1 ? "" : variantLabel(title, formTitle),
+      label:
+        variants.length === 1 ? "" : categoryName(title, form, variants.length),
     }));
 }
