@@ -84,9 +84,8 @@ function findInactivity({
   if (quiet(lastIssued)) return { visas: "visas", lastIssued };
   if (
     immigrant &&
-    !listedInTool &&
-    lastImmigrantIssued !== null &&
-    quiet(lastImmigrantIssued)
+    quiet(lastImmigrantIssued) &&
+    (lastImmigrantIssued !== null || listedInTool)
   )
     return { visas: "immigrant visas", lastIssued: lastImmigrantIssued };
   return null;
@@ -95,11 +94,13 @@ function findInactivity({
 /** For a post that looks closed, a sentence that says what the data shows:
  * that it issued no visas in the last 12 months of the data, whatever else
  * lists it, or, with `immigrant` (its own page and its immigrant visa class
- * pages), that it issued immigrant visas but none in the last 12 months,
- * when State's IV Scheduling Status Tool, which is months newer, does not
- * list it either. Null for every other post, including those that issued
- * other visas but never an immigrant one in the data: they handle
- * nonimmigrant visas only, which the interview-queue card already says. */
+ * pages), that it issued no immigrant visas in the last 12 months, even
+ * when State's IV Scheduling Status Tool lists it, often as current:
+ * Nicosia, none since November 2024, and Vancouver, none at all in the
+ * data. Null for every other post, including those that issued other visas
+ * but never an immigrant one in the data and that the tool does not list:
+ * they handle nonimmigrant visas only, which the interview-queue card
+ * already says. */
 export function describeInactivity(input: InactivityInput): string | null {
   const inactivity = findInactivity(input);
   if (inactivity === null) return null;
@@ -184,6 +185,24 @@ const IV_CLASSES: Record<IvCategory, string[]> = {
   preference: ["f1-family", "f2a", "f2b", "f3", "f4"],
   employment: ["eb-1", "eb-2", "eb-3", "ew", "eb-5"],
 };
+
+/** Fewer family and employment immigrant visas than this in 12 months, about
+ * four a month, and a post State's tool lists as current is not called
+ * current: at New Delhi (29, most of its immigrant visas being adoptions),
+ * Amsterdam (27) or Moscow (none), "current" says nothing about a queue. */
+export const FEW_IMMIGRANT_VISAS = 50;
+
+/** How many visas of the classes State's tool covers, the family and
+ * employment immigrant visas, the rows count */
+export function countToolClassIssuances(
+  rows: { visaClassSlug: string; issuances: number }[],
+): number {
+  return rows
+    .filter(
+      ({ visaClassSlug }) => IV_CATEGORY_BY_CLASS[visaClassSlug] !== undefined,
+    )
+    .reduce((sum, { issuances }) => sum + issuances, 0);
+}
 
 /** The tool's column for each visa class it covers */
 export const IV_CATEGORY_BY_CLASS: Partial<Record<string, IvCategory>> =

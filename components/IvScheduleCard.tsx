@@ -1,7 +1,10 @@
 import { Alert, Anchor, Box, Paper, Stack, Text, Title } from "@mantine/core";
 import React from "react";
 import {
+  FEW_IMMIGRANT_VISAS,
+  formatCount,
   formatIvMonth,
+  formatLongMonth,
   IV_CATEGORIES,
   IvCategory,
   IvSchedule,
@@ -166,6 +169,12 @@ interface Props {
    * says that most applicants are affected, since NVC keeps scheduling
    * their interviews. */
   suspension?: { entry: PolicyEntry; country: string; applicants: string };
+  /** How many family and employment immigrant visas, the classes the tool
+   * covers, the post issued in the last 12 months of State's monthly
+   * figures, from `from` to `to` ("2025-03-01T00:00:00.000Z"). Where that is
+   * fewer than FEW_IMMIGRANT_VISAS, the card says so wherever the tool lists
+   * a category as current. */
+  recentIssued?: { count: number; from: string; to: string };
 }
 
 /** That most of a page's applicants are nationals whose visas are
@@ -203,6 +212,7 @@ export default function IvScheduleCard({
   note,
   scheduleOverride,
   suspension,
+  recentIssued,
 }: Props) {
   // The prerendered page is served for weeks, so whether the update is stale
   // is decided on the client only.
@@ -280,6 +290,8 @@ export default function IvScheduleCard({
     hasQueue &&
     !postCurrent &&
     cutoffs.some((cutoff) => monthsBehind(asOf, cutoff) <= 0);
+  const few =
+    recentIssued !== undefined && recentIssued.count < FEW_IMMIGRANT_VISAS;
 
   return (
     <Paper withBorder p="md" radius="md">
@@ -358,14 +370,32 @@ export default function IvScheduleCard({
             ))}
           </>
         )}
-        {postCurrent && (
+        {(postCurrent || someCurrent) && few && recentIssued !== undefined ? (
+          // Where the post issues almost none of these visas, "current" most
+          // likely means it schedules few such interviews or none, so it is
+          // said in the body text rather than as a small caveat.
+          <Text>
+            But {postName} issued{" "}
+            {recentIssued.count === 0
+              ? "no"
+              : `only ${formatCount(recentIssued.count)}`}{" "}
+            family or employment immigrant{" "}
+            {recentIssued.count === 1 ? "visa" : "visas"}, the kinds this tool
+            covers, from {formatLongMonth(recentIssued.from)} to{" "}
+            {formatLongMonth(recentIssued.to)}, in State&rsquo;s monthly
+            figures. At a post that issues so few, &ldquo;current&rdquo; may
+            mean it schedules few of these interviews or none; check the
+            embassy&rsquo;s own website, listed at {embassiesLink}, before
+            relying on it.
+          </Text>
+        ) : postCurrent ? (
           <Text size="sm">
             A post listed as current may not be scheduling immigrant visas at
             all; check the embassy&rsquo;s own website, listed at{" "}
             {embassiesLink}.
           </Text>
-        )}
-        {someCurrent && (
+        ) : null}
+        {someCurrent && !few && (
           <Text size="sm">
             Where a category is listed as current, the post may not be
             scheduling those cases at all; check the embassy&rsquo;s own

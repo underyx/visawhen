@@ -23,7 +23,10 @@ import { checkPolicies } from "../../../api/policy";
 import {
   applicantCountry,
   CLASS_APPLICANT_COUNTRIES,
+  countToolClassIssuances,
   describeInactivity,
+  FEW_IMMIGRANT_VISAS,
+  formatCount,
   formatMonth,
   formatMonthlyRate,
   formatShortIvMonth,
@@ -206,7 +209,8 @@ export default function ConsulateSelect({
   // title, since NVC scheduling their interviews does not mean a visa can be
   // issued. A post that looks closed (see describeInactivity) is titled by
   // that instead, since State's tool can list a post that issues nothing as
-  // current.
+  // current, and so is one listed as current that issued fewer than
+  // FEW_IMMIGRANT_VISAS of the visas the tool covers.
   const relativeCutoff = ivSchedule?.relative ?? null;
   const today = useToday();
   const scheduleOverride = scheduleOverrideFor(postSlug, ivScheduleAsOf, today);
@@ -215,6 +219,7 @@ export default function ConsulateSelect({
     country: applicantCountry(country, postSlug),
   };
   const suspension = issuanceSuspensionFor(consulate.country);
+  const recentToolIssued = countToolClassIssuances(recentIssuances);
   const issuedDescription = `How many visas ${postName} issued every month ${
     availableVisaClasses.length === 1
       ? "in one visa class"
@@ -253,6 +258,30 @@ export default function ConsulateSelect({
   } else if (inactivity !== null && inactivitySummary !== null) {
     title = `${postName}: ${inactivitySummary}`;
     description = `${inactivity} ${issuedDescription}`;
+  } else if (
+    ivSchedule !== null &&
+    relativeCutoff !== null &&
+    monthsBehind(ivSchedule.asOf, relativeCutoff) <= 0 &&
+    recentToolIssued < FEW_IMMIGRANT_VISAS
+  ) {
+    // State lists immediate relatives as current at a post that issues
+    // almost none of the visas its tool covers: the data, not "current",
+    // takes the title.
+    const issued = `${
+      recentToolIssued === 0 ? "no" : formatCount(recentToolIssued)
+    } family or employment immigrant ${
+      recentToolIssued === 1 ? "visa" : "visas"
+    } issued`;
+    title = `${postName}: ${issued}, ${formatMonth(
+      recentWindow.from,
+    )} to ${formatMonth(recentWindow.to)}`;
+    description = `${postName} issued ${
+      recentToolIssued === 0 ? "no" : `only ${formatCount(recentToolIssued)}`
+    } family or employment immigrant ${
+      recentToolIssued === 1 ? "visa" : "visas"
+    } from ${formatMonth(recentWindow.from)} to ${formatMonth(
+      recentWindow.to,
+    )}, though State’s interview-scheduling tool lists it as current. ${issuedDescription}`;
   } else {
     title =
       ivSchedule === null || relativeCutoff === null
@@ -306,6 +335,11 @@ export default function ConsulateSelect({
         schedule={ivSchedule}
         source={ivScheduleSource}
         scheduleOverride={scheduleOverride ?? undefined}
+        recentIssued={{
+          count: recentToolIssued,
+          from: recentWindow.from,
+          to: recentWindow.to,
+        }}
         suspension={
           suspension === null || consulate.country === null
             ? undefined

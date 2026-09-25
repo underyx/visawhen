@@ -10,6 +10,7 @@ import {
   getPostActivity,
   getSlugPairs,
   getPost,
+  getRecentIssuancesByClass,
   getVisaClass,
   getVisaClassSlugsForPost,
   IssuancesRow,
@@ -21,6 +22,7 @@ import {
   applicantCountry,
   CLASS_APPLICANT_COUNTRIES,
   CLASS_NOTES,
+  countToolClassIssuances,
   describeInactivity,
   formatCount,
   formatLongMonth,
@@ -90,6 +92,9 @@ interface Props {
   ivSchedule: IvSchedule | null;
   /** The tool's address */
   ivScheduleSource: string;
+  /** How many family and employment immigrant visas, the classes State's
+   * tool covers, the post issued in the last 12 months of the data */
+  recentToolIssued: number;
   /** The country whose nationals make up most of the page's immigrant visa
    * applicants, "Cuba", or null (see applicantCountry) */
   country: string | null;
@@ -169,6 +174,9 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       ivScheduleAsOf: await getIvScheduleAsOf(),
       ivSchedule,
       ivScheduleSource: await getIvScheduleSource(),
+      recentToolIssued: countToolClassIssuances(
+        await getRecentIssuancesByClass(postSlug),
+      ),
       country: applicantCountry(
         POST_COUNTRIES[postSlug] ?? null,
         postSlug,
@@ -354,6 +362,7 @@ export default function ConsulateStats({
   ivScheduleAsOf,
   ivSchedule,
   ivScheduleSource,
+  recentToolIssued,
   country,
 }: Props) {
   const firstMonth = issuances[0].month;
@@ -458,6 +467,11 @@ export default function ConsulateStats({
           scheduleOverride={
             scheduleOverrideFor(postSlug, ivScheduleAsOf, today) ?? undefined
           }
+          recentIssued={{
+            count: recentToolIssued,
+            from: recent.from,
+            to: recent.to,
+          }}
           suspension={
             suspension === null || country === null
               ? undefined
