@@ -31,9 +31,10 @@ import {
   formatMedian,
   formatRangeMonths,
   headlineRange,
-  VISA_BULLETIN_URL,
   withoutMisleadingClearing,
 } from "../../../components/estimate";
+import { VISA_BULLETIN_URL } from "../../../components/links";
+import { RELATED_FORMS } from "../../../components/relatedForms";
 import {
   approximately,
   formatCount,
@@ -52,6 +53,7 @@ import { OutcomesChart, WaitChart } from "../../../components/UscisChart";
 import UscisStats, { RangeText } from "../../../components/UscisStats";
 import { ListRow, ListRows } from "../../../components/ListRow";
 import { normalize } from "../../../components/search";
+import SearchStatus from "../../../components/SearchStatus";
 
 interface OfficeSummary {
   slug: string;
@@ -181,6 +183,7 @@ export default function UscisForm({
 }: Props) {
   const [term, setTerm] = useInputState("");
   const current = points[points.length - 1];
+  const related = RELATED_FORMS[form];
   const headline = headlineRange(ranges);
   // whether any category gets a range, not just a reason why not
   const hasRange = ranges.some(
@@ -290,6 +293,27 @@ export default function UscisForm({
           <strong>Quarter-over-quarter highlight:</strong>{" "}
           {highlight(points, "USCIS", `${form} applications`)}
         </Text>
+        {related !== undefined && (
+          <Text>
+            {related.lead}{" "}
+            {related.links.map((link, index) => (
+              <React.Fragment key={link.href}>
+                {index > 0 &&
+                  (index === related.links.length - 1 ? " and " : ", ")}
+                {link.href.startsWith("/") ? (
+                  <Anchor component={Link} href={link.href}>
+                    {link.text}
+                  </Anchor>
+                ) : (
+                  <Anchor href={link.href} target="_blank" rel="noopener">
+                    {link.text}
+                  </Anchor>
+                )}
+              </React.Fragment>
+            ))}
+            .
+          </Text>
+        )}
       </Stack>
       {ranges.length > 0 && (
         <Stack gap="sm">
@@ -394,6 +418,7 @@ export default function UscisForm({
         </Text>
         <OutcomesChart
           points={points}
+          subject={form}
           source={source}
           sourceName={sourceName}
         />
@@ -424,6 +449,7 @@ export default function UscisForm({
           </Text>
           <WaitChart
             points={points}
+            subject={form}
             processingTimeSeries={processingTimeSeries}
           />
         </Stack>
@@ -495,67 +521,76 @@ export default function UscisForm({
           </Text>
           <TextInput
             size="lg"
+            label="Find your field office"
             leftSection={<SearchIcon />}
-            type="text"
-            placeholder="San Francisco"
+            type="search"
+            placeholder="e.g. San Francisco or CA"
             onChange={setTerm}
           />
-          <ListRows>
-            {filteredOffices.map(
-              ({
-                slug: officeSlug,
-                name,
-                stateCode,
-                category,
-                completions,
-                approximate,
-                approved,
-              }) => (
-                <ListRow
-                  key={officeSlug}
-                  href={`/uscis/${slug}/${officeSlug}`}
-                  rightSection={
-                    // with the denials unpublished, the approvals are all
-                    // there is to show
-                    (completions !== null || approved !== null) && (
-                      <Badge
-                        size="lg"
-                        radius="sm"
-                        variant="outline"
-                        color="gray"
-                        tt="none"
-                        fw={500}
-                      >
-                        {`${
-                          completions !== null
-                            ? `${approximately(
-                                formatCount(completions),
-                                approximate,
-                              )} decided`
-                            : `${formatCount(approved)} approved`
-                        }${category === null ? "" : ` · ${category}`}`}
-                      </Badge>
-                    )
-                  }
-                  label={
-                    <Group gap="xs">
-                      <Highlight highlight={term}>{name}</Highlight>
-                      {stateCode !== null && (
+          <SearchStatus
+            term={term}
+            count={filteredOffices.length}
+            noun={["office", "offices"]}
+            hint="Try the city or the two-letter state code, such as Houston or TX."
+          />
+          {filteredOffices.length > 0 && (
+            <ListRows>
+              {filteredOffices.map(
+                ({
+                  slug: officeSlug,
+                  name,
+                  stateCode,
+                  category,
+                  completions,
+                  approximate,
+                  approved,
+                }) => (
+                  <ListRow
+                    key={officeSlug}
+                    href={`/uscis/${slug}/${officeSlug}`}
+                    rightSection={
+                      // with the denials unpublished, the approvals are all
+                      // there is to show
+                      (completions !== null || approved !== null) && (
                         <Badge
                           size="lg"
                           radius="sm"
-                          color="blue"
-                          variant="light"
+                          variant="outline"
+                          color="gray"
+                          tt="none"
+                          fw={500}
                         >
-                          <Highlight highlight={term}>{stateCode}</Highlight>
+                          {`${
+                            completions !== null
+                              ? `${approximately(
+                                  formatCount(completions),
+                                  approximate,
+                                )} decided`
+                              : `${formatCount(approved)} approved`
+                          }${category === null ? "" : ` · ${category}`}`}
                         </Badge>
-                      )}
-                    </Group>
-                  }
-                />
-              ),
-            )}
-          </ListRows>
+                      )
+                    }
+                    label={
+                      <Group gap="xs">
+                        <Highlight highlight={term}>{name}</Highlight>
+                        {stateCode !== null && (
+                          <Badge
+                            size="lg"
+                            radius="sm"
+                            color="blue"
+                            variant="light"
+                          >
+                            <Highlight highlight={term}>{stateCode}</Highlight>
+                          </Badge>
+                        )}
+                      </Group>
+                    }
+                  />
+                ),
+              )}
+            </ListRows>
+          )}
         </Stack>
       )}
     </Stack>

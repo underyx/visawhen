@@ -3,25 +3,24 @@ import React from "react";
 import {
   formatIvMonth,
   IV_CATEGORIES,
-  IV_SCHEDULE_URL,
   IvCategory,
   IvSchedule,
   monthsBehind,
 } from "./consulates";
 import { daysBetween, formatShortDate, useToday } from "./Freshness";
+import { EMBASSIES_URL, VISA_BULLETIN_URL } from "./links";
 import { hasEnded, overridesUpdate, PolicyEntry } from "./policy";
-
-const VISA_BULLETIN_URL =
-  "https://travel.state.gov/content/travel/en/legal/visa-law0/visa-bulletin.html";
-const EMBASSIES_URL = "https://www.usembassy.gov/";
 /** State updates the tool monthly, so an update older than this means we
  * have missed at least one. */
 const MAX_AGE_DAYS = 45;
 
+// The family preference and employment columns each give one month for all
+// of their categories, so the labels say so: the EB-2 page's line is the
+// month for every employment case, not an EB-2 queue of its own.
 const CATEGORY_LABELS: Record<IvCategory, string> = {
   relative: "Spouses, children and parents of U.S. citizens",
-  preference: "Family preference",
-  employment: "Employment",
+  preference: "Family preference (one month for F1, F2A, F2B, F3 and F4)",
+  employment: "Employment (one month for EB-1, EB-2, EB-3 and EB-5)",
 };
 
 /** What State's tool says about one category at a post, split around the
@@ -146,6 +145,8 @@ interface Props {
   asOf: string;
   /** The post's line in that update, or null when it does not list the post */
   schedule: IvSchedule | null;
+  /** The tool's address (iv_schedule.json's "source") */
+  source: string;
   /** The category to show first; the other two follow it */
   first?: IvCategory;
   /** Shown instead of the categories, for visa classes the tool does not
@@ -166,6 +167,7 @@ export default function IvScheduleCard({
   postName,
   asOf,
   schedule,
+  source,
   first,
   note,
   scheduleOverride,
@@ -176,12 +178,7 @@ export default function IvScheduleCard({
   const stale = today !== null && daysBetween(asOf, today) > MAX_AGE_DAYS;
   const updated = formatShortDate(asOf);
   const toolLink = (children: React.ReactNode) => (
-    <Anchor
-      href={IV_SCHEDULE_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      inherit
-    >
+    <Anchor href={source} target="_blank" rel="noopener noreferrer" inherit>
       {children}
     </Anchor>
   );
@@ -264,11 +261,32 @@ export default function IvScheduleCard({
         {schedule === null ? (
           <Text>
             {postName} is not listed in State&rsquo;s interview-scheduling tool;
-            {overridden
-              ? " see the notice above."
-              : " it may not process immigrant visas."}
+            {overridden ? (
+              " see the notice above."
+            ) : (
+              <>
+                {" "}
+                it may not process immigrant visas. Check the embassy&rsquo;s
+                own website, listed at {embassiesLink}.
+              </>
+            )}
           </Text>
-        ) : overridden && cutoffs.length > 0 ? (
+        ) : cutoffs.length === 0 ? (
+          // State lists the post but gives N/A in every column, as for Kabul
+          <Text>
+            State&rsquo;s tool lists {postName} but gives no month for any
+            category (N/A);
+            {overridden ? (
+              " see the notice above."
+            ) : (
+              <>
+                {" "}
+                it may not be processing immigrant visas. Check the
+                embassy&rsquo;s own website, listed at {embassiesLink}.
+              </>
+            )}
+          </Text>
+        ) : overridden ? (
           <Text>
             State&rsquo;s tool still lists{" "}
             {new Set(cutoffs).size === 1

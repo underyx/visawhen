@@ -9,6 +9,7 @@ import {
   getAllVisaClasses,
   getIvSchedule,
   getIvScheduleAsOf,
+  getIvScheduleSource,
   getPost,
   getPostActivity,
   getRecentIssuancesByClass,
@@ -31,15 +32,17 @@ import IvScheduleCard, {
   describeRelativeQueue,
   listsPostAsCurrent,
 } from "../../../components/IvScheduleCard";
-import { ListRow, ListRows } from "../../../components/ListRow";
+import { ListItem, ListRow, ListRows } from "../../../components/ListRow";
 import PolicyBanner from "../../../components/PolicyBanner";
 import { hasEnded, scheduleOverrideFor } from "../../../components/policy";
 import { formatShortDate, useToday } from "../../../components/Freshness";
 import { normalize } from "../../../components/search";
+import SearchStatus from "../../../components/SearchStatus";
+import { POST_COUNTRIES } from "../../../api/searchTerms";
 import {
   Alert,
   Badge,
-  Breadcrumbs,
+  Box,
   Button,
   Group,
   Highlight,
@@ -53,6 +56,8 @@ import { useInputState } from "@mantine/hooks";
 interface Props {
   postSlug: string;
   postName: string;
+  /** "Canada" */
+  country: string | null;
   visaClasses: VisaClassRow[];
   availableVisaClasses: string[];
   /** Visas issued per class in the last 12 months of the data */
@@ -62,6 +67,8 @@ interface Props {
   ivScheduleAsOf: string;
   /** The post's line in it, or null when it does not list the post */
   ivSchedule: IvSchedule | null;
+  /** The tool's address */
+  ivScheduleSource: string;
   /** That the post has issued no immigrant visas, or no visas, for a year,
    * if it has not (see describeInactivity) */
   inactivity: string | null;
@@ -90,12 +97,14 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     props: {
       postSlug,
       postName: postInfo.post,
+      country: POST_COUNTRIES[postSlug] ?? null,
       visaClasses: await getAllVisaClasses(),
       availableVisaClasses: await getVisaClassSlugsForPost(postSlug),
       recentIssuances: await getRecentIssuancesByClass(postSlug),
       recentWindow,
       ivScheduleAsOf: await getIvScheduleAsOf(),
       ivSchedule,
+      ivScheduleSource: await getIvScheduleSource(),
       inactivity: describeInactivity({
         postName: postInfo.post,
         activity: await getPostActivity(postSlug),
@@ -121,12 +130,14 @@ function sortItems(
 export default function ConsulateSelect({
   postSlug,
   postName,
+  country,
   visaClasses,
   availableVisaClasses,
   recentIssuances,
   recentWindow,
   ivScheduleAsOf,
   ivSchedule,
+  ivScheduleSource,
   inactivity,
 }: Props) {
   const recentMap = useMemo<Map<string, number>>(
@@ -150,6 +161,14 @@ export default function ConsulateSelect({
       recentMap,
     );
   }, [recentMap, visaClasses, term]);
+  // The classes the post has a page for, and those it never issued, which
+  // have none: they are listed, collapsed, as text rather than as links
+  const issuedVisas = filteredVisas.filter(({ visaClassSlug }) =>
+    availableVisaClassesSet.has(visaClassSlug),
+  );
+  const neverIssuedVisas = filteredVisas.filter(
+    ({ visaClassSlug }) => !availableVisaClassesSet.has(visaClassSlug),
+  );
 
   const canonicalUrl = `https://visawhen.com/consulates/${postSlug}`;
   // Posts State lists with a month for immediate relatives are titled by
@@ -223,6 +242,10 @@ export default function ConsulateSelect({
       >
         Change consulate
       </Button>
+      <Box>
+        <Title order={1}>{postName}</Title>
+        {country !== null && <Text size="xl">{country}</Text>}
+      </Box>
       {inactivity !== null && (
         // role="note": a standing statement, which screen readers should not
         // announce on load as they do Mantine's default role="alert"
@@ -235,37 +258,35 @@ export default function ConsulateSelect({
         postName={postName}
         asOf={ivScheduleAsOf}
         schedule={ivSchedule}
+        source={ivScheduleSource}
         scheduleOverride={scheduleOverride ?? undefined}
       />
-      <Title order={2}>
-        <Breadcrumbs
-          separator="›"
-          styles={{ separator: { fontSize: "1.5rem" } }}
-        >
-          <Text>{postName}</Text>
-          <Text>Select your visa type</Text>
-        </Breadcrumbs>
-      </Title>
+      <Title order={2}>Visa classes at {postName}</Title>
       <TextInput
         size="lg"
+        label="Find your visa class"
         leftSection={<SearchIcon />}
-        type="text"
-        placeholder="DL6"
+        type="search"
+        placeholder="e.g. CR1 or spouse"
         onChange={setTerm}
+      />
+      <SearchStatus
+        term={term}
+        count={filteredVisas.length}
+        noun={["visa class", "visa classes"]}
+        hint="Try a class code such as CR1, or a word such as spouse."
       />
       <Text size="sm" c="dimmed">
         Badges: average visas issued per month, {formatMonth(recentWindow.from)}{" "}
         to {formatMonth(recentWindow.to)}.
       </Text>
-      <ListRows>
-        {filteredVisas.map(({ visaClass, visaClassSlug, description }) => {
-          const hasAnyIssued = availableVisaClassesSet.has(visaClassSlug);
-          return (
+      {issuedVisas.length > 0 && (
+        <ListRows>
+          {issuedVisas.map(({ visaClass, visaClassSlug, description }) => (
             <ListRow
               key={visaClassSlug}
               href={`/consulates/${postSlug}/${visaClassSlug}`}
               hardNavigation
-              disabled={!hasAnyIssued}
               rightSection={
                 <Badge
                   size="lg"
@@ -275,30 +296,62 @@ export default function ConsulateSelect({
                   tt="none"
                   fw={500}
                 >
-                  {hasAnyIssued
-                    ? formatMonthlyRate(
-                        (recentMap.get(visaClassSlug) ?? 0) / 12,
-                      )
-                    : "never issued here"}
+                  {formatMonthlyRate((recentMap.get(visaClassSlug) ?? 0) / 12)}
                 </Badge>
               }
               label={
                 <Group gap="xs">
-                  <Badge
-                    size="lg"
-                    radius="sm"
-                    color={hasAnyIssued ? "blue" : "gray"}
-                    variant={hasAnyIssued ? "light" : "outline"}
-                  >
+                  <Badge size="lg" radius="sm" color="blue" variant="light">
                     <Highlight highlight={term}>{visaClass}</Highlight>
                   </Badge>
                   <Highlight highlight={term}>{description ?? ""}</Highlight>
                 </Group>
               }
             />
-          );
-        })}
-      </ListRows>
+          ))}
+        </ListRows>
+      )}
+      {neverIssuedVisas.length > 0 && (
+        // Collapsed unless the search finds some of them. They have no page,
+        // so they are text, not links.
+        <details open={term.trim() !== "" || undefined}>
+          <Text component="summary" style={{ cursor: "pointer" }}>
+            {term.trim() === ""
+              ? `${neverIssuedVisas.length} visa classes`
+              : `${neverIssuedVisas.length} matching visa ${
+                  neverIssuedVisas.length === 1 ? "class" : "classes"
+                }`}{" "}
+            with none issued at {postName}, {formatMonth(recentWindow.first)} to{" "}
+            {formatMonth(recentWindow.to)}
+          </Text>
+          <Box mt="sm">
+            <ListRows>
+              {neverIssuedVisas.map(
+                ({ visaClass, visaClassSlug, description }) => (
+                  <ListItem
+                    key={visaClassSlug}
+                    label={
+                      <Group gap="xs">
+                        <Badge
+                          size="lg"
+                          radius="sm"
+                          color="gray"
+                          variant="outline"
+                        >
+                          <Highlight highlight={term}>{visaClass}</Highlight>
+                        </Badge>
+                        <Highlight highlight={term}>
+                          {description ?? ""}
+                        </Highlight>
+                      </Group>
+                    }
+                  />
+                ),
+              )}
+            </ListRows>
+          </Box>
+        </details>
+      )}
     </Stack>
   );
 }

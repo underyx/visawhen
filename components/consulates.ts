@@ -122,9 +122,6 @@ export interface IvSchedule extends Record<IvCategory, string | null> {
   asOf: string;
 }
 
-export const IV_SCHEDULE_URL =
-  "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/iv-wait-times.html";
-
 /** The visa classes each column of the tool covers */
 const IV_CLASSES: Record<IvCategory, string[]> = {
   relative: ["cr1ir1", "cr2ir2", "ir5"],

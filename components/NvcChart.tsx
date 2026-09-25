@@ -1,9 +1,11 @@
 import { NvcSeries } from "../api/nvc";
-import { addDays, daysBetween } from "./Freshness";
+import { addDays, daysBetween, formatShortDate } from "./Freshness";
+import { NVC_TIMEFRAMES_URL } from "./links";
 
 import * as echarts from "echarts/core";
 import { LineChart } from "echarts/charts";
 import {
+  AriaComponent,
   TitleComponent,
   TooltipComponent,
   GridComponent,
@@ -14,6 +16,7 @@ import ReactEChartsCore from "echarts-for-react/lib/core";
 import { Paper } from "@mantine/core";
 
 echarts.use([
+  AriaComponent,
   DataZoomComponent,
   TitleComponent,
   TooltipComponent,
@@ -88,6 +91,21 @@ function Tooltip([series]: TooltipParams[]) {
   return tooltip;
 }
 
+/** What the chart shows, in words, for screen readers: its span and the last
+ * eight readings. */
+function describe(id: string, series: NvcSeries): string {
+  const readings = Object.entries(series);
+  const recent = readings
+    .slice(-8)
+    .map(([date, days]) => `${formatShortDate(date)}: ${days} days`)
+    .join("; ");
+  return `Line chart of NVC ${id} times, ${formatShortDate(
+    readings[0][0],
+  )} to ${formatShortDate(
+    readings[readings.length - 1][0],
+  )}. The last 8 readings: ${recent}.`;
+}
+
 export default function NvcChart({ id, series }: Props) {
   return (
     <Paper shadow="xs" p="md" mx={0} component="figure">
@@ -99,6 +117,10 @@ export default function NvcChart({ id, series }: Props) {
         echarts={echarts}
         option={{
           animation: false,
+          aria: {
+            enabled: true,
+            label: { description: describe(id, series) },
+          },
           tooltip: {
             trigger: "axis",
             formatter: Tooltip,
@@ -130,10 +152,7 @@ export default function NvcChart({ id, series }: Props) {
         }}
       />
       <figcaption>
-        Source:{" "}
-        <a href="https://travel.state.gov/content/travel/en/us-visas/immigrate/nvc-timeframes.html">
-          NVC Timeframes page
-        </a>
+        Source: <a href={NVC_TIMEFRAMES_URL}>NVC Timeframes page</a>
         .<br />
         The weekly readings are stored in a{" "}
         <a href="https://github.com/underyx/visawhen/blob/main/data/nvc/data.json">

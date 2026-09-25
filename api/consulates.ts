@@ -349,6 +349,18 @@ export async function getIvScheduleAsOf(): Promise<string> {
   return dates[dates.length - 1];
 }
 
+/** The address of State's IV Scheduling Status Tool, from the data */
+export async function getIvScheduleSource(): Promise<string> {
+  return (await readIvScheduleData()).source;
+}
+
+/** How many posts the newest update of State's IV Scheduling Status Tool
+ * lists */
+export async function getIvSchedulePostCount(): Promise<number> {
+  const { snapshots } = await readIvScheduleData();
+  return Object.keys(snapshots[await getIvScheduleAsOf()]).length;
+}
+
 /** A post's line in the newest update of State's IV Scheduling Status Tool,
  * or null when that update does not list the post. */
 export async function getIvSchedule(

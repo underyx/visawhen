@@ -1,12 +1,12 @@
 import { GetStaticProps } from "next";
 import Head from "next/head";
 import { getData, NvcData, NvcSeries } from "../api/nvc";
-import React from "react";
+import React, { useState } from "react";
 import NvcChart from "../components/NvcChart";
 import last from "lodash/last";
 import { jsonLdScriptProps } from "react-schemaorg";
 import { Dataset } from "schema-dts";
-import { Alert, Anchor, Stack, Text, Title } from "@mantine/core";
+import { Alert, Anchor, Stack, Text, TextInput, Title } from "@mantine/core";
 import Link from "next/link";
 import {
   addDays,
@@ -15,6 +15,7 @@ import {
   useToday,
 } from "../components/Freshness";
 import PolicyBanner from "../components/PolicyBanner";
+import { NVC_TIMEFRAMES_URL } from "../components/links";
 
 interface Props {
   data: NvcData;
@@ -26,8 +27,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => ({
   },
 });
 
-const NVC_TIMEFRAMES_URL =
-  "https://travel.state.gov/content/travel/en/us-visas/immigrate/nvc-timeframes.html";
 /** NVC updates its timeframes weekly, so data older than two weeks means our
  * updates have stopped, and the numbers may be far off by now. */
 const MAX_AGE_DAYS = 14;
@@ -40,6 +39,120 @@ function getLatestDate(data: NvcData): string {
 /** The newest reading of a series: its as-of date and its number of days */
 function getLatestReading(series: NvcSeries): [string, number] {
   return last(Object.entries(series)) as [string, number];
+}
+
+/** How far from the estimate NVC's document reviews have landed. In a
+ * backtest over NVC's own timeframes since November 2020, taking for each
+ * day the review time NVC showed that day, 9 in 10 of the documents
+ * submitted were reviewed within a week of it, or within 40% of it when that
+ * is longer. The misses were mostly in 2021-2022, when the backlog grew and
+ * shrank by weeks. */
+const REVIEW_MARGIN_DAYS = 7;
+const REVIEW_MARGIN_SHARE = 0.4;
+
+/** Readings further apart than this are not consecutive weekly updates. */
+const MAX_UPDATE_GAP_DAYS = 21;
+/** A queue whose front, the submission date NVC has reached, moved less than
+ * this over its last two updates has stalled. */
+const STALL_DAYS = 3;
+
+/** Where a queue's front stood over its last two updates, when it has barely
+ * moved: its N days then only measure how old a queue that is not moving
+ * is, and grow week by week (in June and July 2026, document review sat at
+ * June 8-10 for five weeks while its days went from 7 to 33). Null while it
+ * moves, or when the last readings are not consecutive weekly updates. */
+function getStall(
+  series: NvcSeries,
+): { from: [string, string]; to: [string, string] } | null {
+  const readings = Object.entries(series).slice(-3);
+  if (readings.length < 3) return null;
+  for (let index = 1; index < readings.length; index++)
+    if (
+      daysBetween(readings[index - 1][0], readings[index][0]) >
+      MAX_UPDATE_GAP_DAYS
+    )
+      return null;
+  const [firstDate, firstDays] = readings[0];
+  const [lastDate, lastDays] = readings[readings.length - 1];
+  const firstFront = addDays(firstDate, -firstDays);
+  const lastFront = addDays(lastDate, -lastDays);
+  return daysBetween(firstFront, lastFront) > STALL_DAYS
+    ? null
+    : { from: [firstDate, firstFront], to: [lastDate, lastFront] };
+}
+
+/** Says that a queue has stalled, when it has (getStall). */
+function StallNotice({ series, what }: { series: NvcSeries; what: string }) {
+  const stall = getStall(series);
+  if (stall === null) return null;
+  const [, lastDays] = getLatestReading(series);
+  return (
+    <Alert color="yellow" role="note">
+      NVC&rsquo;s {what} has barely moved: on {formatDate(stall.from[0])} it had
+      reached those submitted on {formatDate(stall.from[1])}, and on{" "}
+      {formatDate(stall.to[0])} those submitted on {formatDate(stall.to[1])}.
+      While it stays stuck, the {lastDays} days grow every week, and anything
+      submitted now may take longer than that.
+    </Alert>
+  );
+}
+
+interface ReviewEstimateProps {
+  today: string;
+  /** NVC's document review times */
+  series: NvcSeries;
+}
+
+/** When NVC will most likely review documents submitted today, or on a date
+ * the visitor enters, with the range 9 in 10 past reviews landed in. The
+ * estimate is the date plus NVC's newest review time: NVC reviews documents
+ * in the order they came in, so documents submitted on a date are reached
+ * about that many days after it, as long as the queue neither grows nor
+ * shrinks. For a past date this uses what NVC has said since, rather than
+ * the review time it showed that day, which after weeks without readings
+ * can be far off. */
+function ReviewEstimate({ today, series }: ReviewEstimateProps) {
+  const [submitted, setSubmitted] = useState("");
+  const [reviewDate, reviewDays] = getLatestReading(series);
+  const valid = /^\d{4}-\d{2}-\d{2}$/.test(submitted) && submitted <= today;
+  const from = valid ? submitted : today;
+  const margin = Math.max(
+    REVIEW_MARGIN_DAYS,
+    Math.round(REVIEW_MARGIN_SHARE * reviewDays),
+  );
+  // the newest submission date NVC had reached on the newest reading
+  const reached = addDays(reviewDate, -reviewDays);
+  return (
+    <Stack gap="xs">
+      {valid && from <= reached ? (
+        <Text>
+          On {formatDate(reviewDate)}, NVC was already reviewing documents
+          submitted on {formatDate(reached)}, so it has most likely reviewed
+          documents submitted on {formatDate(from)}.
+        </Text>
+      ) : (
+        <Text>
+          {valid
+            ? `Documents submitted on ${formatDate(from)}: NVC will`
+            : "Submit your documents today and NVC will"}{" "}
+          most likely review them around{" "}
+          <strong>{formatDate(addDays(from, reviewDays))}</strong>. Checked
+          against NVC&rsquo;s own timeframes since November 2020, 9 reviews in
+          10 came within {margin} days of an estimate like this: here, between{" "}
+          {formatDate(addDays(from, Math.max(0, reviewDays - margin)))} and{" "}
+          {formatDate(addDays(from, reviewDays + margin))}.
+        </Text>
+      )}
+      <TextInput
+        type="date"
+        label="Already submitted? Enter the date"
+        max={today}
+        value={submitted}
+        onChange={(event) => setSubmitted(event.currentTarget.value)}
+        maw={260}
+      />
+    </Stack>
+  );
 }
 
 interface ChartHeadingProps {
@@ -87,15 +200,16 @@ export default function NvcBacklog({ data }: Props) {
             name: "NVC wait times",
             distribution: {
               "@type": "DataDownload",
+              // the file itself: the github.com/.../blob/ page is HTML
               contentUrl:
-                "https://github.com/underyx/visawhen/blob/main/data/nvc/data.json",
+                "https://raw.githubusercontent.com/underyx/visawhen/main/data/nvc/data.json",
               encodingFormat: "application/json",
               uploadDate: latestDate,
               requiresSubscription: false,
             },
             dateModified: latestDate,
             description:
-              "Here's how long you should expect to wait until the National Visa Center processes your case.",
+              "Weekly National Visa Center timeframes for case creation, document review and inquiry responses, since November 2020.",
             accessMode: "chartOnVisual",
             creator: {
               "@type": "Person",
@@ -130,7 +244,10 @@ export default function NvcBacklog({ data }: Props) {
             .
           </Alert>
         )}
-        <Text size="xl">Last updated {formatDate(latestDate)}.</Text>
+        {/* the alert above gives the date when the data is stale */}
+        {!stale && (
+          <Text size="xl">Last updated {formatDate(latestDate)}.</Text>
+        )}
         <Text>
           Here&rsquo;s how long you should expect to wait until the National
           Visa Center processes your case. NVC usually updates these timeframes
@@ -163,11 +280,9 @@ export default function NvcBacklog({ data }: Props) {
           On {formatDate(reviewDate)}, NVC was reviewing documents submitted on{" "}
           {formatDate(addDays(reviewDate, -reviewDays))}.
         </Text>
-        {today !== null && !stale && (
-          <Text>
-            Submit your documents today and NVC will most likely review them
-            around <strong>{formatDate(addDays(today, reviewDays))}</strong>.
-          </Text>
+        <StallNotice series={data.review} what="document review" />
+        {today !== null && !stale && getStall(data.review) === null && (
+          <ReviewEstimate today={today} series={data.review} />
         )}
         <NvcChart id="review" series={data.review} />
       </Stack>
@@ -204,6 +319,7 @@ export default function NvcBacklog({ data }: Props) {
           </Text>
           , you still need to wait a bit until they send the case to the NVC.
         </Text>
+        <StallNotice series={data.creation} what="case creation" />
         <NvcChart id="creation" series={data.creation} />
       </Stack>
       <Stack gap="sm">
@@ -219,6 +335,7 @@ export default function NvcBacklog({ data }: Props) {
           </Anchor>{" "}
           are answered.
         </Text>
+        <StallNotice series={data.inquiry} what="inquiry response" />
         <NvcChart id="inquiry" series={data.inquiry} />
       </Stack>
     </Stack>

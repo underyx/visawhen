@@ -23,11 +23,21 @@ import {
 import { formatCount, quarterLabel, toPoints } from "../../components/uscis";
 import { ListRow, ListRows } from "../../components/ListRow";
 import { normalize } from "../../components/search";
+import SearchStatus from "../../components/SearchStatus";
+import {
+  DOL_PROCESSING_TIMES_URL,
+  USCIS_PROCESSING_TIMES_URL,
+} from "../../components/links";
+import { FORM_SEARCH_TERMS } from "../../api/searchTerms";
 
 interface FormSummary {
   slug: string;
   form: string;
   title: string;
+  /** What people call it, shown under the title: "Work permit (EAD)" */
+  aka: string | null;
+  /** More words and phrases the search box finds it by */
+  keywords: string[];
   category: string;
   pending: number | null;
   /** What to expect if filing today in the form's main category, "11-22
@@ -65,6 +75,8 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       slug: form.slug,
       form: form.form,
       title: form.title,
+      aka: FORM_SEARCH_TERMS[form.form]?.aka ?? null,
+      keywords: FORM_SEARCH_TERMS[form.form]?.keywords ?? [],
       category: form.category ?? "Other",
       pending: latest.pending,
       badge:
@@ -101,8 +113,12 @@ export default function UscisIndex({
   const [term, setTerm] = useInputState("");
   const groups = useMemo(() => {
     const normalizedTerm = normalize(term);
-    const filtered = forms.filter(({ form, title }) =>
-      normalize(`${form} ${title}`).includes(normalizedTerm),
+    // each field on its own, so that no match spans two of them ("EAD" in
+    // "relative" + "adoption")
+    const filtered = forms.filter(({ form, title, aka, keywords }) =>
+      [`${form} ${title}`, aka ?? "", ...keywords].some((text) =>
+        normalize(text).includes(normalizedTerm),
+      ),
     );
     const byCategory = groupBy(filtered, "category");
     return sortBy(Object.entries(byCategory), ([category]) => {
@@ -113,6 +129,17 @@ export default function UscisIndex({
       items: sortBy(items, [({ pending }) => -(pending ?? 0), "form"]),
     }));
   }, [forms, term]);
+
+  const matchCount = groups.reduce((sum, { items }) => sum + items.length, 0);
+  // PERM and prevailing wage determinations are the Department of Labor's,
+  // and people search for them here
+  const normalizedTerm = normalize(term);
+  const searchesDol =
+    normalizedTerm === "pwd" ||
+    (normalizedTerm.length >= 4 &&
+      ["perm", "laborcertification", "prevailingwage", "eta9089", "9089"].some(
+        (word) => word.startsWith(normalizedTerm),
+      ));
 
   const description = `USCIS had ${formatCount(
     totalPending,
@@ -141,7 +168,7 @@ export default function UscisIndex({
           {latestLabel}; for a form with several categories, it is for the one
           named under it. For your own case, also check USCIS&rsquo;s{" "}
           <Anchor
-            href="https://egov.uscis.gov/processing-times/"
+            href={USCIS_PROCESSING_TIMES_URL}
             target="_blank"
             rel="noopener"
           >
@@ -152,17 +179,47 @@ export default function UscisIndex({
       </Stack>
       <TextInput
         size="lg"
+        label="Find your form"
         leftSection={<SearchIcon />}
-        type="text"
-        placeholder="I-485"
+        type="search"
+        placeholder="e.g. I-485 or work permit"
         onChange={setTerm}
       />
+      <SearchStatus
+        term={term}
+        count={matchCount}
+        noun={["form", "forms"]}
+        hint="Try a form number such as I-130, or words such as green card, work permit or citizenship."
+      />
+      {searchesDol && (
+        <Text>
+          PERM labor certification and prevailing wage determinations are
+          decided by the Department of Labor, not USCIS, and are not covered
+          here: see{" "}
+          <Anchor
+            href={DOL_PROCESSING_TIMES_URL}
+            target="_blank"
+            rel="noopener"
+          >
+            the Department of Labor&rsquo;s processing times
+          </Anchor>
+          . After PERM, the employer files the I-140 with USCIS.
+        </Text>
+      )}
       {groups.map(({ category, items }) => (
         <Stack gap="sm" key={category}>
           <Title order={2}>{category}</Title>
           <ListRows>
             {items.map(
-              ({ slug, form, title, badge, badgeCategory, officeCount }) => (
+              ({
+                slug,
+                form,
+                title,
+                aka,
+                badge,
+                badgeCategory,
+                officeCount,
+              }) => (
                 <ListRow
                   key={slug}
                   href={`/uscis/${slug}`}
@@ -202,6 +259,16 @@ export default function UscisIndex({
                         >
                           by office
                         </Badge>
+                      )}
+                      {aka !== null && (
+                        <Highlight
+                          highlight={term}
+                          size="sm"
+                          c="dimmed"
+                          w="100%"
+                        >
+                          {aka}
+                        </Highlight>
                       )}
                     </Group>
                   }

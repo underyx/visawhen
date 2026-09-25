@@ -1,4 +1,5 @@
 import { Anchor, AppShell, Container, Stack, Text } from "@mantine/core";
+import Link from "next/link";
 import React from "react";
 import Navbar from "./Navbar";
 import classes from "./PageWrapper.module.css";
@@ -13,6 +14,16 @@ export default function PageWrapper({ children }: React.PropsWithChildren) {
         <Container>{children}</Container>
         <footer>
           <Stack my="xl" px="xs" gap="xs" ta="center">
+            <Text size="sm" maw={720} mx="auto" mb="sm">
+              VisaWhen is an independent project, not affiliated with USCIS, the
+              State Department or any other government agency, and nothing on it
+              is legal advice. Its numbers come from the agencies&rsquo; own
+              published data; each page names its source and how recent it is.{" "}
+              <Anchor component={Link} href="/about">
+                Where the data comes from
+              </Anchor>
+              .
+            </Text>
             <Text>
               Hey, I&rsquo;m{" "}
               <Anchor href="https://underyx.me">Bence Nagy</Anchor> and I made

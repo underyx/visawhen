@@ -1,4 +1,4 @@
-import { Paper, SimpleGrid, Stack, Text, Title } from "@mantine/core";
+import { Paper, SimpleGrid, Stack, Text } from "@mantine/core";
 import React from "react";
 import {
   backlogTrend,
@@ -14,6 +14,7 @@ import {
   formatCount,
   formatMonths,
   formatPercent,
+  formatPointChange,
   QuarterPoint,
   WITHHELD_ESTIMATE,
 } from "./uscis";
@@ -30,13 +31,23 @@ interface StatProps {
   lineColor: string;
 }
 
+/** A card's big figure. Not a heading: screen readers' heading lists would
+ * read "5.2 years" and "78%" as section titles. */
+function StatValue({ children }: React.PropsWithChildren) {
+  return (
+    <Text fz="h3" fw={700} lh={1.35}>
+      {children}
+    </Text>
+  );
+}
+
 function Stat({ label, value, line, lineColor }: StatProps) {
   return (
     <Paper withBorder p="md" radius="md">
       <Text size="sm" c="dimmed" fw={500}>
         {label}
       </Text>
-      {typeof value === "string" ? <Title order={3}>{value}</Title> : value}
+      {typeof value === "string" ? <StatValue>{value}</StatValue> : value}
       <Text size="sm" c={lineColor}>
         {line ?? NO_LINE}
       </Text>
@@ -45,7 +56,8 @@ function Stat({ label, value, line, lineColor }: StatProps) {
 }
 
 /** A change vs. the previous quarter, in green when it is good news and red
- * when it is bad. */
+ * when it is bad; the darkest shades, as the lighter ones are below 4.5:1 on
+ * the white card (teal.8 is 3.9:1, teal.9 5.0:1). */
 function ChangeStat({
   change,
   higherIsBetter,
@@ -59,8 +71,8 @@ function ChangeStat({
     change === null || change === "unchanged"
       ? "dimmed"
       : isIncrease === higherIsBetter
-      ? "teal.8"
-      : "red.8";
+      ? "teal.9"
+      : "red.9";
   return (
     <Stat
       {...props}
@@ -84,6 +96,21 @@ export function RangeText({ low, high }: { low: number; high: number }) {
   );
 }
 
+/** Why a quarter has no time to clear the backlog, when it is for want of a
+ * number: USCIS did not publish one it needs, or decided nothing. */
+function clearingUnknown(point: QuarterPoint): string | null {
+  if (point.waitMonths !== null) return null;
+  if (point.pending === null) return "USCIS did not publish the pending count";
+  if (point.completions === null)
+    return point.approved === null && point.denied === null
+      ? "USCIS did not publish the decisions"
+      : point.approved === null
+      ? "USCIS did not publish the approvals"
+      : "USCIS did not publish the denials";
+  if (point.completions === 0) return "no decisions that quarter";
+  return null;
+}
+
 interface Props {
   points: QuarterPoint[];
   /** The range the page leads with, when it has one */
@@ -104,6 +131,7 @@ export default function UscisStats({
   const previous = points[points.length - 2];
   const trend = backlogTrend(previous?.waitMonths, current.waitMonths);
   const pendingChange = formatChange(previous?.pending, current.pending);
+  const notShown = backlogSuppressed ?? clearingUnknown(current);
   // which decisions USCIS withheld as too few to disclose, when it did
   const withheld =
     current.approved === null && current.denied === null
@@ -118,9 +146,12 @@ export default function UscisStats({
           <Text size="sm" c="dimmed" fw={500}>
             {`If you file today (${headline.name})`}
           </Text>
-          <Title order={3}>
+          <Text size="sm" fw={500} mt={4}>
+            Most likely
+          </Text>
+          <StatValue>
             <RangeText low={headline.q[1]} high={headline.q[3]} />
-          </Title>
+          </StatValue>
           <Text size="sm" c="dimmed">
             could be <RangeText low={headline.q[0]} high={headline.q[4]} />
           </Text>
@@ -135,19 +166,19 @@ export default function UscisStats({
         <Stat
           label="Time to clear backlog"
           value={
-            backlogSuppressed === null ? (
+            notShown === null ? (
               approximately(
                 formatMonths(current.waitMonths),
                 current.approximate,
               )
             ) : (
               <Text fw={700} lh={1.3}>
-                {`Not shown: ${backlogSuppressed}`}
+                {`Not shown: ${notShown}`}
               </Text>
             )
           }
           line={
-            backlogSuppressed === null && trend !== null
+            notShown === null && trend !== null
               ? `${trend} vs. previous quarter`
               : null
           }
@@ -194,6 +225,13 @@ export default function UscisStats({
             }`}
             lineColor="dimmed"
           />
+        ) : current.completions === null ? (
+          <Stat
+            label={`Decided in ${current.label}`}
+            value="n/a"
+            line="USCIS did not publish them"
+            lineColor="dimmed"
+          />
         ) : (
           <ChangeStat
             label={`Decided in ${current.label}`}
@@ -208,16 +246,10 @@ export default function UscisStats({
             formatPercent(current.approvalRate),
             current.approximate,
           )}
-          change={
-            current.approvalRate === null ||
-            previous?.approvalRate === null ||
-            previous?.approvalRate === undefined
-              ? null
-              : formatChange(
-                  Math.round(previous.approvalRate * 100),
-                  Math.round(current.approvalRate * 100),
-                )
-          }
+          change={formatPointChange(
+            previous?.approvalRate,
+            current.approvalRate,
+          )}
           higherIsBetter={true}
         />
       </SimpleGrid>

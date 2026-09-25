@@ -25,18 +25,21 @@ import {
   CategoryRange,
   casesMovedQuarters,
   clearingSuppressed,
+  compareClearing,
   formatRangeMonths,
+  fourQuarterClearing,
   headlineRange,
   officeEstimateSuppressed,
-  VISA_BULLETIN_URL,
   withoutMisleadingClearing,
 } from "../../../components/estimate";
+import { VISA_BULLETIN_URL } from "../../../components/links";
 import {
   ALL_CATEGORIES,
   approximately,
   formatCount,
   formatMonths,
   highlight,
+  isServiceCenter,
   NATIONAL_OFFICE_CATEGORIES,
   officeCategoryCounts,
   officeCategoryName,
@@ -45,6 +48,8 @@ import {
   openingOfficeCategory,
   QuarterPoint,
   quarterLabel,
+  SERVICE_CENTER_FORMS,
+  sumCounts,
   toPoints,
 } from "../../../components/uscis";
 import { OutcomesChart, WaitChart } from "../../../components/UscisChart";
@@ -57,9 +62,18 @@ interface CategoryView {
   /** "Immediate Relative", or "All categories" */
   name: string;
   points: QuarterPoint[];
-  /** The time to clear the whole country's backlog in the same category and
-   * quarter, from the per-office report's national totals */
-  nationalWaitMonths: number | null;
+  /** The time to clear the office's backlog at the pace of its last four
+   * quarters, next to the same for the whole country, or for all field
+   * offices together on the field office pages of SERVICE_CENTER_FORMS;
+   * null when either is unknown */
+  comparison: {
+    office: number;
+    national: number;
+    /** Whether either counts decisions USCIS withheld as too few */
+    approximate: boolean;
+    /** What `national` is of */
+    base: "field offices" | "country";
+  } | null;
   /** What a filer in this category can expect nationally: the all-forms
    * report's same category, or for all categories together the form's main
    * one. Null when the all-forms report has no such category. */
@@ -122,6 +136,12 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   // the categories this office has numbers for, on forms whose pages break
   // them down
   const categories = officeCategoryPoints(data.periods, form, office.quarters);
+  // A field office of a form whose service centers hold much of the pile is
+  // compared with the other field offices, not with the whole country.
+  const fieldOffices =
+    SERVICE_CENTER_FORMS.includes(form.form) && !isServiceCenter(office.name)
+      ? form.offices.filter(({ name }) => !isServiceCenter(name))
+      : null;
   const view = (
     key: string,
     name: string,
@@ -131,15 +151,30 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     const latest = points[points.length - 1].quarter;
     const nationalPoints = toPoints(
       data.periods,
-      officeCategoryCounts(form.officeTotals, key),
+      fieldOffices === null
+        ? officeCategoryCounts(form.officeTotals, key)
+        : sumCounts(
+            fieldOffices.map(({ quarters }) =>
+              officeCategoryCounts(quarters, key),
+            ),
+          ),
     );
+    const officeClearing = fourQuarterClearing(points, latest);
+    const nationalClearing = fourQuarterClearing(nationalPoints, latest);
     return {
       key,
       name,
       points,
-      nationalWaitMonths:
-        nationalPoints.find((point) => point.quarter === latest)?.waitMonths ??
-        null,
+      comparison:
+        officeClearing === null || nationalClearing === null
+          ? null
+          : {
+              office: officeClearing.months,
+              national: nationalClearing.months,
+              approximate:
+                officeClearing.approximate || nationalClearing.approximate,
+              base: fieldOffices === null ? "country" : "field offices",
+            },
       nationalRange:
         key === ALL_CATEGORIES
           ? headlineRange(ranges)
@@ -323,21 +358,30 @@ export default function UscisOffice({
   const canonicalUrl = `https://visawhen.com/uscis/${formSlug}/${slug}`;
   const sourceName = `${form} by Category, Case Status, and USCIS Field Office Location`;
 
+  // Four quarters' pace on both sides, and a verdict only beyond 1.5 times
+  // (compareClearing): a single quarter's pace swings too much to call one
+  // office slower than the rest.
   const comparison =
-    backlogSuppressed !== null ||
-    current.waitMonths === null ||
-    view.nationalWaitMonths === null
+    backlogSuppressed !== null || view.comparison === null
       ? null
-      : `That is ${
-          current.waitMonths > view.nationalWaitMonths * 1.2
-            ? "longer than"
-            : current.waitMonths < view.nationalWaitMonths * 0.8
-            ? "shorter than"
-            : "about the same as"
-        } the ${formatMonths(
-          view.nationalWaitMonths,
-        )} it would take the country as a whole${
-          isTotal ? "" : ` for ${view.name} cases`
+      : `At its average pace over the four quarters to ${
+          current.label
+        }, ${officePhrase} would take ${approximately(
+          formatMonths(view.comparison.office),
+          view.comparison.approximate,
+        )} to clear its backlog${isTotal ? "" : ` of these cases`}, ${
+          {
+            longer: "longer than",
+            shorter: "shorter than",
+            close: "not clearly longer or shorter than",
+          }[compareClearing(view.comparison.office, view.comparison.national)]
+        } the ${approximately(
+          formatMonths(view.comparison.national),
+          view.comparison.approximate,
+        )} for ${
+          view.comparison.base === "field offices"
+            ? "all field offices together"
+            : "the country as a whole"
         }.`;
   const whoText = isTotal ? null : officeCategoryWho(view.key);
 
@@ -501,6 +545,7 @@ export default function UscisOffice({
         </Text>
         <OutcomesChart
           points={points}
+          subject={`${who(form, view)} at ${officePhrase}`}
           source={source}
           sourceName={sourceName}
         />
@@ -526,7 +571,13 @@ export default function UscisOffice({
               views.length > 1 ? ", all categories together," : ""
             } more than doubled or halved, which means USCIS moved cases between offices.`}
         </Text>
-        {hasClearing && <WaitChart points={points} processingTimeSeries={[]} />}
+        {hasClearing && (
+          <WaitChart
+            points={points}
+            subject={`${who(form, view)} at ${officePhrase}`}
+            processingTimeSeries={[]}
+          />
+        )}
       </Stack>
     </Stack>
   );

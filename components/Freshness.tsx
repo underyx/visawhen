@@ -63,8 +63,9 @@ export function formatShortDate(date: string): string {
   return shortDateFormatter.format(new Date(date));
 }
 
-/** The ISO date some months after another, counting average months:
- * ("2026-09-24", 11.2) is "2027-08-24". */
+/** The ISO date some months after another, counting average months of
+ * 30.44 days, rounded to a whole day: ("2026-09-24", 11.2) is 341 days later,
+ * "2027-08-31". */
 export function addMonths(date: string, months: number): string {
   return addDays(date, Math.round(months * MONTH_DAYS));
 }

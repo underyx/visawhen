@@ -77,29 +77,12 @@ export function decisionShock(history: (number | null)[]): {
   return { shock: ratio < 0.6, ratio };
 }
 
-/** A number to a tenth the way the calibration script (Python's round) does
- * it, so the pages can be checked against its output: on the exact value of
- * the floating-point number (9.5 x 3.1 is 29.4499..., so 29.4, where
- * Math.round(x * 10) would see 294.5 and round up), with exact ties going to
- * the even tenth (12.2 x 1.25 is exactly 15.25, so 15.2). */
-function roundToTenth(x: number): number {
-  const [whole, fraction] = x.toFixed(20).split(".");
-  if (/^\d50*$/.test(fraction)) {
-    const down = Number(`${whole}.${fraction[0]}`);
-    return Number(fraction[0]) % 2 === 0
-      ? down
-      : Number((down + 0.1).toFixed(1));
-  }
-  return Number(x.toFixed(1));
-}
-
-/** The 10th, 25th, 50th, 75th and 90th percentile of the wait in months,
- * to a tenth of a month like USCIS's medians. The dates the pages show are
- * counted from these rounded values. */
+/** The 10th, 25th, 50th, 75th and 90th percentile of the wait in months:
+ * the median times each multiplier, unrounded. The pages round each value
+ * once, where they show it (formatRangeMonths, and addMonths for the dates),
+ * so that no range is rounded twice. */
 export function planningRange(median: number, level: PressureLevel): number[] {
-  return CALIBRATION[level].map((multiplier) =>
-    roundToTenth(multiplier * median),
-  );
+  return CALIBRATION[level].map((multiplier) => multiplier * median);
 }
 
 /** Categories (Variant.key, per form) whose wait depends on the visitor's
@@ -109,9 +92,6 @@ export const PRIORITY_DATE_CATEGORIES: Record<string, string[]> = {
   "I-130": ["all-other-relative"],
   "I-485": ["employment"],
 };
-
-export const VISA_BULLETIN_URL =
-  "https://travel.state.gov/content/travel/en/legal/visa-law0/visa-bulletin.html";
 
 /** Below this many decisions in a quarter, the median, and the time to clear
  * the backlog at the quarter's pace, are too noisy to plan on. */
@@ -296,6 +276,61 @@ export function officeEstimateSuppressed(
 ): string | null {
   const current = points[points.length - 1];
   return current === undefined ? null : clearingSuppressed(current, moved);
+}
+
+/** The time to clear a backlog at the pace of the four quarters to
+ * `quarter`: its pending count ÷ the decisions of those four quarters per
+ * month. Steadier than one quarter's pace, which the cards show. Null unless
+ * the pending count and all four quarters' decisions, at least
+ * MIN_DECISIONS of them, are known. */
+export function fourQuarterClearing(
+  points: QuarterPoint[],
+  quarter: string,
+): { months: number; approximate: boolean } | null {
+  const index = points.findIndex((point) => point.quarter === quarter);
+  if (index < 3) return null;
+  const window = points.slice(index - 3, index + 1);
+  const pending = window[3].pending;
+  if (
+    pending === null ||
+    window.some(({ completions }) => completions === null)
+  )
+    return null;
+  const decided = window.reduce(
+    (sum, { completions }) => sum + (completions ?? 0),
+    0,
+  );
+  if (decided < MIN_DECISIONS) return null;
+  return {
+    months: pending / (decided / 12),
+    approximate: window.some(({ approximate }) => approximate),
+  };
+}
+
+/** How far apart an office's time to clear its backlog and the national one
+ * have to be, as a ratio, before the office page calls one longer or
+ * shorter. A backtest over every quarter of the N-400 offices, and of the
+ * I-130 (immediate relatives) and I-485 (family) offices' categories the
+ * pages open with, scored each verdict against how long the backlogs really
+ * took to clear. At ±20% on single quarters against the national totals,
+ * "longer" was right 41% (N-400), 59% (I-130) and 49% (I-485) of the time,
+ * and the verdict flipped in 37% to 43% of quarters. At 1.5 times on
+ * four-quarter paces (fourQuarterClearing), with I-130 and I-485 field
+ * offices compared with the field offices alone, "longer" was right 66%, 69%
+ * and 71% of the time and "shorter" 83% to 85%, the office was on the side
+ * the page said 86% to 97% of the time, and the verdict flipped in 12% to
+ * 19% of quarters. */
+export const CLEARING_COMPARISON_FACTOR = 1.5;
+
+/** Whether an office's time to clear its backlog is clearly longer or
+ * shorter than the national one, or too close to call */
+export function compareClearing(
+  office: number,
+  national: number,
+): "longer" | "shorter" | "close" {
+  if (office > national * CLEARING_COMPARISON_FACTOR) return "longer";
+  if (office * CLEARING_COMPARISON_FACTOR < national) return "shorter";
+  return "close";
 }
 
 /** Which way the time to clear the backlog moved since the quarter before:

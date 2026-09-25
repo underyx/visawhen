@@ -151,6 +151,27 @@ export function formatChange(
   return `${change > 0 ? "+" : "−"}${Math.abs(change)}%`;
 }
 
+/** The change between two quarters' shares, 0-1, in percentage points of the
+ * rounded percentages the pages show, as "+3 pts" / "−6 pts" ("unchanged"
+ * when those are equal), or null when either side is missing: a rate from
+ * 84% to 78% is "−6 pts", where formatChange would give the relative change,
+ * "−7%", which reads as a fall from 85%. */
+export function formatPointChange(
+  previous: number | null | undefined,
+  current: number | null | undefined,
+): string | null {
+  if (
+    previous === null ||
+    previous === undefined ||
+    current === null ||
+    current === undefined
+  )
+    return null;
+  const change = Math.round(current * 100) - Math.round(previous * 100);
+  if (change === 0) return "unchanged";
+  return `${change > 0 ? "+" : "−"}${Math.abs(change)} pts`;
+}
+
 /** The quarter-over-quarter summary shown above the charts. `casesMoved`
  * says the pending count jumped because USCIS moved cases between offices,
  * so the sentence does not read like the office fell behind or caught up. */
@@ -360,6 +381,45 @@ export function officeCategoryName(category: OfficeCategory): string {
 
 export function officeCategoryWho(key: string): string | null {
   return OFFICE_CATEGORIES[key]?.who ?? null;
+}
+
+/** Forms whose service centers (and the National Benefits Center) hold much
+ * of the pending pile: a field office's pace is compared with the other
+ * field offices', not with a national total dominated by the centers. Until
+ * USCIS moved the I-130 pile to the field offices in Apr-Jun 2026, nearly
+ * every field office read "faster than the country as a whole". */
+export const SERVICE_CENTER_FORMS = ["I-130", "I-485"];
+
+/** Whether an office is a service center or the National Benefits Center
+ * rather than a field office */
+export function isServiceCenter(name: string): boolean {
+  return /\bCenter$/.test(name);
+}
+
+/** Several offices' counts added up, quarter by quarter: each count is the
+ * sum of those known, with a count withheld as too small counted as
+ * WITHHELD_ESTIMATE, and null only when no office has it. */
+export function sumCounts(
+  counts: Record<string, QuarterCounts>[],
+): Record<string, QuarterCounts> {
+  const fields = ["received", "approved", "denied", "pending"] as const;
+  const sums: Record<string, QuarterCounts> = {};
+  for (const quarters of counts)
+    for (const [quarter, quarterCounts] of Object.entries(quarters)) {
+      const sum = (sums[quarter] ??= {
+        received: null,
+        approved: null,
+        denied: null,
+        pending: null,
+      });
+      for (const field of fields) {
+        const value =
+          quarterCounts[field] ??
+          (quarterCounts.withheld?.includes(field) ? WITHHELD_ESTIMATE : null);
+        if (value !== null) sum[field] = (sum[field] ?? 0) + value;
+      }
+    }
+  return sums;
 }
 
 /** Per-office categories that mean the same as the all-forms report's

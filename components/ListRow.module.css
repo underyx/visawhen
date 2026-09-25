@@ -20,3 +20,10 @@
 .label {
   font-size: var(--mantine-font-size-md);
 }
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mantine-spacing-xs);
+}

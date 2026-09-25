@@ -5,6 +5,7 @@ import { findLast, sumBy } from "lodash";
 import {
   getIvSchedule,
   getIvScheduleAsOf,
+  getIvScheduleSource,
   getMonthlyIssuances,
   getPostActivity,
   getSlugPairs,
@@ -73,6 +74,8 @@ interface Props {
   ivScheduleAsOf: string;
   /** The post's line in it, or null when it does not list the post */
   ivSchedule: IvSchedule | null;
+  /** The tool's address */
+  ivScheduleSource: string;
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -146,6 +149,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
           : { slug: counterpart.visaClassSlug, name: counterpart.visaClass },
       ivScheduleAsOf: await getIvScheduleAsOf(),
       ivSchedule,
+      ivScheduleSource: await getIvScheduleSource(),
     },
   };
 };
@@ -252,6 +256,7 @@ export default function ConsulateStats({
   immigrantCounterpart,
   ivScheduleAsOf,
   ivSchedule,
+  ivScheduleSource,
 }: Props) {
   const firstMonth = issuances[0].month;
   const { summary, metaSummary } = summarize(
@@ -345,6 +350,7 @@ export default function ConsulateStats({
           postName={postName}
           asOf={ivScheduleAsOf}
           schedule={ivSchedule}
+          source={ivScheduleSource}
           first={ivCategory}
           note={classNote}
           scheduleOverride={
@@ -353,13 +359,17 @@ export default function ConsulateStats({
         />
       )}
       <Text>{summary}</Text>
-      <Text>
+      <Text size="sm" c="dimmed">
         This counts visas issued, which shows how busy the post is, not how long
         you will wait. The State Department data here ends in{" "}
         {formatLongMonth(recent.to)}, so it does not show any slowdowns or
         pauses since then.
       </Text>
-      <ConsulateChart issuances={issuances} visaType={visaType} />
+      <ConsulateChart
+        issuances={issuances}
+        visaType={visaType}
+        subject={`${postName} ${visaClassName}`}
+      />
     </Stack>
   );
 }
