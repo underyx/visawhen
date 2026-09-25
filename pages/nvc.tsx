@@ -37,14 +37,60 @@ export const getStaticProps: GetStaticProps<Props> = async () => ({
  * updates have stopped, and the numbers may be far off by now. */
 const MAX_AGE_DAYS = 14;
 
-/** The newest as-of date in the data, "2026-09-07" */
-function getLatestDate(data: NvcData): string {
-  return last(Object.keys(data.creation)) as string;
-}
-
 /** The newest reading of a series: its as-of date and its number of days */
 function getLatestReading(series: NvcSeries): [string, number] {
   return last(Object.entries(series)) as [string, number];
+}
+
+/** The newest as-of date of any series, "2026-09-07". Each series has its
+ * own: the scraper matches each of NVC's sentences separately, so one that
+ * NVC rewords stops updating while the others go on. */
+function getLatestDate(data: NvcData): string {
+  return [data.creation, data.review, data.inquiry]
+    .map((series) => getLatestReading(series)[0])
+    .sort()
+    .reverse()[0];
+}
+
+/** Whether a series' own newest reading is too old to go by */
+function isStale(series: NvcSeries, today: string): boolean {
+  return daysBetween(getLatestReading(series)[0], today) > MAX_AGE_DAYS;
+}
+
+interface SeriesAgeNoticeProps {
+  series: NvcSeries;
+  /** "document review" */
+  what: string;
+  today: string | null;
+  /** Whether the whole page's data is stale, which its own notice says */
+  pageStale: boolean;
+}
+
+/** Says that a series has not updated while the others have. */
+function SeriesAgeNotice({
+  series,
+  what,
+  today,
+  pageStale,
+}: SeriesAgeNoticeProps) {
+  if (today === null || pageStale || !isStale(series, today)) return null;
+  const [date] = getLatestReading(series);
+  return (
+    <Alert color="yellow" role="note">
+      Our newest {what} time is from {formatDate(date)},{" "}
+      {daysBetween(date, today)} days ago, although we have newer readings of
+      NVC&rsquo;s other timeframes. It may be out of date. See{" "}
+      <Anchor
+        href={NVC_TIMEFRAMES_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        inherit
+      >
+        today&rsquo;s on NVC&rsquo;s own page
+      </Anchor>
+      .
+    </Alert>
+  );
 }
 
 /** Says that a queue has stalled, when it has (getStall). */
@@ -235,11 +281,20 @@ export default function NvcBacklog({ data }: Props) {
   const ageDays = today === null ? null : daysBetween(latestDate, today);
   const stale = ageDays !== null && ageDays > MAX_AGE_DAYS;
   const [reviewDate, reviewDays] = getLatestReading(data.review);
-  const [, creationDays] = getLatestReading(data.creation);
-  const [, inquiryDays] = getLatestReading(data.inquiry);
-  const description = `On ${formatDate(
-    latestDate,
-  )}, the National Visa Center was taking ${reviewDays} days to review documents, ${creationDays} days to create cases and ${inquiryDays} days to answer inquiries.`;
+  const [creationDate, creationDays] = getLatestReading(data.creation);
+  const [inquiryDate, inquiryDays] = getLatestReading(data.inquiry);
+  const description =
+    reviewDate === creationDate && reviewDate === inquiryDate
+      ? `On ${formatDate(
+          reviewDate,
+        )}, the National Visa Center was taking ${reviewDays} days to review documents, ${creationDays} days to create cases and ${inquiryDays} days to answer inquiries.`
+      : `The National Visa Center was taking ${reviewDays} days to review documents on ${formatDate(
+          reviewDate,
+        )}, ${creationDays} days to create cases on ${formatDate(
+          creationDate,
+        )} and ${inquiryDays} days to answer inquiries on ${formatDate(
+          inquiryDate,
+        )}.`;
 
   return (
     <Stack gap="3rem">
@@ -337,8 +392,14 @@ export default function NvcBacklog({ data }: Props) {
           On {formatDate(reviewDate)}, NVC was reviewing documents submitted on{" "}
           {formatDate(addDays(reviewDate, -reviewDays))}.
         </Text>
+        <SeriesAgeNotice
+          series={data.review}
+          what="document review"
+          today={today}
+          pageStale={stale}
+        />
         <StallNotice series={data.review} what="document review" />
-        {today !== null && !stale && (
+        {today !== null && !isStale(data.review, today) && (
           <ReviewEstimate today={today} series={data.review} />
         )}
         <NvcChart id="review" series={data.review} />
@@ -376,6 +437,12 @@ export default function NvcBacklog({ data }: Props) {
           </Text>
           , you still need to wait a bit until they send the case to the NVC.
         </Text>
+        <SeriesAgeNotice
+          series={data.creation}
+          what="case creation"
+          today={today}
+          pageStale={stale}
+        />
         <StallNotice series={data.creation} what="case creation" />
         <NvcChart id="creation" series={data.creation} />
       </Stack>
@@ -392,6 +459,12 @@ export default function NvcBacklog({ data }: Props) {
           </Anchor>{" "}
           are answered.
         </Text>
+        <SeriesAgeNotice
+          series={data.inquiry}
+          what="inquiry response"
+          today={today}
+          pageStale={stale}
+        />
         <StallNotice series={data.inquiry} what="inquiry response" />
         <NvcChart id="inquiry" series={data.inquiry} />
       </Stack>
