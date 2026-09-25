@@ -100,6 +100,12 @@ export default function Home() {
               <To href="/consulates">Interview at your consulate</To>: which
               month of documentarily complete cases it is scheduling.
             </>,
+            <>
+              A spouse married less than 2 years when they enter the US on the
+              visa gets a 2-year conditional green card (usually on a CR-1
+              visa): <To href="/uscis/i-751">I-751 to remove the conditions</To>
+              , filed in the 90 days before the card expires.
+            </>,
           ]}
         />
         <Path
@@ -118,9 +124,10 @@ export default function Home() {
               with it.
             </>,
             <>
-              If your green card is a 2-year conditional one:{" "}
+              If you were married less than 2 years when you got your green
+              card, it is a 2-year conditional one:{" "}
               <To href="/uscis/i-751">I-751 to remove the conditions</To>, filed
-              before it expires.
+              in the 90 days before it expires, not earlier.
             </>,
           ]}
         />
@@ -144,6 +151,13 @@ export default function Home() {
               <To href="/uscis/i-485">I-485 green card application</To>, with
               the <To href="/uscis/i-765">I-765 work permit</To> and{" "}
               <To href="/uscis/i-131">I-131 travel document</To>.
+            </>,
+            <>
+              If you have been married less than 2 years when the I-485 is
+              approved, as most K-1 couples are, you get a 2-year conditional
+              green card:{" "}
+              <To href="/uscis/i-751">I-751 to remove the conditions</To>, filed
+              in the 90 days before it expires.
             </>,
           ]}
         />
