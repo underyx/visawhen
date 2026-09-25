@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/.github/deploy-tools/node_modules
 /.pnp
 .pnp.js
 

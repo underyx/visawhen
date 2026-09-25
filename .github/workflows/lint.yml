@@ -1,0 +1,32 @@
+# ESLint and the TypeScript check. next build type-checks too, but since
+# Next.js 16 it no longer runs ESLint. This is a workflow of its own rather
+# than steps in build.yml, so that a lint error does not hold back the data
+# workflows' deploys.
+name: Lint
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: "The git ref to check"
+        required: true
+        type: string
+
+jobs:
+  lint:
+    name: Lint and typecheck
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+      # skip-build: sqlite3's native module is not needed to lint
+      - run: yarn install --mode=skip-build
+      - run: yarn lint
+      - run: yarn typecheck

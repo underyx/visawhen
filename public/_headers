@@ -1,11 +1,15 @@
-# Response headers for the Cloudflare Workers static-assets deployment.
+# Response headers for the Cloudflare Workers static-assets deployment. (The
+# Netlify deploy, which serves visawhen.com today through the Cloudflare proxy,
+# gets its own _headers from .github/workflows/deploy.yml.)
 # https://developers.cloudflare.com/workers/static-assets/headers/
 #
-# HTML deliberately keeps Cloudflare's default ("public, max-age=0,
-# must-revalidate"): every deploy renames the hashed JS/CSS chunks, so a page
-# cached past a deploy references assets that no longer exist and renders
-# without scripts or styles. Only the content-hashed build output is cached
-# for long.
+# HTML and /_next/data JSON deliberately keep Cloudflare's default ("public,
+# max-age=0, must-revalidate"): a code change renames the hashed JS/CSS chunks,
+# so a page cached past a deploy references assets that no longer exist and
+# renders without scripts or styles, and a data change leaves it showing the
+# old numbers. Only the content-hashed build output is cached for long. A
+# cache rule on the visawhen.com zone can still override this on the proxied
+# hosts; see the top of deploy.yml.
 
 /_next/static/*
   Cache-Control: public, max-age=31536000, immutable

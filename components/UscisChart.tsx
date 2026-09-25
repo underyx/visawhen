@@ -1,6 +1,7 @@
 import * as echarts from "echarts/core";
 import { BarChart, LineChart } from "echarts/charts";
 import {
+  AriaComponent,
   DataZoomComponent,
   GridComponent,
   LegendComponent,
@@ -11,13 +12,17 @@ import ReactEChartsCore from "echarts-for-react/lib/core";
 import { Paper } from "@mantine/core";
 import numeral from "numeral";
 import {
+  approximately,
+  CHART_QUARTERS,
   formatCount,
   formatMonths,
   ProcessingTimeSeries,
   QuarterPoint,
 } from "./uscis";
+import { USCIS_DATA_URL } from "./links";
 
 echarts.use([
+  AriaComponent,
   BarChart,
   LineChart,
   DataZoomComponent,
@@ -37,20 +42,24 @@ const EXTRA_COLORS = [DENIED_COLOR, PENDING_COLOR, RECEIVED_COLOR, "#0ca678"];
 
 interface Props {
   points: QuarterPoint[];
+  /** What the numbers are of, for the chart's text alternative: "I-130",
+   * "I-130 (Immediate Relative)" */
+  subject: string;
+  /** Where, for one office's numbers: "at the San Francisco office" */
+  place?: string;
 }
+
+// The legends scroll instead of wrapping: on a phone, the wait chart's five
+// entries took five lines and ran over the plot.
+const LEGEND = { type: "scroll", top: 0 } as const;
 
 function SourceCaption({ source, what }: { source: string; what: string }) {
   return (
     <figcaption>
       Source: USCIS&rsquo;s quarterly <a href={source}>{what}</a> reports, via
-      the{" "}
-      <a href="https://www.uscis.gov/tools/reports-and-studies/immigration-and-citizenship-data">
-        Immigration and Citizenship Data
-      </a>{" "}
-      page.
+      the <a href={USCIS_DATA_URL}>Immigration and Citizenship Data</a> page.
       <br />
-      New quarters show up here within a day of USCIS publishing them and are
-      stored in a{" "}
+      The numbers are stored in a{" "}
       <a href="https://github.com/underyx/visawhen/blob/main/data/uscis/forms.json">
         JSON file on GitHub
       </a>
@@ -61,7 +70,28 @@ function SourceCaption({ source, what }: { source: string; what: string }) {
 
 /** How much of the chart to show initially: the last six years. */
 function initialZoomStart(points: QuarterPoint[]): number {
-  return Math.max(0, 100 - 100 * (24 / points.length));
+  return Math.max(0, 100 - 100 * (CHART_QUARTERS / points.length));
+}
+
+/** What the outcomes chart shows, in words, for screen readers: its span and
+ * the newest quarter's numbers. */
+function describeOutcomes(
+  points: QuarterPoint[],
+  subject: string,
+  place: string | undefined,
+): string {
+  const current = points[points.length - 1];
+  return `Chart of ${subject} applications${
+    place === undefined ? "" : ` ${place}`
+  } per quarter, ${points[0].label} to ${
+    current.label
+  }: bars for those approved and denied, lines for those filed and those pending at the end of the quarter. In ${
+    current.label
+  }: ${formatCount(current.approved)} approved, ${formatCount(
+    current.denied,
+  )} denied, ${formatCount(current.received)} filed, ${formatCount(
+    current.pending,
+  )} pending.`;
 }
 
 /** Bars for the decisions made in each quarter (approved and denied,
@@ -70,6 +100,8 @@ function initialZoomStart(points: QuarterPoint[]): number {
  * quarters' cases still open": most of it was filed earlier. */
 export function OutcomesChart({
   points,
+  subject,
+  place,
   source,
   sourceName,
 }: Props & { source: string; sourceName: string }) {
@@ -81,7 +113,11 @@ export function OutcomesChart({
         option={{
           animation: false,
           color: [APPROVED_COLOR, DENIED_COLOR, PENDING_COLOR, RECEIVED_COLOR],
-          legend: { top: 0 },
+          aria: {
+            enabled: true,
+            label: { description: describeOutcomes(points, subject, place) },
+          },
+          legend: LEGEND,
           tooltip: {
             trigger: "axis",
             formatter: (params: { dataIndex: number }[]) => {
@@ -92,14 +128,14 @@ export function OutcomesChart({
                 `Approved: ${formatCount(point.approved)}`,
                 `Denied: ${formatCount(point.denied)}`,
                 `Pending at quarter end: ${formatCount(point.pending)}`,
-                `Estimated wait at that pace: ${formatMonths(
-                  point.waitMonths,
+                `Time to clear backlog at that pace: ${approximately(
+                  formatMonths(point.waitMonths),
+                  point.approximate,
                 )}`,
               ].join("<br />");
             },
           },
-          // room for the legend to wrap onto two lines on narrow screens
-          grid: { left: 64, right: 16, top: 72, bottom: 80 },
+          grid: { left: 64, right: 16, top: 48, bottom: 80 },
           xAxis: { type: "category", data: points.map((point) => point.label) },
           yAxis: {
             type: "value",
@@ -147,16 +183,92 @@ export function OutcomesChart({
   );
 }
 
+/** A lone spike is more than this many times the next largest value. */
+const SPIKE_FACTOR = 3;
+
+/** Where the wait chart clips lone spikes of the time to clear the backlog,
+ * or null when it clips nothing. A spike is a value more than SPIKE_FACTOR
+ * times the next largest, as in a quarter in which USCIS decided almost
+ * nothing: I-589 asylum applications in Jan–Mar 2026 (281 decisions against
+ * 1.4 million pending) came to 15,106 months, against at most 842 in any
+ * other quarter, and drawn to scale they flattened every other quarter into
+ * a line at zero. The newest quarter is never clipped: when it is the spike,
+ * that is the news, so nothing is. */
+export function spikeCeiling(values: (number | null)[]): number | null {
+  const known = values
+    .filter((value): value is number => value !== null)
+    .sort((a, b) => b - a);
+  let spikes = 0;
+  while (
+    spikes + 1 < known.length &&
+    known[spikes] > SPIKE_FACTOR * known[spikes + 1]
+  )
+    spikes += 1;
+  if (spikes === 0) return null;
+  const ceiling = known[spikes];
+  const newest = values[values.length - 1];
+  return newest !== null && newest !== undefined && newest > ceiling
+    ? null
+    : ceiling;
+}
+
+/** What the wait chart shows, in words, for screen readers: its span and the
+ * newest quarter's figures, or why its time to clear the backlog is not
+ * shown (`suppressed`, see clearingSuppressed). */
+function describeWait(
+  points: QuarterPoint[],
+  subject: string,
+  place: string | undefined,
+  suppressed: string | null,
+  lines: { name: string; key: string }[],
+): string {
+  const current = points[points.length - 1];
+  const figures = [
+    `time to clear the backlog ${
+      suppressed === null
+        ? approximately(formatMonths(current.waitMonths), current.approximate)
+        : `not shown (${suppressed})`
+    }`,
+    ...lines.map(
+      ({ name, key }) =>
+        `${name} ${formatMonths(current.processingTimes[key] ?? null)}`,
+    ),
+  ];
+  return `Line chart of the months it would take to decide every pending ${subject} application${
+    place === undefined ? "" : ` ${place}`
+  } at each quarter's pace${
+    lines.length > 0 ? ", with USCIS's median processing time" : ""
+  }, ${points[0].label} to ${current.label}. In ${
+    current.label
+  }: ${figures.join("; ")}.`;
+}
+
 /** Lines: the months it would take to decide every pending application at
- * each quarter's pace of decisions, next to USCIS's own median processing
- * time where it publishes one. */
+ * each quarter's pace of decisions (the time to clear the backlog, which is
+ * not a wait), next to USCIS's own median processing time where it publishes
+ * one. */
 export function WaitChart({
   points,
+  subject,
+  place,
+  suppressed,
   processingTimeSeries,
-}: Props & { processingTimeSeries: ProcessingTimeSeries[] }) {
-  const estimateName = "Estimated wait at the quarter's pace";
+}: Props & {
+  /** Why the newest quarter's time to clear the backlog is not shown, if it
+   * is not (see clearingSuppressed) */
+  suppressed: string | null;
+  processingTimeSeries: ProcessingTimeSeries[];
+}) {
+  const estimateName = "Time to clear backlog";
   const officialName = ({ label }: ProcessingTimeSeries) =>
     label === "" ? "USCIS median processing time" : `USCIS median: ${label}`;
+  const values = points.map((point) =>
+    point.waitMonths === null ? null : Math.round(point.waitMonths * 10) / 10,
+  );
+  const ceiling = spikeCeiling(values);
+  // clipped spikes are drawn this far above the highest other quarter
+  const clippedAt =
+    ceiling === null ? null : Math.round(ceiling * 1.2 * 10) / 10;
   return (
     <Paper shadow="xs" p="md" mx={0} component="figure">
       <ReactEChartsCore
@@ -165,30 +277,50 @@ export function WaitChart({
         option={{
           animation: false,
           color: [APPROVED_COLOR, ...EXTRA_COLORS],
-          legend: processingTimeSeries.length > 0 ? { top: 0 } : undefined,
+          aria: {
+            enabled: true,
+            label: {
+              description: describeWait(
+                points,
+                subject,
+                place,
+                suppressed,
+                processingTimeSeries.map((series) => ({
+                  name: officialName(series),
+                  key: series.key,
+                })),
+              ),
+            },
+          },
+          legend: processingTimeSeries.length > 0 ? LEGEND : undefined,
           tooltip: {
             trigger: "axis",
             formatter: (params: { dataIndex: number }[]) => {
               const point = points[params[0].dataIndex];
               return [
                 `<strong>${point.label}</strong>`,
-                `${estimateName}: ${formatMonths(point.waitMonths)}`,
-                `(${formatCount(point.pending)} pending, ${formatCount(
-                  point.completions,
+                `${estimateName}: ${approximately(
+                  formatMonths(point.waitMonths),
+                  point.approximate,
+                )}`,
+                `(${formatCount(point.pending)} pending, ${approximately(
+                  formatCount(point.completions),
+                  point.approximate,
                 )} decided)`,
                 ...processingTimeSeries.map(
                   (series) =>
                     `${officialName(series)}: ${formatMonths(
-                      point.processingTimes[series.title] ?? null,
+                      point.processingTimes[series.key] ?? null,
                     )}`,
                 ),
               ].join("<br />");
             },
           },
+          // room above the plot for the legend, then the axis name
           grid: {
             left: 64,
             right: 16,
-            top: processingTimeSeries.length > 0 ? 72 : 32,
+            top: processingTimeSeries.length > 0 ? 56 : 32,
             bottom: 80,
           },
           xAxis: { type: "category", data: points.map((point) => point.label) },
@@ -200,10 +332,22 @@ export function WaitChart({
             {
               name: estimateName,
               type: "line",
-              data: points.map((point) =>
-                point.waitMonths === null
-                  ? null
-                  : Math.round(point.waitMonths * 10) / 10,
+              data: values.map((value) =>
+                value !== null &&
+                ceiling !== null &&
+                clippedAt !== null &&
+                value > ceiling
+                  ? {
+                      value: clippedAt,
+                      symbol: "triangle",
+                      symbolSize: 14,
+                      label: {
+                        show: true,
+                        position: "top",
+                        formatter: "off scale",
+                      },
+                    }
+                  : value,
               ),
               lineStyle: { width: 2 },
               symbolSize: 8,
@@ -212,7 +356,7 @@ export function WaitChart({
               name: officialName(series),
               type: "line",
               data: points.map(
-                (point) => point.processingTimes[series.title] ?? null,
+                (point) => point.processingTimes[series.key] ?? null,
               ),
               lineStyle: { width: 2, type: "dashed" },
               symbolSize: 8,
@@ -221,11 +365,13 @@ export function WaitChart({
         }}
       />
       <figcaption>
-        The estimated wait is the pending applications at the end of each
+        Time to clear backlog is the pending applications at the end of each
         quarter, divided by the decisions (approvals and denials) made per month
         during it.
         {processingTimeSeries.length > 0 &&
           " USCIS's median is how long the cases it decided in the quarter had taken."}
+        {ceiling !== null &&
+          " A triangle marks a quarter far off the top of the scale, such as one in which USCIS decided almost nothing; hover over or tap it for its numbers."}
       </figcaption>
     </Paper>
   );

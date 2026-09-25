@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       artifact-name:
-        description: "Name of the build artifact (containing out.tar.gz and wrangler.jsonc) to deploy"
+        description: "Name of the build artifact (out.tar.gz, wrangler.jsonc and the deploy tools' package files) to deploy"
         required: true
         type: string
     secrets:
@@ -16,33 +16,84 @@ on:
       cloudflare-account-id:
         required: false
 
-# The site is deployed to both Netlify (serving visawhen.com today) and a
-# Cloudflare Workers static-assets Worker (visawhen.<account>.workers.dev,
-# config in wrangler.jsonc). Cutting visawhen.com over to the Worker:
+# How visawhen.com is served today: the visawhen.com zone on Cloudflare proxies
+# visawhen.com and www.visawhen.com to Netlify (visawhen.netlify.app), which
+# serves what this workflow uploads. The same build also goes to a Cloudflare
+# Workers static-assets Worker (visawhen.<account>.workers.dev, config in
+# wrangler.jsonc) that does not serve visawhen.com yet.
 #
-#   1. Add CLOUDFLARE_API_TOKEN (Workers Scripts:Edit + Account Settings:Read
-#      on the account) and CLOUDFLARE_ACCOUNT_ID as repository secrets, and
-#      check that this job's Cloudflare steps go green on the next deploy.
+# The Cloudflare proxy does not just pass requests on. On the apex host,
+# visawhen.com, a rule set in the Cloudflare dashboard (not in this repository)
+# keeps HTML and /_next/data JSON in Cloudflare's cache for over 100 minutes
+# and rewrites their Cache-Control to "public, max-age=1800, must-revalidate",
+# overriding the max-age=0 the Netlify step below sets. On 2026-09-25,
+# https://visawhen.com/nvc answered "cf-cache-status: HIT" with "age: 5295",
+# while www.visawhen.com and visawhen.netlify.app answered max-age=0 (www with
+# "cf-cache-status: DYNAMIC"). So for up to about two and a half hours after a
+# deploy, visitors to visawhen.com can get the previous build's pages: the old
+# data, and after a code change, pages whose scripts and styles are gone.
+# Only the owner can fix this, in the Cloudflare dashboard for the
+# visawhen.com zone:
+#
+#   - Caching > Cache Rules (or Rules > Page Rules): delete the rule that
+#     caches everything or sets an Edge Cache TTL on visawhen.com, or limit it
+#     to /_next/static/*.
+#   - Caching > Configuration > Browser Cache TTL: "Respect Existing Headers".
+#   - Check with `curl -sI https://visawhen.com/nvc`: the answer should carry
+#     max-age=0 and a cf-cache-status other than HIT.
+#
+# Cutting visawhen.com over to the Worker:
+#
+#   1. Create CLOUDFLARE_API_TOKEN with Account > Workers Scripts > Edit and
+#      Account > Account Settings > Read on the account, and Zone > Workers
+#      Routes > Edit on the visawhen.com zone, which attaching the custom
+#      domains in step 2 needs (the "Edit Cloudflare Workers" token template
+#      has all three). Add it and CLOUDFLARE_ACCOUNT_ID as repository secrets,
+#      and check that this job's Cloudflare steps go green on the next deploy.
 #   2. Attach the custom domains to the Worker: add the "routes" block from
 #      wrangler.jsonc (visawhen.com and www.visawhen.com with
 #      `custom_domain: true`). The next deploy creates the DNS records in the
 #      zone (the zone must be on the same account; remove any existing A/CNAME
-#      records for the hostnames first).
+#      records for the hostnames first). Remove the apex cache rule above
+#      first, if it is still there.
 #   3. Once the Worker is serving visawhen.com, disable builds on the old
 #      Cloudflare Pages project (Settings > Builds & deployments > Disable
-#      automatic deployments) or delete it, and drop the Netlify deploy step.
+#      automatic deployments) or delete it, drop the Netlify deploy step, and
+#      point "Check what is live" at the Worker's version.txt.
+#
+# One visible difference: the Worker redirects /nvc/, /nvc.html and /index.html
+# with a 307, where Netlify redirects /nvc/ with a 301 and serves /index.html.
+# No link on the site or entry in the sitemap uses those forms.
 
 jobs:
   deploy:
     name: Deploy to Netlify and Cloudflare
     runs-on: ubuntu-24.04
+    # Only main is published. Running a workflow by hand on another branch
+    # builds that branch but does not deploy it. (In a called workflow,
+    # github.ref is the calling workflow's ref.)
+    if: github.ref == 'refs/heads/main'
+    # One deploy at a time: the push workflow and the data workflows each
+    # deploy their own commit, and the host keeps whichever upload finishes
+    # last. While one deploy runs, the next one waits; a deploy that gets its
+    # turn after a newer commit went live skips itself ("Check what is live").
+    # GitHub keeps only one waiting job per group, and a job that starts
+    # waiting cancels the one already waiting, so when three deploys overlap
+    # and the older of the last two starts waiting last, the newer one is
+    # cancelled: re-run that run's deploy job.
+    concurrency:
+      group: production-deploy
+      cancel-in-progress: false
+    permissions:
+      # the compare API call in "Check what is live"
+      contents: read
     steps:
       - id: download
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           # A single artifact downloaded by name is extracted directly into
-          # the workspace, so out.tar.gz and wrangler.jsonc end up at the top
-          # level.
+          # the workspace, so out.tar.gz, wrangler.jsonc and .github/deploy-tools/
+          # end up at the top level.
           name: ${{ inputs.artifact-name }}
 
       - name: Extract tar archive
@@ -50,13 +101,43 @@ jobs:
           mkdir out
           tar xf out.tar.gz -C out/
 
+      # build.yml writes the commit it built to out/version.txt, which the
+      # hosts serve. Skip the deploy when the live site is at a newer commit
+      # (one this commit is an ancestor of). Anything else is deployed: a
+      # newer commit, the same one again (a re-run), or an unknown live
+      # version.
+      - name: Check what is live
+        id: live
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          built=$(cat out/version.txt 2>/dev/null || true)
+          live=$(curl -fsS --max-time 30 https://visawhen.netlify.app/version.txt || true)
+          echo "Built: ${built:-unknown}; live on Netlify: ${live:-unknown}"
+          if [[ $built =~ ^[0-9a-f]{40}$ && $live =~ ^[0-9a-f]{40}$ ]] &&
+            [ "$(gh api "repos/$GITHUB_REPOSITORY/compare/$live...$built" --jq .status)" = behind ]; then
+            echo "::notice::Not deploying $built: the site already serves $live, a newer commit"
+            echo "newer=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "newer=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: steps.live.outputs.newer != 'true'
         with:
           node-version: "24"
+          cache: npm
+          cache-dependency-path: .github/deploy-tools/package-lock.json
 
-      # netlify-cli is pinned to a major that supports the runner's Node
-      # (27.x needs Node >= 22.13).
-      #
+      # netlify-cli and wrangler run with the deploy tokens in their
+      # environment, so they come at the exact versions and with the exact
+      # dependency tree of .github/deploy-tools/package-lock.json (updated by
+      # Dependabot) rather than whatever npm serves on the day, and without
+      # install scripts (neither CLI needs one to deploy).
+      - name: Install netlify-cli and wrangler
+        if: steps.live.outputs.newer != 'true'
+        run: npm ci --ignore-scripts --no-audit --no-fund --prefix .github/deploy-tools
+
       # --no-build is required: since netlify-cli 21.0.0 (2025-05-06),
       # "netlify deploy" runs the site's build command before deploying, which
       # broke this workflow (the site is already built and we only upload the
@@ -67,11 +148,15 @@ jobs:
       # from the publish directory too (with its own syntax), so swap in a
       # Netlify version for the upload and restore the Cloudflare files after.
       #
-      # HTML must not be cached past a deploy: every build renames the hashed
-      # JS/CSS chunks, so a stale page references assets that no longer exist
-      # and renders without scripts or styles (seen on 2026-08-24 with a
-      # 1-hour max-age). Only the content-hashed /_next/static/* is cached long.
+      # HTML must not be cached past a deploy: a code change renames the
+      # hashed JS/CSS chunks, so a stale page references assets that no longer
+      # exist and renders without scripts or styles (seen on 2026-08-24 with a
+      # 1-hour max-age), and after a data change it shows the old numbers.
+      # Only the content-hashed /_next/static/* is cached long. (On
+      # visawhen.com, the Cloudflare proxy overrides this; see the top of this
+      # file.)
       - name: Deploy to netlify
+        if: steps.live.outputs.newer != 'true'
         run: |
           mkdir -p "$RUNNER_TEMP/cloudflare-only"
           mv out/_headers out/.assetsignore "$RUNNER_TEMP/cloudflare-only/"
@@ -81,7 +166,7 @@ jobs:
           /_next/static/*
             Cache-Control: public, max-age=31536000, immutable
           EOF
-          npx -y netlify-cli@27 deploy --prod --no-build --dir=out/ --timeout=3600
+          .github/deploy-tools/node_modules/.bin/netlify deploy --prod --no-build --dir=out/ --timeout=3600
           rm out/_headers
           mv "$RUNNER_TEMP"/cloudflare-only/_headers "$RUNNER_TEMP"/cloudflare-only/.assetsignore out/
         env:
@@ -92,6 +177,7 @@ jobs:
       # is set as a step output.
       - name: Check for Cloudflare credentials
         id: cloudflare
+        if: steps.live.outputs.newer != 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.cloudflare-api-token }}
         run: |
@@ -118,7 +204,7 @@ jobs:
 
       - name: Deploy to Cloudflare Workers
         if: steps.cloudflare.outputs.enabled == 'true'
-        run: npx -y wrangler@4 deploy
+        run: .github/deploy-tools/node_modules/.bin/wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.cloudflare-api-token }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.cloudflare-account-id }}

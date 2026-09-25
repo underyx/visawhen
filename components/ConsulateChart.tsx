@@ -1,10 +1,14 @@
-import { BacklogRow } from "../api/consulates";
+import { IssuancesRow, VisaType } from "../api/consulates";
+import { formatCount, formatMonth } from "./consulates";
+import { ISSUANCE_STATISTICS_URLS } from "./links";
 
 import * as echarts from "echarts/core";
-import { BarChart, LineChart } from "echarts/charts";
+import { BarChart } from "echarts/charts";
 import {
+  AriaComponent,
   DatasetComponent,
   DataZoomComponent,
+  LegendComponent,
   TitleComponent,
   TooltipComponent,
   GridComponent,
@@ -14,26 +18,56 @@ import ReactEChartsCore from "echarts-for-react/lib/core";
 import { Paper } from "@mantine/core";
 
 echarts.use([
+  AriaComponent,
   DatasetComponent,
   DataZoomComponent,
+  LegendComponent,
   TitleComponent,
   TooltipComponent,
   GridComponent,
   BarChart,
-  LineChart,
   SVGRenderer,
 ]);
 
+/** State's listing of the monthly reports the counts come from */
+const SOURCES: Record<VisaType, { kind: string; url: string }> = {
+  IV: { kind: "immigrant", url: ISSUANCE_STATISTICS_URLS.IV },
+  NIV: { kind: "nonimmigrant", url: ISSUANCE_STATISTICS_URLS.NIV },
+};
+
+/** Mantine's blue.7: 4.2:1 against the white of the chart, where bars need
+ * 3:1 */
+const BAR_COLOR = "#1c7ed6";
+const SERIES_NAME = "Visas issued per month";
+
 interface Props {
-  backlog: BacklogRow[];
+  issuances: IssuancesRow[];
+  visaType: VisaType;
+  /** What the visas are, for the chart's text alternative: "Montreal
+   * CR1/IR1" */
+  subject: string;
 }
 
-export default function ConsulateChart({ backlog }: Props) {
-  const dateFormatter = new Intl.DateTimeFormat([], {
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  });
+/** What the chart shows, in words, for screen readers: its span and the last
+ * 12 months' counts. */
+function describe(issuances: IssuancesRow[], subject: string): string {
+  const first = issuances[0];
+  const last = issuances[issuances.length - 1];
+  const recent = issuances
+    .slice(-12)
+    .map((row) => `${formatMonth(row.month)}: ${formatCount(row.issuances)}`)
+    .join("; ");
+  return `Bar chart of ${subject} visas issued each month, ${formatMonth(
+    first.month,
+  )} to ${formatMonth(last.month)}. The last 12 months: ${recent}.`;
+}
+
+export default function ConsulateChart({
+  issuances,
+  visaType,
+  subject,
+}: Props) {
+  const source = SOURCES[visaType];
   return (
     <Paper shadow="xs" p="md" mx={0} component="figure">
       <ReactEChartsCore
@@ -42,24 +76,28 @@ export default function ConsulateChart({ backlog }: Props) {
         option={{
           dataset: {
             source: [
-              ["month", "actual visas issued", "expected visas issued"],
-              ...backlog.map((row) => [
-                dateFormatter.format(new Date(row.month)),
-                Math.round(row.issuances * 10) / 10,
-                row.expectedDelta !== null
-                  ? Math.round(row.expectedDelta * 10) / 10
-                  : null,
+              ["month", SERIES_NAME],
+              ...issuances.map((row) => [
+                formatMonth(row.month),
+                Math.round(row.issuances),
               ]),
             ],
           },
           animation: false,
+          aria: {
+            enabled: true,
+            label: { description: describe(issuances, subject) },
+          },
+          legend: { top: 0 },
           tooltip: {
             trigger: "axis",
           },
           xAxis: {
             type: "category",
           },
-          yAxis: { name: "visas" },
+          // Whole visas only: without this, a class with at most a visa or two
+          // a month gets ticks at 0.2, 0.4 and so on.
+          yAxis: { name: "visas", minInterval: 1 },
           dataZoom: [
             {
               type: "slider",
@@ -70,22 +108,18 @@ export default function ConsulateChart({ backlog }: Props) {
           series: [
             {
               type: "bar",
-            },
-            {
-              type: "line",
-              step: "middle",
+              name: SERIES_NAME,
+              itemStyle: { color: BAR_COLOR },
             },
           ],
         }}
       />
       <figcaption>
-        Source:{" "}
-        <a href="https://travel.state.gov/content/travel/en/legal/visa-law0/visa-statistics/immigrant-visa-statistics/monthly-immigrant-visa-issuances.html">
-          The U.S. Department of State&rsquo;s Monthly Immigrant Visa Issuance
-          Statistics
-        </a>
-        .<br />
-        New data shows up here within a day and is stored in{" "}
+        Source: the U.S. Department of State&rsquo;s{" "}
+        <a href={source.url}>monthly {source.kind} visa issuance statistics</a>
+        .
+        <br />
+        The monthly counts are stored in{" "}
         <a href="https://github.com/underyx/visawhen/blob/main/data/consulates/dump">
           JSON lines files on GitHub
         </a>

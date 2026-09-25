@@ -14,8 +14,6 @@ interface Props {
   label: React.ReactNode;
   /** Kept at the right, never shrunk */
   rightSection?: React.ReactNode;
-  /** Greyed out and not clickable */
-  disabled?: boolean;
   /** Navigate with a full page load instead of next/link. The consulate
    * pages need this: their per-page _next/data JSON is not deployed (it
    * would push the site over Cloudflare's 20,000-file limit), so a Link
@@ -28,14 +26,12 @@ export function ListRow({
   href,
   label,
   rightSection,
-  disabled = false,
   hardNavigation = false,
 }: Props) {
   const shared = {
     href,
     label,
     rightSection,
-    disabled,
     className: classes.row,
     classNames: { label: classes.label },
   };
@@ -43,5 +39,19 @@ export function ListRow({
     <NavLink component="a" {...shared} />
   ) : (
     <NavLink component={Link} {...shared} />
+  );
+}
+
+/** A row like ListRow's for an entry with no page to go to: plain text, not a
+ * disabled link, so that keyboards and crawlers do not stop at it. */
+export function ListItem({
+  label,
+  rightSection,
+}: Pick<Props, "label" | "rightSection">) {
+  return (
+    <div className={`${classes.row} ${classes.item}`}>
+      <div className={classes.label}>{label}</div>
+      {rightSection}
+    </div>
   );
 }

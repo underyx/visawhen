@@ -3,6 +3,23 @@ name: Pull request
 on:
   pull_request:
 
+# Pull requests, Dependabot's and forks' included, get a read-only token and
+# no secrets; nothing here deploys. The workflows are referenced by path, so a
+# pull request that changes one of them runs its own version.
+permissions:
+  contents: read
+
 jobs:
   pre-commit:
-    uses: underyx/visawhen/.github/workflows/pre-commit.yml@main
+    uses: ./.github/workflows/pre-commit.yml
+
+  lint:
+    uses: ./.github/workflows/lint.yml
+    with:
+      # the merge of the pull request into its base, as pre-commit checks
+      ref: ${{ github.sha }}
+
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      ref: ${{ github.sha }}

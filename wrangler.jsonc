@@ -12,7 +12,9 @@
   "assets": {
     "directory": "./out",
     // /nvc -> out/nvc.html and /nvc/ redirects to /nvc, matching the Next.js
-    // export layout (no trailingSlash) and Netlify's pretty URLs.
+    // export layout (no trailingSlash) and Netlify's pretty URLs. The Worker
+    // redirects with a 307 (Netlify with a 301), and redirects /nvc.html and
+    // /index.html too, which Netlify serves; nothing links to those forms.
     "html_handling": "auto-trailing-slash",
     // Serve out/404.html with a 404 status for unknown paths.
     "not_found_handling": "404-page"

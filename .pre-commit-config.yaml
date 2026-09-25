@@ -33,10 +33,19 @@ repos:
       - id: mypy
         additional_dependencies: [attrs, types-requests]
 
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.0.0
+  # Prettier stays at 3.0.0: newer versions reformat every nested ternary. The
+  # hook is the one pre-commit/mirrors-prettier v3.0.0 defines, kept here
+  # since that repository is archived.
+  - repo: local
     hooks:
       - id: prettier
+        name: prettier
+        entry: prettier --write --list-different --ignore-unknown
+        language: node
+        types: [text]
+        additional_dependencies: ["prettier@3.0.0"]
+        # written by npm and Dependabot
+        exclude: ^[.]github/deploy-tools/package-lock[.]json$
 
   - repo: https://github.com/roy-ht/pre-commit-jupyter
     rev: v1.2.1

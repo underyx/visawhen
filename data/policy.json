@@ -1,0 +1,131 @@
+{
+  "entries": [
+    {
+      "id": "post-pause-juba-kinshasa-kampala",
+      "status": "official",
+      "title": "Visa services paused at this embassy",
+      "body": "Since May 18, 2026, the U.S. Embassies in Juba, Kinshasa and Kampala have paused all visa services, including immigrant visas, because of the Ebola outbreak. No appointments can be scheduled. The State Department says it will update its website when scheduling resumes.",
+      "scope": { "posts": ["juba", "kinshasa", "kampala"] },
+      "overridesSchedule": true,
+      "start": "2026-05-18",
+      "end": null,
+      "sources": [
+        {
+          "label": "State Department: Temporary Pause of Visa Operations",
+          "url": "https://travel.state.gov/content/travel/en/News/visas-news/temporary-pause-of-visa-operations.html"
+        }
+      ],
+      "lastChecked": "2026-09-24"
+    },
+    {
+      "id": "africa-regional-hubs",
+      "status": "official",
+      "title": "Visa services moved to a regional hub",
+      "body": "Since August 1, 2026, routine visa services at this post, including immigrant visas, have moved to a regional hub. Citizens and residents of this country apply at the immigrant visa post the State Department designates for it instead.",
+      "scope": {
+        "posts": [
+          "antananarivo",
+          "abuja",
+          "asmara",
+          "bamako",
+          "banjul",
+          "brazzaville",
+          "bujumbura",
+          "conakry",
+          "cotonou",
+          "durban",
+          "freetown",
+          "gaborone",
+          "harare",
+          "juba",
+          "libreville",
+          "lilongwe",
+          "lusaka",
+          "maputo",
+          "maseru",
+          "mbabane",
+          "ndjamena",
+          "niamey",
+          "nouakchott",
+          "ouagadougou",
+          "windhoek"
+        ]
+      },
+      "overridesSchedule": true,
+      "start": "2026-08-01",
+      "end": null,
+      "sources": [
+        {
+          "label": "State Department: Realignment of U.S. Visa Services in Africa to Regional Hubs",
+          "url": "https://travel.state.gov/content/travel/en/News/visas-news/realignment-of-us-visa-services-in-africa-to-regional-hubs.html"
+        }
+      ],
+      "lastChecked": "2026-09-24"
+    },
+    {
+      "id": "iv-interviews-postponed-public-charge-training",
+      "status": "reported",
+      "title": "Immigrant visa interviews reportedly postponed for public charge training",
+      "body": "From late August 2026, U.S. embassies and consulates reportedly postponed immigrant visa interviews while their consular officers were trained on new public charge guidance, emailing applicants with interviews booked that they would be rescheduled. On August 27, the Associated Press quoted a State Department official saying the pause was not expected to last beyond early to mid-September. On September 8, Reuters reported that processing had resumed for Hungary and Poland while the pause continued elsewhere, and that it could last months, according to a person familiar with the matter. No report we have found says whether it is still in place at other posts. The State Department acknowledged the pause in a statement on August 25 but has posted no notice about it on its website. NVC and consulates may reschedule interviews, including ones already booked, while it lasts.",
+      "scope": {
+        "allConsulatePages": true,
+        "exceptPosts": ["budapest", "krakow", "warsaw"],
+        "pages": ["/nvc"],
+        "immigrantVisasOnly": true
+      },
+      "start": "2026-08-25",
+      "end": null,
+      "sources": [
+        {
+          "label": "Fox News: Trump admin pauses immigrant visa interviews for public charge training (August 26, 2026)",
+          "url": "https://www.foxnews.com/politics/trump-immigrant-visa-interview-pause"
+        },
+        {
+          "label": "Associated Press, via NBC News: Trump administration pauses all immigrant visa applications amid new screening policy (August 27, 2026)",
+          "url": "https://www.nbcnews.com/news/us-news/trump-administration-pauses-immigrant-visa-applications-new-screening-rcna594669"
+        },
+        {
+          "label": "Ogletree: State Department Pauses Immigrant Visa Interviews for New Public Charge Guidance Training (August 31, 2026)",
+          "url": "https://ogletree.com/insights-resources/blog-posts/state-department-pauses-immigrant-visa-interviews-for-new-public-charge-guidance-training/"
+        },
+        {
+          "label": "Reuters, via Yahoo News: US resumes immigrant visa processing for Hungary, Poland as pause remains elsewhere (September 8, 2026)",
+          "url": "https://www.yahoo.com/news/articles/exclusive-us-resumes-immigrant-visa-211243675.html"
+        }
+      ],
+      "lastChecked": "2026-09-25"
+    },
+    {
+      "id": "pp-10998-suspension",
+      "status": "official",
+      "title": "Visa suspensions for nationals of 39 countries",
+      "body": "Since January 1, 2026, Presidential Proclamation 10998 has suspended visas, with narrow exceptions, for nationals of Afghanistan, Burma, Burkina Faso, Chad, the Republic of the Congo, Equatorial Guinea, Eritrea, Haiti, Iran, Laos, Libya, Mali, Niger, Sierra Leone, Somalia, South Sudan, Sudan, Syria and Yemen (all visas), and of Angola, Antigua and Barbuda, Benin, Burundi, Cote d'Ivoire, Cuba, Dominica, Gabon, The Gambia, Malawi, Mauritania, Nigeria, Senegal, Tanzania, Togo, Tonga, Turkmenistan, Venezuela, Zambia and Zimbabwe (immigrant visas and some others). Spouses, children and parents of U.S. citizens are no longer exempt. It depends on your nationality, not on the embassy: dual nationals applying with a passport from a country not on the list are exempt.",
+      "scope": { "allConsulatePages": true, "pages": ["/nvc"] },
+      "start": "2026-01-01",
+      "end": null,
+      "sources": [
+        {
+          "label": "State Department: Suspension of Visa Issuance to Foreign Nationals to Protect the Security of the United States",
+          "url": "https://travel.state.gov/content/travel/en/News/visas-news/suspension-of-visa-issuance-to-foreign-nationals-to-protect-the-security-of-the-united-states.html"
+        }
+      ],
+      "lastChecked": "2026-09-24"
+    },
+    {
+      "id": "iv-pause-75-countries",
+      "status": "official",
+      "title": "75-country immigrant visa pause has ended",
+      "body": "From January 21 to August 21, 2026, the State Department paused immigrant visa issuance to nationals of 75 countries. A court order in CLINIC v. Rubio ended the pause on August 21, 2026.",
+      "scope": { "allConsulatePages": true, "immigrantVisasOnly": true },
+      "start": "2026-01-21",
+      "end": "2026-08-21",
+      "sources": [
+        {
+          "label": "State Department: Immigrant Visa Processing Updates for Nationalities at High Risk of Public Benefits Reliance",
+          "url": "https://travel.state.gov/content/travel/en/News/visas-news/immigrant-visa-processing-updates-for-nationalities-at-high-risk-of-public-benefits-usage.html"
+        }
+      ],
+      "lastChecked": "2026-09-24"
+    }
+  ]
+}

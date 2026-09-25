@@ -1,0 +1,9 @@
+{
+  "name": "visawhen-deploy-tools",
+  "private": true,
+  "description": "The CLIs .github/workflows/deploy.yml runs, pinned with package-lock.json. Kept apart from the site's Yarn project so their large dependency trees stay out of .yarn/cache; Dependabot updates them.",
+  "dependencies": {
+    "netlify-cli": "27.8.1",
+    "wrangler": "4.136.3"
+  }
+}

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "yarn ensure-db && next dev --webpack",
-    "build": "yarn ensure-db && next build --webpack && next-sitemap",
+    "build": "yarn ensure-db && next build --webpack && next-sitemap && node scripts/check-redirects.mjs",
     "export": "yarn build",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -13,7 +13,6 @@
   "dependencies": {
     "@mantine/core": "^9.5.2",
     "@mantine/hooks": "^9.5.2",
-    "date-fns": "^4.4.0",
     "echarts": "^6.1.0",
     "echarts-for-react": "^3.0.6",
     "lodash": "^4.18.1",
@@ -27,7 +26,6 @@
     "sqlite3": "^6.0.1"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^16.3.2",
     "@types/lodash": "^4.17.25",
     "@types/node": "^24.13.3",
     "@types/numeral": "^2.0.5",
@@ -40,6 +38,11 @@
     "postcss-preset-mantine": "^1.18.0",
     "postcss-simple-vars": "^7.0.1",
     "typescript": "^5.9.3"
+  },
+  "dependenciesMeta": {
+    "sqlite3": {
+      "built": true
+    }
   },
   "browserslist": [
     ">1%",

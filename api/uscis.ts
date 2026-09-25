@@ -3,6 +3,8 @@ import { readFile } from "fs/promises";
 
 const dataDir = join(process.cwd(), "data");
 
+export type CountField = "received" | "approved" | "denied" | "pending";
+
 /** Applications received, approved and denied during a quarter, and pending
  * at its end. `null` is a count USCIS withheld or did not publish. */
 export interface QuarterCounts {
@@ -10,11 +12,20 @@ export interface QuarterCounts {
   approved: number | null;
   denied: number | null;
   pending: number | null;
+  /** The null counts that USCIS withheld as too small to disclose ("D" in
+   * its reports), as opposed to not publishing them. Where the N-400 and
+   * I-485 offices add up to their report's total, the remainder comes to 1
+   * to 9 per "D"; in some quarters of the I-130 office reports far more is
+   * unaccounted for (hundreds per "D"), so there an estimate is rougher. */
+  withheld?: CountField[];
 }
 
 /** One line of USCIS's all-forms report: a form, or one category of it
  * (e.g. I-130 for immediate relatives). */
 export interface Variant extends QuarterCounts {
+  /** The category, stable when USCIS retitles its row: "immediate-relative",
+   * "advance-parole", or "all" for a form's only row */
+  key: string;
   title: string;
   /** USCIS's median processing time in months, when it publishes one */
   processingTime: number | null;
@@ -33,13 +44,30 @@ export interface Period {
   fiscalQuarter: number;
 }
 
+/** An office's (or the per-office report's national) counts for a quarter:
+ * the total, and per category of the report. */
+export interface OfficeQuarter extends QuarterCounts {
+  /** By OfficeCategory key; missing from data built before the per-office
+   * categories were parsed */
+  categories?: Record<string, QuarterCounts>;
+}
+
+/** A category the per-office report splits its counts into, e.g. I-130
+ * immediate relatives vs. all other relatives. */
+export interface OfficeCategory {
+  /** "immediate-relative", "family", "civilian", ... */
+  key: string;
+  /** As the newest report labels it: "Immediate Relative", "Family-based" */
+  label: string;
+}
+
 export interface Office {
   code: string;
   name: string;
   state: string | null;
   stateCode: string | null;
   slug: string;
-  quarters: Record<string, QuarterCounts>;
+  quarters: Record<string, OfficeQuarter>;
 }
 
 export interface Form {
@@ -56,8 +84,10 @@ export interface Form {
   /** Per-office breakdown; empty for most forms */
   offices: Office[];
   /** The per-office report's own nationwide totals */
-  officeTotals: Record<string, QuarterCounts>;
+  officeTotals: Record<string, OfficeQuarter>;
   officeSources: Record<string, string>;
+  /** The per-office report's categories, in its order */
+  officeCategories?: OfficeCategory[];
 }
 
 export interface UscisData {
@@ -65,12 +95,16 @@ export interface UscisData {
   forms: Form[];
 }
 
-export async function getData(): Promise<UscisData> {
-  const contents = await readFile(
-    join(dataDir, "uscis", "forms.json"),
-    "utf-8",
-  );
-  return JSON.parse(contents);
+let dataPromise: Promise<UscisData> | undefined;
+
+/** forms.json, read and parsed once per build worker (it is several
+ * megabytes, and every USCIS page reads it). Callers must not modify it. */
+export function getData(): Promise<UscisData> {
+  if (dataPromise === undefined)
+    dataPromise = readFile(join(dataDir, "uscis", "forms.json"), "utf-8").then(
+      (contents) => JSON.parse(contents) as UscisData,
+    );
+  return dataPromise;
 }
 
 /** The newest quarter with numbers, or null when there are none. Quarters

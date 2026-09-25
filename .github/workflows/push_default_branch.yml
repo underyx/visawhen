@@ -5,20 +5,29 @@ on:
     branches:
       - main
   # Allow triggering a build + deploy manually (e.g. to publish data that was
-  # committed while the deploy pipeline was broken).
+  # committed while the deploy pipeline was broken). Run on another branch, it
+  # builds that branch without deploying it (see deploy.yml).
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   pre-commit:
-    uses: underyx/visawhen/.github/workflows/pre-commit.yml@main
+    uses: ./.github/workflows/pre-commit.yml
+
+  lint:
+    uses: ./.github/workflows/lint.yml
+    with:
+      ref: ${{ github.sha }}
 
   build:
-    uses: underyx/visawhen/.github/workflows/build.yml@main
+    uses: ./.github/workflows/build.yml
     with:
       ref: ${{ github.sha }}
 
   deploy:
-    uses: underyx/visawhen/.github/workflows/deploy.yml@main
+    uses: ./.github/workflows/deploy.yml
     needs: [build]
     if: needs.build.result == 'success'
     with:

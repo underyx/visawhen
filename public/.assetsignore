@@ -8,6 +8,3 @@
 # full page load. Skipping them keeps a deploy well under the 20,000 files
 # per version limit. The top-level nvc/consulates data JSON is kept.
 _next/data/*/consulates/
-
-# Copied from public/, not meant to be served.
-.gitignore
