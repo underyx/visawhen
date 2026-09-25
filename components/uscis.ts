@@ -156,6 +156,19 @@ function flowCheck(points: QuarterPoint[]): QuarterPoint[] {
       ) === false
     );
   });
+  // A series whose counts rarely reconcile with its filings and decisions
+  // (the I-129's miss in 42 of 50 quarters, most likely because its pending
+  // count and its receipts count petitions differently) says nothing about
+  // any one quarter: marking nearly every point would read as the whole
+  // series being wrong. Such a series is left unchecked.
+  const checked = steps.filter((step) => step !== null);
+  const misses = checked.filter((step) => step === true).length;
+  if (checked.length >= 8 && misses > checked.length / 2)
+    return points.map((point) => ({
+      ...point,
+      flow: "unknown",
+      suspect: false,
+    }));
   return points.map((point, index) => ({
     ...point,
     flow:
