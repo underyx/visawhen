@@ -8,6 +8,7 @@ import {
   Text,
   Title,
 } from "@mantine/core";
+import { sortBy } from "lodash";
 import React from "react";
 import { daysBetween, formatShortDate, useToday } from "./Freshness";
 import {
@@ -15,6 +16,7 @@ import {
   hasEnded,
   hasStarted,
   isAboutPage,
+  namesPage,
   PolicyEntry,
   policiesFor,
 } from "./policy";
@@ -129,10 +131,16 @@ export default function PolicyBanner({ consulate, immigrant, page }: Props) {
   const shown = policiesFor({ consulate, page, immigrant }).filter(
     (entry) => hasStarted(entry, today) && !hasExpired(entry, today),
   );
-  const expandedEntries = shown.filter((entry) =>
-    consulate === undefined
-      ? entry.expanded === true
-      : isAboutPage(entry, consulate),
+  // The entries about the page in particular, such as a suspension for most
+  // of its applicants' nationality, come before the ones expanded
+  // everywhere.
+  const expandedEntries = sortBy(
+    shown.filter((entry) =>
+      consulate === undefined
+        ? entry.expanded === true
+        : isAboutPage(entry, consulate),
+    ),
+    (entry) => (consulate !== undefined && namesPage(entry, consulate) ? 0 : 1),
   );
   const otherEntries = shown.filter(
     (entry) => !expandedEntries.includes(entry),

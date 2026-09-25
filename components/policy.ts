@@ -143,9 +143,14 @@ function appliesToPage(entry: PolicyEntry, page: ConsulatePage): boolean {
 export function isAboutPage(entry: PolicyEntry, page: ConsulatePage): boolean {
   return (
     (entry.expanded === true && page.nonimmigrant !== true) ||
-    namesPost(entry, page) ||
-    entry.scope.visaClasses !== undefined
+    namesPage(entry, page)
   );
+}
+
+/** Whether an entry that is shown on a consulate page names the page: its
+ * post, the country its applicants are nationals of, or its visa class */
+export function namesPage(entry: PolicyEntry, page: ConsulatePage): boolean {
+  return namesPost(entry, page) || entry.scope.visaClasses !== undefined;
 }
 
 /** The entries for a page, in the file's order: for a post's own page or one
