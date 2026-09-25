@@ -187,8 +187,10 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 };
 
 /** Below this many visas in the year before, a percentage change is mostly
- * noise, so the page gives the count instead. */
-const MIN_COMPARABLE = 10;
+ * noise, so the page gives the count instead: from 10 to 38, Almaty's EB-5
+ * visas were "up 280%", and 101 pages said more than 100% from a base of
+ * 10 to 29. */
+const MIN_COMPARABLE = 50;
 /** Changes within this many percent count as about the same. */
 const SAME_PERCENT = 10;
 
