@@ -216,6 +216,43 @@ function who(form: string, view: FormView, views: FormView[]): string {
     : `${form} (${view.name})`;
 }
 
+/** The meta description of a form with no range: what USCIS's newest
+ * quarter says of its pile and its decisions, leaving out a count USCIS did
+ * not publish (the I-870's, I-899's, I-956G's and I-956H's pending) rather
+ * than calling it "n/a". */
+function describeCounts(
+  what: string,
+  {
+    label,
+    pending,
+    completions,
+    approximate,
+  }: {
+    label: string;
+    pending: number | null;
+    completions: number | null;
+    approximate: boolean;
+  },
+): string {
+  const decided =
+    completions === null
+      ? null
+      : `${approximate ? "about " : ""}${formatCount(completions)}`;
+  if (pending !== null)
+    return `USCIS had ${formatCount(
+      pending,
+    )} ${what} applications pending at the end of ${label}${
+      decided === null ? "." : ` and decided ${decided} that quarter.`
+    }`;
+  // USCIS's "-" in its decisions columns, which its report says represents
+  // zero: the I-956G's and I-956H's in every quarter
+  if (completions === 0)
+    return `USCIS's report for ${label} gives no decisions on ${what} applications, and no count of those pending.`;
+  if (decided !== null)
+    return `USCIS decided ${decided} ${what} applications in ${label}; it did not publish how many were pending.`;
+  return `USCIS published neither how many ${what} applications it decided in ${label} nor how many were pending.`;
+}
+
 export default function UscisForm({
   form,
   slug,
@@ -296,15 +333,7 @@ export default function UscisForm({
     views.length > 1 ? who(form, views[0], views) : `${form} (${title})`;
   const description =
     headline === null
-      ? `USCIS had ${formatCount(
-          opening.pending,
-        )} ${openingWhat} applications pending at the end of ${opening.label}${
-          opening.completions === null
-            ? "."
-            : ` and decided ${opening.approximate ? "about " : ""}${formatCount(
-                opening.completions,
-              )} that quarter.`
-        }`
+      ? describeCounts(openingWhat, opening)
       : `If you file ${article} ${headlineWhat} today, USCIS will most likely decide it in ${formatRangeMonths(
           headline.q[1],
           headline.q[3],
