@@ -535,8 +535,21 @@ export function highlight(
   const previous = points[points.length - 2];
   if (current === undefined) return "";
   const sentences: string[] = [];
-  const pendingChange = formatChange(previous?.pending, current.pending);
+  // As on the card, no percentage from a pile below MIN_CHANGE_BASE:
+  // Christiansted's I-130s went from 15 to 129, "grew 760%"
+  const pendingChange = formatChange(
+    previous?.pending,
+    current.pending,
+    MIN_CHANGE_BASE,
+  );
+  const previousPending = previous?.pending ?? null;
   const reliable = pendingChangeReliable(current);
+  const movedText =
+    moved === "in"
+      ? " as USCIS moved or routed cases here from elsewhere"
+      : moved === "out"
+      ? " as USCIS moved cases to other offices"
+      : "";
   // no trend in the time to clear against a quarter of almost no decisions
   const comparable = reliable && !stalled(points, points.length - 2);
   if (current.pending !== null) {
@@ -544,20 +557,30 @@ export function highlight(
     if (
       !reliable &&
       moved === null &&
-      pendingChange !== null &&
-      previous?.pending !== null &&
-      previous?.pending !== undefined &&
+      previousPending !== null &&
+      previousPending !== 0 &&
       current.received !== null &&
       current.completions !== null
     )
       sentences.push(
         `The count of pending ${what} at ${subject} went from ${formatCount(
-          previous.pending,
-        )} to ${formatCount(current.pending)} in ${
-          current.label
-        } (${pendingChange}), but that quarter's filings minus its decisions come to ${formatSigned(
+          previousPending,
+        )} to ${formatCount(current.pending)} in ${current.label}${
+          pendingChange === null ? "" : ` (${pendingChange})`
+        }, but that quarter's filings minus its decisions come to ${formatSigned(
           current.received - current.completions,
         )}: the count is out of line with USCIS's own numbers, so we don't read it as USCIS catching up or falling behind.`,
+      );
+    else if (
+      pendingChange === null &&
+      previousPending !== null &&
+      previousPending !== current.pending
+    )
+      // too few to give as a percentage: the counts themselves
+      sentences.push(
+        `The pile of pending ${what} at ${subject} went from ${formatCount(
+          previousPending,
+        )} to ${formatCount(current.pending)} in ${current.label}${movedText}.`,
       );
     else
       sentences.push(
@@ -569,13 +592,7 @@ export function highlight(
             : grew
             ? `grew ${pendingChange.slice(1)} to`
             : `shrank ${pendingChange.slice(1)} to`
-        } ${formatCount(current.pending)} in ${current.label}${
-          moved === "in"
-            ? " as USCIS moved or routed cases here from elsewhere"
-            : moved === "out"
-            ? " as USCIS moved cases to other offices"
-            : ""
-        }.`,
+        } ${formatCount(current.pending)} in ${current.label}${movedText}.`,
       );
   }
   if (current.waitMonths !== null) {
