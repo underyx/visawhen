@@ -545,7 +545,8 @@ export default function UscisOffice({
         </Text>
         <OutcomesChart
           points={points}
-          subject={`${who(form, view)} at ${officePhrase}`}
+          subject={who(form, view)}
+          place={`at ${officePhrase}`}
           source={source}
           sourceName={sourceName}
         />
@@ -574,7 +575,9 @@ export default function UscisOffice({
         {hasClearing && (
           <WaitChart
             points={points}
-            subject={`${who(form, view)} at ${officePhrase}`}
+            subject={who(form, view)}
+            place={`at ${officePhrase}`}
+            suppressed={backlogSuppressed}
             processingTimeSeries={[]}
           />
         )}

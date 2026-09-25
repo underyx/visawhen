@@ -98,8 +98,8 @@
     {
       "id": "pp-10998-suspension",
       "status": "official",
-      "title": "Immigrant visas suspended for nationals of 39 countries",
-      "body": "Since January 1, 2026, Presidential Proclamation 10998 has suspended immigrant visas, with narrow exceptions, for nationals of Afghanistan, Burma, Burkina Faso, Chad, the Republic of the Congo, Equatorial Guinea, Eritrea, Haiti, Iran, Laos, Libya, Mali, Niger, Sierra Leone, Somalia, South Sudan, Sudan, Syria and Yemen (all visas), and of Angola, Antigua and Barbuda, Benin, Burundi, Cote d'Ivoire, Cuba, Dominica, Gabon, The Gambia, Malawi, Mauritania, Nigeria, Senegal, Tanzania, Togo, Tonga, Turkmenistan, Venezuela, Zambia and Zimbabwe (immigrant visas and some others). Spouses, children and parents of U.S. citizens are no longer exempt. It depends on your nationality, not on the embassy: dual nationals applying with a passport from a country not on the list are exempt.",
+      "title": "Visa suspensions for nationals of 39 countries",
+      "body": "Since January 1, 2026, Presidential Proclamation 10998 has suspended visas, with narrow exceptions, for nationals of Afghanistan, Burma, Burkina Faso, Chad, the Republic of the Congo, Equatorial Guinea, Eritrea, Haiti, Iran, Laos, Libya, Mali, Niger, Sierra Leone, Somalia, South Sudan, Sudan, Syria and Yemen (all visas), and of Angola, Antigua and Barbuda, Benin, Burundi, Cote d'Ivoire, Cuba, Dominica, Gabon, The Gambia, Malawi, Mauritania, Nigeria, Senegal, Tanzania, Togo, Tonga, Turkmenistan, Venezuela, Zambia and Zimbabwe (immigrant visas and some others). Spouses, children and parents of U.S. citizens are no longer exempt. It depends on your nationality, not on the embassy: dual nationals applying with a passport from a country not on the list are exempt.",
       "scope": { "allConsulatePages": true, "pages": ["/nvc"] },
       "start": "2026-01-01",
       "end": null,

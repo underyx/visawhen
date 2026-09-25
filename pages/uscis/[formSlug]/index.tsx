@@ -450,6 +450,7 @@ export default function UscisForm({
           <WaitChart
             points={points}
             subject={form}
+            suppressed={backlogSuppressed}
             processingTimeSeries={processingTimeSeries}
           />
         </Stack>

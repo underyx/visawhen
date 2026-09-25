@@ -27,6 +27,7 @@ import {
   formatShortIvMonth,
   IvSchedule,
   monthsBehind,
+  summarizeInactivity,
 } from "../../../components/consulates";
 import IvScheduleCard, {
   describeRelativeQueue,
@@ -72,6 +73,8 @@ interface Props {
   /** That the post has issued no immigrant visas, or no visas, for a year,
    * if it has not (see describeInactivity) */
   inactivity: string | null;
+  /** The same as a phrase for the title (see summarizeInactivity) */
+  inactivitySummary: string | null;
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -92,6 +95,14 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   if (postInfo === undefined) return { notFound: true };
   const recentWindow = await getRecentWindow();
   const ivSchedule = await getIvSchedule(postSlug);
+  const inactivityInput = {
+    postName: postInfo.post,
+    activity: await getPostActivity(postSlug),
+    dataStart: recentWindow.first,
+    dataEnd: recentWindow.to,
+    immigrant: true,
+    listedInTool: ivSchedule !== null,
+  };
 
   return {
     props: {
@@ -105,14 +116,8 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       ivScheduleAsOf: await getIvScheduleAsOf(),
       ivSchedule,
       ivScheduleSource: await getIvScheduleSource(),
-      inactivity: describeInactivity({
-        postName: postInfo.post,
-        activity: await getPostActivity(postSlug),
-        dataStart: recentWindow.first,
-        dataEnd: recentWindow.to,
-        immigrant: true,
-        listedInTool: ivSchedule !== null,
-      }),
+      inactivity: describeInactivity(inactivityInput),
+      inactivitySummary: summarizeInactivity(inactivityInput),
     },
   };
 };
@@ -139,6 +144,7 @@ export default function ConsulateSelect({
   ivSchedule,
   ivScheduleSource,
   inactivity,
+  inactivitySummary,
 }: Props) {
   const recentMap = useMemo<Map<string, number>>(
     () =>
@@ -176,7 +182,9 @@ export default function ConsulateSelect({
   // is called current only when every category State lists is. Where a
   // policy means the month is no queue, such as a pause of visa services,
   // the policy takes the title and description instead, with its end date if
-  // it has one, since the page may still be served after it.
+  // it has one, since the page may still be served after it. A post that
+  // looks closed (see describeInactivity) is titled by that instead, since
+  // State's tool can list a post that issues nothing as current.
   const relativeCutoff = ivSchedule?.relative ?? null;
   const today = useToday();
   const scheduleOverride = scheduleOverrideFor(postSlug, ivScheduleAsOf, today);
@@ -204,6 +212,9 @@ export default function ConsulateSelect({
     }${ends === null ? "" : `, ${ends}`}, last checked ${formatShortDate(
       scheduleOverride.lastChecked,
     )}). ${issuedDescription}`;
+  } else if (inactivity !== null && inactivitySummary !== null) {
+    title = `${postName}: ${inactivitySummary}`;
+    description = `${inactivity} ${issuedDescription}`;
   } else {
     title =
       ivSchedule === null || relativeCutoff === null
@@ -216,10 +227,7 @@ export default function ConsulateSelect({
               : "immediate relatives listed as current"
           }`;
     description =
-      describeRelativeQueue(postName, ivSchedule) ??
-      (inactivity === null
-        ? issuedDescription
-        : `${inactivity} ${issuedDescription}`);
+      describeRelativeQueue(postName, ivSchedule) ?? issuedDescription;
   }
 
   return (

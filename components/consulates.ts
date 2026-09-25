@@ -55,22 +55,7 @@ function monthsBetween(from: string, to: string): number {
   return toYear * 12 + toMonth - (fromYear * 12 + fromMonth);
 }
 
-/** For a post that looks closed, a sentence that says what the data shows:
- * that it issued no visas in the last 12 months of the data, whatever else
- * lists it, or, with `immigrant` (its own page and its immigrant visa class
- * pages), that it issued immigrant visas but none in the last 12 months,
- * when State's IV Scheduling Status Tool, which is months newer, does not
- * list it either. Null for every other post, including those that issued
- * other visas but never an immigrant one in the data: they handle
- * nonimmigrant visas only, which the interview-queue card already says. */
-export function describeInactivity({
-  postName,
-  activity,
-  dataStart,
-  dataEnd,
-  immigrant,
-  listedInTool,
-}: {
+interface InactivityInput {
   postName: string;
   activity: PostActivity;
   /** The oldest and newest months in the data */
@@ -79,30 +64,68 @@ export function describeInactivity({
   immigrant: boolean;
   /** Whether State's newest IV Scheduling Status Tool update lists the post */
   listedInTool: boolean;
-}): string | null {
+}
+
+/** What describeInactivity describes: which visas the post has issued none of
+ * for a year, and the month it last issued one, null if it never did in the
+ * data. */
+function findInactivity({
+  activity,
+  dataEnd,
+  immigrant,
+  listedInTool,
+}: InactivityInput): {
+  visas: "visas" | "immigrant visas";
+  lastIssued: string | null;
+} | null {
   const quiet = (month: string | null) =>
     month === null || monthsBetween(month, dataEnd) >= 12;
-  const since = (visas: string, lastIssued: string) =>
-    `${postName} has issued no ${visas} since ${formatLongMonth(
-      lastIssued,
-    )}, according to the State Department’s monthly figures, which run to ${formatLongMonth(
-      dataEnd,
-    )}.`;
   const { lastIssued, lastImmigrantIssued } = activity;
-  if (quiet(lastIssued))
-    return lastIssued === null
-      ? `${postName} issued no visas in any month of the State Department’s figures, ${formatLongMonth(
-          dataStart,
-        )} to ${formatLongMonth(dataEnd)}.`
-      : since("visas", lastIssued);
+  if (quiet(lastIssued)) return { visas: "visas", lastIssued };
   if (
     immigrant &&
     !listedInTool &&
     lastImmigrantIssued !== null &&
     quiet(lastImmigrantIssued)
   )
-    return since("immigrant visas", lastImmigrantIssued);
+    return { visas: "immigrant visas", lastIssued: lastImmigrantIssued };
   return null;
+}
+
+/** For a post that looks closed, a sentence that says what the data shows:
+ * that it issued no visas in the last 12 months of the data, whatever else
+ * lists it, or, with `immigrant` (its own page and its immigrant visa class
+ * pages), that it issued immigrant visas but none in the last 12 months,
+ * when State's IV Scheduling Status Tool, which is months newer, does not
+ * list it either. Null for every other post, including those that issued
+ * other visas but never an immigrant one in the data: they handle
+ * nonimmigrant visas only, which the interview-queue card already says. */
+export function describeInactivity(input: InactivityInput): string | null {
+  const inactivity = findInactivity(input);
+  if (inactivity === null) return null;
+  const { postName, dataStart, dataEnd } = input;
+  const { visas, lastIssued } = inactivity;
+  return lastIssued === null
+    ? `${postName} issued no ${visas} in any month of the State Department’s figures, ${formatLongMonth(
+        dataStart,
+      )} to ${formatLongMonth(dataEnd)}.`
+    : `${postName} has issued no ${visas} since ${formatLongMonth(
+        lastIssued,
+      )}, according to the State Department’s monthly figures, which run to ${formatLongMonth(
+        dataEnd,
+      )}.`;
+}
+
+/** The same finding as describeInactivity, as a phrase for a page title:
+ * "no visas issued since April 2023", or "no visas issued in State
+ * Department figures" for a post that never issued one in the data. */
+export function summarizeInactivity(input: InactivityInput): string | null {
+  const inactivity = findInactivity(input);
+  if (inactivity === null) return null;
+  const { visas, lastIssued } = inactivity;
+  return lastIssued === null
+    ? `no ${visas} issued in State Department figures`
+    : `no ${visas} issued since ${formatLongMonth(lastIssued)}`;
 }
 
 /** The three columns of State's IV Scheduling Status Tool */

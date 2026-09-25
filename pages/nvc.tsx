@@ -97,6 +97,11 @@ function StallNotice({ series, what }: { series: NvcSeries; what: string }) {
   );
 }
 
+/** The later of two ISO dates */
+function maxDate(a: string, b: string): string {
+  return a < b ? b : a;
+}
+
 interface ReviewEstimateProps {
   today: string;
   /** NVC's document review times */
@@ -122,27 +127,57 @@ function ReviewEstimate({ today, series }: ReviewEstimateProps) {
   );
   // the newest submission date NVC had reached on the newest reading
   const reached = addDays(reviewDate, -reviewDays);
+  // For documents submitted after that front, the estimate and its range
+  // can fall before today, by when NVC may or may not have reached them: no
+  // estimate or bound shown is before today, which is after the submission
+  // date too.
+  const estimate = addDays(from, reviewDays);
+  const lower = maxDate(addDays(from, reviewDays - margin), today);
+  const upper = addDays(from, reviewDays + margin);
+  const range = (
+    <>
+      Checked against NVC&rsquo;s own timeframes since November 2020, 9 reviews
+      in 10 came within {margin} days of an estimate like this
+    </>
+  );
+  let text: React.ReactNode;
+  if (valid && from <= reached)
+    text = (
+      <>
+        On {formatDate(reviewDate)}, NVC was already reviewing documents
+        submitted on {formatDate(reached)}, so it has most likely reviewed
+        documents submitted on {formatDate(from)}.
+      </>
+    );
+  else if (upper < today)
+    text = (
+      <>
+        At the pace NVC showed on {formatDate(reviewDate)}, it has most likely
+        reviewed documents submitted on {formatDate(from)} by now.
+      </>
+    );
+  else if (estimate < today)
+    text = (
+      <>
+        Documents submitted on {formatDate(from)}: at the pace NVC showed on{" "}
+        {formatDate(reviewDate)}, it would have reached them by now, so it may
+        already have reviewed them. {range}: here, most likely by{" "}
+        <strong>{formatDate(upper)}</strong>.
+      </>
+    );
+  else
+    text = (
+      <>
+        {valid
+          ? `Documents submitted on ${formatDate(from)}: NVC will`
+          : "Submit your documents today and NVC will"}{" "}
+        most likely review them around <strong>{formatDate(estimate)}</strong>.{" "}
+        {range}: here, between {formatDate(lower)} and {formatDate(upper)}.
+      </>
+    );
   return (
     <Stack gap="xs">
-      {valid && from <= reached ? (
-        <Text>
-          On {formatDate(reviewDate)}, NVC was already reviewing documents
-          submitted on {formatDate(reached)}, so it has most likely reviewed
-          documents submitted on {formatDate(from)}.
-        </Text>
-      ) : (
-        <Text>
-          {valid
-            ? `Documents submitted on ${formatDate(from)}: NVC will`
-            : "Submit your documents today and NVC will"}{" "}
-          most likely review them around{" "}
-          <strong>{formatDate(addDays(from, reviewDays))}</strong>. Checked
-          against NVC&rsquo;s own timeframes since November 2020, 9 reviews in
-          10 came within {margin} days of an estimate like this: here, between{" "}
-          {formatDate(addDays(from, Math.max(0, reviewDays - margin)))} and{" "}
-          {formatDate(addDays(from, reviewDays + margin))}.
-        </Text>
-      )}
+      <Text>{text}</Text>
       <TextInput
         type="date"
         label="Already submitted? Enter the date"

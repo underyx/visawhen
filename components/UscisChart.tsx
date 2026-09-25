@@ -42,9 +42,11 @@ const EXTRA_COLORS = [DENIED_COLOR, PENDING_COLOR, RECEIVED_COLOR, "#0ca678"];
 
 interface Props {
   points: QuarterPoint[];
-  /** What the numbers are of, for the chart's text alternative: "I-130", "I-130
-   * (Immediate Relative) at the San Francisco office" */
+  /** What the numbers are of, for the chart's text alternative: "I-130",
+   * "I-130 (Immediate Relative)" */
   subject: string;
+  /** Where, for one office's numbers: "at the San Francisco office" */
+  place?: string;
 }
 
 // The legends scroll instead of wrapping: on a phone, the wait chart's five
@@ -73,9 +75,15 @@ function initialZoomStart(points: QuarterPoint[]): number {
 
 /** What the outcomes chart shows, in words, for screen readers: its span and
  * the newest quarter's numbers. */
-function describeOutcomes(points: QuarterPoint[], subject: string): string {
+function describeOutcomes(
+  points: QuarterPoint[],
+  subject: string,
+  place: string | undefined,
+): string {
   const current = points[points.length - 1];
-  return `Chart of ${subject} applications per quarter, ${points[0].label} to ${
+  return `Chart of ${subject} applications${
+    place === undefined ? "" : ` ${place}`
+  } per quarter, ${points[0].label} to ${
     current.label
   }: bars for those approved and denied, lines for those filed and those pending at the end of the quarter. In ${
     current.label
@@ -93,6 +101,7 @@ function describeOutcomes(points: QuarterPoint[], subject: string): string {
 export function OutcomesChart({
   points,
   subject,
+  place,
   source,
   sourceName,
 }: Props & { source: string; sourceName: string }) {
@@ -106,7 +115,7 @@ export function OutcomesChart({
           color: [APPROVED_COLOR, DENIED_COLOR, PENDING_COLOR, RECEIVED_COLOR],
           aria: {
             enabled: true,
-            label: { description: describeOutcomes(points, subject) },
+            label: { description: describeOutcomes(points, subject, place) },
           },
           legend: LEGEND,
           tooltip: {
@@ -204,24 +213,30 @@ export function spikeCeiling(values: (number | null)[]): number | null {
 }
 
 /** What the wait chart shows, in words, for screen readers: its span and the
- * newest quarter's figures. */
+ * newest quarter's figures, or why its time to clear the backlog is not
+ * shown (`suppressed`, see clearingSuppressed). */
 function describeWait(
   points: QuarterPoint[],
   subject: string,
+  place: string | undefined,
+  suppressed: string | null,
   lines: { name: string; key: string }[],
 ): string {
   const current = points[points.length - 1];
   const figures = [
-    `time to clear the backlog ${approximately(
-      formatMonths(current.waitMonths),
-      current.approximate,
-    )}`,
+    `time to clear the backlog ${
+      suppressed === null
+        ? approximately(formatMonths(current.waitMonths), current.approximate)
+        : `not shown (${suppressed})`
+    }`,
     ...lines.map(
       ({ name, key }) =>
         `${name} ${formatMonths(current.processingTimes[key] ?? null)}`,
     ),
   ];
-  return `Line chart of the months it would take to decide every pending ${subject} application at each quarter's pace${
+  return `Line chart of the months it would take to decide every pending ${subject} application${
+    place === undefined ? "" : ` ${place}`
+  } at each quarter's pace${
     lines.length > 0 ? ", with USCIS's median processing time" : ""
   }, ${points[0].label} to ${current.label}. In ${
     current.label
@@ -235,8 +250,15 @@ function describeWait(
 export function WaitChart({
   points,
   subject,
+  place,
+  suppressed,
   processingTimeSeries,
-}: Props & { processingTimeSeries: ProcessingTimeSeries[] }) {
+}: Props & {
+  /** Why the newest quarter's time to clear the backlog is not shown, if it
+   * is not (see clearingSuppressed) */
+  suppressed: string | null;
+  processingTimeSeries: ProcessingTimeSeries[];
+}) {
   const estimateName = "Time to clear backlog";
   const officialName = ({ label }: ProcessingTimeSeries) =>
     label === "" ? "USCIS median processing time" : `USCIS median: ${label}`;
@@ -261,6 +283,8 @@ export function WaitChart({
               description: describeWait(
                 points,
                 subject,
+                place,
+                suppressed,
                 processingTimeSeries.map((series) => ({
                   name: officialName(series),
                   key: series.key,

@@ -475,10 +475,15 @@ const MAIN_CATEGORY_DECISIONS = 100;
 /** The per-office category (ALL_CATEGORIES for all of them together) that an
  * office's page opens with, and that the form's office list counts for it:
  * the form's leading category when it is a real part of the office's work
- * in its newest quarter (`total`'s), otherwise the category with the most
- * cases pending there. The I-485 service centers handle almost only
+ * in its newest quarter (`total`'s), otherwise the category the office
+ * decided the most cases of then, or, if it decided none, the one with the
+ * most cases pending. The I-485 service centers handle almost only
  * employment-based and "other" cases; a page leading with their few
- * family-based ones would describe a queue nobody there is in. */
+ * family-based ones would describe a queue nobody there is in. Nor does a
+ * page open on a category with no decisions while another has some: a pile
+ * nobody is working through (Potomac's 34 "other" I-485s in Apr-Jun 2026,
+ * none decided, against 19 employment-based decisions) says nothing about
+ * the office's pace. */
 export function openingOfficeCategory(
   form: string,
   total: QuarterPoint[],
@@ -494,17 +499,24 @@ export function openingOfficeCategory(
   });
   const share = (part: number | null, whole: number | null) =>
     part === null || whole === null || whole === 0 ? 0 : part / whole;
+  const decided = (point: QuarterPoint) => point.completions ?? 0;
+  const anyDecided = newest.some(({ point }) => decided(point) > 0);
   const lead = newest.find(({ key }) => key === leading)?.point;
   if (
     lead !== undefined &&
+    (decided(lead) > 0 || !anyDecided) &&
     (share(lead.pending, current.pending) >= MAIN_CATEGORY_SHARE ||
       share(lead.completions, current.completions) >= MAIN_CATEGORY_SHARE ||
-      (lead.completions ?? 0) >= MAIN_CATEGORY_DECISIONS)
+      decided(lead) >= MAIN_CATEGORY_DECISIONS)
   )
     return leading;
+  // the most decisions, then the most pending
   const largest = newest.reduce<{ key: string; point: QuarterPoint } | null>(
     (best, category) =>
-      (category.point.pending ?? 0) > (best?.point.pending ?? 0)
+      best === null ||
+      decided(category.point) > decided(best.point) ||
+      (decided(category.point) === decided(best.point) &&
+        (category.point.pending ?? 0) > (best.point.pending ?? 0))
         ? category
         : best,
     null,
