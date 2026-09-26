@@ -16,6 +16,7 @@ The data lives in this repository and is refreshed by scheduled workflows that c
 | Consulate interview queues | State's IV Scheduling Status Tool            | `data/consulates/iv_schedule.py --fetch` | `data/consulates/iv_schedule.json`        |
 | Consulate visa issuances   | the State Department's monthly issuance PDFs | `data/consulates/*.ipynb`                | `data/consulates/dump/` (sqlite-diffable) |
 | USCIS form processing      | USCIS's quarterly reports                    | `data/uscis/forms.py`                    | `data/uscis/forms.json`                   |
+| Visa Bulletin cutoff dates | State's monthly Visa Bulletins               | `data/visa_bulletin/bulletin.py`         | `data/visa_bulletin/data.json`            |
 
 The NVC and interview-queue scrapers run in the same workflow (`nvc_update_schedule.yml`), daily and hourly on Mondays; the others run daily.
 
@@ -41,6 +42,7 @@ cd data/uscis && uv run python forms.py          # add --offline to reparse the 
 cd data/consulates && uv run jupyter nbconvert --to script --stdout visa-issuances.ipynb | uv run python -   # writes all_months.pkl
 cd data/consulates && uv run jupyter nbconvert --to script --stdout baselines.ipynb | uv run python -        # reads it, writes consulates.sqlite and dump/
 cd data/consulates && uv run python iv_schedule.py --fetch   # or --from-file page.html, for a page saved from a browser
+cd data/visa_bulletin && uv run python bulletin.py          # or --from-file page.html --month 2026-10
 ```
 
 ### Where the State Department data comes from
@@ -55,6 +57,10 @@ They identify themselves with the user agent `visawhen-bot (+https://github.com/
 
 The interview queues come from State's [IV Scheduling Status Tool](https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/iv-wait-times.html), which only ever shows its latest monthly update, so every snapshot in `data/consulates/iv_schedule.json` is history nobody else keeps. The snapshots before September 2026 were recovered from Wayback Machine captures of the tool, with `--from-file`. `--fetch` adds a snapshot only when State's update is newer than the newest one there, and refuses (and fails) a page that lists far fewer posts than the newest snapshot, such as a truncated one, since the site reads only the newest snapshot; a page older than the newest snapshot or more than 45 days old may be a stale copy, so it then tries the next source too. `--from-file` adds any update it does not have yet, whatever it lists.
 
+### Visa Bulletins
+
+`bulletin.py` keeps every monthly Visa Bulletin since October 2015, the first with both of today's charts: Final Action Dates and Dates for Filing. For each family and employment category and each chargeability area, `data.json` has the cutoff date, or `C` (current) or `U` (unavailable). The bulletins come from the same three sources as the other State Department data, in the same order. State publishes each bulletin once, around the middle of the month before, so a month already in `data.json` is never fetched again. A row, column or cell the script does not know fails the run instead of being skipped, so that a change in State's tables is noticed: add the new label to the patterns at the top of the script. The pages under `/visa-bulletin` show the newest bulletin and how far each category's Final Action Date moved in the last 12 months and 5 years.
+
 ### Consulate visa classes
 
 State's monthly issuance reports give every row a visa class code. `baselines.ipynb` keeps immigrant (IV) and nonimmigrant (NIV) classes apart, since some codes mean different things in the two reports (IV E2 is EB-2, NIV E2 a treaty investor), and maps the detailed immigrant codes State used until January 2021 (DV1, DV2 and DV3) onto the categories it has reported since (DV), so that each page's series runs across the change. Codes State adds later go the same way: the EB-5 set-aside codes (RR, RR1, NH and so on) are counted in EB-5, and the notebook warns when a code with and without a trailing digit (CQ and CQ1) would be counted apart. The descriptions of the classes the notebook names or merges are in `data/consulates/visa_descriptions.csv`; the others come from a Google Sheet. When a class or post page goes away, a rule in `public/_redirects` sends it to its replacement. Cloudflare keeps 2,000 rules without a placeholder or splat and 100 with, but counts every rule after the first one with a placeholder or splat as one with, and skips what goes past the limits without failing the deploy; it also follows a matching rule even where a page exists. So every rule without a placeholder must come first, and `yarn build` runs `scripts/check-redirects.mjs`, which drops any rule that matches a page and fails the build on a rule without a placeholder after one with, or past either limit.
@@ -63,7 +69,7 @@ The consulate list shows and searches each post's country, from `POST_COUNTRIES`
 
 ### Stale data alerts
 
-A scraper that finds nothing new, or cannot reach its source, still finishes green. The daily `freshness.yml` workflow runs `data/freshness.py`, which compares each source's newest date with how often it publishes (NVC weekly, the interview-queue tool monthly, USCIS quarterly and State's issuance statistics with a lag of several months). For each source that is overdue it opens one issue labelled `stale-data`, keeps it up to date while the data stays stale and closes it when new data arrives. `python3 data/freshness.py` prints the same report locally.
+A scraper that finds nothing new, or cannot reach its source, still finishes green. The daily `freshness.yml` workflow runs `data/freshness.py`, which compares each source's newest date with how often it publishes (NVC weekly, the interview-queue tool and the Visa Bulletin monthly, USCIS quarterly and State's issuance statistics with a lag of several months). For each source that is overdue it opens one issue labelled `stale-data`, keeps it up to date while the data stays stale and closes it when new data arrives. `python3 data/freshness.py` prints the same report locally.
 
 GitHub disables scheduled workflows in a public repository after 60 days without activity, and data commits can stop for longer than that. The same workflow keeps the scheduled workflows enabled through the Actions API instead of committing anything: every day it calls the enable endpoint for each one that is enabled or that GitHub disabled for inactivity, as keepalive-workflow's API mode does. A workflow disabled by hand (Actions, the workflow, "Disable workflow") is left alone and stays disabled until someone enables it again.
 

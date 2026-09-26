@@ -18,6 +18,10 @@ newest date with how often the source publishes:
 * USCIS forms (data/uscis/forms.json): USCIS publishes each quarter a few
   months after it ends; stale 120 days after the end of the quarter after the
   newest one.
+* Visa Bulletins (data/visa_bulletin/data.json): State publishes each
+  month's bulletin around the middle of the month before; stale 8 days into
+  a month with no bulletin for it, when the Visa Bulletin pages start
+  warning about it too (GRACE_DAYS in pages/visa-bulletin/).
 * Consulate issuances (data/consulates/dump/backlogs.ndjson.gz): State
   publishes its monthly issuance statistics several months late, often in
   batches; stale 240 days after the end of the newest month.
@@ -135,6 +139,32 @@ def uscis_forms() -> Freshness:
     )
 
 
+def visa_bulletin() -> Freshness:
+    bulletins = json.loads((DATA / "visa_bulletin" / "data.json").read_text())["bulletins"]
+    newest = max(bulletins)
+    year, month = int(newest[:4]), int(newest[5:7])
+    # the first day of the month after the newest bulletin's
+    due = end_of_month(year, month) + timedelta(days=1)
+    return Freshness(
+        source="Visa Bulletins",
+        newest=newest,
+        # more than 7 days into that month, as on the Visa Bulletin pages
+        stale_from=due + timedelta(days=8),
+        cadence=(
+            "State publishes each month's Visa Bulletin around the middle of the month before, so the data counts "
+            f"as stale once {due.isoformat()} is more than 7 days past without the bulletin for that month; the "
+            "Visa Bulletin pages warn about it from then on too."
+        ),
+        where=(
+            "The scraper is `data/visa_bulletin/bulletin.py`, run by the "
+            f"[Update Visa Bulletin data]({REPOSITORY_URL}/actions/workflows/visa_bulletin_update_schedule.yml) workflow. "
+            "If State's [Visa Bulletin page](https://travel.state.gov/content/travel/en/legal/visa-law0/visa-bulletin.html) "
+            "lists a newer bulletin, the log says why it was not added; the page can also be saved from a browser and "
+            "added with `bulletin.py --from-file`."
+        ),
+    )
+
+
 def consulate_issuances() -> Freshness:
     with gzip.open(DATA / "consulates" / "dump" / "backlogs.ndjson.gz", "rt") as dump:
         # rows are [post slug, visa class slug, month "2025-09-01 00:00:00", ...]
@@ -159,7 +189,7 @@ def consulate_issuances() -> Freshness:
     )
 
 
-CHECKS: list[Callable[[], Freshness]] = [nvc, iv_schedule, uscis_forms, consulate_issuances]
+CHECKS: list[Callable[[], Freshness]] = [nvc, iv_schedule, uscis_forms, visa_bulletin, consulate_issuances]
 
 
 def issue_body(freshness: Freshness, today: date, run_url: str | None) -> str:

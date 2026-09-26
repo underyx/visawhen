@@ -7,6 +7,11 @@
 export const VISA_BULLETIN_URL =
   "https://travel.state.gov/content/travel/en/legal/visa-law0/visa-bulletin.html";
 
+/** USCIS's page saying, each month, which Visa Bulletin chart decides who
+ * may file an I-485 in each preference category */
+export const ADJUSTMENT_FILING_CHARTS_URL =
+  "https://www.uscis.gov/green-card/green-card-processes-and-procedures/visa-availability-priority-dates/adjustment-of-status-filing-charts-from-the-visa-bulletin";
+
 /** NVC's own page of its current timeframes */
 export const NVC_TIMEFRAMES_URL =
   "https://travel.state.gov/content/travel/en/us-visas/immigrate/nvc-timeframes.html";
