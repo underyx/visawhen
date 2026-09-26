@@ -9,6 +9,7 @@ import {
 } from "../api/consulates";
 import { getData as getNvcData } from "../api/nvc";
 import { getData as getUscisData, newestQuarter } from "../api/uscis";
+import { getData as getVisaBulletinData } from "../api/visaBulletin";
 import { formatLongMonth } from "../components/consulates";
 import { formatDate } from "../components/Freshness";
 import {
@@ -17,9 +18,11 @@ import {
   ISSUANCE_STATISTICS_URLS,
   NVC_TIMEFRAMES_URL,
   USCIS_DATA_URL,
+  VISA_BULLETIN_URL,
 } from "../components/links";
 import { POLICY_ENTRIES } from "../components/policy";
 import { quarterLabel } from "../components/uscis";
+import { formatBulletinMonth, newestMonth } from "../components/visaBulletin";
 
 interface Props {
   /** "Apr–Jun 2026" */
@@ -33,6 +36,8 @@ interface Props {
   issuancesTo: string;
   /** When the policy notices were last checked, "2026-09-25" */
   policyChecked: string;
+  /** The newest Visa Bulletin's month, "2026-10" */
+  visaBulletinMonth: string;
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
@@ -53,6 +58,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       policyChecked: POLICY_ENTRIES.map(({ lastChecked }) => lastChecked)
         .sort()
         .reverse()[0],
+      visaBulletinMonth: newestMonth(await getVisaBulletinData()),
     },
   };
 };
@@ -76,6 +82,7 @@ export default function About({
   ivScheduleSource,
   issuancesTo,
   policyChecked,
+  visaBulletinMonth,
 }: Props) {
   const rows: {
     what: string;
@@ -108,6 +115,14 @@ export default function About({
       ),
       schedule: "About monthly",
       newest: formatDate(ivScheduleAsOf),
+    },
+    {
+      what: "Priority date cutoffs for the family and employment preference categories",
+      source: (
+        <Source href={VISA_BULLETIN_URL}>State Department Visa Bulletin</Source>
+      ),
+      schedule: "Monthly, around the middle of the month before",
+      newest: `${formatBulletinMonth(visaBulletinMonth)} bulletin`,
     },
     {
       what: "Visas issued per consulate and visa class",
@@ -153,8 +168,8 @@ export default function About({
         Scheduled scripts check each source every day and publish new data when
         there is some. When a source cannot be reached, the newest data we have
         stays up, with its date. Every page says how recent its numbers are, and
-        the NVC, interview-scheduling and policy sections warn when theirs are
-        older than the source&rsquo;s usual schedule.
+        the NVC, interview-scheduling, Visa Bulletin and policy sections warn
+        when theirs are older than the source&rsquo;s usual schedule.
       </Text>
       <Table.ScrollContainer minWidth={640}>
         <Table striped withTableBorder>

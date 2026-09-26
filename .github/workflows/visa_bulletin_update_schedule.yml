@@ -1,0 +1,77 @@
+name: Update Visa Bulletin data
+
+on:
+  schedule:
+    # State publishes each month's bulletin around the middle of the month
+    # before, on a day it does not announce, during the US working day;
+    # check once a day, in the US evening.
+    - cron: 52 21 * * *
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: data/visa_bulletin
+
+# Only the job that commits the data can push; the build and deploy jobs,
+# which run third-party code, get a read-only token.
+permissions:
+  contents: read
+
+jobs:
+  update-visa-bulletin-data:
+    name: Update Visa Bulletin data
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    outputs:
+      new-commit-sha: ${{ steps.head_commit.outputs.commit_sha }}
+      updated: ${{ steps.commit.outputs.pushed }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up uv
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+        with:
+          python-version: "3.13"
+          # The dependency cache is keyed on the lockfile and saved by the
+          # action's post step, even when a later step fails.
+          enable-cache: true
+          cache-dependency-glob: data/visa_bulletin/uv.lock
+      - name: Install dependencies
+        run: uv sync --locked
+      # -u: unbuffered, so the log shows each line when it happens
+      - name: Run script
+        run: uv run python -u bulletin.py
+      # The bulletins that parsed are written even when another did not, and
+      # committed; the job still fails then.
+      - name: Commit changes
+        id: commit
+        if: ${{ !cancelled() }}
+        uses: EndBug/add-and-commit@cc9c08ba6c8df3b93a8f2db63e89b98368ae2ae8 # v11.1.1
+        with:
+          message: Update Visa Bulletin data
+          # The default (`git fetch --tags --force`) pulls the whole history of
+          # the 100 MB data dumps into the shallow clone: 3-4 minutes per run.
+          fetch: false
+      - id: head_commit
+        if: ${{ !cancelled() }}
+        run: echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  build:
+    # !cancelled(): build what was committed even when a page did not parse
+    if: ${{ !cancelled() && needs.update-visa-bulletin-data.outputs.updated == 'true' }}
+    uses: ./.github/workflows/build.yml
+    needs: [update-visa-bulletin-data]
+    with:
+      ref: ${{ needs.update-visa-bulletin-data.outputs.new-commit-sha }}
+
+  deploy:
+    uses: ./.github/workflows/deploy.yml
+    needs: [build]
+    # When nothing was pushed, build is skipped, and so is this job.
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
+    with:
+      artifact-name: ${{ needs.build.outputs.artifact-name }}
+    secrets:
+      netlify-token: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      cloudflare-api-token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      cloudflare-account-id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
