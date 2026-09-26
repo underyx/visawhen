@@ -58,6 +58,7 @@ import {
 } from "../../../components/uscis";
 import { OutcomesChart, WaitChart } from "../../../components/UscisChart";
 import UscisStats, { RangeText } from "../../../components/UscisStats";
+import MoreDetails from "../../../components/MoreDetails";
 import PolicyBanner from "../../../components/PolicyBanner";
 import { ListRow, ListRows } from "../../../components/ListRow";
 import { normalize } from "../../../components/search";
@@ -108,7 +109,7 @@ interface Props {
  * what the words suggest. */
 const APPROVAL_NOTES: Record<string, string> = {
   "I-589":
-    "About the approval rate: when an asylum office does not grant the application of someone without lawful status, it usually refers it to an immigration court rather than denying it. USCIS's report does not say whether it counts those referrals as denials, so read the rate as the share of USCIS's own decisions that granted asylum, not the share of applicants who end up with it.",
+    "About the approval rate: it is the share of USCIS's own decisions that granted asylum, not the share of applicants who get asylum in the end. When an asylum office does not grant asylum to someone without legal status, it usually sends the case to an immigration court, and USCIS's report does not say if it counts these as denials.",
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -544,21 +545,30 @@ export default function UscisForm({
           {premium !== undefined && <Alert color="blue">{premium.note}</Alert>}
           {shocked.length > 0 && (
             <Alert color="yellow">
-              USCIS decided{" "}
-              {new Intl.ListFormat("en-US").format(
-                shocked.map(
-                  ({ name, shockRatio }) =>
-                    `${Math.round(
-                      (1 - (shockRatio ?? 1)) * 100,
-                    )}% fewer ${name} cases`,
-                ),
-              )}{" "}
-              in {newest.label} than{" "}
-              {shocked.length === 1 ? "its average" : "their averages"} over the
-              previous four quarters. We widen the range when this happens, but
-              in past slowdowns like this the typical wait landed in the
-              could-be range only about 2 times in 3 (8 in 10 normally), so plan
-              for the later end.
+              <Stack gap="xs">
+                <Text inherit>
+                  USCIS is deciding fewer of these cases than usual:{" "}
+                  {new Intl.ListFormat("en-US").format(
+                    shocked.map(
+                      ({ name, shockRatio }) =>
+                        `${Math.round(
+                          (1 - (shockRatio ?? 1)) * 100,
+                        )}% fewer ${name} cases`,
+                    ),
+                  )}{" "}
+                  in {newest.label} than{" "}
+                  {shocked.length === 1 ? "its average" : "their averages"} over
+                  the four quarters before. Plan for the later end of the range.
+                </Text>
+                <MoreDetails>
+                  <Text size="sm">
+                    We make the range wider when this happens. But in past
+                    slowdowns like this, the typical wait fell inside the
+                    could-be range only about 2 times in 3, not 8 times in 10 as
+                    usual.
+                  </Text>
+                </MoreDetails>
+              </Stack>
             </Alert>
           )}
         </Stack>

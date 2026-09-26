@@ -107,14 +107,12 @@ export function describeInactivity(input: InactivityInput): string | null {
   const { postName, dataStart, dataEnd } = input;
   const { visas, lastIssued } = inactivity;
   return lastIssued === null
-    ? `${postName} issued no ${visas} in any month of the State Department’s figures, ${formatLongMonth(
+    ? `${postName} did not issue any ${visas} from ${formatLongMonth(
         dataStart,
-      )} to ${formatLongMonth(dataEnd)}.`
-    : `${postName} has issued no ${visas} since ${formatLongMonth(
+      )} to ${formatLongMonth(dataEnd)}, in State Department figures.`
+    : `${postName} has not issued any ${visas} since ${formatLongMonth(
         lastIssued,
-      )}, according to the State Department’s monthly figures, which run to ${formatLongMonth(
-        dataEnd,
-      )}.`;
+      )}, in State Department figures up to ${formatLongMonth(dataEnd)}.`;
 }
 
 /** The same finding as describeInactivity, as a phrase for a page title:

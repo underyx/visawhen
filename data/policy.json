@@ -4,7 +4,8 @@
       "id": "post-pause-juba-kinshasa-kampala",
       "status": "official",
       "title": "Visa services paused at this embassy",
-      "body": "Since May 18, 2026, the U.S. Embassies in Juba, Kinshasa and Kampala have paused all visa services, including immigrant visas, because of the Ebola outbreak. No appointments can be scheduled. The State Department says it will update its website when scheduling resumes.",
+      "summary": "This embassy has stopped all visa services, including immigrant visas, because of an Ebola outbreak. You cannot get an appointment here for now.",
+      "body": "Since May 18, 2026, the U.S. Embassies in Juba, Kinshasa and Kampala have paused all visa services, including immigrant visas, because of the Ebola outbreak. No appointments can be scheduled. The State Department says it will update its website when scheduling starts again.",
       "scope": { "posts": ["juba", "kinshasa", "kampala"] },
       "overridesSchedule": true,
       "start": "2026-05-18",
@@ -20,8 +21,9 @@
     {
       "id": "beirut-limited-services",
       "status": "official",
-      "title": "Routine visa processing not available",
-      "body": "The State Department's notice of February 25, 2026, which is still posted, says that routine visa processing is not currently available at the U.S. Embassy in Beirut, which is prioritizing emergency services for U.S. citizens after the State Department ordered its non-emergency staff to leave on February 23. Applicants who had an interview scheduled in Beirut are to be emailed a new, later date. The State Department's scheduling tool has given Beirut the same month for spouses, children and parents of U.S. citizens, February 2026, since its April 2 update. Check lb.usembassy.gov/visas for updates.",
+      "title": "Normal visa services not available",
+      "summary": "The U.S. Embassy in Beirut is not offering normal visa services, and is helping U.S. citizens with emergencies first. If you had an interview here, the embassy will email you a new, later date.",
+      "body": "On February 23, 2026, the State Department ordered the non-emergency staff of the U.S. Embassy in Beirut to leave. Its notice of February 25, 2026, which is still posted, says that routine visa processing is not currently available at the embassy, which is giving priority to emergency services for U.S. citizens. Applicants who had an interview in Beirut are to be emailed a new, later date.\n\nSince its April 2 update, the State Department's scheduling tool has given Beirut the same month for spouses, children and parents of U.S. citizens: February 2026. Check lb.usembassy.gov/visas for updates.",
       "scope": { "posts": ["beirut"] },
       "overridesSchedule": true,
       "start": "2026-02-25",
@@ -37,8 +39,9 @@
     {
       "id": "khartoum-no-consular-operations",
       "status": "official",
-      "title": "No consular operations at this embassy",
-      "body": "The State Department says there are no consular operations in Khartoum. Its list of the embassies and consulates that process immigrant visas sends applicants from Sudan to the U.S. Embassy in Cairo.",
+      "title": "No visa services at this embassy",
+      "summary": "The U.S. Embassy in Khartoum does not offer visa services. The State Department sends immigrant visa applicants from Sudan to the U.S. Embassy in Cairo.",
+      "body": "The State Department says there are no consular operations, such as visa services, in Khartoum. Its list of the embassies and consulates that process immigrant visas sends applicants from Sudan to the U.S. Embassy in Cairo.",
       "scope": { "posts": ["khartoum"] },
       "overridesSchedule": true,
       "start": "2026-07-15",
@@ -58,8 +61,9 @@
     {
       "id": "jerusalem-tel-aviv-limited-services",
       "status": "official",
-      "title": "February notice of limited visa services is still posted",
-      "body": "On February 27, 2026, after authorizing the departure of non-emergency staff from Israel, the State Department said that routine visa processing was not currently available at the U.S. Embassy in Jerusalem and its Branch Office in Tel Aviv, and that applicants with interviews from March 2 to 6 would be emailed about rescheduling when services resumed. The notice is still posted, unchanged, and does not say whether services have resumed. The State Department's scheduling tool has since moved the month it gives Jerusalem for spouses, children and parents of U.S. citizens from February 2026, in its April 2 update, to August 2026, in its September 23 update. Check il.usembassy.gov/visas for the embassy's current status.",
+      "title": "Visa services may still be limited",
+      "summary": "In February 2026, the U.S. Embassy in Jerusalem and its office in Tel Aviv stopped normal visa services. The State Department has not said if they have started again, so check the embassy's website.",
+      "body": "On February 27, 2026, after allowing non-emergency staff to leave Israel, the State Department said that routine visa processing was not currently available at the U.S. Embassy in Jerusalem and its Branch Office in Tel Aviv. It said applicants with interviews from March 2 to 6 would get an email about a new date when services started again. The notice is still posted, unchanged, and does not say if services have started again.\n\nThe State Department's scheduling tool has since moved the month it gives Jerusalem for spouses, children and parents of U.S. citizens: from February 2026 in its April 2 update to August 2026 in its September 23 update. Check il.usembassy.gov/visas for the embassy's current status.",
       "scope": { "posts": ["jerusalem", "tel-aviv"] },
       "start": "2026-02-27",
       "end": null,
@@ -74,8 +78,9 @@
     {
       "id": "africa-regional-hubs",
       "status": "official",
-      "title": "Visa services moved to a regional hub",
-      "body": "Since August 1, 2026, routine visa services at this post, including immigrant visas, have moved to a regional hub. Citizens and residents of this country apply at the immigrant visa post the State Department designates for it instead.",
+      "title": "Visa services moved elsewhere",
+      "summary": "Since August 1, 2026, you cannot apply here for most visas, including immigrant visas. Citizens and residents of this country now apply at another U.S. embassy or consulate that the State Department chooses.",
+      "body": "Since August 1, 2026, the State Department has moved routine visa services at this post, including immigrant visas, to regional hubs: embassies and consulates in Africa that handle visas for nearby countries. Citizens and residents of this country apply at the immigrant visa post that the State Department names for it.",
       "scope": {
         "posts": [
           "antananarivo",
@@ -119,8 +124,9 @@
     {
       "id": "iv-interviews-postponed-public-charge-training",
       "status": "reported",
-      "title": "Immigrant visa interviews were reportedly postponed; unclear whether still in effect",
-      "body": "In August, U.S. embassies and consulates reportedly postponed immigrant visa interviews while their consular officers were trained on new public charge guidance, emailing applicants with interviews booked that they would be rescheduled. We have found no report on whether that is still the case. On August 27, the Associated Press quoted a State Department official saying the pause began in early August and was not expected to last beyond early to mid-September, and that the interviews affected, most of them scheduled for August, would be rescheduled for September, October and November. The latest report we have found, from Reuters on September 8, said that processing had resumed for Hungary and Poland while the pause continued elsewhere, and that it could last months, according to a person familiar with the matter; it also said that the pause came after the August 21 court ruling against the 75-country pause, and that the government told a court interviews were rescheduled through August 31. A State Department statement quoted by Fox News on August 26 said its training initiative launched in early August. The State Department acknowledged the pause in a statement on August 25 but has posted no notice about it on its website. If your interview was postponed, or is coming up, check your email and the embassy's website: NVC and consulates may reschedule interviews, including ones already booked.",
+      "title": "Immigrant visa interviews may be delayed",
+      "summary": "News reports say many U.S. embassies delayed immigrant visa interviews from August 2026, while officers trained on new rules. We do not know if this has ended, so watch your email for any change to your interview.",
+      "body": "In August 2026, U.S. embassies and consulates reportedly postponed immigrant visa interviews while their consular officers were trained on new public charge guidance: rules on whether an applicant is likely to depend on public benefits. They emailed applicants with interviews booked that the interviews would be rescheduled. The State Department acknowledged the pause in a statement on August 25, but it has posted no notice about it on its website.\n\nOn August 26, a State Department statement quoted by Fox News said its training initiative started in early August. On August 27, the Associated Press quoted a State Department official saying that the pause began in early August and was not expected to last beyond early to mid-September. The official said the interviews affected, most of them scheduled for August, would be rescheduled for September, October and November.\n\nThe latest report we have found, from Reuters on September 8, said that processing had started again for Hungary and Poland while the pause continued elsewhere, and that it could last months, according to a person familiar with the matter. Reuters also said that the pause came after the August 21 court ruling against the 75-country pause, and that the government told a court interviews were rescheduled through August 31. We have found no report on whether the pause is still in effect.\n\nIf your interview was postponed, or is coming up, check your email and the embassy's website: NVC and embassies may reschedule interviews, including ones already booked.",
       "scope": {
         "allConsulatePages": true,
         "exceptPosts": ["budapest", "krakow", "warsaw"],
@@ -153,8 +159,9 @@
     {
       "id": "pp-10998-suspension",
       "status": "official",
-      "title": "Visa suspensions for 39 nationalities and Palestinian Authority travel documents",
-      "body": "Since January 1, 2026, Presidential Proclamation 10998 has suspended visas, with narrow exceptions: all visas for nationals of Afghanistan, Burma, Burkina Faso, Chad, the Republic of the Congo, Equatorial Guinea, Eritrea, Haiti, Iran, Laos, Libya, Mali, Niger, Sierra Leone, Somalia, South Sudan, Sudan, Syria and Yemen, and for anyone traveling on travel documents issued or endorsed by the Palestinian Authority; all immigrant visas, and B-1/B-2, F, M and J visas, for nationals of Angola, Antigua and Barbuda, Benin, Burundi, Cote d'Ivoire, Cuba, Dominica, Gabon, The Gambia, Malawi, Mauritania, Nigeria, Senegal, Tanzania, Togo, Tonga, Venezuela, Zambia and Zimbabwe; and all immigrant visas for nationals of Turkmenistan. Spouses, children and parents of U.S. citizens, and Afghan special immigrants, are no longer exempt. You can still apply and be scheduled for an interview, but the State Department says you may be ineligible for a visa. It depends on your nationality, not on the embassy: dual nationals applying with a passport of a nationality not subject to a suspension are exempt.",
+      "title": "Visas suspended for citizens of 39 countries",
+      "summary": "Since January 1, 2026, the U.S. has stopped giving some or all visas to citizens of 39 countries, and to people with Palestinian Authority travel documents. You can still apply and get an interview, but you may not get a visa.",
+      "body": "Presidential Proclamation 10998 has suspended visas since January 1, 2026, with narrow exceptions. It depends on your nationality, not on the embassy.\n\nAll visas are suspended for nationals of Afghanistan, Burma, Burkina Faso, Chad, the Republic of the Congo, Equatorial Guinea, Eritrea, Haiti, Iran, Laos, Libya, Mali, Niger, Sierra Leone, Somalia, South Sudan, Sudan, Syria and Yemen, and for anyone traveling on travel documents issued or endorsed by the Palestinian Authority.\n\nAll immigrant visas, and B-1/B-2, F, M and J visas, are suspended for nationals of Angola, Antigua and Barbuda, Benin, Burundi, Cote d'Ivoire, Cuba, Dominica, Gabon, The Gambia, Malawi, Mauritania, Nigeria, Senegal, Tanzania, Togo, Tonga, Venezuela, Zambia and Zimbabwe.\n\nAll immigrant visas are suspended for nationals of Turkmenistan.\n\nSpouses, children and parents of U.S. citizens, and Afghan special immigrants, are no longer exempt. You can still apply and be scheduled for an interview, but the State Department says you may not be eligible for a visa. People with two nationalities who apply with the passport of a country not on these lists are exempt.",
       "scope": {
         "allConsulatePages": true,
         "posts": ["jerusalem"],
@@ -265,7 +272,8 @@
     {
       "id": "iv-pause-75-countries",
       "status": "official",
-      "title": "75-country immigrant visa pause has ended",
+      "title": "Immigrant visa pause for 75 countries has ended",
+      "summary": "From January 21 to August 21, 2026, the U.S. did not issue immigrant visas to citizens of 75 countries. A court ended this pause on August 21, 2026.",
       "body": "From January 21 to August 21, 2026, the State Department paused immigrant visa issuance to nationals of 75 countries. A court order in CLINIC v. Rubio ended the pause on August 21, 2026.",
       "scope": { "allConsulatePages": true, "immigrantVisasOnly": true },
       "start": "2026-01-21",
@@ -281,8 +289,9 @@
     {
       "id": "dv-issuance-pause",
       "status": "official",
-      "title": "Diversity visa issuance pause has ended",
-      "body": "In December 2025 the State Department paused diversity visa issuance: applicants could still apply and be interviewed, but no diversity visas were issued. As of August 28, 2026, under a court order in Medani v. Trump, the State Department says the pause is no longer in effect. Its notice, updated August 31, 2026, still carries the December announcement of the pause below that statement. Eligibility for a DV-2026 visa ends on September 30, 2026, the end of the fiscal year, and visas may run out before then.",
+      "title": "Diversity visa pause has ended",
+      "summary": "The State Department did not issue diversity visas from December 2025 until August 28, 2026, when a court order ended this pause. DV-2026 visas can only be issued until September 30, 2026, and they may run out before then.",
+      "body": "In December 2025, the State Department paused diversity visa issuance: applicants could still apply and be interviewed, but no diversity visas were issued. As of August 28, 2026, under a court order in Medani v. Trump, the State Department says the pause is no longer in effect. Its notice, updated August 31, 2026, still shows the December announcement of the pause below that statement.\n\nEligibility for a DV-2026 visa ends on September 30, 2026, the end of the fiscal year, and visas may run out before then.",
       "scope": { "allConsulatePages": true, "visaClasses": ["dv"] },
       "start": "2025-12-23",
       "end": "2026-08-28",
@@ -305,8 +314,9 @@
     {
       "id": "india-eb-2-limit-fy2026",
       "status": "official",
-      "title": "EB-2 visas for India used up until October 1",
-      "body": "The State Department has issued all the EB-2 immigrant visas available in fiscal year 2026 to applicants chargeable to India, so embassies and consulates may not issue these visas for the rest of the fiscal year. The annual limits reset on October 1, 2026, when they may resume issuing them to qualified applicants.",
+      "title": "No EB-2 visas for India until October 1",
+      "summary": "This year's EB-2 visas for India are all used up, so embassies and consulates may not issue them until October 1, 2026, when the yearly limits start again.",
+      "body": "The State Department has issued all the EB-2 immigrant visas available in fiscal year 2026 (October 2025 to September 2026) to applicants chargeable to India, which in most cases means people born in India. So embassies and consulates may not issue these visas for the rest of the fiscal year. The annual limits reset on October 1, 2026, when they may start issuing them again to qualified applicants.",
       "scope": { "countries": ["India"], "visaClasses": ["eb-2"] },
       "start": "2026-05-22",
       "end": "2026-10-01",
@@ -321,8 +331,9 @@
     {
       "id": "india-eb-5-unreserved-limit-fy2026",
       "status": "official",
-      "title": "Unreserved EB-5 visas for India used up until October 1",
-      "body": "As of June 5, 2026, the State Department has issued all the unreserved EB-5 immigrant visas available in fiscal year 2026 to applicants chargeable to India: the C5, T5, I5, R5, RU and NU categories, not the rural, high-unemployment and infrastructure set-asides that this page also counts. Embassies and consulates may not issue visas in these categories for the rest of the fiscal year. The annual limits reset on October 1, 2026, when they may resume issuing them to qualified applicants.",
+      "title": "No unreserved EB-5 visas for India until October 1",
+      "summary": "This year's unreserved EB-5 visas for India are all used up, so embassies and consulates may not issue them until October 1, 2026. This does not include the rural, high-unemployment and infrastructure EB-5 visas.",
+      "body": "As of June 5, 2026, the State Department has issued all the unreserved EB-5 immigrant visas available in fiscal year 2026 (October 2025 to September 2026) to applicants chargeable to India, which in most cases means people born in India. These are the C5, T5, I5, R5, RU and NU categories. It does not include the rural, high-unemployment and infrastructure set-asides, which this page also counts. Embassies and consulates may not issue visas in these categories for the rest of the fiscal year. The annual limits reset on October 1, 2026, when they may start issuing them again to qualified applicants.",
       "scope": { "countries": ["India"], "visaClasses": ["eb-5"] },
       "start": "2026-06-05",
       "end": "2026-10-01",
@@ -337,8 +348,9 @@
     {
       "id": "uscis-public-charge-2026",
       "status": "official",
-      "title": "New public charge rules for green card applications filed from September 18, 2026",
-      "body": "DHS rescinded its 2022 public charge rule, and USCIS's new guidance applies to every Form I-485 postmarked or submitted electronically on or after September 18, 2026. For those applications, USCIS can consider any means-tested public benefits received on or after that date; for benefits received before it, only public cash assistance for income maintenance and long-term institutionalization at the government's expense. Applications filed from December 23, 2022 to September 17, 2026 are decided under the 2022 rule. States and cities have sued to stop the new rule; it is in effect while the lawsuits proceed. If you or your family receive public benefits, talk to an immigration lawyer or accredited representative before filing.",
+      "title": "New public charge rules from September 18, 2026",
+      "summary": "For green card applications (Form I-485) filed from September 18, 2026, USCIS can look at more kinds of public benefits that you get from that date. If you or your family get public benefits, talk to an immigration lawyer before you file.",
+      "body": "DHS has rescinded (cancelled) its 2022 public charge rule. USCIS's new guidance applies to every Form I-485 postmarked or filed online on or after September 18, 2026. For those applications, USCIS can consider any means-tested public benefits (benefits that depend on your income) received on or after that date. For benefits received before that date, it can consider only public cash assistance for income maintenance and long-term institutionalization at government expense.\n\nApplications filed from December 23, 2022 to September 17, 2026 are decided under the 2022 rule.\n\nStates and cities have sued to stop the new rule. It is in effect while the lawsuits go on.\n\nIf you or your family receive public benefits, talk to an immigration lawyer or accredited representative before filing.",
       "scope": {
         "pages": ["/uscis/i-485"]
       },
