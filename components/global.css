@@ -80,3 +80,43 @@ a.mantine-Anchor-root:hover {
   text-underline-offset: 0.18em;
   text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
 }
+
+/* The "Details" toggle under a notice's summary (MoreDetails): a violet
+ * label with a caret that turns when it opens. */
+details > summary {
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--vw-stamp);
+  cursor: pointer;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+details > summary::before {
+  content: "";
+  width: 0.45em;
+  height: 0.45em;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 150ms ease;
+}
+
+details[open] > summary::before {
+  transform: rotate(45deg);
+}
+
+details > summary:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  details > summary::before {
+    transition: none;
+  }
+}
