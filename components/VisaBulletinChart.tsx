@@ -10,6 +10,7 @@ import {
 } from "echarts/components";
 import * as echarts from "echarts/core";
 import { SVGRenderer } from "echarts/renderers";
+import { FONT_FAMILY } from "./font";
 import { VISA_BULLETIN_URL } from "./links";
 import {
   CHARTS,
@@ -91,11 +92,14 @@ function describe(label: string, series: Series): string {
 
 export default function VisaBulletinChart({ series, dataUrl, label }: Props) {
   return (
-    <Paper shadow="xs" p="md" mx={0} component="figure">
+    <Paper withBorder p="md" mx={0} component="figure">
       <ReactEChartsCore
         style={{ width: "100%", height: "400px" }}
         echarts={echarts}
         option={{
+          textStyle: { fontFamily: FONT_FAMILY },
+          // the site's stamp violet and a lighter ink (ink.4, 4.2:1 on white)
+          color: ["#5b3a94", "#677da6"],
           animation: false,
           aria: {
             enabled: true,
