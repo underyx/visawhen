@@ -2,33 +2,20 @@ import { IssuancesRow, VisaType } from "../api/consulates";
 import { formatCount, formatMonth } from "./consulates";
 import { ISSUANCE_STATISTICS_URLS } from "./links";
 
-import * as echarts from "echarts/core";
-import { BarChart } from "echarts/charts";
-import {
-  AriaComponent,
-  DatasetComponent,
-  DataZoomComponent,
-  LegendComponent,
-  TitleComponent,
-  TooltipComponent,
-  GridComponent,
-} from "echarts/components";
-import { SVGRenderer } from "echarts/renderers";
-import ReactEChartsCore from "echarts-for-react/lib/core";
-import { FONT_FAMILY } from "./font";
 import { Paper } from "@mantine/core";
-
-echarts.use([
-  AriaComponent,
-  DatasetComponent,
-  DataZoomComponent,
-  LegendComponent,
-  TitleComponent,
-  TooltipComponent,
-  GridComponent,
-  BarChart,
-  SVGRenderer,
-]);
+import { scaleBand, scaleLinear } from "@visx/scale";
+import { useState } from "react";
+import {
+  ChartHeader,
+  columnPath,
+  Plot,
+  RangeButtons,
+  thin,
+  TooltipLine,
+  useChartWidth,
+  XAxis,
+  YAxis,
+} from "./Chart";
 
 /** State's listing of the monthly reports the counts come from */
 const SOURCES: Record<VisaType, { kind: string; url: string }> = {
@@ -40,6 +27,13 @@ const SOURCES: Record<VisaType, { kind: string; url: string }> = {
  * 3:1 */
 const BAR_COLOR = "#1c7ed6";
 const SERIES_NAME = "Visas issued per month";
+
+/** How many months the chart shows at first: three years, three of each
+ * season */
+const FIRST_MONTHS = 36;
+
+const HEIGHT = 340;
+const MARGIN = { top: 8, right: 8, bottom: 28, left: 44 };
 
 interface Props {
   issuances: IssuancesRow[];
@@ -69,53 +63,94 @@ export default function ConsulateChart({
   subject,
 }: Props) {
   const source = SOURCES[visaType];
+  const [boxRef, width] = useChartWidth();
+  const [range, setRange] = useState(0);
+  const rows = range === 0 ? issuances.slice(-FIRST_MONTHS) : issuances;
+  const plotWidth = width - MARGIN.left - MARGIN.right;
+  const plotHeight = HEIGHT - MARGIN.top - MARGIN.bottom;
+  const step = plotWidth / rows.length;
+  const x = scaleBand({
+    domain: rows.map((row) => row.month),
+    range: [0, plotWidth],
+    // a 2px gap between bars where they are wide enough to spare it
+    paddingInner: step > 6 ? 2 / step : 0.25,
+  });
+  const barWidth = Math.min(24, x.bandwidth());
+  const y = scaleLinear({
+    domain: [0, Math.max(1, ...rows.map((row) => row.issuances))],
+    range: [plotHeight, 0],
+    nice: true,
+  });
+  const xs = rows.map((row) => (x(row.month) ?? 0) + x.bandwidth() / 2);
+  const januaries = rows.flatMap((row, index) =>
+    row.month.slice(5, 7) === "01"
+      ? [{ x: xs[index], label: row.month.slice(0, 4) }]
+      : [],
+  );
   return (
     <Paper withBorder p="md" mx={0} component="figure">
-      <ReactEChartsCore
-        style={{ height: "600px" }}
-        echarts={echarts}
-        option={{
-          textStyle: { fontFamily: FONT_FAMILY },
-          dataset: {
-            source: [
-              ["month", SERIES_NAME],
-              ...issuances.map((row) => [
-                formatMonth(row.month),
-                Math.round(row.issuances),
-              ]),
-            ],
-          },
-          animation: false,
-          aria: {
-            enabled: true,
-            label: { description: describe(issuances, subject) },
-          },
-          legend: { top: 0 },
-          tooltip: {
-            trigger: "axis",
-          },
-          xAxis: {
-            type: "category",
-          },
-          // Whole visas only: without this, a class with at most a visa or two
-          // a month gets ticks at 0.2, 0.4 and so on.
-          yAxis: { name: "visas", minInterval: 1 },
-          dataZoom: [
-            {
-              type: "slider",
-              start: 30,
-              end: 100,
-            },
-          ],
-          series: [
-            {
-              type: "bar",
-              name: SERIES_NAME,
-              itemStyle: { color: BAR_COLOR },
-            },
-          ],
-        }}
+      <ChartHeader
+        title={SERIES_NAME}
+        range={
+          issuances.length > FIRST_MONTHS && (
+            <RangeButtons
+              labels={["Last 3 years", "All years"]}
+              value={range}
+              onChange={setRange}
+            />
+          )
+        }
       />
+      <Plot
+        boxRef={boxRef}
+        width={width}
+        height={HEIGHT}
+        margin={MARGIN}
+        description={describe(issuances, subject)}
+        xs={xs}
+        band={x.step()}
+        tooltip={(index) => (
+          <>
+            <strong>{formatMonth(rows[index].month)}</strong>
+            <TooltipLine
+              series={{ name: SERIES_NAME, color: BAR_COLOR, mark: "bar" }}
+            >
+              {formatCount(rows[index].issuances)} visas issued
+            </TooltipLine>
+          </>
+        )}
+      >
+        {() => (
+          <>
+            <YAxis
+              // Whole visas only: a class with at most a visa or two a month
+              // would otherwise get ticks at 0.5, 1.5 and so on.
+              ticks={y.ticks(5).filter(Number.isInteger)}
+              y={y}
+              width={plotWidth}
+              format={formatCount}
+              left={MARGIN.left}
+            />
+            {rows.map((row, index) => {
+              const top = y(row.issuances);
+              return (
+                <path
+                  key={row.month}
+                  d={columnPath(
+                    xs[index] - barWidth / 2,
+                    top,
+                    barWidth,
+                    plotHeight - top,
+                    barWidth >= 8 ? 4 : 0,
+                  )}
+                  fill={BAR_COLOR}
+                />
+              );
+            })}
+            <XAxis ticks={thin(januaries)} y={plotHeight} width={plotWidth} />
+          </>
+        )}
+      </Plot>
       <figcaption>
         Source: the U.S. Department of State&rsquo;s{" "}
         <a href={source.url}>monthly {source.kind} visa issuance statistics</a>

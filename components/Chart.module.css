@@ -1,0 +1,119 @@
+/* The pieces the charts share (components/chart.tsx): the row above the plot
+ * with its title or legend and range buttons, the axes, and the tooltip. */
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-bottom: var(--mantine-spacing-xs);
+}
+
+.title {
+  font-weight: 700;
+  font-size: var(--mantine-font-size-sm);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: var(--mantine-font-size-xs);
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.range {
+  margin-left: auto;
+}
+
+.box {
+  position: relative;
+}
+
+/* Vertical swipes scroll the page; the rest (taps, sideways drags) pick a
+ * point of the chart. */
+.plot {
+  display: block;
+  overflow: visible;
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Chrome rings an SVG that a tap or a click focused, too; the site's ring is
+ * for the keyboard only. */
+.plot:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.plot text {
+  font-size: 12px;
+  fill: var(--mantine-color-dimmed);
+}
+
+.grid {
+  stroke: var(--vw-rule);
+  stroke-opacity: 0.6;
+  shape-rendering: crispEdges;
+}
+
+.baseline {
+  stroke: var(--vw-rule);
+  shape-rendering: crispEdges;
+}
+
+.band {
+  fill: var(--vw-ink);
+  fill-opacity: 0.07;
+}
+
+.crosshair {
+  stroke: var(--vw-ink);
+  stroke-opacity: 0.4;
+  shape-rendering: crispEdges;
+}
+
+/* Text drawn over the marks, such as a dashed line's label: a halo in the
+ * chart's white keeps it readable. */
+.plot .onMarks {
+  paint-order: stroke;
+  stroke: var(--mantine-color-body);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.tooltip {
+  position: absolute;
+  top: 0;
+  z-index: 2;
+  max-width: min(260px, 85%);
+  padding: 8px 10px;
+  pointer-events: none;
+  background: var(--mantine-color-body);
+  border: 1px solid var(--vw-rule);
+  border-radius: var(--mantine-radius-sm);
+  box-shadow: 0 2px 8px rgb(22 35 63 / 12%);
+  font-size: var(--mantine-font-size-xs);
+  line-height: 1.4;
+}
+
+.tooltip strong {
+  display: block;
+}
+
+.key {
+  flex-shrink: 0;
+}
+
+.tooltipLine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
