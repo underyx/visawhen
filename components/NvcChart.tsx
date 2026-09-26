@@ -13,6 +13,7 @@ import {
 } from "echarts/components";
 import { SVGRenderer } from "echarts/renderers";
 import ReactEChartsCore from "echarts-for-react/lib/core";
+import { FONT_FAMILY } from "./font";
 import { Paper } from "@mantine/core";
 
 echarts.use([
@@ -108,7 +109,7 @@ function describe(id: string, series: NvcSeries): string {
 
 export default function NvcChart({ id, series }: Props) {
   return (
-    <Paper shadow="xs" p="md" mx={0} component="figure">
+    <Paper withBorder p="md" mx={0} component="figure">
       <ReactEChartsCore
         style={{
           width: "100%",
@@ -116,6 +117,7 @@ export default function NvcChart({ id, series }: Props) {
         }}
         echarts={echarts}
         option={{
+          textStyle: { fontFamily: FONT_FAMILY },
           animation: false,
           aria: {
             enabled: true,

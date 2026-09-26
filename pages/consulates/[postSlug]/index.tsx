@@ -416,7 +416,7 @@ export default function ConsulateSelect({
               }
               label={
                 <Group gap="xs">
-                  <Badge size="lg" radius="sm" color="blue" variant="light">
+                  <Badge size="lg" radius="sm" color="ink" variant="light">
                     <Highlight highlight={term}>{visaClass}</Highlight>
                   </Badge>
                   <Highlight highlight={term}>{description ?? ""}</Highlight>

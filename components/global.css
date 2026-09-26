@@ -1,0 +1,122 @@
+/* Site-wide tokens and base styles. The palette is a passport's: navy ink,
+ * the pale page, and the violet of an entry stamp; the Mantine theme in
+ * pages/_app.tsx carries the same colours as its ink and stamp scales. */
+:root {
+  --vw-paper: #f2f4f1;
+  --vw-ink: #16233f;
+  --vw-stamp: #5b3a94;
+  --vw-rule: #c9d2cd;
+  --vw-highlight: #f7ecb5;
+}
+
+body {
+  background-color: var(--vw-paper);
+  color: var(--vw-ink);
+  font-variant-numeric: tabular-nums;
+  /* Archivo's word space is narrow for running text */
+  word-spacing: 0.05em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Headings are set condensed, like the printed headings of a form. */
+.mantine-Title-root {
+  font-stretch: 78%;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+}
+
+p,
+li {
+  text-wrap: pretty;
+}
+
+::selection {
+  background-color: var(--mantine-color-stamp-1);
+  color: var(--vw-ink);
+}
+
+:focus-visible {
+  outline: 3px solid var(--vw-stamp);
+  outline-offset: 2px;
+}
+
+/* Links keep a quieter underline until hovered, so that paragraphs full of
+ * links still read as text. */
+a.mantine-Anchor-root,
+.mantine-Text-root a {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+}
+
+a.mantine-Anchor-root:hover {
+  text-decoration-color: currentColor;
+}
+
+.mantine-Table-table {
+  background-color: var(--mantine-color-body);
+}
+
+.mantine-Table-th {
+  font-weight: 700;
+  color: var(--vw-ink);
+}
+
+/* A notice is a slip on the page: a rule of ink down its left edge. The
+ * yellow and orange ones are also highlighted (see the Alert theme). */
+.mantine-Alert-root {
+  border-left: 4px solid var(--vw-ink);
+}
+
+.mantine-Badge-root {
+  letter-spacing: 0;
+}
+
+/* Plain links written as <a> (in the charts' captions) look like the rest. */
+.mantine-AppShell-main a:not([class]) {
+  color: var(--mantine-color-anchor);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+}
+
+/* The "Details" toggle under a notice's summary (MoreDetails): a violet
+ * label with a caret that turns when it opens. */
+details > summary {
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--vw-stamp);
+  cursor: pointer;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+details > summary::before {
+  content: "";
+  width: 0.45em;
+  height: 0.45em;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 150ms ease;
+}
+
+details[open] > summary::before {
+  transform: rotate(45deg);
+}
+
+details > summary:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  details > summary::before {
+    transition: none;
+  }
+}

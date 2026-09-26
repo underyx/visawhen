@@ -1,0 +1,68 @@
+.bar {
+  height: 100%;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  text-decoration: none;
+}
+
+.wordmark {
+  font-stretch: 72%;
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.links {
+  display: flex;
+  gap: var(--mantine-spacing-md);
+}
+
+@media (max-width: $mantine-breakpoint-xs) {
+  .links {
+    gap: var(--mantine-spacing-sm);
+  }
+}
+
+.link {
+  color: var(--mantine-color-ink-1);
+  font-weight: 600;
+  font-size: var(--mantine-font-size-sm);
+  text-decoration: none;
+  /* a tap target the height of most of the header */
+  padding-block: 14px 12px;
+  border-bottom: 2px solid transparent;
+}
+
+.link:hover {
+  color: #fff;
+}
+
+.link[aria-current="page"] {
+  color: #fff;
+  border-bottom-color: var(--mantine-color-stamp-3);
+}
+
+.discord {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  font-weight: 600;
+  font-size: var(--mantine-font-size-sm);
+  text-decoration: none;
+  padding: 6px 12px;
+  min-height: 40px;
+  border: 1px solid var(--mantine-color-ink-4);
+  border-radius: var(--mantine-radius-sm);
+}
+
+.discord:hover {
+  border-color: var(--mantine-color-ink-2);
+}

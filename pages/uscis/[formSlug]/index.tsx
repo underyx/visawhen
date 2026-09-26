@@ -775,7 +775,7 @@ export default function UscisForm({
                           <Badge
                             size="lg"
                             radius="sm"
-                            color="blue"
+                            color="ink"
                             variant="light"
                           >
                             <Highlight highlight={term}>{stateCode}</Highlight>

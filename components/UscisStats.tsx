@@ -1,4 +1,4 @@
-import { Paper, SimpleGrid, Stack, Text } from "@mantine/core";
+import { Stack, Text } from "@mantine/core";
 import React from "react";
 import { CategoryRange, formatMedian, formatRangeMonths } from "./estimate";
 import { addMonths, formatMonthRange, useToday } from "./Freshness";
@@ -18,6 +18,7 @@ import {
   WITHHELD_ESTIMATE,
   WITHHELD_RANGE,
 } from "./uscis";
+import classes from "./UscisStats.module.css";
 
 // a non-breaking space keeps the cards the same height when one has no
 // line to show under its value
@@ -38,11 +39,7 @@ interface StatProps {
 /** A card's big figure. Not a heading: screen readers' heading lists would
  * read "5.2 years" and "78%" as section titles. */
 function StatValue({ children }: React.PropsWithChildren) {
-  return (
-    <Text fz="h3" fw={700} lh={1.35}>
-      {children}
-    </Text>
-  );
+  return <Text className={classes.boxValue}>{children}</Text>;
 }
 
 /** A card's value when there is none to show, with why. */
@@ -56,15 +53,13 @@ function NotShown({ children }: React.PropsWithChildren) {
 
 function Stat({ label, value, line, lineColor }: StatProps) {
   return (
-    <Paper withBorder p="md" radius="md">
-      <Text size="sm" c="dimmed" fw={500}>
-        {label}
-      </Text>
+    <div className={classes.box}>
+      <Text className={classes.boxLabel}>{label}</Text>
       {typeof value === "string" ? <StatValue>{value}</StatValue> : value}
-      <Text size="sm" c={lineColor}>
+      <Text size="xs" c={lineColor}>
         {line ?? NO_LINE}
       </Text>
-    </Paper>
+    </div>
   );
 }
 
@@ -196,35 +191,38 @@ export default function UscisStats({
       : "Denials";
   const [withheldLow, withheldHigh] = WITHHELD_RANGE;
   return (
-    <Stack gap="sm">
+    <Stack gap="lg">
       {headline !== null && (
-        <Paper withBorder p="md" radius="md">
-          <Text size="sm" c="dimmed" fw={500}>
-            {`If you file today (${headline.name})`}
-          </Text>
-          <Text size="sm" fw={500} mt={4}>
-            Most likely
-          </Text>
-          <StatValue>
-            <RangeText low={headline.q[1]} high={headline.q[3]} />
-          </StatValue>
-          <Text size="sm" c="dimmed">
-            could be <RangeText low={headline.q[0]} high={headline.q[4]} />
-          </Text>
-          <Text size="sm" c="dimmed">
-            {`USCIS median ${formatMedian(headline.median)} · ${
-              current.label
-            } data`}
-          </Text>
-          {headline.premium && (
-            <Text size="sm" c="dimmed">
-              Premium and regular processing together: with premium processing,
-              USCIS acts within weeks.
+        <div className={classes.estimate}>
+          <div className={classes.stamp}>
+            <div className={classes.stampLabel}>
+              {`If you file today (${headline.name}), most likely`}
+            </div>
+            <div className={classes.stampRange}>
+              <RangeText low={headline.q[1]} high={headline.q[3]} />
+            </div>
+            <div className={classes.stampFoot}>
+              could be <RangeText low={headline.q[0]} high={headline.q[4]} />
+            </div>
+          </div>
+          <Stack gap={6} className={classes.aside}>
+            <Text size="sm">
+              {`Based on USCIS's median time of ${formatMedian(
+                headline.median,
+              )} (${
+                current.label
+              } data) and on how much real waits differed from it in the past.`}
             </Text>
-          )}
-        </Paper>
+            {headline.premium && (
+              <Text size="sm" c="dimmed">
+                Premium and regular processing together: with premium
+                processing, USCIS acts within weeks.
+              </Text>
+            )}
+          </Stack>
+        </div>
       )}
-      <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
+      <div className={classes.boxes}>
         <Stat
           label="Time to clear backlog"
           value={
@@ -384,7 +382,7 @@ export default function UscisStats({
             }
           />
         )}
-      </SimpleGrid>
+      </div>
     </Stack>
   );
 }
