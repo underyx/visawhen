@@ -251,7 +251,7 @@ export default function UscisIndex({
                   }
                   label={
                     <Group gap="xs">
-                      <Badge size="lg" radius="sm" color="blue" variant="light">
+                      <Badge size="lg" radius="sm" color="ink" variant="light">
                         <Highlight highlight={term}>{form}</Highlight>
                       </Badge>
                       <Highlight highlight={term}>{title}</Highlight>

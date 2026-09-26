@@ -1,0 +1,132 @@
+.hero {
+  padding-block: var(--mantine-spacing-lg) var(--mantine-spacing-md);
+  max-width: 44rem;
+}
+
+.title {
+  font-size: clamp(2.5rem, 1.2rem + 5vw, 4.25rem);
+  font-stretch: 70%;
+  line-height: 0.98;
+  letter-spacing: -0.015em;
+}
+
+.lead {
+  margin-top: var(--mantine-spacing-md);
+  font-size: var(--mantine-font-size-lg);
+  line-height: 1.45;
+  max-width: 38rem;
+}
+
+/* The index of paths: plain links, so a phone reader can jump to theirs
+ * without scrolling past the others. */
+.index {
+  list-style: none;
+  padding: 0;
+  margin: var(--mantine-spacing-lg) 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.index a {
+  display: inline-block;
+  padding: 6px 12px;
+  border: 1px solid var(--vw-rule);
+  border-radius: 999px;
+  background: var(--mantine-color-body);
+  color: var(--vw-ink);
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.index a:hover {
+  border-color: var(--vw-stamp);
+  color: var(--vw-stamp);
+}
+
+.paths {
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: calc(var(--mantine-spacing-xl) * 1.5);
+  row-gap: calc(var(--mantine-spacing-xl) * 1.25);
+  margin-top: calc(var(--mantine-spacing-xl) * 1.25);
+}
+
+@media (min-width: $mantine-breakpoint-md) {
+  .paths {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.path {
+  border-top: 2px solid var(--vw-ink);
+  padding-top: var(--mantine-spacing-sm);
+  scroll-margin-top: 5rem;
+}
+
+.pathTitle {
+  font-size: 1.5rem;
+}
+
+.who {
+  margin-top: 6px;
+  color: var(--mantine-color-dimmed);
+  font-size: var(--mantine-font-size-sm);
+  max-width: 60ch;
+}
+
+/* The steps, in order, strung on a line like stops on a route. */
+.steps {
+  list-style: none;
+  counter-reset: step;
+  padding: 0;
+  margin: var(--mantine-spacing-md) 0 0;
+}
+
+.step {
+  counter-increment: step;
+  position: relative;
+  padding: 0 0 var(--mantine-spacing-md) 44px;
+}
+
+.step::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: -1px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 2px solid var(--vw-ink);
+  background: var(--vw-paper);
+  font-weight: 800;
+  font-size: 0.875rem;
+  font-stretch: 80%;
+  z-index: 1;
+}
+
+.step::after {
+  content: "";
+  position: absolute;
+  left: 13px;
+  top: 26px;
+  bottom: 0;
+  width: 2px;
+  background: var(--vw-rule);
+}
+
+.step:last-child {
+  padding-bottom: 0;
+}
+
+.step:last-child::after {
+  display: none;
+}
+
+.footnote {
+  margin-top: calc(var(--mantine-spacing-xl) * 1.25);
+  max-width: 62ch;
+}

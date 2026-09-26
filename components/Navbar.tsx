@@ -1,14 +1,8 @@
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { DiscordIcon } from "./icons";
-import {
-  Anchor,
-  Avatar,
-  Button,
-  Container,
-  Flex,
-  Group,
-  Text,
-} from "@mantine/core";
+import { Container, Flex, Image, Text } from "@mantine/core";
+import classes from "./Navbar.module.css";
 
 const NAV_LINKS = [
   { href: "/uscis", label: "USCIS" },
@@ -17,52 +11,62 @@ const NAV_LINKS = [
 ];
 
 export default function Navbar() {
+  const { pathname } = useRouter();
   return (
-    <Container>
+    <Container className={classes.bar}>
       {/* Nothing may wrap: the header has a fixed height, so a second row of
           links would be painted over the page content on narrow screens. */}
-      <Flex justify="space-between" align="center" wrap="nowrap" gap="xs">
-        <Group gap="sm" align="center" wrap="nowrap">
-          <Anchor component={Link} href="/" underline="never">
-            <Group gap={2} c="gray.1" wrap="nowrap">
-              <Avatar src="/logo.svg" alt="Logo for VisaWhen" />
-              &nbsp;
-              <Text size="lg" fw={500} visibleFrom="xs">
-                VisaWhen
-              </Text>
-            </Group>
-          </Anchor>
-          <Group gap={4} wrap="nowrap">
+      <Flex
+        justify="space-between"
+        align="center"
+        wrap="nowrap"
+        gap="md"
+        h="100%"
+      >
+        <Flex align="center" gap="lg" wrap="nowrap">
+          <Link href="/" className={classes.brand} aria-label="VisaWhen home">
+            <Image src="/logo.svg" alt="" w={32} h={32} />
+            <Text
+              component="span"
+              className={classes.wordmark}
+              visibleFrom="xs"
+              aria-hidden
+            >
+              VisaWhen
+            </Text>
+          </Link>
+          <nav className={classes.links} aria-label="Sections">
             {NAV_LINKS.map(({ href, label }) => (
-              <Button
+              <Link
                 key={href}
-                component={Link}
                 href={href}
-                size="compact-sm"
-                color="gray.2"
-                variant="subtle"
+                className={classes.link}
+                aria-current={
+                  pathname === href || pathname.startsWith(`${href}/`)
+                    ? "page"
+                    : undefined
+                }
               >
                 {label}
-              </Button>
+              </Link>
             ))}
-          </Group>
-        </Group>
-        <Button
-          size="sm"
-          color="#5865f2"
-          component="a"
+          </nav>
+        </Flex>
+        <a
+          className={classes.discord}
           target="_blank"
           rel="noopener"
           href="https://discord.gg/zkf8w2QtQY"
           aria-label="Join the Discord community"
-          leftSection={<DiscordIcon />}
-          style={{ flexShrink: 0 }}
         >
-          <Text visibleFrom="sm">Join the Discord community</Text>
-          <Text hiddenFrom="sm" visibleFrom="xs">
+          <DiscordIcon />
+          <Text component="span" inherit visibleFrom="sm">
+            Join the Discord community
+          </Text>
+          <Text component="span" inherit hiddenFrom="sm" visibleFrom="xs">
             Discord
           </Text>
-        </Button>
+        </a>
       </Flex>
     </Container>
   );

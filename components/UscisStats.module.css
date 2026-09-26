@@ -1,0 +1,113 @@
+/* The estimate, set as a passport entry stamp: the one loud element on a
+ * form's page. Everything else around it stays plain. */
+.estimate {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--mantine-spacing-lg);
+  align-items: center;
+  padding-block: var(--mantine-spacing-sm);
+}
+
+@media (min-width: $mantine-breakpoint-sm) {
+  .estimate {
+    grid-template-columns: auto 1fr;
+    gap: calc(var(--mantine-spacing-xl) * 1.25);
+  }
+}
+
+.stamp {
+  justify-self: start;
+  color: var(--vw-stamp);
+  border: 3px solid currentColor;
+  border-radius: 14px;
+  padding: 14px 22px 16px;
+  box-shadow:
+    inset 0 0 0 3px var(--vw-paper),
+    inset 0 0 0 4.5px currentColor;
+  transform: rotate(-2deg);
+  /* worn ink: a fine noise knocks a little of the colour out, as a rubber
+     stamp never inks evenly */
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -3 2.6'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mask-size: 160px 160px;
+  animation: land 420ms cubic-bezier(0.2, 0.9, 0.3, 1.2) 150ms both;
+}
+
+@keyframes land {
+  from {
+    opacity: 0;
+    transform: rotate(-6deg) scale(1.25);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-2deg) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp {
+    animation: none;
+  }
+}
+
+.stampLabel {
+  font-weight: 700;
+  font-size: var(--mantine-font-size-sm);
+  line-height: 1.2;
+}
+
+.stampRange {
+  font-stretch: 68%;
+  font-weight: 850;
+  font-size: clamp(2rem, 1.3rem + 3vw, 3rem);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  margin-block: 6px 4px;
+  white-space: nowrap;
+}
+
+.stampFoot {
+  font-weight: 600;
+  font-size: var(--mantine-font-size-sm);
+  line-height: 1.2;
+}
+
+.aside {
+  max-width: 46ch;
+}
+
+/* The quarter's figures, as the boxes of a printed form: one ruled strip,
+ * each box with its caption at the top. */
+.boxes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--vw-rule);
+  border: 1px solid var(--vw-rule);
+  border-radius: var(--mantine-radius-sm);
+  overflow: hidden;
+}
+
+@media (min-width: $mantine-breakpoint-sm) {
+  .boxes {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.box {
+  background: var(--mantine-color-body);
+  padding: 10px 14px 12px;
+}
+
+.boxLabel {
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 600;
+  color: var(--mantine-color-dimmed);
+}
+
+.boxValue {
+  font-stretch: 75%;
+  font-weight: 800;
+  font-size: 1.875rem;
+  line-height: 1.15;
+  margin-top: 2px;
+}
