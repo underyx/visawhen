@@ -9,5 +9,5 @@ const archivo = Archivo({
   display: "swap",
 });
 
-/** The site's font stack, for CSS and for the charts' canvas text */
+/** The site's font stack */
 export const FONT_FAMILY = `${archivo.style.fontFamily}, system-ui, sans-serif`;

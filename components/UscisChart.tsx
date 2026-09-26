@@ -1,18 +1,25 @@
-import * as echarts from "echarts/core";
-import { BarChart, LineChart } from "echarts/charts";
-import {
-  AriaComponent,
-  DataZoomComponent,
-  GridComponent,
-  LegendComponent,
-  MarkLineComponent,
-  TooltipComponent,
-} from "echarts/components";
-import { SVGRenderer } from "echarts/renderers";
-import ReactEChartsCore from "echarts-for-react/lib/core";
-import { FONT_FAMILY } from "./font";
 import { Paper } from "@mantine/core";
+import { scaleBand, scaleLinear } from "@visx/scale";
+import { LinePath } from "@visx/shape";
 import numeral from "numeral";
+import React, { useState } from "react";
+import {
+  ChartHeader,
+  columnPath,
+  DASHES,
+  Diamond,
+  Dot,
+  lonePoints,
+  ON_MARKS,
+  Plot,
+  RangeButtons,
+  Series,
+  thin,
+  TooltipLine,
+  useChartWidth,
+  XAxis,
+  YAxis,
+} from "./Chart";
 import {
   approximately,
   CHART_QUARTERS,
@@ -23,18 +30,6 @@ import {
   QuarterPoint,
 } from "./uscis";
 import { USCIS_DATA_URL } from "./links";
-
-echarts.use([
-  AriaComponent,
-  BarChart,
-  LineChart,
-  DataZoomComponent,
-  GridComponent,
-  LegendComponent,
-  MarkLineComponent,
-  TooltipComponent,
-  SVGRenderer,
-]);
 
 // Validated as a colorblind-safe categorical set: blue / red / amber /
 // violet, then green for further lines.
@@ -60,10 +55,6 @@ interface Props {
   routed?: readonly string[];
 }
 
-// The legends scroll instead of wrapping: on a phone, the wait chart's five
-// entries took five lines and ran over the plot.
-const LEGEND = { type: "scroll", top: 0 } as const;
-
 /** What a diamond on a pending count or on the time to clear the backlog
  * means (QuarterPoint.suspect). */
 const SUSPECT_NOTE =
@@ -84,37 +75,96 @@ function SourceCaption({ source, what }: { source: string; what: string }) {
   );
 }
 
-/** How much of the chart to show initially: the last six years. */
-function initialZoomStart(points: QuarterPoint[]): number {
-  return Math.max(0, 100 - 100 * (CHART_QUARTERS / points.length));
+/** The quarters a chart shows, picked with its range buttons: the last
+ * CHART_QUARTERS at first, or all of them. Returns them, where each goes
+ * across a plot `plotWidth` wide, the year labels under them, and the
+ * buttons (null when there are no more quarters to show). */
+function useQuarters(points: QuarterPoint[], plotWidth: number) {
+  const [range, setRange] = useState(0);
+  const shown = range === 0 ? points.slice(-CHART_QUARTERS) : points;
+  const step = plotWidth / shown.length;
+  const x = scaleBand({
+    domain: shown.map(({ quarter }) => quarter),
+    range: [0, plotWidth],
+    // a 2px gap between bars where they are wide enough to spare it
+    paddingInner: step > 6 ? 2 / step : 0.25,
+  });
+  const xs = shown.map(({ quarter }) => (x(quarter) ?? 0) + x.bandwidth() / 2);
+  // each year under its first quarter: "2024-Q1"
+  const ticks = thin(
+    shown.flatMap(({ quarter }, index) =>
+      quarter.endsWith("Q1")
+        ? [{ x: xs[index], label: quarter.slice(0, 4) }]
+        : [],
+    ),
+  );
+  const buttons =
+    points.length > CHART_QUARTERS ? (
+      <RangeButtons
+        labels={["Last 6 years", "All years"]}
+        value={range}
+        onChange={setRange}
+      />
+    ) : null;
+  return { shown, x, xs, ticks, buttons };
 }
 
-/** The vertical lines at `breaks`, as a series' markLine, or undefined when
- * there are none within the points. */
-function breakLines(points: QuarterPoint[], breaks: ChartBreak[]) {
-  const data = breaks.flatMap((chartBreak) => {
-    const point = points.find(({ quarter }) => quarter === chartBreak.quarter);
-    return point === undefined
-      ? []
-      : [
-          {
-            xAxis: point.label,
-            label: { formatter: chartBreak.label },
-          },
-        ];
+/** Dashed vertical lines at the `breaks` among the quarters `shown`, each
+ * with its label at the top */
+function BreakLines({
+  shown,
+  xs,
+  breaks,
+  plotWidth,
+  plotHeight,
+}: {
+  shown: QuarterPoint[];
+  xs: number[];
+  breaks: ChartBreak[];
+  plotWidth: number;
+  plotHeight: number;
+}) {
+  return breaks.map((chartBreak) => {
+    const index = shown.findIndex(
+      ({ quarter }) => quarter === chartBreak.quarter,
+    );
+    if (index === -1) return null;
+    const x = Math.round(xs[index]);
+    // the label goes on the side with more room
+    const left = x > plotWidth / 2;
+    return (
+      <g key={chartBreak.quarter}>
+        <line
+          x1={x}
+          x2={x}
+          y1={0}
+          y2={plotHeight}
+          stroke={BREAK_COLOR}
+          strokeDasharray={DASHES}
+        />
+        <text
+          className={ON_MARKS}
+          x={left ? x - 4 : x + 4}
+          y={10}
+          textAnchor={left ? "end" : "start"}
+          style={{ fill: BREAK_COLOR, fontSize: 11 }}
+        >
+          {chartBreak.label}
+        </text>
+      </g>
+    );
   });
-  if (data.length === 0) return undefined;
-  return {
-    silent: true,
-    symbol: "none",
-    lineStyle: { color: BREAK_COLOR, type: "dashed", width: 1 },
-    label: {
-      position: "insideEndTop",
-      color: BREAK_COLOR,
-      fontSize: 11,
-    },
-    data,
-  };
+}
+
+/** A line of a chart: its series, and its value at each quarter shown */
+interface Line {
+  series: Series;
+  values: (number | null)[];
+}
+
+/** Ticks for a y-axis of counts, as "1.2k" */
+function formatCountTick(value: number): string {
+  return numeral(value).format("0.[0]a");
 }
 
 /** The sentences under a chart on its breaks and marked points: those of the
@@ -147,18 +197,6 @@ function Notes({
       ))}
     </>
   );
-}
-
-/** A line's data point, as a diamond when it is `suspect`. */
-function marked(value: number | null, suspect: boolean, color: string) {
-  return suspect && value !== null
-    ? {
-        value,
-        symbol: "diamond",
-        symbolSize: 14,
-        itemStyle: { color: "#fff", borderColor: color, borderWidth: 2 },
-      }
-    : value;
 }
 
 /** The tooltip's lines on where a quarter's numbers come from and whether
@@ -195,6 +233,9 @@ function describeOutcomes(
   )} pending.`;
 }
 
+const OUTCOMES_HEIGHT = 380;
+const OUTCOMES_MARGIN = { top: 12, right: 8, bottom: 28, left: 44 };
+
 /** Bars for the decisions made in each quarter (approved and denied,
  * stacked), with lines for the applications filed during it and for the
  * backlog as it stood at its end. The backlog is a snapshot, not "those
@@ -209,94 +250,207 @@ export function OutcomesChart({
   routed = [],
 }: Props & { source: string; sourceName: string }) {
   const suspects = points.some(({ suspect }) => suspect);
+  const [boxRef, width] = useChartWidth();
+  const margin = OUTCOMES_MARGIN;
+  const plotWidth = width - margin.left - margin.right;
+  const plotHeight = OUTCOMES_HEIGHT - margin.top - margin.bottom;
+  const { shown, x, xs, ticks, buttons } = useQuarters(points, plotWidth);
+  const y = scaleLinear({
+    domain: [
+      0,
+      Math.max(
+        1,
+        ...shown.flatMap((point) => [
+          (point.approved ?? 0) + (point.denied ?? 0),
+          point.pending ?? 0,
+          point.received ?? 0,
+        ]),
+      ),
+    ],
+    range: [plotHeight, 0],
+    nice: true,
+  });
+  const barWidth = Math.min(24, x.bandwidth());
+  const radius = barWidth >= 8 ? 4 : 0;
+  const approved: Series = {
+    name: "Approved",
+    color: APPROVED_COLOR,
+    mark: "bar",
+  };
+  const denied: Series = { name: "Denied", color: DENIED_COLOR, mark: "bar" };
+  const pending: Series = {
+    name: "Pending at quarter end",
+    color: PENDING_COLOR,
+    mark: "line",
+  };
+  const filed: Series = {
+    // as in the text: only for routing in the quarters shown at first; an
+    // older quarter's tooltip still says it
+    name: points
+      .slice(-CHART_QUARTERS)
+      .some(({ quarter }) => routed.includes(quarter))
+      ? "Filed (or routed here)"
+      : "Filed",
+    color: RECEIVED_COLOR,
+    mark: "dashed",
+  };
+  const lines: Line[] = [
+    { series: pending, values: shown.map((point) => point.pending) },
+    { series: filed, values: shown.map((point) => point.received) },
+  ];
   return (
     <Paper withBorder p="md" mx={0} component="figure">
-      <ReactEChartsCore
-        style={{ width: "100%", height: "440px" }}
-        echarts={echarts}
-        option={{
-          textStyle: { fontFamily: FONT_FAMILY },
-          animation: false,
-          color: [APPROVED_COLOR, DENIED_COLOR, PENDING_COLOR, RECEIVED_COLOR],
-          aria: {
-            enabled: true,
-            label: { description: describeOutcomes(points, subject, place) },
-          },
-          legend: LEGEND,
-          tooltip: {
-            trigger: "axis",
-            formatter: (params: { dataIndex: number }[]) => {
-              const point = points[params[0].dataIndex];
-              return [
-                `<strong>${point.label}</strong>`,
-                `${
-                  routed.includes(point.quarter)
-                    ? "Filed or routed here"
-                    : "Filed"
-                }: ${formatCount(point.received)}`,
-                `Approved: ${formatCount(point.approved)}`,
-                `Denied: ${formatCount(point.denied)}`,
-                `Pending at quarter end: ${formatCount(point.pending)}`,
-                `Time to clear backlog at that pace: ${approximately(
+      <ChartHeader
+        series={[approved, denied, pending, filed]}
+        range={buttons}
+      />
+      <Plot
+        boxRef={boxRef}
+        width={width}
+        height={OUTCOMES_HEIGHT}
+        margin={margin}
+        description={describeOutcomes(points, subject, place)}
+        xs={xs}
+        band={x.step()}
+        tooltip={(index) => {
+          const point = shown[index];
+          return (
+            <>
+              <strong>{point.label}</strong>
+              <TooltipLine series={filed}>
+                {routed.includes(point.quarter)
+                  ? "Filed or routed here"
+                  : "Filed"}
+                : {formatCount(point.received)}
+              </TooltipLine>
+              <TooltipLine series={approved}>
+                Approved: {formatCount(point.approved)}
+              </TooltipLine>
+              <TooltipLine series={denied}>
+                Denied: {formatCount(point.denied)}
+              </TooltipLine>
+              <TooltipLine series={pending}>
+                Pending at quarter end: {formatCount(point.pending)}
+              </TooltipLine>
+              <TooltipLine>
+                Time to clear backlog at that pace:{" "}
+                {approximately(
                   formatMonths(point.waitMonths),
                   point.approximate,
-                )}`,
-                ...pointNotes(point),
-              ].join("<br />");
-            },
-          },
-          grid: { left: 64, right: 16, top: 48, bottom: 80 },
-          xAxis: { type: "category", data: points.map((point) => point.label) },
-          yAxis: {
-            type: "value",
-            axisLabel: {
-              formatter: (value: number) => numeral(value).format("0.[0]a"),
-            },
-          },
-          dataZoom: [
-            { type: "slider", start: initialZoomStart(points), end: 100 },
-          ],
-          series: [
-            {
-              name: "Approved",
-              type: "bar",
-              stack: "decisions",
-              data: points.map((point) => point.approved),
-              itemStyle: { borderColor: "#fff", borderWidth: 1 },
-              markLine: breakLines(points, breaks),
-            },
-            {
-              name: "Denied",
-              type: "bar",
-              stack: "decisions",
-              data: points.map((point) => point.denied),
-              itemStyle: { borderColor: "#fff", borderWidth: 1 },
-            },
-            {
-              name: "Pending at quarter end",
-              type: "line",
-              data: points.map((point) =>
-                marked(point.pending, point.suspect, PENDING_COLOR),
-              ),
-              lineStyle: { width: 2 },
-              symbolSize: 8,
-            },
-            {
-              // as in the text: only for routing in the quarters shown at
-              // first; an older quarter's tooltip still says it
-              name: points
-                .slice(-CHART_QUARTERS)
-                .some(({ quarter }) => routed.includes(quarter))
-                ? "Filed (or routed here)"
-                : "Filed",
-              type: "line",
-              data: points.map((point) => point.received),
-              lineStyle: { width: 2, type: "dashed" },
-              symbolSize: 8,
-            },
-          ],
+                )}
+              </TooltipLine>
+              {pointNotes(point).map((note) => (
+                <TooltipLine key={note}>{note}</TooltipLine>
+              ))}
+            </>
+          );
         }}
-      />
+      >
+        {(picked) => (
+          <>
+            <YAxis
+              ticks={y.ticks(5)}
+              y={y}
+              width={plotWidth}
+              format={formatCountTick}
+              left={margin.left}
+            />
+            {shown.map((point, index) => {
+              const left = xs[index] - barWidth / 2;
+              const approvedCount = point.approved ?? 0;
+              const deniedCount = point.denied ?? 0;
+              const approvedTop = y(approvedCount);
+              const top = y(approvedCount + deniedCount);
+              // the white gap between the two, which a thin sliver of
+              // denials does not have room for
+              const gap =
+                approvedCount > 0 ? Math.min(2, (approvedTop - top) / 3) : 0;
+              return (
+                <g key={point.quarter}>
+                  {approvedCount > 0 && (
+                    <path
+                      d={columnPath(
+                        left,
+                        approvedTop,
+                        barWidth,
+                        plotHeight - approvedTop,
+                        deniedCount > 0 ? 0 : radius,
+                      )}
+                      fill={APPROVED_COLOR}
+                    />
+                  )}
+                  {deniedCount > 0 && (
+                    <path
+                      d={columnPath(
+                        left,
+                        top,
+                        barWidth,
+                        approvedTop - top - gap,
+                        radius,
+                      )}
+                      fill={DENIED_COLOR}
+                    />
+                  )}
+                </g>
+              );
+            })}
+            <XAxis ticks={ticks} y={plotHeight} width={plotWidth} />
+            <BreakLines
+              shown={shown}
+              xs={xs}
+              breaks={breaks}
+              plotWidth={plotWidth}
+              plotHeight={plotHeight}
+            />
+            {lines.map(({ series, values }) => (
+              <React.Fragment key={series.name}>
+                <LinePath<number | null>
+                  data={values}
+                  x={(_, index) => xs[index]}
+                  y={(value) => y(value ?? 0)}
+                  defined={(value) => value !== null}
+                  stroke={series.color}
+                  strokeWidth={2}
+                  strokeDasharray={
+                    series.mark === "dashed" ? DASHES : undefined
+                  }
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                  fill="none"
+                />
+                {[
+                  ...lonePoints(values),
+                  ...(picked === null ? [] : [picked]),
+                ].map((index, order) => {
+                  const value = values[index];
+                  return (
+                    value !== null && (
+                      <Dot
+                        key={order}
+                        x={xs[index]}
+                        y={y(value)}
+                        color={series.color}
+                      />
+                    )
+                  );
+                })}
+              </React.Fragment>
+            ))}
+            {shown.map(
+              (point, index) =>
+                point.suspect &&
+                point.pending !== null && (
+                  <Diamond
+                    key={point.quarter}
+                    x={xs[index]}
+                    y={y(point.pending)}
+                    color={PENDING_COLOR}
+                  />
+                ),
+            )}
+          </>
+        )}
+      </Plot>
       <figcaption>
         <SourceCaption source={source} what={sourceName} />
         <Notes points={points} breaks={breaks} suspects={suspects} />
@@ -365,6 +519,9 @@ function describeWait(
   }: ${figures.join("; ")}.`;
 }
 
+const WAIT_HEIGHT = 320;
+const WAIT_MARGIN = { top: 28, right: 8, bottom: 28, left: 36 };
+
 /** Lines: the months it would take to decide every pending application at
  * each quarter's pace of decisions (the time to clear the backlog, which is
  * not a wait), next to USCIS's own median processing time where it publishes
@@ -395,104 +552,197 @@ export function WaitChart({
   const suspects = points.some(
     ({ suspect, waitMonths }) => suspect && waitMonths !== null,
   );
+  const [boxRef, width] = useChartWidth();
+  const margin = WAIT_MARGIN;
+  const plotWidth = width - margin.left - margin.right;
+  const plotHeight = WAIT_HEIGHT - margin.top - margin.bottom;
+  const { shown, xs, ticks, buttons } = useQuarters(points, plotWidth);
+  const start = points.length - shown.length;
+  /** Whether the value at an index of `shown` is a spike drawn off scale */
+  const offScale = (index: number) => {
+    const value = values[start + index];
+    return value !== null && ceiling !== null && value > ceiling;
+  };
+  const estimate: Line = {
+    series: { name: estimateName, color: APPROVED_COLOR, mark: "line" },
+    values: shown.map((_, index) =>
+      offScale(index) ? clippedAt : values[start + index],
+    ),
+  };
+  const officials = processingTimeSeries.map(
+    (series, index): Line => ({
+      series: {
+        name: officialName(series),
+        color: EXTRA_COLORS[index % EXTRA_COLORS.length],
+        mark: "dashed",
+      },
+      values: shown.map((point) => point.processingTimes[series.key] ?? null),
+    }),
+  );
+  const lines = [estimate, ...officials];
+  const y = scaleLinear({
+    domain: [
+      0,
+      Math.max(
+        1,
+        ...lines.flatMap(({ values }) =>
+          values.filter((value): value is number => value !== null),
+        ),
+      ),
+    ],
+    range: [plotHeight, 0],
+    nice: true,
+  });
   return (
     <Paper withBorder p="md" mx={0} component="figure">
-      <ReactEChartsCore
-        style={{ width: "100%", height: "360px" }}
-        echarts={echarts}
-        option={{
-          textStyle: { fontFamily: FONT_FAMILY },
-          animation: false,
-          color: [APPROVED_COLOR, ...EXTRA_COLORS],
-          aria: {
-            enabled: true,
-            label: {
-              description: describeWait(
-                points,
-                subject,
-                place,
-                suppressed,
-                processingTimeSeries.map((series) => ({
-                  name: officialName(series),
-                  key: series.key,
-                })),
-              ),
-            },
-          },
-          legend: processingTimeSeries.length > 0 ? LEGEND : undefined,
-          tooltip: {
-            trigger: "axis",
-            formatter: (params: { dataIndex: number }[]) => {
-              const point = points[params[0].dataIndex];
-              return [
-                `<strong>${point.label}</strong>`,
-                `${estimateName}: ${approximately(
+      <ChartHeader
+        {...(officials.length > 0
+          ? { series: lines.map(({ series }) => series) }
+          : { title: estimateName })}
+        range={buttons}
+      />
+      <Plot
+        boxRef={boxRef}
+        width={width}
+        height={WAIT_HEIGHT}
+        margin={margin}
+        description={describeWait(
+          points,
+          subject,
+          place,
+          suppressed,
+          processingTimeSeries.map((series) => ({
+            name: officialName(series),
+            key: series.key,
+          })),
+        )}
+        xs={xs}
+        tooltip={(index) => {
+          const point = shown[index];
+          return (
+            <>
+              <strong>{point.label}</strong>
+              <TooltipLine series={estimate.series}>
+                {estimateName}:{" "}
+                {approximately(
                   formatMonths(point.waitMonths),
                   point.approximate,
-                )}`,
-                `(${formatCount(point.pending)} pending, ${approximately(
+                )}
+              </TooltipLine>
+              <TooltipLine>
+                ({formatCount(point.pending)} pending,{" "}
+                {approximately(
                   formatCount(point.completions),
                   point.approximate,
-                )} decided)`,
-                ...processingTimeSeries.map(
-                  (series) =>
-                    `${officialName(series)}: ${formatMonths(
-                      point.processingTimes[series.key] ?? null,
-                    )}`,
-                ),
-                ...pointNotes(point),
-              ].join("<br />");
-            },
-          },
-          // room above the plot for the legend, then the axis name
-          grid: {
-            left: 64,
-            right: 16,
-            top: processingTimeSeries.length > 0 ? 56 : 32,
-            bottom: 80,
-          },
-          xAxis: { type: "category", data: points.map((point) => point.label) },
-          yAxis: { type: "value", name: "months", min: 0 },
-          dataZoom: [
-            { type: "slider", start: initialZoomStart(points), end: 100 },
-          ],
-          series: [
-            {
-              name: estimateName,
-              type: "line",
-              data: values.map((value, index) =>
-                value !== null &&
-                ceiling !== null &&
-                clippedAt !== null &&
-                value > ceiling
-                  ? {
-                      value: clippedAt,
-                      symbol: "triangle",
-                      symbolSize: 14,
-                      label: {
-                        show: true,
-                        position: "top",
-                        formatter: "off scale",
-                      },
-                    }
-                  : marked(value, points[index].suspect, APPROVED_COLOR),
-              ),
-              lineStyle: { width: 2 },
-              symbolSize: 8,
-              markLine: breakLines(points, breaks),
-            },
-            ...processingTimeSeries.map((series) => ({
-              name: officialName(series),
-              type: "line",
-              data: points.map(
-                (point) => point.processingTimes[series.key] ?? null,
-              ),
-              lineStyle: { width: 2, type: "dashed" },
-              symbolSize: 8,
-            })),
-          ],
+                )}{" "}
+                decided)
+              </TooltipLine>
+              {processingTimeSeries.map((series, seriesIndex) => (
+                <TooltipLine
+                  key={series.key}
+                  series={officials[seriesIndex].series}
+                >
+                  {officialName(series)}:{" "}
+                  {formatMonths(point.processingTimes[series.key] ?? null)}
+                </TooltipLine>
+              ))}
+              {pointNotes(point).map((note) => (
+                <TooltipLine key={note}>{note}</TooltipLine>
+              ))}
+            </>
+          );
         }}
-      />
+      >
+        {(picked) => (
+          <>
+            <YAxis
+              ticks={y.ticks(4)}
+              y={y}
+              width={plotWidth}
+              format={String}
+              unit="months"
+              left={margin.left}
+            />
+            <XAxis ticks={ticks} y={plotHeight} width={plotWidth} />
+            <BreakLines
+              shown={shown}
+              xs={xs}
+              breaks={breaks}
+              plotWidth={plotWidth}
+              plotHeight={plotHeight}
+            />
+            {lines.map(({ series, values }) => (
+              <React.Fragment key={series.name}>
+                <LinePath<number | null>
+                  data={values}
+                  x={(_, index) => xs[index]}
+                  y={(value) => y(value ?? 0)}
+                  defined={(value) => value !== null}
+                  stroke={series.color}
+                  strokeWidth={2}
+                  strokeDasharray={
+                    series.mark === "dashed" ? DASHES : undefined
+                  }
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                  fill="none"
+                />
+                {[
+                  ...lonePoints(values),
+                  ...(picked === null ? [] : [picked]),
+                ].map((index, order) => {
+                  const value = values[index];
+                  return (
+                    value !== null && (
+                      <Dot
+                        key={order}
+                        x={xs[index]}
+                        y={y(value)}
+                        color={series.color}
+                      />
+                    )
+                  );
+                })}
+              </React.Fragment>
+            ))}
+            {shown.map((point, index) => {
+              const value = estimate.values[index];
+              if (value === null) return null;
+              if (offScale(index))
+                return (
+                  <g key={point.quarter}>
+                    <path
+                      d={`M${xs[index]},${y(value) - 7}L${xs[index] + 7},${
+                        y(value) + 6
+                      }L${xs[index] - 7},${y(value) + 6}Z`}
+                      fill={APPROVED_COLOR}
+                      stroke="#fff"
+                      strokeWidth={2}
+                    />
+                    <text
+                      className={ON_MARKS}
+                      x={xs[index]}
+                      y={y(value) - 12}
+                      textAnchor="middle"
+                    >
+                      off scale
+                    </text>
+                  </g>
+                );
+              return (
+                point.suspect && (
+                  <Diamond
+                    key={point.quarter}
+                    x={xs[index]}
+                    y={y(value)}
+                    color={APPROVED_COLOR}
+                  />
+                )
+              );
+            })}
+          </>
+        )}
+      </Plot>
       <figcaption>
         Time to clear backlog is the pending applications at the end of each
         quarter, divided by the decisions (approvals and denials) made per month

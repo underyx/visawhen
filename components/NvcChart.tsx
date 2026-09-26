@@ -2,29 +2,24 @@ import { NvcSeries } from "../api/nvc";
 import { addDays, daysBetween, formatShortDate } from "./Freshness";
 import { NVC_TIMEFRAMES_URL } from "./links";
 
-import * as echarts from "echarts/core";
-import { LineChart } from "echarts/charts";
-import {
-  AriaComponent,
-  TitleComponent,
-  TooltipComponent,
-  GridComponent,
-  DataZoomComponent,
-} from "echarts/components";
-import { SVGRenderer } from "echarts/renderers";
-import ReactEChartsCore from "echarts-for-react/lib/core";
-import { FONT_FAMILY } from "./font";
 import { Paper } from "@mantine/core";
-
-echarts.use([
-  AriaComponent,
-  DataZoomComponent,
-  TitleComponent,
-  TooltipComponent,
-  GridComponent,
-  LineChart,
-  SVGRenderer,
-]);
+import { curveMonotoneX } from "@visx/curve";
+import { scaleLinear, scaleUtc } from "@visx/scale";
+import { LinePath } from "@visx/shape";
+import { useState } from "react";
+import {
+  ChartHeader,
+  Dot,
+  formatDateTick,
+  lonePoints,
+  Plot,
+  RangeButtons,
+  thin,
+  TooltipLine,
+  useChartWidth,
+  XAxis,
+  YAxis,
+} from "./Chart";
 
 interface Props {
   series: NvcSeries;
@@ -38,11 +33,21 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
   timeZone: "UTC",
 });
 
+/** Mantine's blue.7: 4.2:1 against the white of the chart, where lines need
+ * 3:1 */
+const LINE_COLOR = "#1c7ed6";
+
 /** Readings further apart than this, three weeks, have several weeks with no
  * reading between them, which the chart shows as a break in the line instead
  * of joining the readings across it. Shorter gaps, a missing week or two, are
  * joined, as the caption says. */
 const MAX_GAP_DAYS = 21;
+
+/** How far back the chart goes at first: a year of weekly readings */
+const FIRST_DAYS = 365;
+
+const HEIGHT = 300;
+const MARGIN = { top: 28, right: 12, bottom: 28, left: 36 };
 
 /** A point of the line: [date, days], or [date, null] for a break in it */
 type Point = [string, number | null];
@@ -63,33 +68,21 @@ function chartPoints(series: NvcSeries): Point[] {
   return points;
 }
 
-interface TooltipParams {
-  /** The point under the cursor, as passed to the series */
-  data: Point;
-}
-
-function Tooltip([series]: TooltipParams[]) {
-  const [date, backlogDays] = series.data;
-  if (backlogDays === null) return "No readings for these weeks";
+function Tooltip({ point: [date, backlogDays] }: { point: Point }) {
+  if (backlogDays === null) return <>No readings for these weeks</>;
   // Date arithmetic on the ISO strings: date-fns would add days in the
   // visitor's time zone, and land on the wrong day across a DST change.
   const processingDate = addDays(date, -backlogDays);
-  const tooltip = document.createElement("div");
-  tooltip.appendChild(
-    document.createTextNode(
-      `${backlogDays} days of backlog on ${dateFormatter.format(
-        new Date(date),
-      )}`,
-    ),
+  return (
+    <>
+      <TooltipLine>
+        {backlogDays} days of backlog on {dateFormatter.format(new Date(date))}
+      </TooltipLine>
+      <TooltipLine>
+        (processed up to {dateFormatter.format(new Date(processingDate))})
+      </TooltipLine>
+    </>
   );
-  tooltip.appendChild(document.createElement("br"));
-  tooltip.appendChild(
-    document.createTextNode(
-      `(processed up to ${dateFormatter.format(new Date(processingDate))})`,
-    ),
-  );
-
-  return tooltip;
 }
 
 /** What the chart shows, in words, for screen readers: its span and the last
@@ -108,51 +101,98 @@ function describe(id: string, series: NvcSeries): string {
 }
 
 export default function NvcChart({ id, series }: Props) {
+  const [boxRef, width] = useChartWidth();
+  const [range, setRange] = useState(0);
+  const all = chartPoints(series);
+  const from = addDays(all[all.length - 1][0], -FIRST_DAYS);
+  const points = range === 0 ? all.filter(([date]) => date >= from) : all;
+  const plotWidth = width - MARGIN.left - MARGIN.right;
+  const plotHeight = HEIGHT - MARGIN.top - MARGIN.bottom;
+  const x = scaleUtc({
+    domain: [new Date(points[0][0]), new Date(points[points.length - 1][0])],
+    range: [0, plotWidth],
+  });
+  const y = scaleLinear({
+    domain: [0, Math.max(1, ...points.map(([, days]) => days ?? 0))],
+    range: [plotHeight, 0],
+    nice: true,
+  });
+  const xs = points.map(([date]) => x(new Date(date)));
+  const lone = lonePoints(points.map(([, days]) => days));
+  const ticks = x.ticks(Math.max(2, Math.floor(plotWidth / 48)));
   return (
     <Paper withBorder p="md" mx={0} component="figure">
-      <ReactEChartsCore
-        style={{
-          width: "100%",
-          height: "400px",
-        }}
-        echarts={echarts}
-        option={{
-          textStyle: { fontFamily: FONT_FAMILY },
-          animation: false,
-          aria: {
-            enabled: true,
-            label: { description: describe(id, series) },
-          },
-          tooltip: {
-            trigger: "axis",
-            formatter: Tooltip,
-          },
-          title: {
-            text: `Change in ${id} processing times`,
-            left: "center",
-          },
-          xAxis: {
-            type: "time",
-          },
-          yAxis: { type: "value", boundaryGap: [0, "100%"], name: "days" },
-          dataZoom: [
-            {
-              type: "slider",
-              // the last year of weekly data points
-              start: Math.max(0, 100 - 100 * (52 / Object.keys(series).length)),
-              end: 100,
-            },
-          ],
-          series: [
-            {
-              name: id,
-              type: "line",
-              smooth: true,
-              data: chartPoints(series),
-            },
-          ],
-        }}
+      <ChartHeader
+        title={`Change in ${id} processing times`}
+        range={
+          all[0][0] < from && (
+            <RangeButtons
+              labels={["Last year", "All years"]}
+              value={range}
+              onChange={setRange}
+            />
+          )
+        }
       />
+      <Plot
+        boxRef={boxRef}
+        width={width}
+        height={HEIGHT}
+        margin={MARGIN}
+        description={describe(id, series)}
+        xs={xs}
+        tooltip={(index) => <Tooltip point={points[index]} />}
+      >
+        {(picked) => (
+          <>
+            <YAxis
+              ticks={y.ticks(4)}
+              y={y}
+              width={plotWidth}
+              format={String}
+              unit="days"
+              left={MARGIN.left}
+            />
+            <XAxis
+              ticks={thin(
+                ticks.map((tick) => ({
+                  x: x(tick),
+                  label: formatDateTick(tick),
+                })),
+              )}
+              y={plotHeight}
+              width={plotWidth}
+            />
+            <LinePath<Point>
+              data={points}
+              x={([date]) => x(new Date(date))}
+              y={([, days]) => y(days ?? 0)}
+              defined={([, days]) => days !== null}
+              curve={curveMonotoneX}
+              stroke={LINE_COLOR}
+              strokeWidth={2}
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              fill="none"
+            />
+            {[...lone, ...(picked === null ? [] : [picked])].map(
+              (index, order) => {
+                const days = points[index][1];
+                return (
+                  days !== null && (
+                    <Dot
+                      key={order}
+                      x={xs[index]}
+                      y={y(days)}
+                      color={LINE_COLOR}
+                    />
+                  )
+                );
+              },
+            )}
+          </>
+        )}
+      </Plot>
       <figcaption>
         Source: <a href={NVC_TIMEFRAMES_URL}>NVC Timeframes page</a>
         .<br />

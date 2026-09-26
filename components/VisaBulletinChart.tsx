@@ -1,18 +1,26 @@
 import { Paper } from "@mantine/core";
-import ReactEChartsCore from "echarts-for-react/lib/core";
-import { LineChart } from "echarts/charts";
+import { curveStepAfter } from "@visx/curve";
+import { scaleUtc } from "@visx/scale";
+import { LinePath } from "@visx/shape";
+import React, { useState } from "react";
 import {
-  AriaComponent,
-  DataZoomComponent,
-  GridComponent,
-  LegendComponent,
-  TooltipComponent,
-} from "echarts/components";
-import * as echarts from "echarts/core";
-import { SVGRenderer } from "echarts/renderers";
-import { FONT_FAMILY } from "./font";
+  ChartHeader,
+  DASHES,
+  Dot,
+  formatDateTick,
+  lonePoints,
+  Plot,
+  RangeButtons,
+  Series as ChartSeries,
+  thin,
+  TooltipLine,
+  useChartWidth,
+  XAxis,
+  YAxis,
+} from "./Chart";
 import { VISA_BULLETIN_URL } from "./links";
 import {
+  addMonthsToMonth,
   CHARTS,
   ChartKey,
   formatBulletinMonth,
@@ -21,16 +29,6 @@ import {
   monthStart,
   Series,
 } from "./visaBulletin";
-
-echarts.use([
-  AriaComponent,
-  DataZoomComponent,
-  GridComponent,
-  LegendComponent,
-  TooltipComponent,
-  LineChart,
-  SVGRenderer,
-]);
 
 interface Props {
   /** The category's cutoffs in the area, per chart */
@@ -41,35 +39,55 @@ interface Props {
   label: string;
 }
 
-const DAY_MS = 24 * 60 * 60 * 1000;
+const KEYS = Object.keys(CHARTS) as ChartKey[];
 
-/** A point: [the bulletin's first day, its cutoff date or null when it is
- * "C" or "U", the cutoff as the bulletin gives it] */
-type Point = [string, string | null, string];
+/** The two charts' lines: the site's stamp violet and a lighter ink (ink.4,
+ * 4.2:1 on white), the second one dashed as well */
+const LINES: Record<ChartKey, ChartSeries> = {
+  finalAction: { name: CHARTS.finalAction, color: "#5b3a94", mark: "line" },
+  datesForFiling: {
+    name: CHARTS.datesForFiling,
+    color: "#677da6",
+    mark: "dashed",
+  },
+};
 
-function points(series: Series): Point[] {
-  return series.map(([month, cutoff]) => [
-    monthStart(month),
-    isDate(cutoff) ? cutoff : null,
-    cutoff,
-  ]);
+/** How many bulletins the "Last 5 years" button shows */
+const RECENT_MONTHS = 60;
+
+const HEIGHT = 340;
+const MARGIN = { top: 8, right: 12, bottom: 28, left: 64 };
+
+const tickMonthFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+/** A bulletin: its month, "2026-10", and each chart's cutoff in it, if the
+ * chart has the category and area that month */
+interface Bulletin {
+  month: string;
+  cutoffs: Partial<Record<ChartKey, string>>;
 }
 
-interface TooltipParams {
-  seriesName: string;
-  data: Point;
+/** Every month either chart has a cutoff for, oldest first */
+function bulletins(series: Record<ChartKey, Series>): Bulletin[] {
+  const byMonth = new Map<string, Bulletin>();
+  for (const key of KEYS)
+    for (const [month, cutoff] of series[key]) {
+      const bulletin = byMonth.get(month) ?? { month, cutoffs: {} };
+      bulletin.cutoffs[key] = cutoff;
+      byMonth.set(month, bulletin);
+    }
+  return [...byMonth.values()].sort((a, b) => a.month.localeCompare(b.month));
 }
 
-function tooltip(params: TooltipParams[]): string {
-  if (params.length === 0) return "";
-  const month = params[0].data[0].slice(0, 7);
-  const lines = params.map(
-    ({ seriesName, data }) => `${seriesName}: ${formatCutoff(data[2])}`,
-  );
-  // text only: the tooltip is set as HTML
-  return [`${formatBulletinMonth(month)} bulletin`, ...lines]
-    .map((line) => line.replace(/&/g, "&amp;").replace(/</g, "&lt;"))
-    .join("<br/>");
+/** A chart's cutoff in a bulletin as a date, or null when it has none: the
+ * category is "C" (current) or "U" (unavailable) or not in the chart */
+function cutoffDate(bulletin: Bulletin, key: ChartKey): Date | null {
+  const cutoff = bulletin.cutoffs[key];
+  return cutoff !== undefined && isDate(cutoff) ? new Date(cutoff) : null;
 }
 
 /** The chart in words, for screen readers: its span and the last 6
@@ -91,44 +109,143 @@ function describe(label: string, series: Series): string {
 }
 
 export default function VisaBulletinChart({ series, dataUrl, label }: Props) {
+  const [boxRef, width] = useChartWidth();
+  // every bulletin at first, which fits: about 12 a year since October 2015
+  const [range, setRange] = useState(1);
+  const all = bulletins(series);
+  const from = addMonthsToMonth(all[all.length - 1].month, -RECENT_MONTHS + 1);
+  const shown = range === 0 ? all.filter(({ month }) => month >= from) : all;
+  const plotWidth = width - MARGIN.left - MARGIN.right;
+  const plotHeight = HEIGHT - MARGIN.top - MARGIN.bottom;
+  const x = scaleUtc({
+    domain: [
+      new Date(monthStart(shown[0].month)),
+      new Date(monthStart(shown[shown.length - 1].month)),
+    ],
+    range: [0, plotWidth],
+  });
+  const xs = shown.map(({ month }) => x(new Date(monthStart(month))));
+  // the cutoffs shown, or all of them when none are: a category current
+  // for the last five years
+  const cutoffTimes = (bulletins: Bulletin[]) =>
+    bulletins.flatMap((bulletin) =>
+      KEYS.flatMap((key) => cutoffDate(bulletin, key)?.getTime() ?? []),
+    );
+  const times =
+    cutoffTimes(shown).length > 0 ? cutoffTimes(shown) : cutoffTimes(all);
+  const y = scaleUtc({
+    domain: [new Date(Math.min(...times)), new Date(Math.max(...times))],
+    range: [plotHeight, 0],
+    nice: true,
+  });
+  const yTicks = y.ticks(5);
+  const years = yTicks.every(
+    (tick) => tick.getUTCMonth() === 0 && tick.getUTCDate() === 1,
+  );
+  const xTicks = x.ticks(Math.max(2, Math.floor(plotWidth / 48)));
   return (
     <Paper withBorder p="md" mx={0} component="figure">
-      <ReactEChartsCore
-        style={{ width: "100%", height: "400px" }}
-        echarts={echarts}
-        option={{
-          textStyle: { fontFamily: FONT_FAMILY },
-          // the site's stamp violet and a lighter ink (ink.4, 4.2:1 on white)
-          color: ["#5b3a94", "#677da6"],
-          animation: false,
-          aria: {
-            enabled: true,
-            label: { description: describe(label, series.finalAction) },
-          },
-          legend: { top: 0 },
-          tooltip: { trigger: "axis", formatter: tooltip },
-          grid: { left: 8, right: 16, top: 40, containLabel: true },
-          xAxis: { type: "time" },
-          yAxis: {
-            type: "time",
-            scale: true,
-            // cutoffs are days: no ticks between them
-            minInterval: DAY_MS,
-            axisLabel: {
-              formatter: { year: "{yyyy}", month: "{MMM}", day: "{MMM} {d}" },
-            },
-          },
-          // every bulletin, which fits: about 12 a year since October 2015
-          dataZoom: [{ type: "slider", start: 0, end: 100 }],
-          series: (Object.keys(CHARTS) as ChartKey[]).map((chart) => ({
-            name: CHARTS[chart],
-            type: "line",
-            step: "end",
-            showSymbol: false,
-            data: points(series[chart]),
-          })),
-        }}
+      <ChartHeader
+        series={KEYS.map((key) => LINES[key])}
+        range={
+          all[0].month < from && (
+            <RangeButtons
+              labels={["Last 5 years", "All years"]}
+              value={range}
+              onChange={setRange}
+            />
+          )
+        }
       />
+      <Plot
+        boxRef={boxRef}
+        width={width}
+        height={HEIGHT}
+        margin={MARGIN}
+        description={describe(label, series.finalAction)}
+        xs={xs}
+        tooltip={(index) => (
+          <>
+            <strong>{formatBulletinMonth(shown[index].month)} bulletin</strong>
+            {KEYS.map((key) => {
+              const cutoff = shown[index].cutoffs[key];
+              return (
+                cutoff !== undefined && (
+                  <TooltipLine key={key} series={LINES[key]}>
+                    {CHARTS[key]}: {formatCutoff(cutoff)}
+                  </TooltipLine>
+                )
+              );
+            })}
+          </>
+        )}
+      >
+        {(picked) => (
+          <>
+            <YAxis
+              ticks={yTicks}
+              y={y}
+              width={plotWidth}
+              format={(tick) =>
+                years
+                  ? String(tick.getUTCFullYear())
+                  : tickMonthFormatter.format(tick)
+              }
+              left={MARGIN.left}
+            />
+            <XAxis
+              ticks={thin(
+                xTicks.map((tick) => ({
+                  x: x(tick),
+                  label: formatDateTick(tick),
+                })),
+              )}
+              y={plotHeight}
+              width={plotWidth}
+            />
+            {KEYS.map((key) => {
+              const cutoffs = shown.map((bulletin) =>
+                cutoffDate(bulletin, key),
+              );
+              const pickedCutoff = picked === null ? null : cutoffs[picked];
+              return (
+                <React.Fragment key={key}>
+                  <LinePath<Date | null>
+                    data={cutoffs}
+                    x={(_, index) => xs[index]}
+                    y={(cutoff) => y(cutoff ?? 0)}
+                    defined={(cutoff) => cutoff !== null}
+                    curve={curveStepAfter}
+                    stroke={LINES[key].color}
+                    strokeWidth={2}
+                    strokeDasharray={
+                      LINES[key].mark === "dashed" ? DASHES : undefined
+                    }
+                    fill="none"
+                  />
+                  {lonePoints(
+                    cutoffs.map((cutoff) => cutoff?.getTime() ?? null),
+                  ).map((index) => (
+                    <Dot
+                      key={index}
+                      x={xs[index]}
+                      y={y(cutoffs[index] ?? 0)}
+                      color={LINES[key].color}
+                    />
+                  ))}
+                  {picked !== null && pickedCutoff !== null && (
+                    <Dot
+                      x={xs[picked]}
+                      y={y(pickedCutoff)}
+                      color={LINES[key].color}
+                    />
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </>
+        )}
+      </Plot>
       <figcaption>
         Source: the State Department&rsquo;s{" "}
         <a href={VISA_BULLETIN_URL}>monthly Visa Bulletins</a>. Each line shows
