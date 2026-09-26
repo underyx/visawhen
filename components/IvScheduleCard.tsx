@@ -18,6 +18,7 @@ import {
   IV_POSTS_URL,
   VISA_BULLETIN_URL,
 } from "./links";
+import MoreDetails from "./MoreDetails";
 import { hasEnded, overridesUpdate, PolicyEntry } from "./policy";
 /** State updates the tool monthly, so an update older than this means we
  * have missed at least one. */
@@ -49,8 +50,8 @@ interface PreviousMonth {
   cutoff: string;
 }
 
-/** What the update before said, for the end of the sentence: " (December
- * 2025 in State’s previous update, of Apr 2, 2026)", with "; it has moved
+/** What the update before said, as a sentence of its own: " In the previous
+ * update, from Apr 2, 2026, it was December 2025.", with ", so it has moved
  * back" where the month went backwards, or "" when there was no previous
  * month, or it and the newest one both are current. */
 function describePrevious(
@@ -59,27 +60,26 @@ function describePrevious(
   previous: PreviousMonth | null,
 ): string {
   if (previous === null) return "";
-  const update = `State’s previous update, of ${formatShortDate(
-    previous.asOf,
-  )}`;
+  const update = `the previous update, from ${formatShortDate(previous.asOf)}`;
   const previousCurrent = monthsBehind(previous.asOf, previous.cutoff) <= 0;
   if (previousCurrent)
-    return current ? "" : `; ${update} listed these cases as current`;
-  if (previous.cutoff === cutoff) return `; the same month as in ${update}`;
-  return `; ${formatIvMonth(previous.cutoff)} in ${update}${
+    return current ? "" : ` In ${update}, these cases were current.`;
+  if (previous.cutoff === cutoff)
+    return ` It is the same month as in ${update}.`;
+  return ` In ${update}, it was ${formatIvMonth(previous.cutoff)}${
     cutoff < previous.cutoff ? ", so it has moved back" : ""
-  }`;
+  }.`;
 }
 
 /** "NVC is scheduling most interviews for cases that became documentarily
- * complete in December 2024; April 2025 in State’s previous update, of Apr
- * 2, 2026, so it has moved back." State's own words are the month "for which
- * NVC is scheduling most interviews", and the month can move backwards, so
- * the sentence neither drops "most" nor reads it as a wait. A current month
- * is said of the whole post only for the one line that stands for all three
- * categories, since a post can be current in one category and years behind
- * in another. With `dated`, the update's date goes in too, for text that is
- * read without the card around it. */
+ * complete in December 2024. In the previous update, from Apr 2, 2026, it
+ * was April 2025, so it has moved back." State's own words are the month
+ * "for which NVC is scheduling most interviews", and the month can move
+ * backwards, so the sentence neither drops "most" nor reads it as a wait. A
+ * current month is said of the whole post only for the one line that stands
+ * for all three categories, since a post can be current in one category and
+ * years behind in another. With `dated`, the update's date goes in too, for
+ * text that is read without the card around it. */
 function describeQueue(
   asOf: string,
   cutoff: string,
@@ -90,23 +90,23 @@ function describeQueue(
   const current = monthsBehind(asOf, cutoff) <= 0;
   const month = formatIvMonth(cutoff);
   const update = dated
-    ? `${current ? " in its" : ", in State’s"} update of ${formatShortDate(
-        asOf,
-      )}`
+    ? `${
+        current ? " in its" : ", in the State Department’s"
+      } update of ${formatShortDate(asOf)}`
     : "";
   const before = current
-    ? `State lists ${
+    ? `The State Department lists ${
         wholePost ? "this post" : "these cases"
       } as current (cases that became documentarily complete in `
     : "NVC is scheduling most interviews for cases that became documentarily complete in ";
   return {
     before,
     month,
-    after: `${current ? ")" : ""}${update}${describePrevious(
+    after: `${current ? ")" : ""}${update}.${describePrevious(
       cutoff,
       current,
       previous,
-    )}.`,
+    )}`,
     current,
   };
 }
@@ -181,7 +181,7 @@ export function describeRelativeQueue(
   );
   return `${postName} immigrant visas for spouses, children and parents of U.S. citizens: ${before}${month}${after}${
     current
-      ? " Current can also mean the post is not scheduling these cases; check the embassy’s website."
+      ? " Current can also mean the post is not scheduling these cases. Check the embassy’s website."
       : " The month is not a wait time, and it can move backwards."
   }`;
 }
@@ -196,7 +196,7 @@ interface LineProps {
 
 function QueueLine({ label, asOf, cutoff, previous, wholePost }: LineProps) {
   let text: React.ReactNode;
-  if (cutoff === null) text = "State lists no month (N/A).";
+  if (cutoff === null) text = "No month given (N/A).";
   else {
     const { before, month, after } = describeQueue(
       asOf,
@@ -276,16 +276,16 @@ function ElsewhereNote({
   return (
     <Alert role="note" color="orange">
       <Text size="sm">
-        State&rsquo;s{" "}
+        The State Department&rsquo;s{" "}
         <Anchor
           href={IV_POSTS_URL}
           target="_blank"
           rel="noopener noreferrer"
           inherit
         >
-          list of the embassies and consulates that process immigrant visas
+          list of embassies and consulates for immigrant visas
         </Anchor>{" "}
-        names{" "}
+        sends immigrant visa applicants from {country} to{" "}
         {posts.map(({ slug, name, only }, index) => (
           <React.Fragment key={slug}>
             {index > 0 && (index === posts.length - 1 ? " and " : ", ")}
@@ -296,22 +296,22 @@ function ElsewhereNote({
             </Anchor>
             {only !== undefined && ` (${only} only)`}
           </React.Fragment>
-        ))}{" "}
-        for {country}, not {postName}.
+        ))}
+        , not to {postName}.
         {alsoHub === true && (
           <>
             {" "}
-            State&rsquo;s{" "}
+            But a{" "}
             <Anchor
               href={AFRICA_HUBS_URL}
               target="_blank"
               rel="noopener noreferrer"
               inherit
             >
-              July 15, 2026 notice on realigning visa services in Africa
+              State Department notice of July 15, 2026
             </Anchor>{" "}
-            names {postName} as a regional visa hub, though; check the
-            embassy&rsquo;s own website, listed at{" "}
+            names {postName} as a regional visa hub. Check the embassy&rsquo;s
+            own website, listed at{" "}
             <Anchor
               href={EMBASSIES_URL}
               target="_blank"
@@ -340,14 +340,22 @@ function SuspensionNote({
 }) {
   return (
     <Alert role="note" color="orange">
-      <Text size="sm">
-        Most {applicants} applicants at {postName} are nationals of {country},
-        whose immigrant visas are suspended (&ldquo;{entry.title}&rdquo;,
-        above). NVC can still schedule their interviews, but State says
-        applicants subject to the suspension may be ineligible for a visa.
-        Exceptions include dual nationals applying with a passport of a
-        nationality not subject to a suspension.
-      </Text>
+      <Stack gap="xs">
+        <Text size="sm">
+          Most {applicants} applicants at {postName} are citizens of {country},
+          and immigrant visas for citizens of {country} are suspended. They can
+          still get an interview, but they may not get a visa.
+        </Text>
+        <MoreDetails>
+          <Text size="sm">
+            NVC can still schedule their interviews, but the State Department
+            says applicants covered by the suspension may not be eligible for a
+            visa. People with two nationalities who apply with the passport of a
+            country not covered are an exception. See &ldquo;
+            {entry.title}&rdquo; above.
+          </Text>
+        </MoreDetails>
+      </Stack>
     </Alert>
   );
 }
@@ -490,50 +498,52 @@ export default function IvScheduleCard({
         )}
         {stale && (
           <Alert color="yellow">
-            This is State&rsquo;s {updated} update, the newest we have;{" "}
-            {toolLink("check the tool")} for a newer one.
+            This is from the State Department&rsquo;s update of {updated}, the
+            newest we have. {toolLink("Check the tool")} for a newer one.
           </Alert>
         )}
         {schedule === null ? (
           <Text>
-            {postName} is not listed in State&rsquo;s interview-scheduling tool;
+            {postName} is not in the State Department&rsquo;s interview
+            scheduling tool.
             {overridden ? (
-              " see the notice above."
+              " See the notice above."
             ) : (
               <>
                 {" "}
-                it may not process immigrant visas. Check the embassy&rsquo;s
-                own website, listed at {embassiesLink}.
+                It may not handle immigrant visas. Check the embassy&rsquo;s own
+                website, listed at {embassiesLink}.
               </>
             )}
           </Text>
         ) : cutoffs.length === 0 ? (
           // State lists the post but gives N/A in every column, as for Kabul
           <Text>
-            State&rsquo;s tool lists {postName} but gives no month for any
-            category (N/A);
+            The State Department&rsquo;s tool lists {postName} but gives no
+            month for any category (N/A).
             {overridden ? (
-              " see the notice above."
+              " See the notice above."
             ) : (
               <>
                 {" "}
-                it may not be processing immigrant visas. Check the
+                It may not be handling immigrant visas. Check the
                 embassy&rsquo;s own website, listed at {embassiesLink}.
               </>
             )}
           </Text>
         ) : overridden ? (
           <Text>
-            State&rsquo;s tool still lists{" "}
+            The State Department&rsquo;s tool still shows{" "}
             {new Set(cutoffs).size === 1
-              ? `a month for ${postName}; don’t rely on it`
-              : `months for ${postName}; don’t rely on them`}
+              ? `a month for ${postName}. Do not rely on it`
+              : `months for ${postName}. Do not rely on them`}
             {overrideEnded && scheduleOverride.end !== null ? (
               <>
-                : its {updated} update predates the end of &ldquo;
-                {scheduleOverride.title}&rdquo; on{" "}
-                {formatShortDate(scheduleOverride.end)}. Wait for State&rsquo;s
-                next update.
+                {" "}
+                yet: the tool&rsquo;s update of {updated} is older than the end
+                of &ldquo;{scheduleOverride.title}&rdquo; on{" "}
+                {formatShortDate(scheduleOverride.end)}. Wait for the next
+                update.
               </>
             ) : (
               <>
@@ -567,35 +577,34 @@ export default function IvScheduleCard({
               ? "no"
               : `only ${formatCount(recentIssued.count)}`}{" "}
             family or employment immigrant{" "}
-            {recentIssued.count === 1 ? "visa" : "visas"}, the kinds this tool
-            covers, from {formatLongMonth(recentIssued.from)} to{" "}
-            {formatLongMonth(recentIssued.to)}, in State&rsquo;s monthly
-            figures. At a post that issues so few, &ldquo;current&rdquo; may
-            mean it schedules few of these interviews or none; check the
-            embassy&rsquo;s own website, listed at {embassiesLink}, before
-            relying on it.
+            {recentIssued.count === 1 ? "visa" : "visas"} from{" "}
+            {formatLongMonth(recentIssued.from)} to{" "}
+            {formatLongMonth(recentIssued.to)}, so &ldquo;current&rdquo; may
+            mean it schedules few of these interviews, or none. Check the
+            embassy&rsquo;s own website, listed at {embassiesLink}, before you
+            rely on it.
           </Text>
         ) : postCurrent ? (
           <Text size="sm">
-            A post listed as current may not be scheduling immigrant visas at
-            all; check the embassy&rsquo;s own website, listed at{" "}
-            {embassiesLink}.
+            &ldquo;Current&rdquo; can also mean the post is not scheduling
+            immigrant visa interviews at all. Check the embassy&rsquo;s own
+            website, listed at {embassiesLink}.
           </Text>
         ) : null}
         {someCurrent && !few && (
           <Text size="sm">
-            Where a category is listed as current, the post may not be
-            scheduling those cases at all; check the embassy&rsquo;s own
-            website, listed at {embassiesLink}.
+            &ldquo;Current&rdquo; can also mean the post is not scheduling those
+            cases at all. Check the embassy&rsquo;s own website, listed at{" "}
+            {embassiesLink}.
           </Text>
         )}
         {hasQueue && (
           <Text size="sm">
             Compare this with the month NVC told you your case was documentarily
-            complete. It is not a wait time: it is the month most interviews are
-            being scheduled for, and it can move backwards from one of
-            State&rsquo;s updates to the next. Preference and employment cases
-            also need a current priority date in the{" "}
+            complete, which means NVC accepted all your documents. It is not a
+            wait time: it is the month most interviews are being scheduled for
+            now, and it can move backwards. Family preference and employment
+            cases also need a current priority date in the{" "}
             <Anchor
               href={VISA_BULLETIN_URL}
               target="_blank"
@@ -609,7 +618,7 @@ export default function IvScheduleCard({
         )}
         <Text size="sm" c="dimmed">
           {hasQueue &&
-            "State says it cannot predict exactly when a case will be scheduled. "}
+            "The State Department says it cannot predict exactly when a case will be scheduled. "}
           Source: {toolLink("State Department IV Scheduling Status Tool")},
           updated {updated}.
         </Text>

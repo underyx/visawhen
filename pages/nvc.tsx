@@ -14,6 +14,7 @@ import {
   formatDate,
   useToday,
 } from "../components/Freshness";
+import MoreDetails from "../components/MoreDetails";
 import PolicyBanner from "../components/PolicyBanner";
 import {
   front,
@@ -78,15 +79,14 @@ function SeriesAgeNotice({
   return (
     <Alert color="yellow" role="note">
       Our newest {what} time is from {formatDate(date)},{" "}
-      {daysBetween(date, today)} days ago, although we have newer readings of
-      NVC&rsquo;s other timeframes. It may be out of date. See{" "}
+      {daysBetween(date, today)} days ago, so it may be out of date. See{" "}
       <Anchor
         href={NVC_TIMEFRAMES_URL}
         target="_blank"
         rel="noopener noreferrer"
         inherit
       >
-        today&rsquo;s on NVC&rsquo;s own page
+        today&rsquo;s time on NVC&rsquo;s website
       </Anchor>
       .
     </Alert>
@@ -100,11 +100,20 @@ function StallNotice({ series, what }: { series: NvcSeries; what: string }) {
   const [, lastDays] = getLatestReading(series);
   return (
     <Alert color="yellow" role="note">
-      NVC&rsquo;s {what} has barely moved: on {formatDate(stall.from[0])} it had
-      reached those submitted on {formatDate(front(stall.from))}, and on{" "}
-      {formatDate(stall.to[0])} those submitted on {formatDate(front(stall.to))}
-      . While it stays stuck, the {lastDays} days grow every week, and anything
-      submitted now may take longer than that.
+      <Stack gap="xs">
+        <Text inherit>
+          NVC&rsquo;s {what} has almost stopped moving. Anything you submit now
+          may take longer than {lastDays} days.
+        </Text>
+        <MoreDetails>
+          <Text size="sm">
+            On {formatDate(stall.from[0])}, NVC had reached those submitted on{" "}
+            {formatDate(front(stall.from))}. On {formatDate(stall.to[0])}, it
+            had reached those submitted on {formatDate(front(stall.to))}. While
+            it stays stuck, the wait grows every week.
+          </Text>
+        </MoreDetails>
+      </Stack>
     </Alert>
   );
 }
@@ -124,27 +133,27 @@ function RangeBasis({ range }: { range: ReviewRange }) {
     pace !== null && Math.abs(daysBetween(range.queueDate, pace.date)) > 7;
   return (
     <>
-      At NVC&rsquo;s newest review time, {latestDays} days on{" "}
-      {formatDate(latestDate)}, it would reach them around{" "}
-      {formatDate(range.queueDate)}.
+      NVC&rsquo;s newest review time was {latestDays} days, on{" "}
+      {formatDate(latestDate)}. If it stays the same, NVC would reach them
+      around {formatDate(range.queueDate)}.
       {pace !== null && paceApart && (
         <>
           {" "}
           But its queue has been{" "}
-          {pace.date > range.queueDate ? "growing" : "shrinking"}: between{" "}
-          {formatDate(pace.from[0])} and {formatDate(latestDate)} it moved from
-          documents submitted on {formatDate(front(pace.from))} to those
-          submitted on {formatDate(front(range.latest))},{" "}
-          {daysBetween(front(pace.from), front(range.latest))} days&rsquo; worth
-          in {daysBetween(pace.from[0], latestDate)} days. At that pace, it
+          {pace.date > range.queueDate ? "growing" : "shrinking"}. From{" "}
+          {formatDate(pace.from[0])} to {formatDate(latestDate)}, it moved from
+          documents submitted on {formatDate(front(pace.from))} to documents
+          submitted on {formatDate(front(range.latest))}:{" "}
+          {daysBetween(front(pace.from), front(range.latest))} days of documents
+          in {daysBetween(pace.from[0], latestDate)} days. At that speed, it
           would reach them around {formatDate(pace.date)}.
         </>
       )}
       {range.burstDays !== null && (
         <>
           {" "}
-          NVC has lately moved in bursts and pauses, so the range also reaches
-          to its longest review time of the last six weeks, {
+          Lately NVC has moved in bursts and pauses, so the range also goes up
+          to its longest review time of the last six weeks: {
             range.burstDays
           }{" "}
           days.
@@ -152,22 +161,22 @@ function RangeBasis({ range }: { range: ReviewRange }) {
       )}{" "}
       {range.gap !== null ? (
         <>
-          We have no readings of NVC&rsquo;s page between{" "}
+          We have no data from NVC&rsquo;s page between{" "}
           {formatDate(range.gap[0])} and {formatDate(range.gap[1])}, so we
-          cannot tell whether NVC moved evenly in between or in bursts and
-          pauses, as it did in June 2026: take this range as rougher than usual.
+          cannot tell if NVC moved steadily or in bursts and pauses, as it did
+          in June 2026.
         </>
       ) : range.growing ? (
         <>
-          Checked against NVC&rsquo;s own timeframes since November 2020, more
-          than 9 reviews in 10 landed in a range worked out like this, but while
-          the queue was growing, as it is now, only about 4 in 5 did, and the
-          rest came sooner.
+          We tested this method on NVC&rsquo;s timeframes since November 2020:
+          more than 9 reviews in 10 fell inside the range. But when the queue
+          was growing, as it is now, only about 4 in 5 did, and the rest came
+          sooner.
         </>
       ) : (
         <>
-          Checked against NVC&rsquo;s own timeframes since November 2020, more
-          than 9 reviews in 10 landed in a range worked out like this.
+          We tested this method on NVC&rsquo;s timeframes since November 2020:
+          more than 9 reviews in 10 fell inside the range.
         </>
       )}
     </>
@@ -191,6 +200,9 @@ function ReviewEstimate({ today, series }: ReviewEstimateProps) {
     ? `Documents submitted on ${formatDate(from)}`
     : "Documents submitted today";
   let text: React.ReactNode;
+  // the range whose basis goes under "How we worked this out", if the text
+  // gives one
+  let shownRange: ReviewRange | null = null;
   if (valid && from <= reached)
     text = (
       <>
@@ -211,31 +223,47 @@ function ReviewEstimate({ today, series }: ReviewEstimateProps) {
   // The range can start before today, by when NVC may or may not have
   // reached documents submitted a while ago: no bound shown is before today,
   // which is after the submission date too.
-  else if (range.lower < today)
+  else if (range.lower < today) {
+    shownRange = range;
     text = (
       <>
         {what}: NVC{" "}
         {valid && from < today
           ? "may already have reviewed them, and will most likely have"
           : "will most likely review them"}{" "}
-        by <strong>{formatDate(range.upper)}</strong>.{" "}
-        <RangeBasis range={range} />
+        by <strong>{formatDate(range.upper)}</strong>.
       </>
     );
-  else
+  } else {
+    shownRange = range;
     text = (
       <>
         {what}: NVC will most likely review them between{" "}
         <strong>{formatDate(range.lower)}</strong> and{" "}
-        <strong>{formatDate(range.upper)}</strong>. <RangeBasis range={range} />
+        <strong>{formatDate(range.upper)}</strong>.
       </>
     );
+  }
   return (
     <Stack gap="xs">
-      <Text>{text}</Text>
+      <Text>
+        {text}
+        {shownRange !== null && shownRange.gap !== null && (
+          <>
+            {" "}
+            This range is less exact than usual, because some data is missing.
+          </>
+        )}
+      </Text>
+      {shownRange !== null && (
+        <MoreDetails label="How we worked this out">
+          <Text size="sm">
+            <RangeBasis range={shownRange} />
+          </Text>
+        </MoreDetails>
+      )}
       <Text size="sm">
-        A review can end in a request for corrections. You then correct your
-        documents and submit them again, which puts your case{" "}
+        If NVC asks you to correct your documents, your case goes back{" "}
         <Anchor
           href="https://travel.state.gov/content/travel/en/us-visas/immigrate/the-immigrant-visa-process/step-8-scan-collected-documents/step-9-upload-and-submit-scanned-documents.html"
           target="_blank"
@@ -244,7 +272,7 @@ function ReviewEstimate({ today, series }: ReviewEstimateProps) {
         >
           in line for review
         </Anchor>{" "}
-        again, so enter the date you last submitted them.
+        when you submit them again. So enter the date you last submitted them.
       </Text>
       <TextInput
         type="date"
@@ -342,16 +370,16 @@ export default function NvcBacklog({ data }: Props) {
         <PolicyBanner page="/nvc" />
         {stale && (
           <Alert color="yellow">
-            Our newest reading is from {formatDate(latestDate)}, {ageDays} days
-            ago, although NVC usually updates its timeframes every week. NVC may
-            be faster or slower today. See{" "}
+            Our newest data is from {formatDate(latestDate)}, {ageDays} days
+            ago, but NVC usually updates every week, so it may be faster or
+            slower now. See{" "}
             <Anchor
               href={NVC_TIMEFRAMES_URL}
               target="_blank"
               rel="noopener noreferrer"
               inherit
             >
-              today&rsquo;s timeframes on NVC&rsquo;s own page
+              today&rsquo;s times on NVC&rsquo;s website
             </Anchor>
             .
           </Alert>

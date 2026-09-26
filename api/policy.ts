@@ -16,6 +16,12 @@ import {
  * re-check. */
 const MAX_OPEN_ENDED = 8;
 
+/** A summary longer than this, in words or sentences, is more than the
+ * one or two short sentences a visitor reads before deciding whether to open
+ * the details. */
+const MAX_SUMMARY_WORDS = 45;
+const MAX_SUMMARY_SENTENCES = 2;
+
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 /** A calendar day that exists: "2026-02-28", but not "2026-02-30", which
@@ -47,6 +53,7 @@ function problemsWith(entry: Record<string, unknown>): string[] {
       'status must be "official" or "reported"',
     ],
     [isText(entry.title), "title must be a non-empty string"],
+    [isText(entry.summary), "summary must be a non-empty string"],
     [isText(entry.body), "body must be a non-empty string"],
     [
       (scope.posts === undefined || isTextList(scope.posts)) &&
@@ -211,8 +218,26 @@ export function checkPolicies({
     ),
   ]);
 
-  // A warning, not an error: failing the build would also hold back the
+  // Warnings, not errors: failing the build would also hold back the
   // scheduled data deploys.
+  const longSummaries = POLICY_ENTRIES.filter(({ summary }) => {
+    const words = summary.split(/\s+/).filter(Boolean).length;
+    // "U.S." ends no sentence.
+    const sentences = summary
+      .replaceAll("U.S.", "US")
+      .split(/[.!?](?:\s|$)/)
+      .filter((sentence) => sentence.trim() !== "").length;
+    return words > MAX_SUMMARY_WORDS || sentences > MAX_SUMMARY_SENTENCES;
+  });
+  if (longSummaries.length > 0)
+    console.warn(
+      `data/policy.json has summaries longer than ${MAX_SUMMARY_SENTENCES} sentences or ${MAX_SUMMARY_WORDS} words (${longSummaries
+        .map((entry) => entry.id)
+        .join(
+          ", ",
+        )}); keep each to one or two short sentences of plain English, and move the rest to the body.`,
+    );
+
   const openEnded = policyData.entries.filter((entry) => entry.end === null);
   if (openEnded.length > MAX_OPEN_ENDED)
     console.warn(
