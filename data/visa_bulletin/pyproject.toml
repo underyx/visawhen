@@ -1,0 +1,16 @@
+[project]
+name = "visa-bulletin"
+version = "0.1.0"
+description = ""
+authors = [{ name = "Bence Nagy", email = "bence@underyx.me" }]
+license = "MIT"
+requires-python = ">=3.11"
+dependencies = [
+  "beautifulsoup4>=4.15.0,<5",
+  "lxml>=6.1.2,<7",
+  "requests>=2.34.2,<3",
+  "types-requests>=2.33.0.20260712,<3",
+]
+
+[tool.ruff]
+extend = "../../.ruff.toml"
