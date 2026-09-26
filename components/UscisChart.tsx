@@ -10,6 +10,7 @@ import {
 } from "echarts/components";
 import { SVGRenderer } from "echarts/renderers";
 import ReactEChartsCore from "echarts-for-react/lib/core";
+import { FONT_FAMILY } from "./font";
 import { Paper } from "@mantine/core";
 import numeral from "numeral";
 import {
@@ -209,11 +210,12 @@ export function OutcomesChart({
 }: Props & { source: string; sourceName: string }) {
   const suspects = points.some(({ suspect }) => suspect);
   return (
-    <Paper shadow="xs" p="md" mx={0} component="figure">
+    <Paper withBorder p="md" mx={0} component="figure">
       <ReactEChartsCore
         style={{ width: "100%", height: "440px" }}
         echarts={echarts}
         option={{
+          textStyle: { fontFamily: FONT_FAMILY },
           animation: false,
           color: [APPROVED_COLOR, DENIED_COLOR, PENDING_COLOR, RECEIVED_COLOR],
           aria: {
@@ -394,11 +396,12 @@ export function WaitChart({
     ({ suspect, waitMonths }) => suspect && waitMonths !== null,
   );
   return (
-    <Paper shadow="xs" p="md" mx={0} component="figure">
+    <Paper withBorder p="md" mx={0} component="figure">
       <ReactEChartsCore
         style={{ width: "100%", height: "360px" }}
         echarts={echarts}
         option={{
+          textStyle: { fontFamily: FONT_FAMILY },
           animation: false,
           color: [APPROVED_COLOR, ...EXTRA_COLORS],
           aria: {

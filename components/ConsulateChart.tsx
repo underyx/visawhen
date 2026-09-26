@@ -15,6 +15,7 @@ import {
 } from "echarts/components";
 import { SVGRenderer } from "echarts/renderers";
 import ReactEChartsCore from "echarts-for-react/lib/core";
+import { FONT_FAMILY } from "./font";
 import { Paper } from "@mantine/core";
 
 echarts.use([
@@ -69,11 +70,12 @@ export default function ConsulateChart({
 }: Props) {
   const source = SOURCES[visaType];
   return (
-    <Paper shadow="xs" p="md" mx={0} component="figure">
+    <Paper withBorder p="md" mx={0} component="figure">
       <ReactEChartsCore
         style={{ height: "600px" }}
         echarts={echarts}
         option={{
+          textStyle: { fontFamily: FONT_FAMILY },
           dataset: {
             source: [
               ["month", SERIES_NAME],

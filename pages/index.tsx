@@ -1,12 +1,4 @@
-import {
-  Anchor,
-  Card,
-  List,
-  SimpleGrid,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
+import { Anchor, Text, Title } from "@mantine/core";
 import Head from "next/head";
 import Link from "next/link";
 import React from "react";
@@ -16,6 +8,7 @@ import {
   I751_URL,
   VISA_BULLETIN_URL,
 } from "../components/links";
+import classes from "../components/Home.module.css";
 
 /** USCIS's page saying, each month, which Visa Bulletin chart decides who
  * may file an I-485 in each preference category */
@@ -77,6 +70,8 @@ function I751Timing() {
 }
 
 interface PathProps {
+  /** The anchor the index at the top of the page links to */
+  id: string;
   title: string;
   /** Who the path is for, in a sentence */
   who: React.ReactNode;
@@ -86,25 +81,34 @@ interface PathProps {
 
 /** One common route through the process, as its steps in order, each
  * linking to the page with its numbers. */
-function Path({ title, who, steps }: PathProps) {
+function Path({ id, title, who, steps }: PathProps) {
   return (
-    <Card withBorder radius="md" p="md">
-      <Stack gap="xs">
-        <Title order={2} size="h4">
-          {title}
-        </Title>
-        <Text size="sm" c="dimmed">
-          {who}
-        </Text>
-        <List type="ordered" spacing={6}>
-          {steps.map((step, index) => (
-            <List.Item key={index}>{step}</List.Item>
-          ))}
-        </List>
-      </Stack>
-    </Card>
+    <section className={classes.path} id={id} aria-labelledby={`${id}-title`}>
+      <Title order={2} className={classes.pathTitle} id={`${id}-title`}>
+        {title}
+      </Title>
+      <Text className={classes.who}>{who}</Text>
+      <ol className={classes.steps}>
+        {steps.map((step, index) => (
+          <li key={index} className={classes.step}>
+            {step}
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }
+
+/** The paths, in the order the page lists them, for the index at its top */
+const PATHS = [
+  { id: "spouse-abroad", label: "Spouse, parent or child, abroad" },
+  { id: "spouse-in-us", label: "Spouse, in the US" },
+  { id: "fiance", label: "Fiancé(e)" },
+  { id: "citizenship", label: "Citizenship" },
+  { id: "employment", label: "Employment" },
+  { id: "other-family", label: "Other family" },
+  { id: "temporary", label: "Visitor, student or work visa" },
+];
 
 const TITLE = "US visa and green card wait times";
 const DESCRIPTION =
@@ -112,7 +116,7 @@ const DESCRIPTION =
 
 export default function Home() {
   return (
-    <Stack>
+    <>
       <Head>
         <title>{TITLE}</title>
         <meta name="description" content={DESCRIPTION} />
@@ -121,15 +125,27 @@ export default function Home() {
         <meta property="og:description" content={DESCRIPTION} />
         <meta property="og:url" content="https://visawhen.com" />
       </Head>
-      <Title order={1} size="h2">
-        How long each step of your US immigration case is taking
-      </Title>
-      <Text size="lg">
-        Pick the path that matches your case. Each step links to the numbers for
-        it, with their source and how recent they are.
-      </Text>
-      <SimpleGrid cols={{ base: 1, md: 2 }} spacing={{ base: "sm", sm: "md" }}>
+      <header className={classes.hero}>
+        <Title order={1} className={classes.title}>
+          How long each step of your US immigration case is taking
+        </Title>
+        <Text className={classes.lead}>
+          Pick the path that matches your case. Each step links to the numbers
+          for it, with their source and how recent they are.
+        </Text>
+        <nav aria-label="Paths">
+          <ul className={classes.index}>
+            {PATHS.map(({ id, label }) => (
+              <li key={id}>
+                <a href={`#${id}`}>{label}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </header>
+      <div className={classes.paths}>
         <Path
+          id="spouse-abroad"
           title="Spouse, parent or child of a US citizen, living abroad"
           who="Immediate relatives who immigrate through a US embassy or consulate (IR and CR visas)."
           steps={[
@@ -155,6 +171,7 @@ export default function Home() {
           ]}
         />
         <Path
+          id="spouse-in-us"
           title="Spouse of a US citizen, living in the US"
           who={
             <>
@@ -186,6 +203,7 @@ export default function Home() {
           ]}
         />
         <Path
+          id="fiance"
           title="Fiancé(e) of a US citizen"
           who="Coming to the US on a K-1 visa to marry within 90 days."
           steps={[
@@ -214,6 +232,7 @@ export default function Home() {
           ]}
         />
         <Path
+          id="citizenship"
           title="Becoming a US citizen"
           who="Naturalization for green card holders."
           steps={[
@@ -224,6 +243,7 @@ export default function Home() {
           ]}
         />
         <Path
+          id="employment"
           title="Employment-based green card"
           who="EB-1, EB-2 and EB-3, sponsored by an employer or self-petitioned."
           steps={[
@@ -251,6 +271,7 @@ export default function Home() {
           ]}
         />
         <Path
+          id="other-family"
           title="Other family: siblings, adult children, relatives of green card holders"
           who="The family preference categories (F1, F2A, F2B, F3 and F4)."
           steps={[
@@ -271,6 +292,7 @@ export default function Home() {
           ]}
         />
         <Path
+          id="temporary"
           title="Visitor, student or temporary work visa"
           who="B, F, J, H, L, O and other nonimmigrant visas."
           steps={[
@@ -296,12 +318,12 @@ export default function Home() {
             </>,
           ]}
         />
-      </SimpleGrid>
-      <Text size="sm" c="dimmed">
+      </div>
+      <Text size="sm" c="dimmed" className={classes.footnote}>
         These are the common routes, not legal advice: an immigration lawyer or
         accredited representative can tell you which one is yours and whether
         you qualify.
       </Text>
-    </Stack>
+    </>
   );
 }
