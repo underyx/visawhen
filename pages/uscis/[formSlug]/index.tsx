@@ -58,6 +58,7 @@ import {
 } from "../../../components/uscis";
 import { OutcomesChart, WaitChart } from "../../../components/UscisChart";
 import UscisStats, { RangeText } from "../../../components/UscisStats";
+import PolicyBanner from "../../../components/PolicyBanner";
 import { ListRow, ListRows } from "../../../components/ListRow";
 import { normalize } from "../../../components/search";
 import SearchStatus from "../../../components/SearchStatus";
@@ -392,6 +393,7 @@ export default function UscisForm({
             · {title}
           </Text>
         </Title>
+        <PolicyBanner page={`/uscis/${slug}`} />
         {views.length > 1 && (
           <Stack gap={6}>
             <Chip.Group
