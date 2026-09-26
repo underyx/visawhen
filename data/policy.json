@@ -333,6 +333,37 @@
         }
       ],
       "lastChecked": "2026-09-25"
+    },
+    {
+      "id": "uscis-public-charge-2026",
+      "status": "official",
+      "title": "New public charge rules for green card applications filed from September 18, 2026",
+      "body": "DHS rescinded its 2022 public charge rule, and USCIS's new guidance applies to every Form I-485 postmarked or submitted electronically on or after September 18, 2026. For those applications, USCIS can consider any means-tested public benefits received on or after that date; for benefits received before it, only public cash assistance for income maintenance and long-term institutionalization at the government's expense. Applications filed from December 23, 2022 to September 17, 2026 are decided under the 2022 rule. States and cities have sued to stop the new rule; it is in effect while the lawsuits proceed. If you or your family receive public benefits, talk to an immigration lawyer or accredited representative before filing.",
+      "scope": {
+        "pages": ["/uscis/i-485"]
+      },
+      "expanded": true,
+      "start": "2026-09-18",
+      "end": null,
+      "sources": [
+        {
+          "label": "USCIS: USCIS Issues Guidance on Making Public Charge Inadmissibility Determination (Aug 18, 2026)",
+          "url": "https://www.uscis.gov/newsroom/alerts/uscis-issues-guidance-on-making-public-charge-inadmissibility-determination"
+        },
+        {
+          "label": "USCIS Policy Manual, Volume 8, Part G: Public Charge Ground of Inadmissibility",
+          "url": "https://www.uscis.gov/policy-manual/volume-8-part-g"
+        },
+        {
+          "label": "Federal Register: Public Charge Ground of Inadmissibility (Jul 20, 2026)",
+          "url": "https://www.federalregister.gov/documents/2026/07/20/2026-14539/public-charge-ground-of-inadmissibility"
+        },
+        {
+          "label": "JURIST: Two lawsuits challenge the revised public charge rule",
+          "url": "https://www.jurist.org/news/2026/09/two-separate-lawsuits-challenge-trump-administrations-revised-public-charge-rule-for-immigrants/"
+        }
+      ],
+      "lastChecked": "2026-09-26"
     }
   ]
 }
