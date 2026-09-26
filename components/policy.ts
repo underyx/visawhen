@@ -108,7 +108,7 @@ export const POLICY_ENTRIES = policyData.entries as PolicyEntry[];
 
 /** The pages other than the consulate pages that show notices, the only
  * values `scope.pages` may take (the build checks it, see api/policy.ts) */
-export const POLICY_PAGES = ["/nvc"];
+export const POLICY_PAGES = ["/nvc", "/uscis/i-485"];
 
 /** A consulate page an entry may be shown on: a post's own page, or one of
  * its visa class pages */

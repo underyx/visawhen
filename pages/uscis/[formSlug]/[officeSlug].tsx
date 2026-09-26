@@ -60,6 +60,7 @@ import {
 } from "../../../components/uscis";
 import { OutcomesChart, WaitChart } from "../../../components/UscisChart";
 import UscisStats, { RangeText } from "../../../components/UscisStats";
+import PolicyBanner from "../../../components/PolicyBanner";
 
 /** How the field offices' piles compare with the national range, where they
  * are much longer than it suggests (fieldOfficeCaveat). */
@@ -590,6 +591,7 @@ export default function UscisOffice({
         <Title order={1}>
           {form} processing at {fullName}
         </Title>
+        <PolicyBanner page={`/uscis/${formSlug}`} />
         {views.length > 1 && (
           <Stack gap={6}>
             <Chip.Group
