@@ -32,6 +32,20 @@ export const GLOBAL_VISA_WAIT_TIMES_URL =
 /** The list of U.S. embassies' and consulates' own websites */
 export const EMBASSIES_URL = "https://www.usembassy.gov/";
 
+/** USCIS's page for Form I-751, Petition to Remove Conditions on
+ * Residence */
+export const I751_URL = "https://www.uscis.gov/i-751";
+
+/** State's List of U.S. Embassies and Consulates that Process Immigrant
+ * Visas */
+export const IV_POSTS_URL =
+  "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/list-of-posts.html";
+
+/** State's notice of July 15, 2026, Realignment of U.S. Visa Services in
+ * Africa to Regional Hubs */
+export const AFRICA_HUBS_URL =
+  "https://travel.state.gov/content/travel/en/News/visas-news/realignment-of-us-visa-services-in-africa-to-regional-hubs.html";
+
 /** State's listings of the monthly issuance reports the consulate pages count
  * visas from, for immigrant and nonimmigrant visas */
 export const ISSUANCE_STATISTICS_URLS = {

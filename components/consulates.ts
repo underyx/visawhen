@@ -84,9 +84,8 @@ function findInactivity({
   if (quiet(lastIssued)) return { visas: "visas", lastIssued };
   if (
     immigrant &&
-    !listedInTool &&
-    lastImmigrantIssued !== null &&
-    quiet(lastImmigrantIssued)
+    quiet(lastImmigrantIssued) &&
+    (lastImmigrantIssued !== null || listedInTool)
   )
     return { visas: "immigrant visas", lastIssued: lastImmigrantIssued };
   return null;
@@ -95,11 +94,13 @@ function findInactivity({
 /** For a post that looks closed, a sentence that says what the data shows:
  * that it issued no visas in the last 12 months of the data, whatever else
  * lists it, or, with `immigrant` (its own page and its immigrant visa class
- * pages), that it issued immigrant visas but none in the last 12 months,
- * when State's IV Scheduling Status Tool, which is months newer, does not
- * list it either. Null for every other post, including those that issued
- * other visas but never an immigrant one in the data: they handle
- * nonimmigrant visas only, which the interview-queue card already says. */
+ * pages), that it issued no immigrant visas in the last 12 months, even
+ * when State's IV Scheduling Status Tool lists it, often as current:
+ * Nicosia, none since November 2024, and Vancouver, none at all in the
+ * data. Null for every other post, including those that issued other visas
+ * but never an immigrant one in the data and that the tool does not list:
+ * they handle nonimmigrant visas only, which the interview-queue card
+ * already says. */
 export function describeInactivity(input: InactivityInput): string | null {
   const inactivity = findInactivity(input);
   if (inactivity === null) return null;
@@ -128,6 +129,319 @@ export function summarizeInactivity(input: InactivityInput): string | null {
     : `no ${visas} issued since ${formatLongMonth(lastIssued)}`;
 }
 
+/** Visa classes whose applicants at a post are mostly nationals of another
+ * country than the one the post is in, by post slug, then class slug. SQ and
+ * SI visas are for Iraqis and Afghans only (see their descriptions), and
+ * State's list of the posts that process immigrant visas designates
+ * Islamabad for Afghanistan
+ * (https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/list-of-posts.html). */
+export const CLASS_APPLICANT_COUNTRIES: Partial<
+  Record<string, Partial<Record<string, string>>>
+> = {
+  islamabad: { sq: "Afghanistan", si: "Afghanistan" },
+};
+
+/** A post whose country State's list of the embassies and consulates that
+ * process immigrant visas (IV_POSTS_URL in links.ts) sends to another post:
+ * "Haiti - Port-au-Prince - See Bahamas - Nassau". */
+export interface IvPostElsewhere {
+  /** The country as a sentence names it: "Haiti", "the Netherlands" */
+  country: string;
+  /** The posts the list names for it, in its order, with the cases a post
+   * is named for only, as the list gives them ("IR-5") */
+  posts: { slug: string; name: string; only?: string }[];
+  /** Whether State's notice of July 15, 2026 (AFRICA_HUBS_URL in links.ts)
+   * names the post itself as a regional visa hub, which the list
+   * contradicts */
+  alsoHub?: boolean;
+}
+
+/** When IV_POSTS_ELSEWHERE was last checked against State's list */
+export const IV_POSTS_ELSEWHERE_CHECKED = "2026-09-25";
+
+/** The posts, by slug, whose country State's list of the embassies and
+ * consulates that process immigrant visas sends to another post, as of
+ * IV_POSTS_ELSEWHERE_CHECKED. State designates the other post for the
+ * country's immigrant visa applicants, so the post's page must not say that
+ * most of its applicants are the country's nationals (whose visas may be
+ * suspended), and State's IV Scheduling Status Tool can list the post as
+ * current all the same: Amsterdam, Nicosia and Zagreb are. Only posts the
+ * site has a page for; a country the list gives no post of its own
+ * ("Afghanistan - See Pakistan - Islamabad") stands for every post in it.
+ * Kampala, Lome, Malabo and Port Louis are also named as regional hubs in
+ * State's July 15 realignment notice (`alsoHub`). */
+export const IV_POSTS_ELSEWHERE: Partial<Record<string, IvPostElsewhere>> = {
+  amsterdam: {
+    country: "the Netherlands",
+    posts: [{ slug: "frankfurt", name: "Frankfurt" }],
+  },
+  antananarivo: {
+    country: "Madagascar",
+    posts: [{ slug: "johannesburg", name: "Johannesburg" }],
+  },
+  apia: { country: "Samoa", posts: [{ slug: "auckland", name: "Auckland" }] },
+  asmara: { country: "Eritrea", posts: [{ slug: "nairobi", name: "Nairobi" }] },
+  baku: {
+    country: "Azerbaijan",
+    posts: [{ slug: "tbilisi", name: "Tbilisi" }],
+  },
+  bamako: { country: "Mali", posts: [{ slug: "dakar", name: "Dakar" }] },
+  "bandar-seri-begawan": {
+    country: "Brunei",
+    posts: [
+      { slug: "kuala-lumpur", name: "Kuala Lumpur" },
+      { slug: "singapore", name: "Singapore" },
+    ],
+  },
+  banjul: { country: "The Gambia", posts: [{ slug: "dakar", name: "Dakar" }] },
+  bratislava: {
+    country: "Slovakia",
+    posts: [{ slug: "frankfurt", name: "Frankfurt" }],
+  },
+  brazzaville: {
+    country: "the Republic of the Congo",
+    posts: [{ slug: "kinshasa", name: "Kinshasa" }],
+  },
+  bujumbura: {
+    country: "Burundi",
+    posts: [{ slug: "nairobi", name: "Nairobi" }],
+  },
+  caracas: {
+    country: "Venezuela",
+    posts: [{ slug: "bogota", name: "Bogota" }],
+  },
+  conakry: { country: "Guinea", posts: [{ slug: "dakar", name: "Dakar" }] },
+  copenhagen: {
+    country: "Denmark",
+    posts: [{ slug: "stockholm", name: "Stockholm" }],
+  },
+  cotonou: { country: "Benin", posts: [{ slug: "abidjan", name: "Abidjan" }] },
+  curacao: { country: "Curacao", posts: [{ slug: "bogota", name: "Bogota" }] },
+  dili: {
+    country: "Timor-Leste",
+    posts: [{ slug: "jakarta", name: "Jakarta" }],
+  },
+  freetown: {
+    country: "Sierra Leone",
+    posts: [{ slug: "monrovia", name: "Monrovia" }],
+  },
+  gaborone: {
+    country: "Botswana",
+    posts: [{ slug: "johannesburg", name: "Johannesburg" }],
+  },
+  harare: {
+    country: "Zimbabwe",
+    posts: [{ slug: "johannesburg", name: "Johannesburg" }],
+  },
+  helsinki: {
+    country: "Finland",
+    posts: [{ slug: "stockholm", name: "Stockholm" }],
+  },
+  juba: {
+    country: "South Sudan",
+    posts: [{ slug: "nairobi", name: "Nairobi" }],
+  },
+  kabul: {
+    country: "Afghanistan",
+    posts: [{ slug: "islamabad", name: "Islamabad" }],
+  },
+  kampala: {
+    country: "Uganda",
+    posts: [{ slug: "nairobi", name: "Nairobi" }],
+    alsoHub: true,
+  },
+  khartoum: { country: "Sudan", posts: [{ slug: "cairo", name: "Cairo" }] },
+  kolonia: {
+    country: "the Federated States of Micronesia",
+    posts: [{ slug: "manila", name: "Manila" }],
+  },
+  koror: { country: "Palau", posts: [{ slug: "manila", name: "Manila" }] },
+  libreville: {
+    country: "Gabon",
+    posts: [{ slug: "yaounde", name: "Yaounde" }],
+  },
+  lilongwe: {
+    country: "Malawi",
+    posts: [{ slug: "nairobi", name: "Nairobi" }],
+  },
+  lisbon: { country: "Portugal", posts: [{ slug: "paris", name: "Paris" }] },
+  ljubljana: {
+    country: "Slovenia",
+    posts: [{ slug: "frankfurt", name: "Frankfurt" }],
+  },
+  lome: {
+    country: "Togo",
+    posts: [{ slug: "abidjan", name: "Abidjan" }],
+    alsoHub: true,
+  },
+  lusaka: {
+    country: "Zambia",
+    posts: [{ slug: "johannesburg", name: "Johannesburg" }],
+  },
+  luxembourg: {
+    country: "Luxembourg",
+    posts: [{ slug: "brussels", name: "Brussels" }],
+  },
+  majuro: {
+    country: "the Marshall Islands",
+    posts: [{ slug: "manila", name: "Manila" }],
+  },
+  malabo: {
+    country: "Equatorial Guinea",
+    posts: [{ slug: "yaounde", name: "Yaounde" }],
+    alsoHub: true,
+  },
+  maputo: {
+    country: "Mozambique",
+    posts: [{ slug: "johannesburg", name: "Johannesburg" }],
+  },
+  maseru: {
+    country: "Lesotho",
+    posts: [{ slug: "johannesburg", name: "Johannesburg" }],
+  },
+  mbabane: {
+    country: "Eswatini",
+    posts: [{ slug: "johannesburg", name: "Johannesburg" }],
+  },
+  minsk: { country: "Belarus", posts: [{ slug: "warsaw", name: "Warsaw" }] },
+  moscow: {
+    country: "Russia",
+    posts: [
+      { slug: "warsaw", name: "Warsaw" },
+      { slug: "almaty", name: "Almaty", only: "IR-5" },
+      { slug: "tashkent", name: "Tashkent", only: "IR-5" },
+    ],
+  },
+  ndjamena: { country: "Chad", posts: [{ slug: "yaounde", name: "Yaounde" }] },
+  niamey: { country: "Niger", posts: [{ slug: "abidjan", name: "Abidjan" }] },
+  nicosia: {
+    country: "Cyprus",
+    posts: [{ slug: "frankfurt", name: "Frankfurt" }],
+  },
+  nouakchott: {
+    country: "Mauritania",
+    posts: [{ slug: "dakar", name: "Dakar" }],
+  },
+  oslo: {
+    country: "Norway",
+    posts: [{ slug: "stockholm", name: "Stockholm" }],
+  },
+  ouagadougou: {
+    country: "Burkina Faso",
+    posts: [{ slug: "dakar", name: "Dakar" }],
+  },
+  paramaribo: {
+    country: "Suriname",
+    posts: [{ slug: "georgetown", name: "Georgetown" }],
+  },
+  podgorica: {
+    country: "Montenegro",
+    posts: [{ slug: "belgrade", name: "Belgrade" }],
+  },
+  "port-au-prince": {
+    country: "Haiti",
+    posts: [{ slug: "nassau", name: "Nassau" }],
+  },
+  "port-louis": {
+    country: "Mauritius",
+    posts: [{ slug: "johannesburg", name: "Johannesburg" }],
+    alsoHub: true,
+  },
+  riga: {
+    country: "Latvia",
+    posts: [{ slug: "stockholm", name: "Stockholm" }],
+  },
+  tallinn: {
+    country: "Estonia",
+    posts: [{ slug: "stockholm", name: "Stockholm" }],
+  },
+  valletta: { country: "Malta", posts: [{ slug: "naples", name: "Naples" }] },
+  vilnius: {
+    country: "Lithuania",
+    posts: [{ slug: "stockholm", name: "Stockholm" }],
+  },
+  windhoek: {
+    country: "Namibia",
+    posts: [{ slug: "johannesburg", name: "Johannesburg" }],
+  },
+  zagreb: {
+    country: "Croatia",
+    posts: [{ slug: "frankfurt", name: "Frankfurt" }],
+  },
+};
+
+/** "Nassau", "Kuala Lumpur and Singapore", "Warsaw, Almaty (IR-5 only),
+ * and Tashkent (IR-5 only)"; without `withCases`, only the posts named for
+ * every case, "Warsaw" (all of them if none is) */
+function elsewhereNames(
+  { posts }: IvPostElsewhere,
+  withCases: boolean,
+): string {
+  const general = posts.filter(({ only }) => only === undefined);
+  const named = withCases || general.length === 0 ? posts : general;
+  return new Intl.ListFormat("en-US").format(
+    named.map(({ name, only }) =>
+      only !== undefined ? `${name} (${only} only)` : name,
+    ),
+  );
+}
+
+/** For a page's title: "Port-au-Prince: State lists Nassau as the immigrant
+ * visa post for Haiti", "Moscow: State lists Warsaw as the immigrant visa
+ * post for Russia" (and Almaty and Tashkent for IR-5 cases only, which the
+ * description and the card say) */
+export function summarizeIvPostElsewhere(
+  postName: string,
+  elsewhere: IvPostElsewhere,
+): string {
+  const general = elsewhere.posts.filter(({ only }) => only === undefined);
+  const count = general.length === 0 ? elsewhere.posts.length : general.length;
+  return `${postName}: State lists ${elsewhereNames(
+    elsewhere,
+    false,
+  )} as the immigrant visa ${count === 1 ? "post" : "posts"} for ${
+    elsewhere.country
+  }`;
+}
+
+/** For a meta description: "State's list of the embassies and consulates
+ * that process immigrant visas names Nassau for Haiti, not Port-au-Prince."
+ * with the realignment notice's contrary word for a post it calls a hub. */
+export function describeIvPostElsewhere(
+  postName: string,
+  elsewhere: IvPostElsewhere,
+): string {
+  return `State’s list of the embassies and consulates that process immigrant visas names ${elsewhereNames(
+    elsewhere,
+    true,
+  )} for ${elsewhere.country}, not ${postName}.${
+    elsewhere.alsoHub === true
+      ? ` State’s July 15, 2026 notice on realigning visa services in Africa names ${postName} as a regional visa hub, though.`
+      : ""
+  }`;
+}
+
+/** The country whose nationals make up most of the immigrant visa
+ * applicants on a post's page or one of its visa class pages, as the policy
+ * notices name it (data/policy.json's scope.countries): the post's own
+ * country, from api/searchTerms.ts's POST_COUNTRIES without the other names
+ * in parentheses ("Burma (Myanmar)" is "Burma"), since State requires
+ * immigrant visa applicants to interview in their country of residence or
+ * nationality, except for the classes in CLASS_APPLICANT_COUNTRIES. Null for
+ * a post with no country. */
+export function applicantCountry(
+  postCountry: string | null,
+  postSlug: string,
+  visaClassSlug?: string,
+): string | null {
+  const classCountry =
+    visaClassSlug === undefined
+      ? undefined
+      : CLASS_APPLICANT_COUNTRIES[postSlug]?.[visaClassSlug];
+  if (classCountry !== undefined) return classCountry;
+  return postCountry === null ? null : postCountry.replace(/ \(.*\)$/, "");
+}
+
 /** The three columns of State's IV Scheduling Status Tool */
 export type IvCategory = "relative" | "preference" | "employment";
 
@@ -140,9 +454,17 @@ export const IV_CATEGORIES: IvCategory[] = [
 /** A post's line in one of State's monthly updates of its IV Scheduling
  * Status Tool: per category, the month of documentarily complete cases NVC
  * is scheduling interviews for, "2026-02", or null where State lists N/A. */
-export interface IvSchedule extends Record<IvCategory, string | null> {
+export interface IvScheduleLine extends Record<IvCategory, string | null> {
   /** The date of State's update, "2026-09-23" */
   asOf: string;
+}
+
+/** A post's line in State's newest update, with its line in the update
+ * before, since the month can move backwards as well as forwards */
+export interface IvSchedule extends IvScheduleLine {
+  /** The post's line in the update before the newest, or null when there
+   * is none or it does not list the post */
+  previous: IvScheduleLine | null;
 }
 
 /** The visa classes each column of the tool covers */
@@ -151,6 +473,24 @@ const IV_CLASSES: Record<IvCategory, string[]> = {
   preference: ["f1-family", "f2a", "f2b", "f3", "f4"],
   employment: ["eb-1", "eb-2", "eb-3", "ew", "eb-5"],
 };
+
+/** Fewer family and employment immigrant visas than this in 12 months, about
+ * four a month, and a post State's tool lists as current is not called
+ * current: at New Delhi (29, most of its immigrant visas being adoptions),
+ * Amsterdam (27) or Moscow (none), "current" says nothing about a queue. */
+export const FEW_IMMIGRANT_VISAS = 50;
+
+/** How many visas of the classes State's tool covers, the family and
+ * employment immigrant visas, the rows count */
+export function countToolClassIssuances(
+  rows: { visaClassSlug: string; issuances: number }[],
+): number {
+  return rows
+    .filter(
+      ({ visaClassSlug }) => IV_CATEGORY_BY_CLASS[visaClassSlug] !== undefined,
+    )
+    .reduce((sum, { issuances }) => sum + issuances, 0);
+}
 
 /** The tool's column for each visa class it covers */
 export const IV_CATEGORY_BY_CLASS: Partial<Record<string, IvCategory>> =

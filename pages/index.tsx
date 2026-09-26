@@ -13,8 +13,39 @@ import React from "react";
 import {
   DOL_PROCESSING_TIMES_URL,
   GLOBAL_VISA_WAIT_TIMES_URL,
+  I751_URL,
   VISA_BULLETIN_URL,
 } from "../components/links";
+
+/** USCIS's page saying, each month, which Visa Bulletin chart decides who
+ * may file an I-485 in each preference category */
+const ADJUSTMENT_FILING_CHARTS_URL =
+  "https://www.uscis.gov/green-card/green-card-processes-and-procedures/visa-availability-priority-dates/adjustment-of-status-filing-charts-from-the-visa-bulletin";
+
+/** USCIS's eligibility page for immediate relatives' green cards, which says
+ * who can adjust status in the US */
+const IMMEDIATE_RELATIVE_ELIGIBILITY_URL =
+  "https://www.uscis.gov/green-card/green-card-eligibility/green-card-for-immediate-relatives-of-us-citizen";
+
+/** USCIS's page on the registration an H-1B cap petition has to be selected
+ * in first */
+const H1B_REGISTRATION_URL =
+  "https://www.uscis.gov/working-in-the-united-states/temporary-workers/h-1b-specialty-occupations-and-fashion-models/h-1b-electronic-registration-process";
+
+/** How the Visa Bulletin's two charts apply, for the preference paths */
+function PriorityDateCharts() {
+  return (
+    <>
+      The <To href={VISA_BULLETIN_URL}>Visa Bulletin</To> has two charts. In the
+      US, USCIS says each month which of them decides when you can file the
+      I-485, on its{" "}
+      <To href={ADJUSTMENT_FILING_CHARTS_URL}>filing charts page</To>. Abroad,
+      NVC can have you send your documents once the Dates for Filing chart
+      passes your date, before an interview is possible: that needs your date to
+      be current in the Final Action Dates chart.
+    </>
+  );
+}
 
 /** A link to a page of this site, or to an official one in a new tab */
 function To({ href, children }: React.PropsWithChildren<{ href: string }>) {
@@ -26,6 +57,22 @@ function To({ href, children }: React.PropsWithChildren<{ href: string }>) {
     <Anchor href={href} target="_blank" rel="noopener">
       {children}
     </Anchor>
+  );
+}
+
+/** When a conditional resident files the I-751, as uscis.gov/i-751 puts
+ * it: jointly "during the 90-day period immediately before your
+ * conditional residence expires", or individually, "with a request to
+ * waive the joint filing requirement", "at any time before your
+ * conditional permanent resident status expires". */
+function I751Timing() {
+  return (
+    <>
+      <To href="/uscis/i-751">I-751 to remove the conditions</To>, filed with
+      your spouse in the 90 days before the card expires, not earlier; or, with
+      a <To href={I751_URL}>waiver of the joint filing requirement</To> (after a
+      divorce, for example), any time before it expires.
+    </>
   );
 }
 
@@ -100,11 +147,26 @@ export default function Home() {
               <To href="/consulates">Interview at your consulate</To>: which
               month of documentarily complete cases it is scheduling.
             </>,
+            <>
+              A spouse married less than 2 years when they enter the US on the
+              visa gets a 2-year conditional green card (usually on a CR-1
+              visa): <I751Timing />
+            </>,
           ]}
         />
         <Path
           title="Spouse of a US citizen, living in the US"
-          who="Getting a green card without leaving the US (adjustment of status)."
+          who={
+            <>
+              Getting a green card without leaving the US (adjustment of
+              status). This is generally for people who were{" "}
+              <To href={IMMEDIATE_RELATIVE_ELIGIBILITY_URL}>
+                inspected and admitted or paroled
+              </To>{" "}
+              into the US, as with a visa; if you entered another way, talk to
+              an immigration lawyer before filing.
+            </>
+          }
           steps={[
             <>
               <To href="/uscis/i-130">I-130 petition</To> and{" "}
@@ -118,9 +180,8 @@ export default function Home() {
               with it.
             </>,
             <>
-              If your green card is a 2-year conditional one:{" "}
-              <To href="/uscis/i-751">I-751 to remove the conditions</To>, filed
-              before it expires.
+              If you were married less than 2 years when you got your green
+              card, it is a 2-year conditional one: <I751Timing />
             </>,
           ]}
         />
@@ -144,6 +205,11 @@ export default function Home() {
               <To href="/uscis/i-485">I-485 green card application</To>, with
               the <To href="/uscis/i-765">I-765 work permit</To> and{" "}
               <To href="/uscis/i-131">I-131 travel document</To>.
+            </>,
+            <>
+              If you have been married less than 2 years when the I-485 is
+              approved, as most K-1 couples are, you get a 2-year conditional
+              green card: <I751Timing />
             </>,
           ]}
         />
@@ -171,9 +237,8 @@ export default function Home() {
               <To href="/uscis/i-140">I-140 petition</To>, filed with USCIS.
             </>,
             <>
-              Your priority date: in most categories you wait until the{" "}
-              <To href={VISA_BULLETIN_URL}>Visa Bulletin</To> shows it as
-              current.
+              Your priority date: in most categories you wait for it to be
+              reached. <PriorityDateCharts />
             </>,
             <>
               In the US:{" "}
@@ -194,9 +259,8 @@ export default function Home() {
               relative with USCIS.
             </>,
             <>
-              Your priority date: you wait, often for years, until the{" "}
-              <To href={VISA_BULLETIN_URL}>Visa Bulletin</To> shows it as
-              current.
+              Your priority date: you wait, often for years, for it to be
+              reached. <PriorityDateCharts />
             </>,
             <>
               Abroad: <To href="/nvc">the National Visa Center</To> and an{" "}
@@ -211,8 +275,16 @@ export default function Home() {
           who="B, F, J, H, L, O and other nonimmigrant visas."
           steps={[
             <>
-              Work visas start with an{" "}
-              <To href="/uscis/i-129">I-129 petition</To> from the employer.
+              Most employer-sponsored work visas (H, L, O, P, Q and R) start
+              with an <To href="/uscis/i-129">I-129 petition</To> from the
+              employer. For an H-1B under the annual cap, the employer first
+              registers the worker in{" "}
+              <To href={H1B_REGISTRATION_URL}>
+                USCIS&rsquo;s H-1B registration
+              </To>{" "}
+              and can file only if the worker is selected. For E and TN visas,
+              the I-129 is used only to change or extend status inside the US,
+              and J exchange visitors do not use it.
             </>,
             <>
               Visa appointment waits at each consulate: the State

@@ -1,5 +1,10 @@
 import type { Form } from "../api/uscis";
-import { categoryName, QuarterPoint } from "./uscis";
+import {
+  categoryName,
+  HEADLINE_CATEGORY,
+  QuarterPoint,
+  STALLED_RATIO,
+} from "./uscis";
 
 // How long someone filing a USCIS form today should plan for, and when not to
 // say. Everything the range rests on is in this file: the calibration table,
@@ -26,6 +31,22 @@ import { categoryName, QuarterPoint } from "./uscis";
 // had decisions below a quarter of their recent average, so the table says
 // almost nothing about a category USCIS has all but stopped deciding. Any
 // change to these numbers needs the backtest rerun.
+//
+// The backtest read forms.json as it was, before the pages learned to set
+// aside two kinds of bad data (components/uscis.ts): the Apr–Jun 2024
+// report repeated Jan–Mar 2024's medians for 37 of 44 series
+// (republishedMedianQuarters), and a few pending counts are out of line with
+// their quarter's filings and decisions (flowCheck). The repeated medians
+// sit in the backtest as the base of the series-quarters filed in Jul–Sep
+// 2024 and as the realized wait of some filed about a year before; each is
+// the real median of the quarter before, one quarter stale, so they add
+// noise rather than a bias, in about one series-quarter in 16. Pending
+// counts only pick the pressure level, so an out-of-line count matters only
+// where it changes the level: the I-130's Apr–Jun 2024 count, 9% short of
+// its flow, put that quarter at the typical level where the flow puts it at
+// high (the I-765's Jan–Mar 2025 spike was high either way). That is a
+// handful of the 616 series-quarters, so the constants stand until the
+// backtest is rerun on the cleaned data.
 export const CALIBRATION = {
   low: [0.41, 0.58, 0.78, 0.96, 1.25],
   typical: [0.54, 0.75, 0.98, 1.26, 1.66],
@@ -93,14 +114,67 @@ export const PRIORITY_DATE_CATEGORIES: Record<string, string[]> = {
   "I-485": ["employment"],
 };
 
+/** What the "If you file today" table says instead of a range for a
+ * priority-date category, per form and category, given USCIS's median for
+ * those it decided (formatMedian). USCIS does decide many of these each
+ * quarter (7,951 I-130 preference petitions approved and 8,883 denied in
+ * Apr-Jun 2026), so the text must not say they wait unapproved; the point
+ * is that USCIS's decision is not the end of the wait. */
+export const PRIORITY_DATE_TEXT: Record<
+  string,
+  Record<string, (median: string) => string>
+> = {
+  "I-130": {
+    "all-other-relative": (median) =>
+      `USCIS's median for the ones it decided was ${median}, but approval is only the first step: when your relative can immigrate depends on the priority date:`,
+  },
+  "I-485": {
+    employment: (median) =>
+      `USCIS's median for the ones it decided was ${median}, but it can approve one only once the priority date is current, so how long yours takes depends on your priority date:`,
+  },
+};
+
+/** Forms and their categories (Variant.key; "*" for every one) for which
+ * USCIS offers premium processing: for an extra fee, it acts on a case
+ * within a set number of days, far sooner than the median, which counts
+ * premium and regular cases together. What to tell a visitor about it. */
+export const PREMIUM_PROCESSING: Record<
+  string,
+  { categories: string[]; note: string }
+> = {
+  "I-129": {
+    categories: ["*"],
+    note: "Premium processing is available for most I-129 classifications: for an extra fee, USCIS acts on the petition within 15 business days. USCIS's median counts premium-processed petitions together with regular ones, so filed without it, expect the later end of the range, or longer.",
+  },
+  "I-140": {
+    categories: ["*"],
+    note: "Premium processing is available for most I-140 categories: for an extra fee, USCIS acts on the petition within 15 business days (45 for some, such as national interest waivers). USCIS's median counts premium-processed petitions together with regular ones, so filed without it, expect the later end of the range, or longer.",
+  },
+  "I-539": {
+    categories: [],
+    note: "Premium processing is available for some changes of status, such as to F, J or M: for an extra fee, USCIS acts on those within 30 days. USCIS's median counts them together with regular applications.",
+  },
+  "I-765": {
+    categories: [],
+    note: "Premium processing is available for some work permits, such as F-1 students' OPT and STEM OPT (among Other Categories): for an extra fee, USCIS acts on those within 30 days. USCIS's median counts them together with regular applications.",
+  },
+};
+
+/** Whether all (or nearly all) of a category's cases can be
+ * premium-processed (PREMIUM_PROCESSING), so its median mixes weeks-long
+ * premium cases with regular ones. */
+export function premiumCategory(form: string, key: string): boolean {
+  const categories = PREMIUM_PROCESSING[form]?.categories ?? [];
+  return categories.includes("*") || categories.includes(key);
+}
+
 /** Below this many decisions in a quarter, the median, and the time to clear
  * the backlog at the quarter's pace, are too noisy to plan on. */
 const MIN_DECISIONS = 100;
 
-/** Below this share of the four previous quarters' average, decisions have
- * nearly stopped: the median then describes the few cases USCIS still
- * decided, and the calibration has almost no past quarters like it. */
-const STALLED_RATIO = 0.25;
+// Below STALLED_RATIO of the four previous quarters' average, decisions
+// have nearly stopped: the median then describes the few cases USCIS still
+// decided, and the calibration has almost no past quarters like it.
 
 /** Why a category gets no range. */
 export type Suppression = "too few decisions" | "nearly stopped";
@@ -126,6 +200,9 @@ export interface CategoryRange {
   suppressed: Suppression | null;
   /** Waits on the Visa Bulletin: no range */
   priorityDate: boolean;
+  /** Its cases can be premium-processed (premiumCategory): the range is for
+   * the median of premium and regular cases together */
+  premium: boolean;
   /** The wait in months at the 10th, 25th, 50th, 75th and 90th percentile */
   q: number[];
 }
@@ -157,7 +234,19 @@ export function categoryRanges(form: Form): CategoryRange[] {
           ? null
           : variant.pending / (completions / 3);
       const { shock, ratio } = decisionShock(history);
-      const level = shock ? "high" : pressureLevel(pileMonths, median);
+      const premium = premiumCategory(form.form, variant.key);
+      const pressure = pressureLevel(pileMonths, median);
+      // A small pile for the median reads as USCIS catching up (the low
+      // row), but where most cases can be premium-processed it is small
+      // because premium cases clear in weeks: the I-129's 192,712 pending
+      // in Apr–Jun 2026 took 3.2 months to clear against a 9.5-month
+      // median, and the low row put the whole most likely range, 5.5-9.1
+      // months, below that median. Such a category gets the typical row.
+      const level = shock
+        ? "high"
+        : premium && pressure === "low"
+        ? "typical"
+        : pressure;
       return {
         key: variant.key,
         title: variant.title,
@@ -176,6 +265,7 @@ export function categoryRanges(form: Form): CategoryRange[] {
         priorityDate: (PRIORITY_DATE_CATEGORIES[form.form] ?? []).includes(
           variant.key,
         ),
+        premium,
         q: planningRange(median, level),
       };
     });
@@ -183,7 +273,19 @@ export function categoryRanges(form: Form): CategoryRange[] {
 
 /** The range a page leads with: the category with the most applications
  * received, among those that have a range at all. Null when none does. */
-export function headlineRange(ranges: CategoryRange[]): CategoryRange | null {
+export function headlineRange(
+  ranges: CategoryRange[],
+  form: string,
+): CategoryRange | null {
+  // the category most of the form's visitors are in, when it has a range;
+  // no other category stands in for it
+  const preferred = ranges.find(
+    (range) => range.key === HEADLINE_CATEGORY[form],
+  );
+  if (preferred !== undefined)
+    return !preferred.priorityDate && preferred.suppressed === null
+      ? preferred
+      : null;
   return ranges
     .filter((range) => !range.priorityDate && range.suppressed === null)
     .reduce<CategoryRange | null>(
@@ -215,7 +317,10 @@ export function formatMedian(months: number): string {
 }
 
 export const TOO_FEW_DECISIONS = "too few decisions";
-export const CASES_MOVED = "USCIS moved cases between offices";
+
+/** The fewest cases an office's pile has to change by to count as USCIS
+ * moving cases (casesMovedQuarters). */
+const MOVED_MIN_CASES = 100;
 
 /** The quarters (QuarterPoint.quarter) in which an office's pending count
  * more than doubled or halved since the quarter before: USCIS moving cases
@@ -225,30 +330,109 @@ export const CASES_MOVED = "USCIS moved cases between offices";
  * (2 to 6), and a category that got fewer of the moved cases than the others
  * would read as the office falling behind (Jacksonville's I-130 immediate
  * relatives went from 3,237 to 6,299 in Apr-Jun 2026, its total from 3,383
- * to 16,206). */
-export function casesMovedQuarters(total: QuarterPoint[]): string[] {
+ * to 16,206). A change of fewer than `minimum` cases (40 to 90 at a small
+ * office) is no sign of a move either way. */
+export function casesMovedQuarters(
+  total: QuarterPoint[],
+  minimum = MOVED_MIN_CASES,
+): string[] {
   return total
     .filter((point, index) => {
       const previous = total[index - 1]?.pending ?? null;
       return (
         point.pending !== null &&
         previous !== null &&
+        Math.abs(point.pending - previous) >= minimum &&
         (point.pending > 2 * previous || point.pending < 0.5 * previous)
       );
     })
     .map(({ quarter }) => quarter);
 }
 
+/** A category's own pile counts as cases moved or routed in or out when it
+ * changed by at least this many cases, and either more than doubled or
+ * halved, or grew by half while the category's receipts at least doubled:
+ * new filings routed to the office. The Baltimore office's employment-based
+ * I-485s went from 3,272 to 6,302 in Apr–Jun 2026 as its receipts of them
+ * went from 1,167 to 3,766, while its total grew 20%. */
+const MOVED_CATEGORY_MIN_CASES = 500;
+
+/** The quarters in which USCIS moved (or routed) cases in or out of one
+ * category of an office's (`points`): those of the office's total
+ * (casesMovedQuarters), and those of the category's own pile
+ * (MOVED_CATEGORY_MIN_CASES). */
+export function categoryMovedQuarters(
+  total: QuarterPoint[],
+  points: QuarterPoint[],
+): string[] {
+  const own = points
+    .filter((point, index) => {
+      const previous = points[index - 1];
+      if (
+        previous === undefined ||
+        point.pending === null ||
+        previous.pending === null ||
+        Math.abs(point.pending - previous.pending) < MOVED_CATEGORY_MIN_CASES
+      )
+        return false;
+      const routed =
+        point.received !== null &&
+        previous.received !== null &&
+        previous.received > 0 &&
+        point.received >= 2 * previous.received;
+      return (
+        point.pending > 2 * previous.pending ||
+        point.pending < 0.5 * previous.pending ||
+        (routed && point.pending >= 1.5 * previous.pending)
+      );
+    })
+    .map(({ quarter }) => quarter);
+  return [...new Set([...casesMovedQuarters(total), ...own])].sort();
+}
+
+/** Whether cases moved in or out in a quarter of `moved`, going by the
+ * points' pending count; null in other quarters. */
+export function movedDirection(
+  points: QuarterPoint[],
+  moved: readonly string[],
+  quarter: string,
+): "in" | "out" | null {
+  if (!moved.includes(quarter)) return null;
+  const index = points.findIndex((point) => point.quarter === quarter);
+  const current = points[index]?.pending ?? null;
+  const previous = points[index - 1]?.pending ?? null;
+  if (current === null || previous === null) return null;
+  return current >= previous ? "in" : "out";
+}
+
+/** The quarters of `moved` in which the office's receipts also jumped, by
+ * half or more and at least 100: new filings USCIS routed to the office,
+ * not people filing there. In Apr–Jun 2026 the I-130 field offices together
+ * received 159,365 petitions, up from 50,697, while USCIS received 166,322
+ * nationwide, as many as the quarter before. */
+export function routedQuarters(
+  points: QuarterPoint[],
+  moved: readonly string[],
+): string[] {
+  return points
+    .filter((point, index) => {
+      const previous = points[index - 1]?.received ?? null;
+      return (
+        moved.includes(point.quarter) &&
+        point.received !== null &&
+        previous !== null &&
+        point.received >= 1.5 * previous &&
+        point.received - previous >= 100
+      );
+    })
+    .map(({ quarter }) => quarter);
+}
+
 /** Why the time to clear the backlog at one quarter's pace would mislead, or
- * null when it would not (or cannot be worked out at all): an office's
- * quarter in which USCIS moved cases between offices (`moved`, from
- * casesMovedQuarters; checked first, as the pages then also say so about the
- * pending count), or fewer than 100 decisions to divide by. */
-export function clearingSuppressed(
-  point: QuarterPoint,
-  moved: readonly string[] = [],
-): string | null {
-  if (moved.includes(point.quarter)) return CASES_MOVED;
+ * null when it would not (or cannot be worked out at all): fewer than 100
+ * decisions to divide by. In a quarter in which USCIS moved cases between
+ * offices, the pages show it, saying the pile includes the cases moved. */
+export function clearingSuppressed(point: QuarterPoint): string | null {
   if (point.completions === null) return null;
   if (point.completions < MIN_DECISIONS) return TOO_FEW_DECISIONS;
   return null;
@@ -259,23 +443,12 @@ export function clearingSuppressed(
  * highlight all leave the same quarters out. */
 export function withoutMisleadingClearing(
   points: QuarterPoint[],
-  moved: readonly string[] = [],
 ): QuarterPoint[] {
   return points.map((point) =>
-    point.waitMonths !== null && clearingSuppressed(point, moved) !== null
+    point.waitMonths !== null && clearingSuppressed(point) !== null
       ? { ...point, waitMonths: null }
       : point,
   );
-}
-
-/** Why the time to clear the backlog in the newest of the points would
- * mislead, or null when it would not. */
-export function officeEstimateSuppressed(
-  points: QuarterPoint[],
-  moved: readonly string[] = [],
-): string | null {
-  const current = points[points.length - 1];
-  return current === undefined ? null : clearingSuppressed(current, moved);
 }
 
 /** The time to clear a backlog at the pace of the four quarters to
@@ -331,23 +504,4 @@ export function compareClearing(
   if (office > national * CLEARING_COMPARISON_FACTOR) return "longer";
   if (office * CLEARING_COMPARISON_FACTOR < national) return "shorter";
   return "close";
-}
-
-/** Which way the time to clear the backlog moved since the quarter before:
- * more than 10% either way counts. Null when either side is unknown. */
-export function backlogTrend(
-  previous: number | null | undefined,
-  current: number | null,
-): "rising" | "steady" | "easing" | null {
-  if (
-    previous === null ||
-    previous === undefined ||
-    current === null ||
-    previous === 0
-  )
-    return null;
-  const change = (current - previous) / previous;
-  if (change > 0.1) return "rising";
-  if (change < -0.1) return "easing";
-  return "steady";
 }

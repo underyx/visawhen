@@ -20,7 +20,12 @@ import {
   formatRangeMonths,
   headlineRange,
 } from "../../components/estimate";
-import { formatCount, quarterLabel, toPoints } from "../../components/uscis";
+import {
+  cleanData,
+  formatCount,
+  quarterLabel,
+  toPoints,
+} from "../../components/uscis";
 import { ListRow, ListRows } from "../../components/ListRow";
 import { normalize } from "../../components/search";
 import SearchStatus from "../../components/SearchStatus";
@@ -65,12 +70,12 @@ const CATEGORY_ORDER = [
 ];
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  const data = await getData();
+  const data = cleanData(await getData());
   const forms = getActiveForms(data).map((form) => {
     const points = toPoints(data.periods, form.quarters);
     const latest = points[points.length - 1];
     const ranges = categoryRanges(form);
-    const headline = headlineRange(ranges);
+    const headline = headlineRange(ranges, form.form);
     return {
       slug: form.slug,
       form: form.form,

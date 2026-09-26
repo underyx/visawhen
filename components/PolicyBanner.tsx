@@ -8,12 +8,15 @@ import {
   Text,
   Title,
 } from "@mantine/core";
+import { sortBy } from "lodash";
 import React from "react";
 import { daysBetween, formatShortDate, useToday } from "./Freshness";
 import {
+  ConsulatePage,
   hasEnded,
   hasStarted,
-  isAboutPost,
+  isAboutPage,
+  namesPage,
   PolicyEntry,
   policiesFor,
 } from "./policy";
@@ -108,34 +111,44 @@ function EntryDetails({
 }
 
 type Props =
-  /** A post's own page or one of its visa class pages, "kampala". The page
-   * of a nonimmigrant class that does not go through NVC passes `immigrant`
+  /** A post's own page or one of its visa class pages. The page of a
+   * nonimmigrant class that does not go through NVC passes `immigrant`
    * false, and leaves out the notices about immigrant visas only. */
-  | { postSlug: string; immigrant?: boolean; page?: undefined }
+  | { consulate: ConsulatePage; immigrant?: boolean; page?: undefined }
   /** Any other page, by its path, "/nvc" */
-  | { page: string; postSlug?: undefined; immigrant?: undefined };
+  | { page: string; consulate?: undefined; immigrant?: undefined };
 
 /** The policies that affect a page's visas, from data/policy.json: those
- * about the page's post in full, and the rest, such as those about every
- * post, in one collapsed section that lists their titles, so that thousands of
- * pages do not open with the same banners. */
-export default function PolicyBanner({ postSlug, immigrant, page }: Props) {
+ * about the page in particular (its post, the nationality of most of its
+ * applicants or its visa class) or marked `expanded` in full, and the rest,
+ * such as those about every post, in one collapsed section that lists their
+ * titles, so that thousands of pages do not open with the same banners. */
+export default function PolicyBanner({ consulate, immigrant, page }: Props) {
   // The prerendered page is served for weeks, so which entries have started,
   // have expired or have gone unchecked too long is decided on the client
   // only.
   const today = useToday();
-  const shown = policiesFor({ postSlug, page, immigrant }).filter(
+  const shown = policiesFor({ consulate, page, immigrant }).filter(
     (entry) => hasStarted(entry, today) && !hasExpired(entry, today),
   );
-  const postEntries =
-    postSlug === undefined
-      ? []
-      : shown.filter((entry) => isAboutPost(entry, postSlug));
-  const otherEntries = shown.filter((entry) => !postEntries.includes(entry));
+  // The entries about the page in particular, such as a suspension for most
+  // of its applicants' nationality, come before the ones expanded
+  // everywhere.
+  const expandedEntries = sortBy(
+    shown.filter((entry) =>
+      consulate === undefined
+        ? entry.expanded === true
+        : isAboutPage(entry, consulate),
+    ),
+    (entry) => (consulate !== undefined && namesPage(entry, consulate) ? 0 : 1),
+  );
+  const otherEntries = shown.filter(
+    (entry) => !expandedEntries.includes(entry),
+  );
 
   return (
     <>
-      {postEntries.map((entry) => (
+      {expandedEntries.map((entry) => (
         // role="region", labelled by the title: a standing notice, which
         // screen readers should not announce on load as they do Mantine's
         // default role="alert"

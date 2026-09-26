@@ -21,21 +21,34 @@ import {
 } from "../../../api/consulates";
 import { checkPolicies } from "../../../api/policy";
 import {
+  applicantCountry,
+  CLASS_APPLICANT_COUNTRIES,
+  countToolClassIssuances,
   describeInactivity,
+  describeIvPostElsewhere,
+  FEW_IMMIGRANT_VISAS,
+  formatCount,
   formatMonth,
   formatMonthlyRate,
   formatShortIvMonth,
+  IV_POSTS_ELSEWHERE,
   IvSchedule,
   monthsBehind,
   summarizeInactivity,
+  summarizeIvPostElsewhere,
 } from "../../../components/consulates";
 import IvScheduleCard, {
   describeRelativeQueue,
   listsPostAsCurrent,
+  showsSuspension,
 } from "../../../components/IvScheduleCard";
 import { ListItem, ListRow, ListRows } from "../../../components/ListRow";
 import PolicyBanner from "../../../components/PolicyBanner";
-import { hasEnded, scheduleOverrideFor } from "../../../components/policy";
+import {
+  hasEnded,
+  issuanceSuspensionFor,
+  scheduleOverrideFor,
+} from "../../../components/policy";
 import { formatShortDate, useToday } from "../../../components/Freshness";
 import { normalize } from "../../../components/search";
 import SearchStatus from "../../../components/SearchStatus";
@@ -79,7 +92,20 @@ interface Props {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const posts = await getAllPosts();
-  checkPolicies(posts.map((row) => row.postSlug));
+  checkPolicies({
+    postSlugs: posts.map((row) => row.postSlug),
+    countries: [
+      ...posts.map(({ postSlug }) =>
+        applicantCountry(POST_COUNTRIES[postSlug] ?? null, postSlug),
+      ),
+      ...Object.values(CLASS_APPLICANT_COUNTRIES).flatMap((classes) =>
+        Object.values(classes ?? {}),
+      ),
+    ].filter((country): country is string => country !== null),
+    visaClassSlugs: (await getAllVisaClasses()).map(
+      ({ visaClassSlug }) => visaClassSlug,
+    ),
+  });
   return {
     paths: posts.map((row) => ({ params: { postSlug: row.postSlug } })),
     fallback: false,
@@ -182,17 +208,42 @@ export default function ConsulateSelect({
   // is called current only when every category State lists is. Where a
   // policy means the month is no queue, such as a pause of visa services,
   // the policy takes the title and description instead, with its end date if
-  // it has one, since the page may still be served after it. A post that
-  // looks closed (see describeInactivity) is titled by that instead, since
-  // State's tool can list a post that issues nothing as current.
+  // it has one, since the page may still be served after it. Next, a post
+  // that looks closed (see describeInactivity) is titled by that, since
+  // State's tool can list a post that issues nothing as current; then one
+  // whose country State's list of immigrant visa posts sends elsewhere
+  // (IV_POSTS_ELSEWHERE), by where it sends it. Next, where most applicants
+  // are nationals whose visas are suspended, that takes the title, since NVC
+  // scheduling their interviews does not mean a visa can be issued; but only
+  // at a post that processes immigrant visas (showsSuspension): Caracas and
+  // Kabul have issued none for years. Last, a post listed as current that
+  // issued fewer than FEW_IMMIGRANT_VISAS of the visas the tool covers is
+  // titled by what it issued.
   const relativeCutoff = ivSchedule?.relative ?? null;
   const today = useToday();
   const scheduleOverride = scheduleOverrideFor(postSlug, ivScheduleAsOf, today);
+  const consulate = {
+    postSlug,
+    country: applicantCountry(country, postSlug),
+  };
+  const elsewhere = IV_POSTS_ELSEWHERE[postSlug];
+  const suspension = showsSuspension({
+    schedule: ivSchedule,
+    inactive: inactivity !== null,
+    elsewhere,
+  })
+    ? issuanceSuspensionFor(consulate.country)
+    : null;
+  const recentToolIssued = countToolClassIssuances(recentIssuances);
   const issuedDescription = `How many visas ${postName} issued every month ${
     availableVisaClasses.length === 1
       ? "in one visa class"
       : `in each of ${availableVisaClasses.length} visa classes`
   }, from State Department statistics through ${formatMonth(recentWindow.to)}.`;
+  const elsewhereDescription =
+    elsewhere === undefined
+      ? ""
+      : `${describeIvPostElsewhere(postName, elsewhere)} `;
   let title: string;
   let description: string;
   if (scheduleOverride !== null) {
@@ -211,17 +262,57 @@ export default function ConsulateSelect({
         : "reported; no State Department notice"
     }${ends === null ? "" : `, ${ends}`}, last checked ${formatShortDate(
       scheduleOverride.lastChecked,
-    )}). ${issuedDescription}`;
+    )}). ${elsewhereDescription}${issuedDescription}`;
   } else if (inactivity !== null && inactivitySummary !== null) {
     title = `${postName}: ${inactivitySummary}`;
-    description = `${inactivity} ${issuedDescription}`;
+    description = `${inactivity} ${elsewhereDescription}${issuedDescription}`;
+  } else if (elsewhere !== undefined) {
+    title = summarizeIvPostElsewhere(postName, elsewhere);
+    description = `${elsewhereDescription}${issuedDescription}`;
+  } else if (suspension !== null && consulate.country !== null) {
+    title = `${postName}: immigrant visas suspended for nationals of ${consulate.country}`;
+    description = `Most immigrant visa applicants at ${postName} are nationals of ${
+      consulate.country
+    }, whose immigrant visas are suspended: ${suspension.title} (${
+      suspension.status === "official"
+        ? "State Department notice"
+        : "reported; no State Department notice"
+    }, last checked ${formatShortDate(
+      suspension.lastChecked,
+    )}). ${issuedDescription}`;
+  } else if (
+    ivSchedule !== null &&
+    relativeCutoff !== null &&
+    monthsBehind(ivSchedule.asOf, relativeCutoff) <= 0 &&
+    recentToolIssued < FEW_IMMIGRANT_VISAS
+  ) {
+    // State lists immediate relatives as current at a post that issues
+    // almost none of the visas its tool covers: the data, not "current",
+    // takes the title.
+    const issued = `${
+      recentToolIssued === 0 ? "no" : formatCount(recentToolIssued)
+    } family or employment immigrant ${
+      recentToolIssued === 1 ? "visa" : "visas"
+    } issued`;
+    title = `${postName}: ${issued}, ${formatMonth(
+      recentWindow.from,
+    )} to ${formatMonth(recentWindow.to)}`;
+    description = `${postName} issued ${
+      recentToolIssued === 0 ? "no" : `only ${formatCount(recentToolIssued)}`
+    } family or employment immigrant ${
+      recentToolIssued === 1 ? "visa" : "visas"
+    } from ${formatMonth(recentWindow.from)} to ${formatMonth(
+      recentWindow.to,
+    )}, though State’s interview-scheduling tool lists it as current. ${issuedDescription}`;
   } else {
     title =
       ivSchedule === null || relativeCutoff === null
         ? `${postName} visas issued by class`
-        : `${postName} immigrant visa interview wait: ${
+        : // Not a wait: the month is the one "for which NVC is scheduling
+          // most interviews", in State's words, and it can move backwards.
+          `${postName} immigrant visa interview scheduling: ${
             monthsBehind(ivSchedule.asOf, relativeCutoff) > 0
-              ? `scheduling ${formatShortIvMonth(relativeCutoff)} cases`
+              ? `mostly ${formatShortIvMonth(relativeCutoff)} cases`
               : listsPostAsCurrent(ivSchedule)
               ? "listed as current"
               : "immediate relatives listed as current"
@@ -261,13 +352,29 @@ export default function ConsulateSelect({
           {inactivity}
         </Alert>
       )}
-      <PolicyBanner postSlug={postSlug} />
+      <PolicyBanner consulate={consulate} />
       <IvScheduleCard
         postName={postName}
         asOf={ivScheduleAsOf}
         schedule={ivSchedule}
         source={ivScheduleSource}
         scheduleOverride={scheduleOverride ?? undefined}
+        recentIssued={{
+          count: recentToolIssued,
+          from: recentWindow.from,
+          to: recentWindow.to,
+        }}
+        elsewhere={elsewhere}
+        inactive={inactivity !== null}
+        suspension={
+          suspension === null || consulate.country === null
+            ? undefined
+            : {
+                entry: suspension,
+                country: consulate.country,
+                applicants: "immigrant visa",
+              }
+        }
       />
       <Title order={2}>Visa classes at {postName}</Title>
       <TextInput

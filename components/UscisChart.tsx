@@ -5,6 +5,7 @@ import {
   DataZoomComponent,
   GridComponent,
   LegendComponent,
+  MarkLineComponent,
   TooltipComponent,
 } from "echarts/components";
 import { SVGRenderer } from "echarts/renderers";
@@ -14,6 +15,7 @@ import numeral from "numeral";
 import {
   approximately,
   CHART_QUARTERS,
+  ChartBreak,
   formatCount,
   formatMonths,
   ProcessingTimeSeries,
@@ -28,6 +30,7 @@ echarts.use([
   DataZoomComponent,
   GridComponent,
   LegendComponent,
+  MarkLineComponent,
   TooltipComponent,
   SVGRenderer,
 ]);
@@ -39,6 +42,7 @@ const DENIED_COLOR = "#e03131";
 const PENDING_COLOR = "#f08c00";
 const RECEIVED_COLOR = "#7048e8";
 const EXTRA_COLORS = [DENIED_COLOR, PENDING_COLOR, RECEIVED_COLOR, "#0ca678"];
+const BREAK_COLOR = "#495057";
 
 interface Props {
   points: QuarterPoint[];
@@ -47,15 +51,26 @@ interface Props {
   subject: string;
   /** Where, for one office's numbers: "at the San Francisco office" */
   place?: string;
+  /** Quarters from which the numbers mean something else, marked with a
+   * vertical line and explained under the chart */
+  breaks?: ChartBreak[];
+  /** Quarters in which the filings include new filings USCIS routed to the
+   * office (routedQuarters) */
+  routed?: readonly string[];
 }
 
 // The legends scroll instead of wrapping: on a phone, the wait chart's five
 // entries took five lines and ran over the plot.
 const LEGEND = { type: "scroll", top: 0 } as const;
 
+/** What a diamond on a pending count or on the time to clear the backlog
+ * means (QuarterPoint.suspect). */
+const SUSPECT_NOTE =
+  "A diamond marks a pending count that doesn't match the quarter before's count plus the quarter's filings minus its decisions: it is what USCIS reported, but USCIS doesn't say why they differ, so the pages draw no conclusions from it.";
+
 function SourceCaption({ source, what }: { source: string; what: string }) {
   return (
-    <figcaption>
+    <>
       Source: USCIS&rsquo;s quarterly <a href={source}>{what}</a> reports, via
       the <a href={USCIS_DATA_URL}>Immigration and Citizenship Data</a> page.
       <br />
@@ -64,13 +79,98 @@ function SourceCaption({ source, what }: { source: string; what: string }) {
         JSON file on GitHub
       </a>
       .
-    </figcaption>
+    </>
   );
 }
 
 /** How much of the chart to show initially: the last six years. */
 function initialZoomStart(points: QuarterPoint[]): number {
   return Math.max(0, 100 - 100 * (CHART_QUARTERS / points.length));
+}
+
+/** The vertical lines at `breaks`, as a series' markLine, or undefined when
+ * there are none within the points. */
+function breakLines(points: QuarterPoint[], breaks: ChartBreak[]) {
+  const data = breaks.flatMap((chartBreak) => {
+    const point = points.find(({ quarter }) => quarter === chartBreak.quarter);
+    return point === undefined
+      ? []
+      : [
+          {
+            xAxis: point.label,
+            label: { formatter: chartBreak.label },
+          },
+        ];
+  });
+  if (data.length === 0) return undefined;
+  return {
+    silent: true,
+    symbol: "none",
+    lineStyle: { color: BREAK_COLOR, type: "dashed", width: 1 },
+    label: {
+      position: "insideEndTop",
+      color: BREAK_COLOR,
+      fontSize: 11,
+    },
+    data,
+  };
+}
+
+/** The sentences under a chart on its breaks and marked points: those of the
+ * breaks within the points, and what a diamond means when there is one. */
+function Notes({
+  points,
+  breaks,
+  suspects,
+}: {
+  points: QuarterPoint[];
+  breaks: ChartBreak[];
+  suspects: boolean;
+}) {
+  // the breaks in the quarters the chart shows at first; older ones have
+  // their line and its label
+  const shown = points.slice(-CHART_QUARTERS);
+  const texts = [
+    ...breaks
+      .filter((chartBreak) =>
+        shown.some(({ quarter }) => quarter === chartBreak.quarter),
+      )
+      .map(({ label, text }) => `A dashed line ("${label}"): ${text}`),
+    ...(suspects ? [SUSPECT_NOTE] : []),
+  ];
+  if (texts.length === 0) return null;
+  return (
+    <>
+      {texts.map((text) => (
+        <span key={text}> {text}</span>
+      ))}
+    </>
+  );
+}
+
+/** A line's data point, as a diamond when it is `suspect`. */
+function marked(value: number | null, suspect: boolean, color: string) {
+  return suspect && value !== null
+    ? {
+        value,
+        symbol: "diamond",
+        symbolSize: 14,
+        itemStyle: { color: "#fff", borderColor: color, borderWidth: 2 },
+      }
+    : value;
+}
+
+/** The tooltip's lines on where a quarter's numbers come from and whether
+ * they are out of line. */
+function pointNotes(point: QuarterPoint): string[] {
+  return [
+    ...(point.suspect
+      ? ["Pending count doesn't match filings minus decisions"]
+      : []),
+    ...(point.fromOfficeReport
+      ? ["From the national totals of USCIS's per-office report"]
+      : []),
+  ];
 }
 
 /** What the outcomes chart shows, in words, for screen readers: its span and
@@ -104,7 +204,10 @@ export function OutcomesChart({
   place,
   source,
   sourceName,
+  breaks = [],
+  routed = [],
 }: Props & { source: string; sourceName: string }) {
+  const suspects = points.some(({ suspect }) => suspect);
   return (
     <Paper shadow="xs" p="md" mx={0} component="figure">
       <ReactEChartsCore
@@ -124,7 +227,11 @@ export function OutcomesChart({
               const point = points[params[0].dataIndex];
               return [
                 `<strong>${point.label}</strong>`,
-                `Filed: ${formatCount(point.received)}`,
+                `${
+                  routed.includes(point.quarter)
+                    ? "Filed or routed here"
+                    : "Filed"
+                }: ${formatCount(point.received)}`,
                 `Approved: ${formatCount(point.approved)}`,
                 `Denied: ${formatCount(point.denied)}`,
                 `Pending at quarter end: ${formatCount(point.pending)}`,
@@ -132,6 +239,7 @@ export function OutcomesChart({
                   formatMonths(point.waitMonths),
                   point.approximate,
                 )}`,
+                ...pointNotes(point),
               ].join("<br />");
             },
           },
@@ -153,6 +261,7 @@ export function OutcomesChart({
               stack: "decisions",
               data: points.map((point) => point.approved),
               itemStyle: { borderColor: "#fff", borderWidth: 1 },
+              markLine: breakLines(points, breaks),
             },
             {
               name: "Denied",
@@ -164,12 +273,20 @@ export function OutcomesChart({
             {
               name: "Pending at quarter end",
               type: "line",
-              data: points.map((point) => point.pending),
+              data: points.map((point) =>
+                marked(point.pending, point.suspect, PENDING_COLOR),
+              ),
               lineStyle: { width: 2 },
               symbolSize: 8,
             },
             {
-              name: "Filed",
+              // as in the text: only for routing in the quarters shown at
+              // first; an older quarter's tooltip still says it
+              name: points
+                .slice(-CHART_QUARTERS)
+                .some(({ quarter }) => routed.includes(quarter))
+                ? "Filed (or routed here)"
+                : "Filed",
               type: "line",
               data: points.map((point) => point.received),
               lineStyle: { width: 2, type: "dashed" },
@@ -178,7 +295,10 @@ export function OutcomesChart({
           ],
         }}
       />
-      <SourceCaption source={source} what={sourceName} />
+      <figcaption>
+        <SourceCaption source={source} what={sourceName} />
+        <Notes points={points} breaks={breaks} suspects={suspects} />
+      </figcaption>
     </Paper>
   );
 }
@@ -253,6 +373,7 @@ export function WaitChart({
   place,
   suppressed,
   processingTimeSeries,
+  breaks = [],
 }: Props & {
   /** Why the newest quarter's time to clear the backlog is not shown, if it
    * is not (see clearingSuppressed) */
@@ -269,6 +390,9 @@ export function WaitChart({
   // clipped spikes are drawn this far above the highest other quarter
   const clippedAt =
     ceiling === null ? null : Math.round(ceiling * 1.2 * 10) / 10;
+  const suspects = points.some(
+    ({ suspect, waitMonths }) => suspect && waitMonths !== null,
+  );
   return (
     <Paper shadow="xs" p="md" mx={0} component="figure">
       <ReactEChartsCore
@@ -313,6 +437,7 @@ export function WaitChart({
                       point.processingTimes[series.key] ?? null,
                     )}`,
                 ),
+                ...pointNotes(point),
               ].join("<br />");
             },
           },
@@ -332,7 +457,7 @@ export function WaitChart({
             {
               name: estimateName,
               type: "line",
-              data: values.map((value) =>
+              data: values.map((value, index) =>
                 value !== null &&
                 ceiling !== null &&
                 clippedAt !== null &&
@@ -347,10 +472,11 @@ export function WaitChart({
                         formatter: "off scale",
                       },
                     }
-                  : value,
+                  : marked(value, points[index].suspect, APPROVED_COLOR),
               ),
               lineStyle: { width: 2 },
               symbolSize: 8,
+              markLine: breakLines(points, breaks),
             },
             ...processingTimeSeries.map((series) => ({
               name: officialName(series),
@@ -372,6 +498,7 @@ export function WaitChart({
           " USCIS's median is how long the cases it decided in the quarter had taken."}
         {ceiling !== null &&
           " A triangle marks a quarter far off the top of the scale, such as one in which USCIS decided almost nothing; hover over or tap it for its numbers."}
+        <Notes points={points} breaks={breaks} suspects={suspects} />
       </figcaption>
     </Paper>
   );

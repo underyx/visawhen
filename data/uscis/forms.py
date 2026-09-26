@@ -771,8 +771,15 @@ def parse_value(text: str) -> int | None:
     return None
 
 
-def parse_counts(cells: list[str]) -> Counts | None:
-    """Received, approved, denied and pending, or None when these cells are not a data row."""
+def parse_counts(cells: list[str], *, dash_pending_unknown: bool = False) -> Counts | None:
+    """Received, approved, denied and pending, or None when these cells are not a data row.
+
+    With `dash_pending_unknown` (the all-forms report), a pending "-" in a
+    quarter that received applications is unknown, not zero: USCIS puts "-"
+    in the pending column of forms it keeps no pile of (the I-870 and I-899
+    worksheets, the I-956G and I-956H), whose applications do not all get
+    decided in the quarter they come in.
+    """
     cells = [cell.strip() for cell in cells]
     if (
         len(cells) != 4
@@ -781,6 +788,8 @@ def parse_counts(cells: list[str]) -> Counts | None:
     ):
         return None
     received, approved, denied, pending = (parse_value(cell) for cell in cells)
+    if dash_pending_unknown and cells[3] == "-" and received != 0:
+        pending = None
     return Counts(
         (received, approved, denied, pending),
         frozenset(name for name, cell in zip(FIELDS, cells, strict=True) if cell == "D"),
@@ -1237,7 +1246,8 @@ def parse_all_forms_grid(report: Report, grid: list[list[str]]) -> list[FormRow]
                     cells[group.approved],
                     cells[group.denied],
                     cells[group.pending],
-                ]
+                ],
+                dash_pending_unknown=True,
             )
             if counts is None:
                 continue
@@ -1340,7 +1350,10 @@ def parse_all_forms_pdf(report: Report, content: bytes) -> list[FormRow]:
             )
             continue
         if not cumulative:
-            counts = parse_counts([values[0], values[1], values[2], values[4]])
+            counts = parse_counts(
+                [values[0], values[1], values[2], values[4]],
+                dash_pending_unknown=True,
+            )
             if counts is not None:
                 rows.append(
                     FormRow(
@@ -1355,7 +1368,9 @@ def parse_all_forms_pdf(report: Report, content: bytes) -> list[FormRow]:
                 )
             continue
         for quarter in range(1, quarters + 1):
-            counts = parse_counts(values[4 * (quarter - 1) : 4 * quarter])
+            counts = parse_counts(
+                values[4 * (quarter - 1) : 4 * quarter], dash_pending_unknown=True
+            )
             if counts is not None:
                 rows.append(
                     FormRow(
@@ -1587,6 +1602,50 @@ def check_national_vs_offices(entry: dict[str, Any]) -> None:
             )
 
 
+# Of the series (form categories) with a median in both a quarter and the
+# one before, at least this share repeating the one before to the last digit
+# means the report published the quarter before's medians again: the FY2024
+# Q3 report (April-June 2024) repeated 37 of 44, against at most 4 of 38 in
+# any other quarter since FY2021.
+REPUBLISHED_MEDIAN_SHARE = 0.5
+REPUBLISHED_MEDIAN_MIN_SERIES = 10
+
+
+def drop_republished_medians(forms: dict[str, dict[str, Any]]) -> list[str]:
+    """Drop the medians of a quarter whose report repeats the quarter before's
+    (REPUBLISHED_MEDIAN_SHARE): they say nothing about that quarter. Returns
+    those quarters, which forms.json lists, so that the pages can say why
+    they have no medians for them."""
+    quarters = sorted({q for entry in forms.values() for q in entry["quarters"]})
+    republished = []
+    for previous, quarter in pairwise(quarters):
+        same = compared = 0
+        for entry in forms.values():
+            before = {
+                variant["key"]: variant["processingTime"]
+                for variant in entry["quarters"].get(previous, {}).get("variants", [])
+            }
+            for variant in entry["quarters"].get(quarter, {}).get("variants", []):
+                earlier = before.get(variant["key"])
+                if variant["processingTime"] is None or earlier is None:
+                    continue
+                compared += 1
+                same += variant["processingTime"] == earlier
+        if (
+            compared >= REPUBLISHED_MEDIAN_MIN_SERIES
+            and same >= REPUBLISHED_MEDIAN_SHARE * compared
+        ):
+            republished.append(quarter)
+    for quarter in republished:
+        print(
+            f"::warning::the {quarter} all-forms report repeats the quarter before's medians; not using them"
+        )
+        for entry in forms.values():
+            for variant in entry["quarters"].get(quarter, {}).get("variants", []):
+                variant["processingTime"] = None
+    return republished
+
+
 def build_dataset(
     all_forms: list[tuple[Report, list[FormRow]]],
     office_reports: dict[str, list[tuple[Report, OfficeReport]]],
@@ -1629,6 +1688,7 @@ def build_dataset(
         main = max(rows, key=lambda row: row.counts[0] or 0)
         entry["title"] = FORM_TITLES.get(form, base_title(main.title))
         entry["category"] = main.category
+    republished = drop_republished_medians(forms)
 
     for family_name, reports in office_reports.items():
         family = FAMILIES[family_name]
@@ -1701,6 +1761,8 @@ def build_dataset(
         )
     return {
         "periods": periods,
+        # the quarters whose medians drop_republished_medians dropped
+        "republishedMedianQuarters": republished,
         "forms": sorted(forms.values(), key=lambda entry: entry["form"]),
     }
 
