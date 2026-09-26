@@ -1,6 +1,38 @@
 {
   "source": "https://travel.state.gov/content/travel/en/legal/visa-law0/visa-bulletin.html",
   "bulletins": {
+    "2015-10": {
+      "url": "https://travel.state.gov/content/travel/en/legal/visa-law0/visa-bulletin/2016/visa-bulletin-for-october-2015.html",
+      "finalAction": {
+        "F1": {"all": "2008-01-15", "china": "2008-01-15", "india": "2008-01-15", "mexico": "1994-11-22", "philippines": "2001-06-01"},
+        "F2A": {"all": "2014-04-15", "china": "2014-04-15", "india": "2014-04-15", "mexico": "2014-03-01", "philippines": "2014-04-15"},
+        "F2B": {"all": "2009-01-15", "china": "2009-01-15", "india": "2009-01-15", "mexico": "1995-08-01", "philippines": "2004-10-01"},
+        "F3": {"all": "2004-05-22", "china": "2004-05-22", "india": "2004-05-22", "mexico": "1994-06-08", "philippines": "1993-10-01"},
+        "F4": {"all": "2003-02-08", "china": "2003-02-08", "india": "2003-02-08", "mexico": "1997-03-22", "philippines": "1992-05-01"},
+        "EB-1": {"all": "C", "china": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "EB-2": {"all": "C", "china": "2012-01-01", "india": "2005-05-01", "mexico": "C", "philippines": "C"},
+        "EB-3": {"all": "2015-08-15", "china": "2011-10-15", "india": "2004-03-08", "mexico": "2015-08-15", "philippines": "2007-01-01"},
+        "EW": {"all": "2015-08-15", "china": "2006-01-01", "india": "2004-03-08", "mexico": "2015-08-15", "philippines": "2007-01-01"},
+        "EB-4": {"all": "C", "china": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "SR": {"all": "U", "china": "U", "india": "U", "mexico": "U", "philippines": "U"},
+        "EB-5-non-regional-center": {"all": "C", "china": "2013-10-08", "india": "C", "mexico": "C", "philippines": "C"},
+        "EB-5-regional-center": {"all": "U", "china": "U", "india": "U", "mexico": "U", "philippines": "U"}
+      },
+      "datesForFiling": {
+        "F1": {"all": "2009-05-01", "china": "2009-05-01", "india": "2009-05-01", "mexico": "1995-04-01", "philippines": "2005-09-01"},
+        "F2A": {"all": "2015-03-01", "china": "2015-03-01", "india": "2015-03-01", "mexico": "2015-03-01", "philippines": "2015-03-01"},
+        "F2B": {"all": "2010-07-01", "china": "2010-07-01", "india": "2010-07-01", "mexico": "1996-01-01", "philippines": "2005-01-01"},
+        "F3": {"all": "2005-04-01", "china": "2005-04-01", "india": "2005-04-01", "mexico": "1995-05-01", "philippines": "1995-08-01"},
+        "F4": {"all": "2004-02-01", "china": "2004-02-01", "india": "2004-02-01", "mexico": "1998-05-01", "philippines": "1993-01-01"},
+        "EB-1": {"all": "C", "china": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "EB-2": {"all": "C", "china": "2013-01-01", "india": "2009-07-01", "mexico": "C", "philippines": "C"},
+        "EB-3": {"all": "2015-09-01", "china": "2013-10-01", "india": "2005-07-01", "mexico": "2015-09-01", "philippines": "2010-01-01"},
+        "EW": {"all": "2015-09-01", "china": "2007-01-01", "india": "2005-07-01", "mexico": "2015-09-01", "philippines": "2010-01-01"},
+        "EB-4": {"all": "C", "china": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "SR": {"all": "C", "china": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "EB-5-regional-center": {"all": "C", "china": "2015-05-01", "india": "C", "mexico": "C", "philippines": "C"}
+      }
+    },
     "2015-11": {
       "url": "https://travel.state.gov/content/travel/en/legal/visa-law0/visa-bulletin/2016/visa-bulletin-for-november-2015.html",
       "finalAction": {
@@ -413,6 +445,39 @@
         "SR": {"all": "C", "china": "C", "el-salvador-guatemala-honduras": "2015-07-15", "india": "C", "mexico": "C", "philippines": "C"},
         "EB-5-non-regional-center": {"all": "C", "china": "2014-03-08", "el-salvador-guatemala-honduras": "C", "india": "C", "mexico": "C", "philippines": "C"},
         "EB-5-regional-center": {"all": "C", "china": "2014-03-08", "el-salvador-guatemala-honduras": "C", "india": "C", "mexico": "C", "philippines": "C"}
+      },
+      "datesForFiling": {
+        "F1": {"all": "2011-01-01", "china": "2011-01-01", "india": "2011-01-01", "mexico": "1995-06-01", "philippines": "2006-05-01"},
+        "F2A": {"all": "2015-11-22", "china": "2015-11-22", "india": "2015-11-22", "mexico": "2015-11-22", "philippines": "2015-11-22"},
+        "F2B": {"all": "2011-02-08", "china": "2011-02-08", "india": "2011-02-08", "mexico": "1996-06-01", "philippines": "2007-02-01"},
+        "F3": {"all": "2005-08-22", "china": "2005-08-22", "india": "2005-08-22", "mexico": "1995-05-01", "philippines": "1995-01-01"},
+        "F4": {"all": "2004-07-01", "china": "2004-07-01", "india": "2004-05-01", "mexico": "1997-12-01", "philippines": "1994-04-01"},
+        "EB-1": {"all": "C", "china": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "EB-2": {"all": "C", "china": "2013-03-01", "india": "2009-04-22", "mexico": "C", "philippines": "C"},
+        "EB-3": {"all": "C", "china": "2014-05-01", "india": "2005-07-01", "mexico": "C", "philippines": "2013-09-01"},
+        "EW": {"all": "C", "china": "2009-08-01", "india": "2005-07-01", "mexico": "C", "philippines": "2013-09-01"},
+        "EB-4": {"all": "C", "china": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "SR": {"all": "C", "china": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "EB-5-non-regional-center": {"all": "C", "china": "2014-06-15", "india": "C", "mexico": "C", "philippines": "C"},
+        "EB-5-regional-center": {"all": "C", "china": "2014-06-15", "india": "C", "mexico": "C", "philippines": "C"}
+      }
+    },
+    "2016-12": {
+      "url": "https://travel.state.gov/content/travel/en/legal/visa-law0/visa-bulletin/2017/visa-bulletin-for-december-2016.html",
+      "finalAction": {
+        "F1": {"all": "2009-12-01", "china": "2009-12-01", "india": "2009-12-01", "mexico": "1995-04-15", "philippines": "2005-09-15"},
+        "F2A": {"all": "2015-02-22", "china": "2015-02-22", "india": "2015-02-22", "mexico": "2015-02-15", "philippines": "2015-02-22"},
+        "F2B": {"all": "2010-05-08", "china": "2010-05-08", "india": "2010-05-08", "mexico": "1995-10-15", "philippines": "2006-03-01"},
+        "F3": {"all": "2005-02-15", "china": "2005-02-15", "india": "2005-02-15", "mexico": "1994-12-08", "philippines": "1994-08-15"},
+        "F4": {"all": "2003-12-22", "china": "2003-10-01", "india": "2003-04-01", "mexico": "1997-05-15", "philippines": "1993-05-22"},
+        "EB-1": {"all": "C", "china": "C", "el-salvador-guatemala-honduras": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "EB-2": {"all": "C", "china": "2012-09-22", "el-salvador-guatemala-honduras": "C", "india": "2008-02-01", "mexico": "C", "philippines": "C"},
+        "EB-3": {"all": "2016-07-01", "china": "2013-07-01", "el-salvador-guatemala-honduras": "2016-07-01", "india": "2005-03-15", "mexico": "2016-07-01", "philippines": "2011-06-01"},
+        "EW": {"all": "2016-07-01", "china": "2005-11-01", "el-salvador-guatemala-honduras": "2016-07-01", "india": "2005-03-15", "mexico": "2016-07-01", "philippines": "2011-06-01"},
+        "EB-4": {"all": "C", "china": "C", "el-salvador-guatemala-honduras": "2015-07-15", "india": "C", "mexico": "2015-07-15", "philippines": "C"},
+        "SR": {"all": "C", "china": "C", "el-salvador-guatemala-honduras": "2015-07-15", "india": "C", "mexico": "2015-07-15", "philippines": "C"},
+        "EB-5-non-regional-center": {"all": "C", "china": "2014-03-22", "el-salvador-guatemala-honduras": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "EB-5-regional-center": {"all": "C", "china": "2014-03-22", "el-salvador-guatemala-honduras": "C", "india": "C", "mexico": "C", "philippines": "C"}
       },
       "datesForFiling": {
         "F1": {"all": "2011-01-01", "china": "2011-01-01", "india": "2011-01-01", "mexico": "1995-06-01", "philippines": "2006-05-01"},
@@ -2540,6 +2605,45 @@
         "SR": {"all": "C", "china": "C", "el-salvador-guatemala-honduras": "2017-06-15", "india": "C", "mexico": "C", "philippines": "C"},
         "EB-5-non-regional-center": {"all": "C", "china": "C", "el-salvador-guatemala-honduras": "C", "india": "C", "mexico": "C", "philippines": "C"},
         "EB-5-regional-center": {"all": "C", "china": "2015-12-15", "el-salvador-guatemala-honduras": "C", "india": "C", "mexico": "C", "philippines": "C"}
+      }
+    },
+    "2022-05": {
+      "url": "https://travel.state.gov/content/travel/en/legal/visa-law0/visa-bulletin/2022/visa-bulletin-for-may-2022.html",
+      "finalAction": {
+        "F1": {"all": "2014-12-01", "china": "2014-12-01", "india": "2014-12-01", "mexico": "2000-01-01", "philippines": "2012-03-01"},
+        "F2A": {"all": "C", "china": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "F2B": {"all": "2015-09-22", "china": "2015-09-22", "india": "2015-09-22", "mexico": "2001-01-01", "philippines": "2011-10-22"},
+        "F3": {"all": "2008-11-22", "china": "2008-11-22", "india": "2008-11-22", "mexico": "1997-09-15", "philippines": "2002-06-08"},
+        "F4": {"all": "2007-03-22", "china": "2007-03-22", "india": "2005-09-15", "mexico": "2000-01-01", "philippines": "2002-08-22"},
+        "EB-1": {"all": "C", "china": "C", "el-salvador-guatemala-honduras": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "EB-2": {"all": "C", "china": "2019-03-01", "el-salvador-guatemala-honduras": "C", "india": "2013-09-01", "mexico": "C", "philippines": "C"},
+        "EB-3": {"all": "C", "china": "2018-03-22", "el-salvador-guatemala-honduras": "C", "india": "2012-01-15", "mexico": "C", "philippines": "C"},
+        "EW": {"all": "C", "china": "2012-06-01", "el-salvador-guatemala-honduras": "C", "india": "2012-01-15", "mexico": "C", "philippines": "C"},
+        "EB-4": {"all": "C", "china": "C", "el-salvador-guatemala-honduras": "2017-05-01", "india": "C", "mexico": "2020-04-01", "philippines": "C"},
+        "SR": {"all": "C", "china": "C", "el-salvador-guatemala-honduras": "2017-05-01", "india": "C", "mexico": "2020-04-01", "philippines": "C"},
+        "EB-5-unreserved": {"all": "C", "china": "C", "el-salvador-guatemala-honduras": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "EB-5-unreserved-regional-center": {"all": "C", "china": "2015-11-22", "el-salvador-guatemala-honduras": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "EB-5-rural": {"all": "C", "china": "C", "el-salvador-guatemala-honduras": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "EB-5-high-unemployment": {"all": "C", "china": "C", "el-salvador-guatemala-honduras": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "EB-5-infrastructure": {"all": "C", "china": "C", "el-salvador-guatemala-honduras": "C", "india": "C", "mexico": "C", "philippines": "C"}
+      },
+      "datesForFiling": {
+        "F1": {"all": "2016-05-15", "china": "2016-05-15", "india": "2016-05-15", "mexico": "2001-05-01", "philippines": "2015-04-22"},
+        "F2A": {"all": "C", "china": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "F2B": {"all": "2016-09-22", "china": "2016-09-22", "india": "2016-09-22", "mexico": "2001-05-01", "philippines": "2013-10-01"},
+        "F3": {"all": "2009-08-22", "china": "2009-08-22", "india": "2009-08-22", "mexico": "2001-03-01", "philippines": "2003-11-08"},
+        "F4": {"all": "2007-10-01", "china": "2007-10-01", "india": "2006-02-22", "mexico": "2001-03-01", "philippines": "2004-04-22"},
+        "EB-1": {"all": "C", "china": "C", "el-salvador-guatemala-honduras": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "EB-2": {"all": "C", "china": "2019-04-01", "el-salvador-guatemala-honduras": "C", "india": "2014-12-01", "mexico": "C", "philippines": "C"},
+        "EB-3": {"all": "C", "china": "2018-04-01", "el-salvador-guatemala-honduras": "C", "india": "2012-01-22", "mexico": "C", "philippines": "C"},
+        "EW": {"all": "C", "china": "2015-08-01", "el-salvador-guatemala-honduras": "C", "india": "2012-01-22", "mexico": "C", "philippines": "C"},
+        "EB-4": {"all": "C", "china": "C", "el-salvador-guatemala-honduras": "2017-06-15", "india": "C", "mexico": "C", "philippines": "C"},
+        "SR": {"all": "C", "china": "C", "el-salvador-guatemala-honduras": "2017-06-15", "india": "C", "mexico": "C", "philippines": "C"},
+        "EB-5-unreserved": {"all": "C", "china": "C", "el-salvador-guatemala-honduras": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "EB-5-unreserved-regional-center": {"all": "C", "china": "2015-12-15", "el-salvador-guatemala-honduras": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "EB-5-rural": {"all": "C", "china": "C", "el-salvador-guatemala-honduras": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "EB-5-high-unemployment": {"all": "C", "china": "C", "el-salvador-guatemala-honduras": "C", "india": "C", "mexico": "C", "philippines": "C"},
+        "EB-5-infrastructure": {"all": "C", "china": "C", "el-salvador-guatemala-honduras": "C", "india": "C", "mexico": "C", "philippines": "C"}
       }
     },
     "2022-06": {
