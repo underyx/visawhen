@@ -21,7 +21,8 @@ from these, in order:
    counts as not served).
 2. The same page on adoption.state.gov, which State serves without Cloudflare
    in front of it. The host is not advertised and could go away.
-3. The newest Wayback Machine capture of either page.
+3. The Wayback Machine's capture of the page on either host nearest to the
+   bulletin's month (for State's list of bulletins, nearest to today).
 
 A month that is already in data.json is never fetched or overwritten again:
 State publishes each bulletin once, about the middle of the month before, and
@@ -72,7 +73,6 @@ DATA_PATH = HERE / "data.json"
 BULLETINS_PATH = "/content/travel/en/legal/visa-law0/visa-bulletin"
 INDEX_PATH = f"{BULLETINS_PATH}.html"
 LIVE_HOSTS = ("https://travel.state.gov", "https://adoption.state.gov")
-CDX_URL = "https://web.archive.org/cdx/search/cdx"
 WAYBACK_URL = "https://web.archive.org/web/{timestamp}id_/{url}"
 SAVE_URL = "https://web.archive.org/save/{url}"
 TIMEOUT = 60
@@ -151,14 +151,18 @@ EMPLOYMENT_CATEGORIES = {
     "EB-4": re.compile(r"4th$"),
     # EB-4 for religious workers other than ministers
     "SR": re.compile(r"certain religious workers$"),
-    # the EB-5 rows since the EB-5 Reform and Integrity Act of 2022
+    # the EB-5 rows since the EB-5 Reform and Integrity Act of 2022; in May
+    # 2022 alone, the regional center investors (I5 and R5) had a row of their
+    # own, "5th Unreserved (I5 and R5)"
+    "EB-5-unreserved-regional-center": re.compile(r"5th unreserved.*\bi5 and r5\b"),
     "EB-5-unreserved": re.compile(r"5th unreserved"),
     "EB-5-rural": re.compile(r"5th set aside.*rural"),
     "EB-5-high-unemployment": re.compile(r"5th set aside.*high unemployment"),
     "EB-5-infrastructure": re.compile(r"5th set aside.*infrastructure"),
-    # and before it
+    # and before it; until October 2015, the regional center row was
+    # "5th Targeted Employment Areas/ Regional Centers and Pilot Programs"
     "EB-5-non-regional-center": re.compile(r"5th non-regional center"),
-    "EB-5-regional-center": re.compile(r"5th regional center"),
+    "EB-5-regional-center": re.compile(r"5th (regional center|targeted employment areas)"),
 }
 
 # One chart: category -> area -> "2020-01-22", "C" or "U"
@@ -349,62 +353,40 @@ def fetch_page(session: requests.Session, url: str) -> str | None:
     return response.text
 
 
-def wayback_get(
-    session: requests.Session, url: str, params: dict[str, str] | None = None
-) -> requests.Response | None:
-    """GET from web.archive.org, retrying through its transient 5xx pages and resets."""
+def wayback_get(session: requests.Session, url: str) -> requests.Response | None:
+    """GET from web.archive.org, retrying through its transient 5xx pages and
+    resets; None when it fails, or at once when the archive has no capture."""
     for attempt in range(1, WAYBACK_ATTEMPTS + 1):
         try:
-            response = session.get(url, params=params, timeout=TIMEOUT)
+            response = session.get(url, timeout=TIMEOUT)
         except requests.RequestException as error:
             print(f"Wayback request failed ({attempt}/{WAYBACK_ATTEMPTS}): {error}")
         else:
             if response.status_code == 200:
                 return response
             print(f"Wayback returned HTTP {response.status_code} ({attempt}/{WAYBACK_ATTEMPTS}) for {response.url}")
+            if response.status_code < 500:
+                return None
         if attempt < WAYBACK_ATTEMPTS:
             time.sleep(5 * attempt)
     return None
 
 
-def newest_capture(session: requests.Session, path: str) -> tuple[str, str] | None:
-    """(timestamp, url) of the newest HTTP 200 capture of the page on either host"""
-    captures: list[tuple[str, str]] = []
-    for host in LIVE_HOSTS:
-        url = f"{host}{path}"
-        response = wayback_get(
-            session,
-            CDX_URL,
-            params={"url": url, "output": "json", "fl": "timestamp", "filter": "statuscode:200", "limit": "-1"},
-        )
-        if response is None:
-            continue
-        try:
-            rows = response.json()
-        except ValueError:
-            print(f"CDX API returned non-JSON: {response.text[:200]!r}")
-            continue
-        # the first row is a header (only present when there are results at all)
-        captures += [(row[0], url) for row in rows[1:]]
-    return max(captures, default=None)
-
-
-def fetch_pages(session: requests.Session, path: str) -> Iterator[tuple[str, str]]:
+def fetch_pages(session: requests.Session, path: str, near: str) -> Iterator[tuple[str, str]]:
     """The page at path from each source that serves it, in order, as (where
-    from, its HTML); the Wayback Machine is asked only when the caller asks
-    for more than the live hosts gave."""
+    from, its HTML); the Wayback Machine, for its capture of the page on
+    either host nearest to the day near ("20161215"), is asked only when the
+    caller asks for more than the live hosts gave. The archive finds the
+    nearest capture itself, so that this does not depend on its search API,
+    which is often down."""
     for host in LIVE_HOSTS:
         html = fetch_page(session, f"{host}{path}")
         if html is not None:
             yield f"{host}{path}", html
-    capture = newest_capture(session, path)
-    if capture is None:
-        print(f"The Wayback Machine has no capture of {path}")
-        return
-    timestamp, url = capture
-    response = wayback_get(session, WAYBACK_URL.format(timestamp=timestamp, url=url))
-    if response is not None:
-        yield f"Wayback capture {timestamp} of {url}", response.text
+    for host in LIVE_HOSTS:
+        response = wayback_get(session, WAYBACK_URL.format(timestamp=near, url=f"{host}{path}"))
+        if response is not None and not is_challenge(response.text):
+            yield f"Wayback capture {response.url}", response.text
 
 
 def bulletin_path(month: str) -> str:
@@ -415,10 +397,10 @@ def bulletin_path(month: str) -> str:
     return f"{BULLETINS_PATH}/{fiscal_year}/visa-bulletin-for-{MONTH_NAMES[month_number - 1]}-{year}.html"
 
 
-def listed_bulletins(session: requests.Session) -> dict[str, str] | None:
+def listed_bulletins(session: requests.Session, today: date) -> dict[str, str] | None:
     """The bulletins State's Visa Bulletin page links to, as month -> path, or
     None when no source serves the page."""
-    for source, html in fetch_pages(session, INDEX_PATH):
+    for source, html in fetch_pages(session, INDEX_PATH, today.strftime("%Y%m%d")):
         listed: dict[str, str] = {}
         for match in BULLETIN_LINK_PATTERN.finditer(html):
             if match["month"] not in MONTH_NAMES:
@@ -432,9 +414,10 @@ def listed_bulletins(session: requests.Session) -> dict[str, str] | None:
     return None
 
 
-def next_month(month: str) -> str:
-    year, month_number = int(month[:4]), int(month[5:])
-    return f"{year + month_number // 12}-{month_number % 12 + 1:02d}"
+def addmonths(month: str, months: int) -> str:
+    """The month some months after another: ("2026-10", -1) is "2026-09" """
+    index = int(month[:4]) * 12 + int(month[5:]) - 1 + months
+    return f"{index // 12}-{index % 12 + 1:02d}"
 
 
 def save_page_now(session: requests.Session, url: str) -> None:
@@ -455,12 +438,12 @@ def save_page_now(session: requests.Session, url: str) -> None:
 def fetch(data: Data, today: date) -> int:
     session = requests.Session()
     session.headers.update(HEADERS)
-    listed = listed_bulletins(session) or {}
+    listed = listed_bulletins(session, today) or {}
     # The list may be behind, or unreachable: try this month's and next
     # month's addresses as well. State publishes a bulletin around the middle
     # of the month before.
     this_month = f"{today.year}-{today.month:02d}"
-    for month in (this_month, next_month(this_month)):
+    for month in (this_month, addmonths(this_month, 1)):
         listed.setdefault(month, bulletin_path(month))
     wanted = sorted(month for month in listed if month >= FIRST_MONTH and month not in data["bulletins"])
     print(f"Newest bulletin in {DATA_PATH.name}: {max(data['bulletins'], default='none')}; fetching {wanted}")
@@ -469,7 +452,9 @@ def fetch(data: Data, today: date) -> int:
     unparseable: list[str] = []
     for month in wanted:
         errors: list[str] = []
-        for source, html in fetch_pages(session, listed[month]):
+        # the middle of the month before, around when State publishes it
+        near = f"{addmonths(month, -1).replace('-', '')}15"
+        for source, html in fetch_pages(session, listed[month], near):
             try:
                 add_bulletin(data, month, f"{LIVE_HOSTS[0]}{listed[month]}", html)
             except ParseError as error:
