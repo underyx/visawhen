@@ -297,24 +297,11 @@ def load_data(path: Path) -> Data:
 
 
 def save_data(data: Data, path: Path) -> None:
-    """One line per category, so that a new bulletin is a readable diff."""
-    bulletins = data["bulletins"]
-    lines = ["{", f'  "source": {json.dumps(data["source"])},', '  "bulletins": {']
-    for index, month in enumerate(sorted(bulletins)):
-        bulletin = bulletins[month]
-        lines.append(f"    {json.dumps(month)}: {{")
-        lines.append(f'      "url": {json.dumps(bulletin["url"])},')
-        charts = (("finalAction", bulletin["finalAction"]), ("datesForFiling", bulletin["datesForFiling"]))
-        for chart_index, (chart_name, chart) in enumerate(charts):
-            lines.append(f"      {json.dumps(chart_name)}: {{")
-            categories = list(chart)
-            for category_index, category in enumerate(categories):
-                comma = "," if category_index < len(categories) - 1 else ""
-                lines.append(f"        {json.dumps(category)}: {json.dumps(chart[category])}{comma}")
-            lines.append("      }" + ("," if chart_index == 0 else ""))
-        lines.append("    }" + ("," if index < len(bulletins) - 1 else ""))
-    lines += ["  }", "}", ""]
-    path.write_text("\n".join(lines), encoding="utf-8")
+    """Months in order, formatted as Prettier (pre-commit) would."""
+    data["bulletins"] = dict(sorted(data["bulletins"].items()))
+    with path.open("w", encoding="utf-8") as data_file:
+        json.dump(data, data_file, indent=2, ensure_ascii=False)
+        data_file.write("\n")
 
 
 def add_bulletin(data: Data, month: str, url: str, html: str) -> None:
