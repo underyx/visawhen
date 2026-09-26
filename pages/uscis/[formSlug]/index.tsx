@@ -33,10 +33,10 @@ import {
   formatRangeMonths,
   headlineRange,
   PREMIUM_PROCESSING,
+  PRIORITY_DATE_CUTOFFS,
   PRIORITY_DATE_TEXT,
   withoutMisleadingClearing,
 } from "../../../components/estimate";
-import { VISA_BULLETIN_URL } from "../../../components/links";
 import { RELATED_FORMS } from "../../../components/relatedForms";
 import {
   ALL_CATEGORIES,
@@ -492,14 +492,15 @@ export default function UscisForm({
                         {PRIORITY_DATE_TEXT[form]?.[range.key]?.(
                           formatMedian(range.median),
                         ) ?? "Depends on your priority date:"}{" "}
-                        see the{" "}
+                        see{" "}
                         <Anchor
-                          href={VISA_BULLETIN_URL}
-                          target="_blank"
-                          rel="noopener"
+                          component={Link}
+                          href={
+                            PRIORITY_DATE_CUTOFFS[range.key] ?? "/visa-bulletin"
+                          }
                           inherit
                         >
-                          Visa Bulletin
+                          today&rsquo;s cutoff dates
                         </Anchor>
                         .
                       </Table.Td>

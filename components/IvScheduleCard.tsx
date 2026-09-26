@@ -1,4 +1,5 @@
 import { Alert, Anchor, Box, Paper, Stack, Text, Title } from "@mantine/core";
+import Link from "next/link";
 import React from "react";
 import {
   FEW_IMMIGRANT_VISAS,
@@ -12,12 +13,7 @@ import {
   monthsBehind,
 } from "./consulates";
 import { daysBetween, formatShortDate, useToday } from "./Freshness";
-import {
-  AFRICA_HUBS_URL,
-  EMBASSIES_URL,
-  IV_POSTS_URL,
-  VISA_BULLETIN_URL,
-} from "./links";
+import { AFRICA_HUBS_URL, EMBASSIES_URL, IV_POSTS_URL } from "./links";
 import MoreDetails from "./MoreDetails";
 import { hasEnded, overridesUpdate, PolicyEntry } from "./policy";
 /** State updates the tool monthly, so an update older than this means we
@@ -605,12 +601,7 @@ export default function IvScheduleCard({
             wait time: it is the month most interviews are being scheduled for
             now, and it can move backwards. Family preference and employment
             cases also need a current priority date in the{" "}
-            <Anchor
-              href={VISA_BULLETIN_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              inherit
-            >
+            <Anchor component={Link} href="/visa-bulletin" inherit>
               Visa Bulletin
             </Anchor>
             .

@@ -3,17 +3,12 @@ import Head from "next/head";
 import Link from "next/link";
 import React from "react";
 import {
+  ADJUSTMENT_FILING_CHARTS_URL,
   DOL_PROCESSING_TIMES_URL,
   GLOBAL_VISA_WAIT_TIMES_URL,
   I751_URL,
-  VISA_BULLETIN_URL,
 } from "../components/links";
 import classes from "../components/Home.module.css";
-
-/** USCIS's page saying, each month, which Visa Bulletin chart decides who
- * may file an I-485 in each preference category */
-const ADJUSTMENT_FILING_CHARTS_URL =
-  "https://www.uscis.gov/green-card/green-card-processes-and-procedures/visa-availability-priority-dates/adjustment-of-status-filing-charts-from-the-visa-bulletin";
 
 /** USCIS's eligibility page for immediate relatives' green cards, which says
  * who can adjust status in the US */
@@ -25,13 +20,15 @@ const IMMEDIATE_RELATIVE_ELIGIBILITY_URL =
 const H1B_REGISTRATION_URL =
   "https://www.uscis.gov/working-in-the-united-states/temporary-workers/h-1b-specialty-occupations-and-fashion-models/h-1b-electronic-registration-process";
 
-/** How the Visa Bulletin's two charts apply, for the preference paths */
-function PriorityDateCharts() {
+/** Where to see today's cutoffs, and how the Visa Bulletin's two charts
+ * apply, for the preference paths; cutoffs is the Visa Bulletin page's
+ * table for the path */
+function PriorityDateCharts({ cutoffs }: { cutoffs: string }) {
   return (
     <>
-      The <To href={VISA_BULLETIN_URL}>Visa Bulletin</To> has two charts. In the
-      US, USCIS says each month which of them decides when you can file the
-      I-485, on its{" "}
+      See <To href={cutoffs}>today&rsquo;s cutoff dates</To>. The Visa Bulletin
+      has two charts. In the US, USCIS says each month which of them decides
+      when you can file the I-485, on its{" "}
       <To href={ADJUSTMENT_FILING_CHARTS_URL}>filing charts page</To>. Abroad,
       NVC can have you send your documents once the Dates for Filing chart
       passes your date, before an interview is possible: that needs your date to
@@ -258,7 +255,8 @@ export default function Home() {
             </>,
             <>
               Your priority date: in most categories you wait for it to be
-              reached. <PriorityDateCharts />
+              reached.{" "}
+              <PriorityDateCharts cutoffs="/visa-bulletin#employment" />
             </>,
             <>
               In the US:{" "}
@@ -281,7 +279,7 @@ export default function Home() {
             </>,
             <>
               Your priority date: you wait, often for years, for it to be
-              reached. <PriorityDateCharts />
+              reached. <PriorityDateCharts cutoffs="/visa-bulletin#family" />
             </>,
             <>
               Abroad: <To href="/nvc">the National Visa Center</To> and an{" "}

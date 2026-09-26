@@ -3,6 +3,7 @@
 }
 
 .brand {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -19,8 +20,36 @@
 }
 
 .links {
+  /* the links' offsetLeft is from here (useHiddenLinks) */
+  position: relative;
   display: flex;
   gap: var(--mantine-spacing-md);
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.links::-webkit-scrollbar {
+  display: none;
+}
+
+/* links past an edge: fade it out, so the cut is seen as one */
+.links[data-hidden="left"] {
+  mask-image: linear-gradient(to right, transparent, #000 32px);
+}
+
+.links[data-hidden="right"] {
+  mask-image: linear-gradient(to left, transparent, #000 32px);
+}
+
+.links[data-hidden="both"] {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 32px,
+    #000 calc(100% - 32px),
+    transparent
+  );
 }
 
 @media (max-width: $mantine-breakpoint-xs) {
@@ -30,6 +59,8 @@
 }
 
 .link {
+  flex-shrink: 0;
+  white-space: nowrap;
   color: var(--mantine-color-ink-1);
   font-weight: 600;
   font-size: var(--mantine-font-size-sm);

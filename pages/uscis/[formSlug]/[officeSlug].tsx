@@ -30,10 +30,10 @@ import {
   fourQuarterClearing,
   headlineRange,
   movedDirection,
+  PRIORITY_DATE_CUTOFFS,
   routedQuarters,
   withoutMisleadingClearing,
 } from "../../../components/estimate";
-import { VISA_BULLETIN_URL } from "../../../components/links";
 import {
   ALL_CATEGORIES,
   CHART_QUARTERS,
@@ -355,9 +355,13 @@ function NationalRange({
   if (range.priorityDate)
     return (
       <>
-        For {rangeWho} cases, the wait depends on the priority date: see the{" "}
-        <Anchor href={VISA_BULLETIN_URL} target="_blank" rel="noopener" inherit>
-          Visa Bulletin
+        For {rangeWho} cases, the wait depends on the priority date: see{" "}
+        <Anchor
+          component={Link}
+          href={PRIORITY_DATE_CUTOFFS[range.key] ?? "/visa-bulletin"}
+          inherit
+        >
+          today&rsquo;s cutoff dates
         </Anchor>
         .{" "}
       </>

@@ -47,6 +47,8 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 };
 
 interface CutoffTableProps {
+  /** The section's anchor, which other pages link to */
+  id: string;
   title: string;
   categories: Category[];
   chart: BulletinChart;
@@ -54,13 +56,14 @@ interface CutoffTableProps {
 
 /** One kind's categories (family or employment), a row each, with a column
  * per chargeability area; each cell links to its page */
-function CutoffTable({ title, categories, chart }: CutoffTableProps) {
+function CutoffTable({ id, title, categories, chart }: CutoffTableProps) {
   const shown = categories.filter(({ key }) => key in chart);
   const areas: Area[] = chartAreas(
     Object.fromEntries(shown.map(({ key }) => [key, chart[key]])),
   );
   return (
-    <Stack gap="xs">
+    // below the fixed header when a link jumps here
+    <Stack gap="xs" id={id} style={{ scrollMarginTop: "5rem" }}>
       <Title order={2}>{title}</Title>
       <Table.ScrollContainer minWidth={720}>
         <Table striped withTableBorder>
@@ -193,11 +196,13 @@ export default function VisaBulletinIndex({
         </List>
       </Stack>
       <CutoffTable
+        id="family"
         title="Family"
         categories={CATEGORIES.filter(({ kind }) => kind === "family")}
         chart={chart}
       />
       <CutoffTable
+        id="employment"
         title="Employment"
         categories={CATEGORIES.filter(({ kind }) => kind === "employment")}
         chart={chart}
