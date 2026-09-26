@@ -1,5 +1,3 @@
-import { VISA_BULLETIN_URL } from "./links";
-
 interface RelatedLink {
   href: string;
   text: string;
@@ -50,7 +48,7 @@ export const RELATED_FORMS: Partial<
     lead: "After the I-140 come",
     links: [
       {
-        href: VISA_BULLETIN_URL,
+        href: "/visa-bulletin#employment",
         text: "your priority date in the Visa Bulletin",
       },
       { href: "/uscis/i-485", text: "the I-485 in the US" },

@@ -114,6 +114,14 @@ export const PRIORITY_DATE_CATEGORIES: Record<string, string[]> = {
   "I-485": ["employment"],
 };
 
+/** Where this site lists today's cutoff dates for each category in
+ * PRIORITY_DATE_CATEGORIES (Variant.key): the family or employment table
+ * of the Visa Bulletin page */
+export const PRIORITY_DATE_CUTOFFS: Record<string, string> = {
+  "all-other-relative": "/visa-bulletin#family",
+  employment: "/visa-bulletin#employment",
+};
+
 /** What the "If you file today" table says instead of a range for a
  * priority-date category, per form and category, given USCIS's median for
  * those it decided (formatMedian). USCIS does decide many of these each

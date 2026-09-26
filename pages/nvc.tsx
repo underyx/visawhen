@@ -22,7 +22,7 @@ import {
   reviewRange,
   ReviewRange,
 } from "../components/nvcReview";
-import { NVC_TIMEFRAMES_URL, VISA_BULLETIN_URL } from "../components/links";
+import { NVC_TIMEFRAMES_URL } from "../components/links";
 
 interface Props {
   data: NvcData;
@@ -402,11 +402,7 @@ export default function NvcBacklog({ data }: Props) {
           </Anchor>
           . In the family and employment preference categories, the longest wait
           is usually for your priority date, often years: once the{" "}
-          <Anchor
-            href={VISA_BULLETIN_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <Anchor component={Link} href="/visa-bulletin">
             Visa Bulletin
           </Anchor>
           &rsquo;s Dates for Filing chart passes it, NVC can tell you to send
