@@ -34,7 +34,8 @@
   font-weight: 600;
   font-size: var(--mantine-font-size-sm);
   text-decoration: none;
-  padding-block: 6px;
+  /* a tap target the height of most of the header */
+  padding-block: 14px 12px;
   border-bottom: 2px solid transparent;
 }
 
@@ -57,6 +58,7 @@
   font-size: var(--mantine-font-size-sm);
   text-decoration: none;
   padding: 6px 12px;
+  min-height: 40px;
   border: 1px solid var(--mantine-color-ink-4);
   border-radius: var(--mantine-radius-sm);
 }

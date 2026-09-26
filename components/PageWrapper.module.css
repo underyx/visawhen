@@ -8,6 +8,15 @@
   background-color: var(--vw-paper);
 }
 
+/* No side padding from the shell on phones: the Container's own gutter is
+ * enough there, and the two together left under 300px for the text on a
+ * small phone. Doubled class to win over Mantine's own rule. */
+@media (max-width: $mantine-breakpoint-sm) {
+  .main.main {
+    padding-inline: 0;
+  }
+}
+
 .footer {
   margin-top: calc(var(--mantine-spacing-xl) * 2);
   padding-block: var(--mantine-spacing-xl);

@@ -63,8 +63,9 @@ const theme = createTheme({
     xs: "0.8125rem",
     sm: "0.9375rem",
     md: "1.0625rem",
-    lg: "1.3125rem",
-    xl: "1.625rem",
+    // the two large sizes shrink on phones, where most visitors are
+    lg: "clamp(1.1875rem, 1.05rem + 0.6vw, 1.3125rem)",
+    xl: "clamp(1.3125rem, 1.1rem + 1vw, 1.625rem)",
   },
   // larger text needs less leading
   lineHeights: { xs: "1.45", sm: "1.5", md: "1.55", lg: "1.4", xl: "1.3" },

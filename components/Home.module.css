@@ -40,6 +40,13 @@
   text-decoration: none;
 }
 
+@media (max-width: $mantine-breakpoint-xs) {
+  .index a {
+    padding: 6px 10px;
+    font-size: var(--mantine-font-size-xs);
+  }
+}
+
 .index a:hover {
   border-color: var(--vw-stamp);
   color: var(--vw-stamp);
