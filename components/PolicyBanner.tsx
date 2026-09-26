@@ -11,6 +11,7 @@ import {
 import { sortBy } from "lodash";
 import React from "react";
 import { daysBetween, formatShortDate, useToday } from "./Freshness";
+import MoreDetails from "./MoreDetails";
 import {
   ConsulatePage,
   hasEnded,
@@ -35,6 +36,9 @@ function hasExpired(entry: PolicyEntry, today: string | null): boolean {
   );
 }
 
+/** An entry's summary, with its body, sources and the day it was last
+ * checked behind "Details". Its status and end date stay in view, as badges,
+ * since they change what the summary means. */
 function EntryDetails({
   entry,
   today,
@@ -58,11 +62,11 @@ function EntryDetails({
   // to read on the orange of an official notice.
   return (
     <Stack gap="xs">
-      {(entry.status === "reported" || entry.end !== null) && (
+      {(entry.status === "reported" || entry.end !== null || unchecked) && (
         <Group gap="xs">
           {entry.status === "reported" && (
             <Badge {...badgeProps} variant="filled" color="gray.7">
-              Reported; no State Department notice
+              News reports only; no State Department notice
             </Badge>
           )}
           {entry.end !== null && (
@@ -71,41 +75,54 @@ function EntryDetails({
               {formatShortDate(entry.end)}
             </Badge>
           )}
+          {unchecked && (
+            <Badge {...badgeProps} variant="default">
+              May be out of date
+            </Badge>
+          )}
         </Group>
       )}
-      <Text size="sm">{entry.body}</Text>
-      <Text size="sm">
-        {entry.sources.length === 1 ? "Source" : "Sources"}:{" "}
-        {entry.sources.map((source, index) => (
-          <React.Fragment key={source.url}>
-            {index > 0 && "; "}
-            <Anchor
-              href={source.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              c="blue.9"
-              inherit
-            >
-              {source.label}
-            </Anchor>
-          </React.Fragment>
+      <Text size="sm">{entry.summary}</Text>
+      <MoreDetails>
+        {/* A blank line in the body starts a new paragraph. */}
+        {entry.body.split("\n\n").map((paragraph) => (
+          <Text key={paragraph} size="sm">
+            {paragraph}
+          </Text>
         ))}
-        .
-      </Text>
-      <Text size="sm">
-        Last checked {formatShortDate(entry.lastChecked)}
-        {unchecked ? (
-          <>
-            ;{" "}
-            <Text span inherit fw={700}>
-              this may be out of date
-            </Text>
-            .
-          </>
-        ) : (
-          "."
-        )}
-      </Text>
+        <Text size="sm">
+          {entry.sources.length === 1 ? "Source" : "Sources"}:{" "}
+          {entry.sources.map((source, index) => (
+            <React.Fragment key={source.url}>
+              {index > 0 && "; "}
+              <Anchor
+                href={source.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                c="blue.9"
+                inherit
+              >
+                {source.label}
+              </Anchor>
+            </React.Fragment>
+          ))}
+          .
+        </Text>
+        <Text size="sm">
+          Last checked {formatShortDate(entry.lastChecked)}
+          {unchecked ? (
+            <>
+              ;{" "}
+              <Text span inherit fw={700}>
+                this may be out of date
+              </Text>
+              .
+            </>
+          ) : (
+            "."
+          )}
+        </Text>
+      </MoreDetails>
     </Stack>
   );
 }
@@ -120,7 +137,7 @@ type Props =
 
 /** The policies that affect a page's visas, from data/policy.json: those
  * about the page in particular (its post, the nationality of most of its
- * applicants or its visa class) or marked `expanded` in full, and the rest,
+ * applicants or its visa class) or marked `expanded` open, and the rest,
  * such as those about every post, in one collapsed section that lists their
  * titles, so that thousands of pages do not open with the same banners. */
 export default function PolicyBanner({ consulate, immigrant, page }: Props) {

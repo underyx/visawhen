@@ -75,6 +75,13 @@ export interface PolicyEntry {
   id: string;
   status: PolicyStatus;
   title: string;
+  /** What a visitor needs to know, in one or two short sentences of plain
+   * English: most visitors read English as a second language. Shown first;
+   * the body is behind "Details". The build warns when it runs long (see
+   * api/policy.ts). */
+  summary: string;
+  /** The facts in full, with dates and who said what. A blank line starts a
+   * new paragraph. */
   body: string;
   scope: PolicyScope;
   /** Whether it is shown expanded on every page it is shown on but the

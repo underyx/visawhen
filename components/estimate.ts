@@ -144,19 +144,19 @@ export const PREMIUM_PROCESSING: Record<
 > = {
   "I-129": {
     categories: ["*"],
-    note: "Premium processing is available for most I-129 classifications: for an extra fee, USCIS acts on the petition within 15 business days. USCIS's median counts premium-processed petitions together with regular ones, so filed without it, expect the later end of the range, or longer.",
+    note: "For an extra fee, you can ask for premium processing of most I-129 petitions, and USCIS then acts within 15 business days. USCIS's median includes these fast cases, so without premium processing, expect the later end of the range, or longer.",
   },
   "I-140": {
     categories: ["*"],
-    note: "Premium processing is available for most I-140 categories: for an extra fee, USCIS acts on the petition within 15 business days (45 for some, such as national interest waivers). USCIS's median counts premium-processed petitions together with regular ones, so filed without it, expect the later end of the range, or longer.",
+    note: "For an extra fee, you can ask for premium processing of most I-140 petitions, and USCIS then acts within 15 business days (45 for some, such as national interest waivers). USCIS's median includes these fast cases, so without premium processing, expect the later end of the range, or longer.",
   },
   "I-539": {
     categories: [],
-    note: "Premium processing is available for some changes of status, such as to F, J or M: for an extra fee, USCIS acts on those within 30 days. USCIS's median counts them together with regular applications.",
+    note: "For an extra fee, you can ask for premium processing of some changes of status, such as to F, J or M, and USCIS then acts within 30 days. USCIS's median includes these fast cases.",
   },
   "I-765": {
     categories: [],
-    note: "Premium processing is available for some work permits, such as F-1 students' OPT and STEM OPT (among Other Categories): for an extra fee, USCIS acts on those within 30 days. USCIS's median counts them together with regular applications.",
+    note: "For an extra fee, you can ask for premium processing of some work permits, such as OPT and STEM OPT for F-1 students (in Other Categories), and USCIS then acts within 30 days. USCIS's median includes these fast cases.",
   },
 };
 
