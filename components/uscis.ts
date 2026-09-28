@@ -49,6 +49,10 @@ export interface QuarterPoint extends QuarterCounts {
   fromOfficeReport: boolean;
 }
 
+/** What one point of a series covers: a quarter, or for USCIS's monthly
+ * numbers (monthPoints), a month. */
+export type Span = "quarter" | "month";
+
 /** How many quarters the charts show at first: the last six years. */
 export const CHART_QUARTERS = 24;
 
@@ -128,7 +132,7 @@ function outOfLine(
  * with the flow putting Jan–Mar 2025 at 855k) makes only the odd quarter
  * `suspect`: the next quarter's count is fine, though its change from the
  * odd one is not. */
-function flowCheck(points: QuarterPoint[]): QuarterPoint[] {
+export function flowCheck(points: QuarterPoint[]): QuarterPoint[] {
   const steps = points.map((point, index) => {
     const previous = points[index - 1];
     if (previous === undefined) return null;
@@ -539,17 +543,20 @@ function formatSigned(count: number): string {
   return `${count >= 0 ? "+" : "−"}${formatCount(Math.abs(count))}`;
 }
 
-/** The quarter-over-quarter summary shown above the charts. `moved` says the
- * pending count jumped because USCIS moved cases between offices ("in" or
- * "out"), so the sentences do not read like the office fell behind or caught
- * up; a pending count whose change filings and decisions do not explain
- * (pendingChangeReliable) is not read as either. `what` is plural: "I-130
- * (Immediate Relative) applications". */
+/** The summary of what changed since the point before, shown under the
+ * cards. `moved` says the pending count jumped because USCIS moved cases
+ * between offices ("in" or "out"), so the sentences do not read like the
+ * office fell behind or caught up; a pending count whose change filings and
+ * decisions do not explain (pendingChangeReliable) is not read as either.
+ * `what` is plural: "I-130 (Immediate Relative) applications". `period` is
+ * what each point covers: a quarter, or for the monthly numbers
+ * (monthPoints), a month. */
 export function highlight(
   points: QuarterPoint[],
   subject: string,
   what: string,
   moved: "in" | "out" | null = null,
+  period: Span = "quarter",
 ): string {
   const current = points[points.length - 1];
   const previous = points[points.length - 2];
@@ -587,7 +594,7 @@ export function highlight(
           previousPending,
         )} to ${formatCount(current.pending)} in ${current.label}${
           pendingChange === null ? "" : ` (${pendingChange})`
-        }, but that quarter's filings minus its decisions come to ${formatSigned(
+        }, but that ${period}'s filings minus its decisions come to ${formatSigned(
           current.received - current.completions,
         )}, which doesn't account for the change, so we don't read it as USCIS catching up or falling behind.`,
       );
@@ -621,11 +628,11 @@ export function highlight(
     )}`;
     if (moved !== null)
       sentences.push(
-        `At that quarter's pace of decisions, clearing it, ${
+        `At that ${period}'s pace of decisions, clearing it, ${
           moved === "in"
             ? "cases moved or routed in included"
             : "without the cases moved out"
-        }, would take ${clearing}; the quarter before is not comparable.`,
+        }, would take ${clearing}; the ${period} before is not comparable.`,
       );
     else {
       const trend = comparable
@@ -641,17 +648,17 @@ export function highlight(
           : trend === "steady"
           ? formatMonths(previous.waitMonths) ===
             formatMonths(current.waitMonths)
-            ? ", the same as the quarter before"
-            : `, about the same as the quarter before (${formatMonths(
+            ? `, the same as the ${period} before`
+            : `, about the same as the ${period} before (${formatMonths(
                 previous.waitMonths,
               )})`
           : comparable &&
             formatMonths(previous.waitMonths) ===
               formatMonths(current.waitMonths)
-          ? ", as in the quarter before"
+          ? `, as in the ${period} before`
           : "";
       sentences.push(
-        `At that quarter's pace of decisions, clearing it would take ${clearing}${previousWait}.`,
+        `At that ${period}'s pace of decisions, clearing it would take ${clearing}${previousWait}.`,
       );
     }
   }
@@ -817,7 +824,7 @@ export function medianBreaks(
       breaks.push({
         quarter: point.quarter,
         label: "split by category",
-        text: `From ${point.label}, USCIS reports the ${form.form} by category; before, one row covered all of them.`,
+        text: `From ${point.label}, USCIS gives the ${form.form} numbers by category; before, it gave them only for all categories together.`,
       });
   });
   // runs of quarters in which every category's median was the same figure

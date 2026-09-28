@@ -206,9 +206,7 @@ function pointNotes(point: QuarterPoint): string[] {
     ...(point.suspect
       ? ["Pending count doesn't match filings minus decisions"]
       : []),
-    ...(point.fromOfficeReport
-      ? ["From the national totals of USCIS's per-office report"]
-      : []),
+    ...(point.fromOfficeReport ? ["The totals of all of USCIS's offices"] : []),
   ];
 }
 

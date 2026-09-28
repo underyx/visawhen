@@ -55,13 +55,12 @@ import {
   openingOfficeCategory,
   quarterLabel,
   republishedMedianQuarters,
+  Span,
   toPoints,
 } from "../../../components/uscis";
 import { OutcomesChart, WaitChart } from "../../../components/UscisChart";
 import UscisStats, { RangeText } from "../../../components/UscisStats";
-import UscisMonthly, {
-  MONTHLY_SECTION_ID,
-} from "../../../components/UscisMonthly";
+import UscisMonths from "../../../components/UscisMonths";
 import {
   monthlyNumbers,
   MonthlyNumbers,
@@ -112,7 +111,8 @@ interface Props {
    * charts leave out (republishedMedianQuarters) */
   republished: { quarter: string; label: string }[];
   /** USCIS's monthly numbers, by view (FormView.key), for the views the
-   * monthly report covers */
+   * monthly report has a row for: newer than the quarters, so the cards show
+   * them instead */
   monthly: Record<string, MonthlyNumbers>;
 }
 
@@ -120,7 +120,7 @@ interface Props {
  * what the words suggest. */
 const APPROVAL_NOTES: Record<string, string> = {
   "I-589":
-    "About the approval rate: it is the share of USCIS's own decisions that granted asylum, not the share of applicants who get asylum in the end. When an asylum office does not grant asylum to someone without legal status, it usually sends the case to an immigration court, and USCIS's report does not say if it counts these as denials.",
+    "About the approval rate: it is the share of USCIS's own decisions that granted asylum, not the share of applicants who get asylum in the end. When an asylum office does not grant asylum to someone without legal status, it usually sends the case to an immigration court, and USCIS does not say if it counts these as denials.",
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -158,7 +158,17 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const monthly = Object.fromEntries(
     views.flatMap((view) => {
       const numbers = monthlyNumbers(monthlyData, form.form, view.key);
-      return numbers === null ? [] : [[view.key, numbers]];
+      return numbers === null
+        ? []
+        : [
+            [
+              view.key,
+              {
+                ...numbers,
+                points: withoutMisleadingClearing(numbers.points),
+              },
+            ],
+          ];
     }),
   );
   // the office list shows the category each office's page opens with
@@ -266,7 +276,7 @@ function describeCounts(
   // USCIS's "-" in its decisions columns, which its report says represents
   // zero: the I-956G's and I-956H's in every quarter
   if (completions === 0)
-    return `USCIS's report for ${label} gives no decisions on ${what} applications, and no count of those pending.`;
+    return `For ${label}, USCIS gives no decisions on ${what} applications, and no count of those pending.`;
   if (decided !== null)
     return `USCIS decided ${decided} ${what} applications in ${label}; it did not publish how many were pending.`;
   return `USCIS published neither how many ${what} applications it decided in ${label} nor how many were pending.`;
@@ -294,11 +304,12 @@ export default function UscisForm({
   const categoryInputName = useId();
   const view = views.find(({ key }) => key === selected) ?? views[0];
   const { points } = view;
-  const viewMonthly = monthly[view.key] ?? null;
-  const monthlyLabel =
-    viewMonthly === null
-      ? null
-      : viewMonthly.points[viewMonthly.points.length - 1].label;
+  // the cards show the newest numbers there are for the view: its months,
+  // where USCIS publishes them, else its quarters
+  const recent = monthly[view.key] ?? null;
+  const statsPoints = recent?.points ?? points;
+  const statsPeriod: Span = recent === null ? "quarter" : "month";
+  const statsCurrent = statsPoints[statsPoints.length - 1];
   const current = points[points.length - 1];
   const isTotal = view.key === ALL_CATEGORIES;
   // the newest quarter of the form, which a category may have no numbers for
@@ -447,30 +458,23 @@ export default function UscisForm({
             )}
           </Stack>
         )}
-        <Text size="xl">
-          Latest USCIS data: {newest.label}, from the{" "}
-          <Anchor href={source} target="_blank" rel="noopener">
-            {sourceName}
-          </Anchor>{" "}
-          report
-          {monthlyLabel !== null && (
-            <>
-              , and{" "}
-              <Anchor href={`#${MONTHLY_SECTION_ID}`}>
-                monthly numbers for {monthlyLabel}
-              </Anchor>
-            </>
-          )}
-          .
-        </Text>
+        <Text size="xl">Latest USCIS data: {statsCurrent.label}.</Text>
         <UscisStats
-          points={points}
+          points={statsPoints}
           headline={viewRange}
-          backlogSuppressed={backlogSuppressed}
+          backlogSuppressed={clearingSuppressed(statsCurrent)}
+          period={statsPeriod}
+          medianLabel={current.label}
         />
         <Text>
-          <strong>Quarter-over-quarter highlight:</strong>{" "}
-          {highlight(points, "USCIS", `${viewWho} applications`)}
+          <strong>What changed:</strong>{" "}
+          {highlight(
+            statsPoints,
+            "USCIS",
+            `${viewWho} applications`,
+            null,
+            statsPeriod,
+          )}
         </Text>
         {APPROVAL_NOTES[form] !== undefined && (
           <Text size="sm" c="dimmed">
@@ -608,9 +612,6 @@ export default function UscisForm({
           )}
         </Stack>
       )}
-      {viewMonthly !== null && (
-        <UscisMonthly form={form} who={viewWho} monthly={viewMonthly} />
-      )}
       <Stack gap="sm">
         <Title order={2}>What happened to the applications</Title>
         <Text>
@@ -619,7 +620,7 @@ export default function UscisForm({
           applications were still waiting at the end of that quarter, most of
           them filed in earlier ones. The dashed line is how many came in.
           {view.splitLabel !== null &&
-            ` Before ${view.splitLabel}, USCIS's all-forms report had one row for every ${form}; the ${view.name} numbers for those quarters come from the national totals of its per-office ${form} report.`}
+            ` Before ${view.splitLabel}, USCIS gave national ${form} numbers only for all categories together, so the ${view.name} numbers for those quarters are the totals of all its offices.`}
         </Text>
         <OutcomesChart
           points={points}
@@ -628,6 +629,7 @@ export default function UscisForm({
           sourceName={sourceName}
           breaks={view.breaks}
         />
+        {recent !== null && <UscisMonths monthly={recent} />}
       </Stack>
       {(hasClearing || view.processingTimeSeries.length > 0) && (
         <Stack gap="sm">
@@ -640,8 +642,8 @@ export default function UscisForm({
             {hasRange &&
               "The range starts from USCIS's own median processing time for your category and widens it by how far real waits have landed from that median in past quarters. "}
             Time to clear backlog is how long USCIS would need to decide every
-            pending case at last quarter&rsquo;s pace. It is not your wait: the
-            pile includes cases on hold and{" "}
+            pending case if it kept deciding them at the same speed. It is not
+            your wait: the pile includes cases on hold and{" "}
             {ranges.some(
               ({ key, priorityDate }) =>
                 priorityDate && (isTotal || key === view.key),
@@ -652,9 +654,9 @@ export default function UscisForm({
             {clearingGaps &&
               " The chart leaves it out for quarters in which USCIS decided fewer than 100, too few to divide by."}
             {view.processingTimeSeries.length === 0
-              ? ` USCIS does not publish a processing time for ${
+              ? ` USCIS does not publish a median processing time for ${
                   isTotal ? "this form" : "this category"
-                } in these reports.`
+                }.`
               : view.lastMedian !== null &&
                 ` USCIS has not published a median for ${
                   isTotal ? "this form" : "this category"
@@ -666,7 +668,7 @@ export default function UscisForm({
                 )
                 .map(
                   ({ label }) =>
-                    ` USCIS's ${label} report repeated the quarter before's medians, so the chart has none for ${label}.`,
+                    ` For ${label}, USCIS published the quarter before's medians again, so the chart has none for ${label}.`,
                 )
                 .join("")}
           </Text>

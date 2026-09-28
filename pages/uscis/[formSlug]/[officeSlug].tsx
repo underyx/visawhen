@@ -639,13 +639,7 @@ export default function UscisOffice({
           </Anchor>
           .
         </Text>
-        <Text size="xl">
-          Latest USCIS data: {current.label}, from the{" "}
-          <Anchor href={source} target="_blank" rel="noopener">
-            {sourceName}
-          </Anchor>{" "}
-          report.
-        </Text>
+        <Text size="xl">Latest USCIS data: {current.label}.</Text>
         <UscisStats
           points={points}
           backlogSuppressed={backlogSuppressed}
