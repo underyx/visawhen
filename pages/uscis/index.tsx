@@ -14,7 +14,12 @@ import { groupBy, sortBy } from "lodash";
 import { GetStaticProps } from "next";
 import Head from "next/head";
 import React, { useMemo } from "react";
-import { getActiveForms, getData, newestQuarter } from "../../api/uscis";
+import {
+  getActiveForms,
+  getData,
+  getMonthlyData,
+  newestQuarter,
+} from "../../api/uscis";
 import {
   categoryRanges,
   formatRangeMonths,
@@ -26,6 +31,7 @@ import {
   quarterLabel,
   toPoints,
 } from "../../components/uscis";
+import { formatMonthYear } from "../../components/Freshness";
 import { ListRow, ListRows } from "../../components/ListRow";
 import { normalize } from "../../components/search";
 import SearchStatus from "../../components/SearchStatus";
@@ -56,6 +62,10 @@ interface FormSummary {
 interface Props {
   forms: FormSummary[];
   latestLabel: string;
+  /** The newest month of USCIS's monthly report, "Aug 2026" */
+  latestMonthLabel: string | null;
+  /** The forms the monthly report covers, "I-130" */
+  monthlyForms: string[];
   totalPending: number;
 }
 
@@ -101,10 +111,19 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   const latestPeriod = data.periods.find(
     (period) => period.quarter === newestQuarter(data),
   );
+  const monthly = await getMonthlyData();
+  const months = Object.keys(monthly.months).sort();
+  const latestMonth = months[months.length - 1];
   return {
     props: {
       forms,
       latestLabel: latestPeriod ? quarterLabel(latestPeriod) : "",
+      latestMonthLabel:
+        latestMonth === undefined ? null : formatMonthYear(`${latestMonth}-01`),
+      monthlyForms:
+        latestMonth === undefined
+          ? []
+          : Object.keys(monthly.months[latestMonth].forms).sort(),
       totalPending: forms.reduce((sum, form) => sum + (form.pending ?? 0), 0),
     },
   };
@@ -113,6 +132,8 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 export default function UscisIndex({
   forms,
   latestLabel,
+  latestMonthLabel,
+  monthlyForms,
   totalPending,
 }: Props) {
   const [term, setTerm] = useInputState("");
@@ -171,7 +192,12 @@ export default function UscisIndex({
           doing. The range next to a form is how long a decision will most
           likely take if you file today, going by USCIS&rsquo;s median for{" "}
           {latestLabel}; for a form with several categories, it is for the one
-          named under it. For your own case, also check USCIS&rsquo;s{" "}
+          named under it.
+          {latestMonthLabel !== null &&
+            ` For the ${new Intl.ListFormat("en-US").format(
+              monthlyForms,
+            )}, USCIS also publishes a few numbers every month, and their pages show them too, up to ${latestMonthLabel}.`}{" "}
+          For your own case, also check USCIS&rsquo;s{" "}
           <Anchor
             href={USCIS_PROCESSING_TIMES_URL}
             target="_blank"

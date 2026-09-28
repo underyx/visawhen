@@ -23,6 +23,7 @@ import {
   getActiveForms,
   getActiveOffices,
   getData,
+  getMonthlyData,
   Variant,
 } from "../../../api/uscis";
 import {
@@ -58,6 +59,13 @@ import {
 } from "../../../components/uscis";
 import { OutcomesChart, WaitChart } from "../../../components/UscisChart";
 import UscisStats, { RangeText } from "../../../components/UscisStats";
+import UscisMonthly, {
+  MONTHLY_SECTION_ID,
+} from "../../../components/UscisMonthly";
+import {
+  monthlyNumbers,
+  MonthlyNumbers,
+} from "../../../components/monthlyNumbers";
 import MoreDetails from "../../../components/MoreDetails";
 import PolicyBanner from "../../../components/PolicyBanner";
 import { ListRow, ListRows } from "../../../components/ListRow";
@@ -103,6 +111,9 @@ interface Props {
   /** The quarters whose medians repeat the quarter before's, which the
    * charts leave out (republishedMedianQuarters) */
   republished: { quarter: string; label: string }[];
+  /** USCIS's monthly numbers, by view (FormView.key), for the views the
+   * monthly report covers */
+  monthly: Record<string, MonthlyNumbers>;
 }
 
 /** What to know about a form's approval rate, where USCIS's counts are not
@@ -143,6 +154,13 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const latest = total[total.length - 1];
   const variants = form.quarters[latest.quarter].variants;
   const ranges = categoryRanges(form);
+  const monthlyData = await getMonthlyData();
+  const monthly = Object.fromEntries(
+    views.flatMap((view) => {
+      const numbers = monthlyNumbers(monthlyData, form.form, view.key);
+      return numbers === null ? [] : [[view.key, numbers]];
+    }),
+  );
   // the office list shows the category each office's page opens with
   const officeCategory = (form.officeCategories ?? []).find(
     ({ key }) => key === LEADING_OFFICE_CATEGORY[form.form],
@@ -203,6 +221,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
           ? null
           : officeCategoryName(officeCategory),
       republished,
+      monthly,
     },
   };
 };
@@ -266,6 +285,7 @@ export default function UscisForm({
   officeLabel,
   officeCategory,
   republished,
+  monthly,
 }: Props) {
   const [term, setTerm] = useInputState("");
   const [selected, setSelected] = useState(views[0].key);
@@ -274,6 +294,11 @@ export default function UscisForm({
   const categoryInputName = useId();
   const view = views.find(({ key }) => key === selected) ?? views[0];
   const { points } = view;
+  const viewMonthly = monthly[view.key] ?? null;
+  const monthlyLabel =
+    viewMonthly === null
+      ? null
+      : viewMonthly.points[viewMonthly.points.length - 1].label;
   const current = points[points.length - 1];
   const isTotal = view.key === ALL_CATEGORIES;
   // the newest quarter of the form, which a category may have no numbers for
@@ -427,7 +452,16 @@ export default function UscisForm({
           <Anchor href={source} target="_blank" rel="noopener">
             {sourceName}
           </Anchor>{" "}
-          report.
+          report
+          {monthlyLabel !== null && (
+            <>
+              , and{" "}
+              <Anchor href={`#${MONTHLY_SECTION_ID}`}>
+                monthly numbers for {monthlyLabel}
+              </Anchor>
+            </>
+          )}
+          .
         </Text>
         <UscisStats
           points={points}
@@ -573,6 +607,9 @@ export default function UscisForm({
             </Alert>
           )}
         </Stack>
+      )}
+      {viewMonthly !== null && (
+        <UscisMonthly form={form} who={viewWho} monthly={viewMonthly} />
       )}
       <Stack gap="sm">
         <Title order={2}>What happened to the applications</Title>
