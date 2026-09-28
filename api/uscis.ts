@@ -100,7 +100,51 @@ export interface UscisData {
   forms: Form[];
 }
 
+/** One row of USCIS's monthly Application Processing Data report: a form,
+ * or for the I-485 one category of it, in one month. */
+export interface MonthlyRow {
+  title: string;
+  received: number;
+  approved: number;
+  denied: number;
+  /** At the end of the month */
+  pending: number;
+  /** Of those pending, the ones filed more than six months before */
+  pendingOver6Months: number;
+  /** USCIS's average processing time, in months, of the cases it decided in
+   * the month: an average, not the median of the quarterly report */
+  averageMonths: number;
+}
+
+export interface MonthlyReport {
+  url: string;
+  /** Per form, per category: "all" for a form's only row, and for the I-485
+   * the keys of its categories in the all-forms report ("family", ...) */
+  forms: Record<string, Record<string, MonthlyRow>>;
+  /** USCIS's notes about this month in particular */
+  notes?: string[];
+}
+
+/** monthly.json, written by data/uscis/monthly.py */
+export interface MonthlyData {
+  source: string;
+  /** By month, "2026-08" */
+  months: Record<string, MonthlyReport>;
+}
+
 let dataPromise: Promise<UscisData> | undefined;
+let monthlyPromise: Promise<MonthlyData> | undefined;
+
+/** monthly.json, read and parsed once per build worker. Callers must not
+ * modify it. */
+export function getMonthlyData(): Promise<MonthlyData> {
+  if (monthlyPromise === undefined)
+    monthlyPromise = readFile(
+      join(dataDir, "uscis", "monthly.json"),
+      "utf-8",
+    ).then((contents) => JSON.parse(contents) as MonthlyData);
+  return monthlyPromise;
+}
 
 /** forms.json, read and parsed once per build worker (it is several
  * megabytes, and every USCIS page reads it). Callers must not modify it. */

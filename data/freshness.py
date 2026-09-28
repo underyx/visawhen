@@ -18,6 +18,9 @@ newest date with how often the source publishes:
 * USCIS forms (data/uscis/forms.json): USCIS publishes each quarter a few
   months after it ends; stale 120 days after the end of the quarter after the
   newest one.
+* USCIS monthly (data/uscis/monthly.json): USCIS publishes each month's
+  report about four weeks after the month ends; stale 60 days after the end
+  of the month after the newest one.
 * Visa Bulletins (data/visa_bulletin/data.json): State publishes each
   month's bulletin around the middle of the month before; stale 8 days into
   a month with no bulletin for it, when the Visa Bulletin pages start
@@ -139,6 +142,30 @@ def uscis_forms() -> Freshness:
     )
 
 
+def uscis_monthly() -> Freshness:
+    months = json.loads((DATA / "uscis" / "monthly.json").read_text())["months"]
+    newest = max(months)
+    year, month = int(newest[:4]), int(newest[5:7])
+    next_end = end_of_month(year, month + 1)
+    return Freshness(
+        source="USCIS monthly",
+        newest=newest,
+        stale_from=next_end + timedelta(days=60),
+        cadence=(
+            "USCIS publishes each month's Application Processing Data report about four weeks after the month "
+            f"ends, so the data counts as stale 60 days after the next month ended on {next_end.isoformat()}."
+        ),
+        where=(
+            "The scraper is `data/uscis/monthly.py`, run by the "
+            f"[Update USCIS monthly data]({REPOSITORY_URL}/actions/workflows/uscis_monthly_update_schedule.yml) workflow. "
+            "Check whether USCIS's [Immigration and Citizenship Data](https://www.uscis.gov/tools/reports-and-studies/"
+            "immigration-and-citizenship-data?query=Appropriations&items_per_page=100) page lists the next month; if "
+            "it does, the workflow's log says why it was not added; the report can also be saved from a browser and "
+            "added with `monthly.py --from-file`."
+        ),
+    )
+
+
 def visa_bulletin() -> Freshness:
     bulletins = json.loads((DATA / "visa_bulletin" / "data.json").read_text())["bulletins"]
     newest = max(bulletins)
@@ -189,7 +216,7 @@ def consulate_issuances() -> Freshness:
     )
 
 
-CHECKS: list[Callable[[], Freshness]] = [nvc, iv_schedule, uscis_forms, visa_bulletin, consulate_issuances]
+CHECKS: list[Callable[[], Freshness]] = [nvc, iv_schedule, uscis_forms, uscis_monthly, visa_bulletin, consulate_issuances]
 
 
 def issue_body(freshness: Freshness, today: date, run_url: str | None) -> str:

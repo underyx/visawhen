@@ -22,7 +22,9 @@ Sources, in order:
 2. The Wayback Machine, whose crawler *is* let through: the CDX index for the
    reports it already has, and Save Page Now for the listing page and for
    reports it has not captured yet, so a freshly published quarter still shows
-   up here within a day.
+   up here within a day. The CDX index is often down for days (HTTP 503);
+   discovery then goes on without it, since the cache and the listing page
+   cover what it would find.
 
 Downloaded reports are cached in reports/ (gitignored, cached between
 workflow runs) under their URL's path, so a report USCIS republishes under a
@@ -727,10 +729,25 @@ def listing_url(family: ReportFamily) -> str:
 def discover_reports() -> tuple[set[Report], dict[str, str]]:
     """Every report file found (see best_reports for the ones used) and the Wayback captures of report files."""
     captures: dict[str, str] = {}
-    for directory in DOCUMENT_DIRS:
-        for family in FAMILIES.values():
-            for prefix in family.file_prefixes:
-                captures.update(wayback_captures(f"https://{directory}{prefix}"))
+    prefixes = [
+        f"https://{directory}{prefix}"
+        for directory in DOCUMENT_DIRS
+        for family in FAMILIES.values()
+        for prefix in family.file_prefixes
+    ]
+    for url_prefix in prefixes:
+        try:
+            captures.update(wayback_captures(url_prefix))
+        except RuntimeError as e:
+            # The CDX index answers HTTP 503 for days at a time (late September
+            # 2026). The cache holds every report used before, the listing
+            # page finds new ones, and check_history fails the run if a
+            # quarter goes missing, so carry on without the index; the other
+            # prefixes would only fail the same way, after minutes of retries.
+            print(
+                f"::warning::{e}; going on without the Wayback Machine's index of report files"
+            )
+            break
     reports = {
         report for url in captures if (report := Report.from_url(url)) is not None
     }
@@ -1784,6 +1801,23 @@ def cached_reports() -> set[Report]:
     }
 
 
+def cited_reports() -> set[Report]:
+    """The reports forms.json was built from. Discovery finds them through
+    the Wayback Machine's index, and the cache usually holds them, but with
+    the index down and a cache that lacks some (one restored from before a
+    report was added), they would be missed."""
+    if not OUTPUT_PATH.exists():
+        return set()
+    dataset = json.loads(OUTPUT_PATH.read_text())
+    return {
+        report
+        for form in dataset["forms"]
+        for sources in (form["sources"], form["officeSources"])
+        for url in sources.values()
+        if (report := Report.from_url(url)) is not None
+    }
+
+
 def check_history(previous: dict[str, Any], dataset: dict[str, Any]) -> None:
     """Fail when the new dataset lost a quarter of a form the previous one
     had: the Wayback Machine's CDX index sometimes answers a query with only
@@ -1878,6 +1912,7 @@ def main() -> int:
                 f"::warning::{e}; no new quarter is due yet and every report is cached, so {OUTPUT_PATH.name} is left as it is"
             )
             return 0
+        reports |= cited_reports()
         # discovery works, so reports are downloaded again under their new
         # names as needed: the old files are of no use
         for path in legacy:

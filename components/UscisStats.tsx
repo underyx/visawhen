@@ -51,7 +51,7 @@ function NotShown({ children }: React.PropsWithChildren) {
   );
 }
 
-function Stat({ label, value, line, lineColor }: StatProps) {
+export function Stat({ label, value, line, lineColor }: StatProps) {
   return (
     <div className={classes.box}>
       <Text className={classes.boxLabel}>{label}</Text>
@@ -63,19 +63,21 @@ function Stat({ label, value, line, lineColor }: StatProps) {
   );
 }
 
-/** A change vs. the previous quarter, in green when it is good news and red
- * when it is bad; the darkest shades, as the lighter ones are below 4.5:1 on
- * the white card (teal.8 is 3.9:1, teal.9 5.0:1). `fallback` is the line
- * when there is no change to show. */
-function ChangeStat({
+/** A change vs. the previous quarter (or `versus`), in green when it is good
+ * news and red when it is bad; the darkest shades, as the lighter ones are
+ * below 4.5:1 on the white card (teal.8 is 3.9:1, teal.9 5.0:1). `fallback`
+ * is the line when there is no change to show. */
+export function ChangeStat({
   change,
   higherIsBetter,
   fallback = null,
+  versus = "previous quarter",
   ...props
 }: Omit<StatProps, "line" | "lineColor"> & {
   change: string | null;
   higherIsBetter: boolean;
   fallback?: string | null;
+  versus?: string;
 }) {
   const isIncrease = change?.startsWith("+") ?? false;
   const color =
@@ -87,7 +89,7 @@ function ChangeStat({
   return (
     <Stat
       {...props}
-      line={change === null ? fallback : `${change} vs. previous quarter`}
+      line={change === null ? fallback : `${change} vs. ${versus}`}
       lineColor={color}
     />
   );

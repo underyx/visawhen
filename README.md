@@ -16,6 +16,7 @@ The data lives in this repository and is refreshed by scheduled workflows that c
 | Consulate interview queues | State's IV Scheduling Status Tool            | `data/consulates/iv_schedule.py --fetch` | `data/consulates/iv_schedule.json`        |
 | Consulate visa issuances   | the State Department's monthly issuance PDFs | `data/consulates/*.ipynb`                | `data/consulates/dump/` (sqlite-diffable) |
 | USCIS form processing      | USCIS's quarterly reports                    | `data/uscis/forms.py`                    | `data/uscis/forms.json`                   |
+| USCIS monthly numbers      | USCIS's monthly Application Processing Data  | `data/uscis/monthly.py`                  | `data/uscis/monthly.json`                 |
 | Visa Bulletin cutoff dates | State's monthly Visa Bulletins               | `data/visa_bulletin/bulletin.py`         | `data/visa_bulletin/data.json`            |
 
 The NVC and interview-queue scrapers run in the same workflow (`nvc_update_schedule.yml`), daily and hourly on Mondays; the others run daily.
@@ -39,6 +40,7 @@ Each scraper is its own [uv](https://docs.astral.sh/uv/) project under `data/`:
 ```sh
 cd data/nvc && uv run python main.py
 cd data/uscis && uv run python forms.py          # add --offline to reparse the cached reports only
+cd data/uscis && uv run python monthly.py        # or --from-file report.csv --url https://www.uscis.gov/...
 cd data/consulates && uv run jupyter nbconvert --to script --stdout visa-issuances.ipynb | uv run python -   # writes all_months.pkl
 cd data/consulates && uv run jupyter nbconvert --to script --stdout baselines.ipynb | uv run python -        # reads it, writes consulates.sqlite and dump/
 cd data/consulates && uv run python iv_schedule.py --fetch   # or --from-file page.html, for a page saved from a browser
@@ -57,6 +59,10 @@ They identify themselves with the user agent `visawhen-bot (+https://github.com/
 
 The interview queues come from State's [IV Scheduling Status Tool](https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/iv-wait-times.html), which only ever shows its latest monthly update, so every snapshot in `data/consulates/iv_schedule.json` is history nobody else keeps. The snapshots before September 2026 were recovered from Wayback Machine captures of the tool, with `--from-file`. `--fetch` adds a snapshot only when State's update is newer than the newest one there, and refuses (and fails) a page that lists far fewer posts than the newest snapshot, such as a truncated one, since the site reads only the newest snapshot; a page older than the newest snapshot or more than 45 days old may be a stale copy, so it then tries the next source too. `--from-file` adds any update it does not have yet, whatever it lists.
 
+### USCIS monthly numbers
+
+Every month since November 2022, USCIS publishes for Congress a short "Application Processing Data" report: for the I-130, I-360, I-485 (by category), I-751, I-765 and N-400, the applications received, approved, denied and pending, those pending over six months, and the average processing time of the month's decisions. It comes out about four weeks after the month, two months sooner than the quarterly reports, so the pages of those six forms show its last six months in a section of their own. It is counted separately from the quarterly reports and does not add up to them, and its average processing time is an average over the month's decisions, not the median the estimates use, so the pages keep the two apart. `monthly.py` adds each month once, keyed by the month the report names, from uscis.gov or else the Wayback Machine.
+
 ### Visa Bulletins
 
 `bulletin.py` keeps every monthly Visa Bulletin since October 2015, the first with both of today's charts: Final Action Dates and Dates for Filing. For each family and employment category and each chargeability area, `data.json` has the cutoff date, or `C` (current) or `U` (unavailable). The bulletins come from the same three sources as the other State Department data, in the same order. State publishes each bulletin once, around the middle of the month before, so a month already in `data.json` is never fetched again. A row, column or cell the script does not know fails the run instead of being skipped, so that a change in State's tables is noticed: add the new label to the patterns at the top of the script. The pages under `/visa-bulletin` show the newest bulletin and how far each category's Final Action Date moved in the last 12 months and 5 years.
@@ -69,7 +75,7 @@ The consulate list shows and searches each post's country, from `POST_COUNTRIES`
 
 ### Stale data alerts
 
-A scraper that finds nothing new, or cannot reach its source, still finishes green. The daily `freshness.yml` workflow runs `data/freshness.py`, which compares each source's newest date with how often it publishes (NVC weekly, the interview-queue tool and the Visa Bulletin monthly, USCIS quarterly and State's issuance statistics with a lag of several months). For each source that is overdue it opens one issue labelled `stale-data`, keeps it up to date while the data stays stale and closes it when new data arrives. `python3 data/freshness.py` prints the same report locally.
+A scraper that finds nothing new, or cannot reach its source, still finishes green. The daily `freshness.yml` workflow runs `data/freshness.py`, which compares each source's newest date with how often it publishes (NVC weekly, the interview-queue tool, the Visa Bulletin and USCIS's monthly report monthly, USCIS's other reports quarterly and State's issuance statistics with a lag of several months). For each source that is overdue it opens one issue labelled `stale-data`, keeps it up to date while the data stays stale and closes it when new data arrives. `python3 data/freshness.py` prints the same report locally.
 
 GitHub disables scheduled workflows in a public repository after 60 days without activity, and data commits can stop for longer than that. The same workflow keeps the scheduled workflows enabled through the Actions API instead of committing anything: every day it calls the enable endpoint for each one that is enabled or that GitHub disabled for inactivity, as keepalive-workflow's API mode does. A workflow disabled by hand (Actions, the workflow, "Disable workflow") is left alone and stays disabled until someone enables it again.
 
