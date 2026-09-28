@@ -14,6 +14,7 @@ import {
   MIN_CHANGE_BASE,
   pendingChangeReliable,
   QuarterPoint,
+  Span,
   stalled,
   WITHHELD_ESTIMATE,
   WITHHELD_RANGE,
@@ -24,9 +25,10 @@ import classes from "./UscisStats.module.css";
 // line to show under its value
 const NO_LINE = " ";
 
-const TOO_FEW_TO_COMPARE = "too few to compare with the quarter before";
-const STALLED_BEFORE =
-  "not compared: USCIS nearly stopped deciding these the quarter before";
+const tooFewToCompare = (period: Span) =>
+  `too few to compare with the ${period} before`;
+const stalledBefore = (period: Span) =>
+  `not compared: USCIS nearly stopped deciding these the ${period} before`;
 
 interface StatProps {
   label: string;
@@ -51,7 +53,7 @@ function NotShown({ children }: React.PropsWithChildren) {
   );
 }
 
-export function Stat({ label, value, line, lineColor }: StatProps) {
+function Stat({ label, value, line, lineColor }: StatProps) {
   return (
     <div className={classes.box}>
       <Text className={classes.boxLabel}>{label}</Text>
@@ -63,21 +65,21 @@ export function Stat({ label, value, line, lineColor }: StatProps) {
   );
 }
 
-/** A change vs. the previous quarter (or `versus`), in green when it is good
+/** A change vs. the previous quarter (or month), in green when it is good
  * news and red when it is bad; the darkest shades, as the lighter ones are
  * below 4.5:1 on the white card (teal.8 is 3.9:1, teal.9 5.0:1). `fallback`
  * is the line when there is no change to show. */
-export function ChangeStat({
+function ChangeStat({
   change,
   higherIsBetter,
   fallback = null,
-  versus = "previous quarter",
+  period,
   ...props
 }: Omit<StatProps, "line" | "lineColor"> & {
   change: string | null;
   higherIsBetter: boolean;
   fallback?: string | null;
-  versus?: string;
+  period: Span;
 }) {
   const isIncrease = change?.startsWith("+") ?? false;
   const color =
@@ -89,7 +91,7 @@ export function ChangeStat({
   return (
     <Stat
       {...props}
-      line={change === null ? fallback : `${change} vs. ${versus}`}
+      line={change === null ? fallback : `${change} vs. previous ${period}`}
       lineColor={color}
     />
   );
@@ -109,9 +111,9 @@ export function RangeText({ low, high }: { low: number; high: number }) {
   );
 }
 
-/** Why a quarter has no time to clear the backlog, when it is for want of a
+/** Why a point has no time to clear the backlog, when it is for want of a
  * number: USCIS did not publish one it needs, or decided nothing. */
-function clearingUnknown(point: QuarterPoint): string | null {
+function clearingUnknown(point: QuarterPoint, period: Span): string | null {
   if (point.waitMonths !== null) return null;
   if (point.pending === null) return "USCIS did not publish the pending count";
   if (point.completions === null)
@@ -120,7 +122,7 @@ function clearingUnknown(point: QuarterPoint): string | null {
       : point.approved === null
       ? "USCIS did not publish the approvals"
       : "USCIS did not publish the denials";
-  if (point.completions === 0) return "no decisions that quarter";
+  if (point.completions === 0) return `no decisions that ${period}`;
   return null;
 }
 
@@ -150,11 +152,17 @@ interface Props {
   /** Whether the office almost never approves these cases (rarelyApproves):
    * no approval rate or time to clear then */
   rarelyApproved?: boolean;
+  /** What each point covers: a quarter, or a month for USCIS's monthly
+   * numbers (monthPoints) */
+  period?: Span;
+  /** The period of the median the headline range is based on, when the
+   * points are newer than it: "Apr–Jun 2026" */
+  medianLabel?: string;
 }
 
-/** The headline figures of the newest quarter: what to expect if filing
- * today, when there is a range for it, then the backlog and the quarter's
- * decisions, with their change since the quarter before where it means
+/** The headline figures of the newest quarter (or month): what to expect if
+ * filing today, when there is a range for it, then the backlog and the
+ * period's decisions, with their change since the one before where it means
  * something: not for counts too small to compare (MIN_CHANGE_BASE), a
  * pending count that filings and decisions do not account for
  * (pendingChangeReliable), cases moved between offices, or an approval rate
@@ -165,6 +173,8 @@ export default function UscisStats({
   backlogSuppressed = null,
   moved = null,
   rarelyApproved = false,
+  period = "quarter",
+  medianLabel,
 }: Props) {
   const current = points[points.length - 1];
   const previous = points[points.length - 2];
@@ -183,7 +193,7 @@ export default function UscisStats({
   );
   const notShown = rarelyApproved
     ? "the office almost never approves these"
-    : backlogSuppressed ?? clearingUnknown(current);
+    : backlogSuppressed ?? clearingUnknown(current, period);
   // which decisions USCIS withheld as too few to disclose, when it did
   const withheld =
     current.approved === null && current.denied === null
@@ -212,7 +222,7 @@ export default function UscisStats({
               {`Based on USCIS's median time of ${formatMedian(
                 headline.median,
               )} (${
-                current.label
+                medianLabel ?? current.label
               } data) and on how much real waits differed from it in the past.`}
             </Text>
             {headline.premium && (
@@ -245,7 +255,7 @@ export default function UscisStats({
               : moved === "out"
               ? "after USCIS moved cases away"
               : trend !== null
-              ? `${trend} vs. previous quarter`
+              ? `${trend} vs. previous ${period}`
               : null
           }
           lineColor="dimmed"
@@ -281,9 +291,10 @@ export default function UscisStats({
             value={formatCount(current.pending)}
             change={pendingChange}
             higherIsBetter={false}
+            period={period}
             fallback={
               tooSmallToCompare(previous?.pending, current.pending)
-                ? TOO_FEW_TO_COMPARE
+                ? tooFewToCompare(period)
                 : null
             }
           />
@@ -336,11 +347,12 @@ export default function UscisStats({
                   )
             }
             higherIsBetter={true}
+            period={period}
             fallback={
               previousStalled
-                ? STALLED_BEFORE
+                ? stalledBefore(period)
                 : tooSmallToCompare(previous?.completions, current.completions)
-                ? TOO_FEW_TO_COMPARE
+                ? tooFewToCompare(period)
                 : null
             }
           />
@@ -367,6 +379,7 @@ export default function UscisStats({
                 : null
             }
             higherIsBetter={true}
+            period={period}
             fallback={
               current.approximate
                 ? current.approvalRange === null
@@ -377,10 +390,10 @@ export default function UscisStats({
                   previous.approvalRate === null
                 ? null
                 : previousStalled
-                ? STALLED_BEFORE
+                ? stalledBefore(period)
                 : previous.approximate
-                ? "the quarter before's is approximate"
-                : "too few decisions to compare with the quarter before"
+                ? `the ${period} before's is approximate`
+                : `too few decisions to compare with the ${period} before`
             }
           />
         )}
