@@ -43,11 +43,13 @@ import {
   ALL_CATEGORIES,
   approximately,
   cleanData,
+  formatChange,
   formatCount,
   formViews,
   FormView,
   highlight,
   LEADING_OFFICE_CATEGORY,
+  MIN_CHANGE_BASE,
   officeCategoryName,
   officeCategoryPoints,
   officeCategoryWho,
@@ -60,7 +62,7 @@ import {
 } from "../../../components/uscis";
 import { OutcomesChart, WaitChart } from "../../../components/UscisChart";
 import UscisStats, { RangeText } from "../../../components/UscisStats";
-import UscisMonths from "../../../components/UscisMonths";
+import UscisMonths, { MONTHS_ID } from "../../../components/UscisMonths";
 import {
   monthlyNumbers,
   MonthlyNumbers,
@@ -312,6 +314,27 @@ export default function UscisForm({
   const statsCurrent = statsPoints[statsPoints.length - 1];
   const current = points[points.length - 1];
   const isTotal = view.key === ALL_CATEGORIES;
+  // a category USCIS's months do not split out (the N-400's civilians): the
+  // cards keep its quarters, and the whole form's months are shown besides
+  const formMonths =
+    recent === null && !isTotal ? monthly[ALL_CATEGORIES] ?? null : null;
+  const months = recent ?? formMonths;
+  const newestMonth =
+    formMonths === null
+      ? null
+      : formMonths.points[formMonths.points.length - 1];
+  const monthBefore =
+    formMonths === null
+      ? null
+      : formMonths.points[formMonths.points.length - 2];
+  const newestMonthChange =
+    newestMonth === null
+      ? null
+      : formatChange(
+          monthBefore?.pending,
+          newestMonth.pending,
+          MIN_CHANGE_BASE,
+        );
   // the newest quarter of the form, which a category may have no numbers for
   const totalPoints = views[views.length - 1].points;
   const newest = totalPoints[totalPoints.length - 1];
@@ -458,7 +481,9 @@ export default function UscisForm({
             )}
           </Stack>
         )}
-        <Text size="xl">Latest USCIS data: {statsCurrent.label}.</Text>
+        <Text size="xl">
+          Latest USCIS data: {(newestMonth ?? statsCurrent).label}.
+        </Text>
         <UscisStats
           points={statsPoints}
           headline={viewRange}
@@ -476,6 +501,20 @@ export default function UscisForm({
             statsPeriod,
           )}
         </Text>
+        {newestMonth !== null && (
+          <Text>
+            {`For all ${form} categories together, there are newer numbers: at the end of ${
+              newestMonth.label
+            }, ${formatCount(newestMonth.pending)} were pending${
+              newestMonthChange === null || monthBefore === null
+                ? ""
+                : ` (${newestMonthChange} since ${monthBefore.label})`
+            }, and USCIS decided ${formatCount(
+              newestMonth.completions,
+            )} that month. `}
+            <Anchor href={`#${MONTHS_ID}`}>See them month by month</Anchor>.
+          </Text>
+        )}
         {APPROVAL_NOTES[form] !== undefined && (
           <Text size="sm" c="dimmed">
             {APPROVAL_NOTES[form]}
@@ -629,7 +668,12 @@ export default function UscisForm({
           sourceName={sourceName}
           breaks={view.breaks}
         />
-        {recent !== null && <UscisMonths monthly={recent} />}
+        {months !== null && (
+          <UscisMonths
+            monthly={months}
+            wholeForm={formMonths === null ? null : form}
+          />
+        )}
       </Stack>
       {(hasClearing || view.processingTimeSeries.length > 0) && (
         <Stack gap="sm">

@@ -3,14 +3,29 @@ import React from "react";
 import type { MonthlyNumbers } from "./monthlyNumbers";
 import { formatCount } from "./uscis";
 
+/** The id of the months' table, for links to it from the top of the page */
+export const MONTHS_ID = "months";
+
 /** The last few months of a form's numbers, the newest first, under the
  * quarterly chart: filings, decisions and the pile at the end of each month,
- * the same three things the chart draws. */
-export default function UscisMonths({ monthly }: { monthly: MonthlyNumbers }) {
+ * the same three things the chart draws. `wholeForm` names the form when the
+ * page shows one of its categories and the months are for all of them
+ * together. */
+export default function UscisMonths({
+  monthly,
+  wholeForm = null,
+}: {
+  monthly: MonthlyNumbers;
+  wholeForm?: string | null;
+}) {
   const { points, source, notes } = monthly;
   return (
-    <Stack gap="xs">
-      <Text>The last {points.length} months, one by one:</Text>
+    <Stack gap="xs" id={MONTHS_ID}>
+      <Text>
+        {wholeForm === null
+          ? `The last ${points.length} months, one by one:`
+          : `The last ${points.length} months, one by one, for all ${wholeForm} categories together:`}
+      </Text>
       {/* narrow enough for a 360px phone without wrapping a cell */}
       <Table.ScrollContainer minWidth={280}>
         <Table
