@@ -23,6 +23,7 @@ import {
   ReviewRange,
 } from "../components/nvcReview";
 import { NVC_TIMEFRAMES_URL } from "../components/links";
+import { CREATOR, LICENSE_URL } from "../components/structuredData";
 
 interface Props {
   data: NvcData;
@@ -303,6 +304,9 @@ function ChartHeading({
   );
 }
 
+/** With NVC's full name too, which some people search for instead */
+const TITLE = "National Visa Center (NVC) wait times";
+
 export default function NvcBacklog({ data }: Props) {
   const today = useToday();
   const latestDate = getLatestDate(data);
@@ -327,10 +331,10 @@ export default function NvcBacklog({ data }: Props) {
   return (
     <Stack gap="3rem">
       <Head>
-        <title>NVC wait times</title>
+        <title>{TITLE}</title>
         <meta name="description" content={description} />
         <link rel="canonical" href="https://visawhen.com/nvc" />
-        <meta property="og:title" content="NVC wait times" />
+        <meta property="og:title" content={TITLE} />
         <meta property="og:description" content={description} />
         <meta property="og:url" content="https://visawhen.com/nvc" />
         <script
@@ -338,6 +342,7 @@ export default function NvcBacklog({ data }: Props) {
             "@context": "https://schema.org",
             "@type": "Dataset",
             name: "NVC wait times",
+            url: "https://visawhen.com/nvc",
             distribution: {
               "@type": "DataDownload",
               // the file itself: the github.com/.../blob/ page is HTML
@@ -351,16 +356,10 @@ export default function NvcBacklog({ data }: Props) {
             description:
               "Weekly National Visa Center timeframes for case creation, document review and inquiry responses, since November 2020.",
             accessMode: "chartOnVisual",
-            creator: {
-              "@type": "Person",
-              familyName: "Nagy",
-              givenName: "Bence",
-              additionalName: "underyx",
-              url: "https://underyx.me",
-            },
+            creator: CREATOR,
             inLanguage: "en",
             isBasedOn: NVC_TIMEFRAMES_URL,
-            license: "https://github.com/underyx/visawhen/blob/main/LICENSE",
+            license: LICENSE_URL,
             temporalCoverage: "2020-11/..",
           })}
         />

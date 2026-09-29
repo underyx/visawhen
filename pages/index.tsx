@@ -9,6 +9,7 @@ import {
   I751_URL,
 } from "../components/links";
 import classes from "../components/Home.module.css";
+import { webSite } from "../components/structuredData";
 
 /** USCIS's eligibility page for immediate relatives' green cards, which says
  * who can adjust status in the US */
@@ -107,7 +108,8 @@ const PATHS = [
   { id: "temporary", label: "Visitor, student or work visa" },
 ];
 
-const TITLE = "US visa and green card wait times";
+// The site's name leads, for people who search for the site by name
+const TITLE = "VisaWhen: US visa and green card wait times";
 const DESCRIPTION =
   "How long each step of a US immigration case is taking: USCIS processing times, National Visa Center timeframes and consulate interview queues, for family, fiancé(e), employment and citizenship cases.";
 
@@ -121,6 +123,7 @@ export default function Home() {
         <meta property="og:title" content={TITLE} />
         <meta property="og:description" content={DESCRIPTION} />
         <meta property="og:url" content="https://visawhen.com" />
+        <script {...webSite()} />
       </Head>
       <header className={classes.hero}>
         <Title order={1} className={classes.title}>

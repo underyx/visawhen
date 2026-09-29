@@ -8,11 +8,14 @@ import {
   Title,
 } from "@mantine/core";
 import { GetStaticProps } from "next";
+import { jsonLdScriptProps } from "react-schemaorg";
+import { Dataset } from "schema-dts";
 import Head from "next/head";
 import Link from "next/link";
 import React, { useState } from "react";
 import { BulletinChart, getData } from "../../api/visaBulletin";
 import { VISA_BULLETIN_URL } from "../../components/links";
+import { CREATOR, LICENSE_URL } from "../../components/structuredData";
 import {
   Area,
   CATEGORIES,
@@ -29,6 +32,8 @@ import {
 interface Props {
   /** The newest bulletin's month, "2026-10" */
   month: string;
+  /** The oldest bulletin's month in the data, "2015-10" */
+  firstMonth: string;
   bulletinUrl: string;
   charts: Record<ChartKey, BulletinChart>;
 }
@@ -40,6 +45,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   return {
     props: {
       month,
+      firstMonth: Object.keys(data.bulletins).sort()[0],
       bulletinUrl: url,
       charts: { finalAction, datesForFiling },
     },
@@ -116,23 +122,49 @@ const TITLE = "Visa Bulletin dates";
 
 export default function VisaBulletinIndex({
   month,
+  firstMonth,
   bulletinUrl,
   charts,
 }: Props) {
   const [chartKey, setChartKey] = useState<ChartKey>("finalAction");
   const chart = charts[chartKey];
+  // with the month, which people search for: "Visa Bulletin October 2026"
+  const pageTitle = `${TITLE} for ${formatBulletinMonth(month)}`;
   const description = `The priority date cutoffs in the ${formatBulletinMonth(
     month,
   )} Visa Bulletin for every family and employment category, and how fast each one has moved.`;
   return (
     <Stack gap="xl">
       <Head>
-        <title>{TITLE}</title>
+        <title>{pageTitle}</title>
         <meta name="description" content={description} />
         <link rel="canonical" href="https://visawhen.com/visa-bulletin" />
-        <meta property="og:title" content={TITLE} />
+        <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={description} />
         <meta property="og:url" content="https://visawhen.com/visa-bulletin" />
+        <script
+          {...jsonLdScriptProps<Dataset>({
+            "@context": "https://schema.org",
+            "@type": "Dataset",
+            name: "Visa Bulletin dates",
+            url: "https://visawhen.com/visa-bulletin",
+            distribution: {
+              "@type": "DataDownload",
+              // the file itself: the github.com/.../blob/ page is HTML
+              contentUrl:
+                "https://raw.githubusercontent.com/underyx/visawhen/main/data/visa_bulletin/data.json",
+              encodingFormat: "application/json",
+            },
+            description: `The Final Action Dates and Dates for Filing of every family and employment preference category and chargeability area in each monthly Visa Bulletin of the U.S. State Department, since ${formatBulletinMonth(
+              firstMonth,
+            )}.`,
+            creator: CREATOR,
+            inLanguage: "en",
+            isBasedOn: VISA_BULLETIN_URL,
+            license: LICENSE_URL,
+            temporalCoverage: `${firstMonth}/..`,
+          })}
+        />
       </Head>
       <Stack gap="sm">
         <Title order={1}>{TITLE}</Title>

@@ -35,6 +35,7 @@ import {
 } from "../../../components/consulates";
 import IvScheduleCard from "../../../components/IvScheduleCard";
 import PolicyBanner from "../../../components/PolicyBanner";
+import { breadcrumbList } from "../../../components/structuredData";
 import {
   issuanceSuspensionFor,
   scheduleOverrideFor,
@@ -384,6 +385,12 @@ export default function ConsulateStats({
     firstMonth,
   )} from U.S. State Department statistics.`;
   const canonicalUrl = `https://visawhen.com/consulates/${postSlug}/${visaClassSlug}`;
+  // A class the post has not issued in two years leaves the page little to
+  // show but that, and there are thousands of such pages. They ask search
+  // engines not to list them, so that the site's results are its pages with
+  // numbers, and the sitemap leaves them out (next-sitemap.config.js).
+  // Visitors still reach them from the post's page.
+  const noindex = recent.last12 === 0 && recent.prev12 === 0;
   // The interview queue for the classes State's scheduling tool covers, and
   // a note for the other classes that go through NVC (the other immigrant
   // classes and the K visas); other nonimmigrant classes get neither.
@@ -409,6 +416,17 @@ export default function ConsulateStats({
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:url" content={canonicalUrl} />
+        {noindex && <meta name="robots" content="noindex" />}
+        <script
+          {...breadcrumbList([
+            { name: "Consulates", path: "/consulates" },
+            { name: postName, path: `/consulates/${postSlug}` },
+            {
+              name: visaClassName,
+              path: `/consulates/${postSlug}/${visaClassSlug}`,
+            },
+          ])}
+        />
       </Head>
       <Group gap="xs" style={{ alignSelf: "flex-start" }}>
         <Button

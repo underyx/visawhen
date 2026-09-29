@@ -20,6 +20,7 @@ import {
   VISA_BULLETIN_URL,
 } from "../../../components/links";
 import VisaBulletinChart from "../../../components/VisaBulletinChart";
+import { breadcrumbList } from "../../../components/structuredData";
 import {
   addMonthsToMonth,
   Area,
@@ -351,6 +352,12 @@ export default function VisaBulletinPage({
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:url" content={`https://visawhen.com${path}`} />
+        <script
+          {...breadcrumbList([
+            { name: "Visa Bulletin", path: "/visa-bulletin" },
+            { name: `${category.name}, ${area.name}`, path },
+          ])}
+        />
       </Head>
       <Stack gap="sm">
         <Text size="sm">

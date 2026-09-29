@@ -61,6 +61,7 @@ import {
 import { OutcomesChart, WaitChart } from "../../../components/UscisChart";
 import UscisStats, { RangeText } from "../../../components/UscisStats";
 import PolicyBanner from "../../../components/PolicyBanner";
+import { breadcrumbList } from "../../../components/structuredData";
 
 /** How the field offices' piles compare with the national range, where they
  * are much longer than it suggests (fieldOfficeCaveat). */
@@ -570,6 +571,13 @@ export default function UscisOffice({
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:url" content={canonicalUrl} />
+        <script
+          {...breadcrumbList([
+            { name: "USCIS", path: "/uscis" },
+            { name: form, path: `/uscis/${formSlug}` },
+            { name: fullName, path: `/uscis/${formSlug}/${slug}` },
+          ])}
+        />
       </Head>
       <Group gap="xs" style={{ alignSelf: "flex-start" }}>
         <Button

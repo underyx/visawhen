@@ -1,10 +1,53 @@
+const { execFileSync } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const dataDir = path.join(__dirname, "data");
+// `next build` (output: "export") writes the site straight to out/, so the
+// sitemap has to be written there too instead of the default public/.
+const OUT_DIR = "out";
 
-function readJson(file) {
-  return JSON.parse(fs.readFileSync(path.join(dataDir, file), "utf8"));
+function git(...args) {
+  return execFileSync("git", args, {
+    cwd: __dirname,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "ignore"],
+    // dates in UTC, whatever the time zone of the build or of the committer
+    env: { ...process.env, TZ: "UTC" },
+  }).trim();
+}
+
+/** The commits where a shallow clone's history stops */
+function shallowCommits() {
+  const file = path.resolve(
+    __dirname,
+    git("rev-parse", "--git-path", "shallow"),
+  );
+  return fs.existsSync(file)
+    ? fs.readFileSync(file, "utf8").split("\n").filter(Boolean)
+    : [];
+}
+
+/** The day (UTC) the newest change to any of these paths reached the branch,
+ * "2026-09-28": the commit on the branch itself, so for a pull request the
+ * day it was merged. Undefined when the history cannot tell: without git, or
+ * when that commit is where a shallow clone's history stops, which shows
+ * every file as added. build.yml fetches the whole history for this. */
+function changedOn(...paths) {
+  try {
+    const [commit, day] = git(
+      "log",
+      "-1",
+      "--first-parent",
+      "--date=format-local:%Y-%m-%d",
+      "--format=%H %cd",
+      "--",
+      ...paths,
+    ).split(" ");
+    if (!commit || shallowCommits().includes(commit)) return undefined;
+    return day;
+  } catch {
+    return undefined;
+  }
 }
 
 /** The latest of some ISO dates, "2026-09-23" */
@@ -12,56 +55,73 @@ function latest(dates) {
   return dates.filter(Boolean).sort().at(-1);
 }
 
-/** The newest month of visa issuances, "2026-02-01", from the database that
- * `yarn build` loads before this runs */
-function newestIssuanceMonth() {
-  const sqlite3 = require("sqlite3");
-  return new Promise((resolve, reject) => {
-    const db = new sqlite3.Database(
-      path.join(dataDir, "consulates", "consulates.sqlite"),
-      sqlite3.OPEN_READONLY,
-    );
-    db.get('SELECT MAX("Month") AS month FROM backlogs', (error, row) => {
-      db.close();
-      if (error) reject(error);
-      else resolve(row.month.slice(0, 10));
-    });
-  });
-}
+let pageDates;
 
-let sectionDates;
-
-/** The date of the newest data each section of the site shows. A page's
- * lastmod is its section's: it changes when the section's data does, not on
- * every build, which would teach search engines to ignore it. */
-async function getSectionDates() {
-  if (sectionDates === undefined) {
-    const nvc = readJson("nvc/data.json");
-    const uscis = readJson("uscis/forms.json");
-    const newestQuarter = latest(
-      uscis.forms.flatMap((form) => Object.keys(form.quarters)),
+/** A page's lastmod is the day the data it shows last changed on the site,
+ * not the build time: it changes when the data does, not on every build,
+ * which would teach search engines to ignore it. Nor is it the date the data
+ * is about: USCIS publishes a quarter's numbers months after it ends, and a
+ * lastmod of the quarter's end would look older than the search engine's
+ * last visit. Undefined for the home page, whose text does not change with
+ * the data. */
+function getPageDates() {
+  if (pageDates === undefined) {
+    const uscis = changedOn("data/uscis/forms.json");
+    // Only the form pages of the forms in USCIS's monthly report show its
+    // numbers (components/monthlyNumbers.ts).
+    const monthly = JSON.parse(
+      fs.readFileSync(path.join(__dirname, "data/uscis/monthly.json"), "utf8"),
     );
-    const ivSchedule = readJson("consulates/iv_schedule.json");
-    const nvcDate = latest(Object.values(nvc).flatMap(Object.keys));
-    // the end of the newest quarter with USCIS data
-    const uscisDate = uscis.periods.find(
-      (period) => period.quarter === newestQuarter,
-    )?.end;
-    // the consulate pages show both the interview-scheduling tool and the
-    // monthly issuances
-    const consulatesDate = latest([
-      ...Object.keys(ivSchedule.snapshots),
-      await newestIssuanceMonth(),
-    ]);
-    sectionDates = {
-      "/nvc": nvcDate,
-      "/uscis": uscisDate,
-      "/consulates": consulatesDate,
-      // it lists the newest date of every source
-      "/about": latest([nvcDate, uscisDate, consulatesDate]),
+    const monthlyForms = new Set(
+      Object.values(monthly.months).flatMap((report) =>
+        Object.keys(report.forms),
+      ),
+    );
+    const { forms } = JSON.parse(
+      fs.readFileSync(path.join(__dirname, "data/uscis/forms.json"), "utf8"),
+    );
+    const uscisMonthly = latest([uscis, changedOn("data/uscis/monthly.json")]);
+    const sections = {
+      "/nvc": changedOn("data/nvc/data.json"),
+      "/uscis": uscis,
+      // the interview-scheduling tool and the monthly issuances
+      "/consulates": changedOn(
+        "data/consulates/iv_schedule.json",
+        "data/consulates/dump",
+      ),
+      "/visa-bulletin": changedOn("data/visa_bulletin/data.json"),
+    };
+    pageDates = {
+      sections: {
+        ...sections,
+        // it lists the newest date of every source, and of the notices
+        "/about": latest([
+          ...Object.values(sections),
+          uscisMonthly,
+          changedOn("data/policy.json"),
+        ]),
+      },
+      pages: Object.fromEntries(
+        forms
+          .filter(({ form }) => monthlyForms.has(form))
+          .map(({ slug }) => [`/uscis/${slug}`, uscisMonthly]),
+      ),
     };
   }
-  return sectionDates;
+  return pageDates;
+}
+
+/** Whether the exported page asks search engines not to index it, as the
+ * consulate pages of a visa class the post has not issued in two years do */
+function isNoindex(loc) {
+  const file = path.join(
+    __dirname,
+    OUT_DIR,
+    loc === "/" ? "index.html" : `${loc}.html`,
+  );
+  const html = fs.readFileSync(file, "utf8");
+  const head = html.slice(0, html.indexOf("</head>"));
+  return /<meta name="robots" content="[^"]*noindex/.test(head);
 }
 
 /** @type {import('next-sitemap').IConfig} */
@@ -69,22 +129,22 @@ module.exports = {
   siteUrl: process.env.SITE_URL || "https://visawhen.com",
   generateRobotsTxt: true,
   changefreq: "weekly",
-  // `next build` (output: "export") writes the site straight to out/, so the
-  // sitemap has to be written there too instead of the default public/.
-  outDir: "out",
-  // No build time as every page's lastmod; see getSectionDates.
+  outDir: OUT_DIR,
+  // No build time as every page's lastmod; see getPageDates.
   autoLastmod: false,
   transform: async (config, loc) => {
-    const dates = await getSectionDates();
-    const section = Object.keys(dates).find(
+    // a page search engines should not index has no place in the sitemap
+    if (isNoindex(loc)) return null;
+    const { sections, pages } = getPageDates();
+    const section = Object.keys(sections).find(
       (prefix) => loc === prefix || loc.startsWith(`${prefix}/`),
     );
     return {
       loc,
       changefreq: config.changefreq,
       priority: config.priority,
-      // none for the home page, whose text does not change with the data
-      lastmod: section === undefined ? undefined : dates[section],
+      lastmod:
+        pages[loc] ?? (section === undefined ? undefined : sections[section]),
       alternateRefs: config.alternateRefs ?? [],
     };
   },

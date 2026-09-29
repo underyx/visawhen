@@ -69,6 +69,7 @@ import {
 } from "../../../components/monthlyNumbers";
 import MoreDetails from "../../../components/MoreDetails";
 import PolicyBanner from "../../../components/PolicyBanner";
+import { breadcrumbList } from "../../../components/structuredData";
 import { ListRow, ListRows } from "../../../components/ListRow";
 import { normalize } from "../../../components/search";
 import SearchStatus from "../../../components/SearchStatus";
@@ -432,6 +433,12 @@ export default function UscisForm({
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={description} />
         <meta property="og:url" content={canonicalUrl} />
+        <script
+          {...breadcrumbList([
+            { name: "USCIS", path: "/uscis" },
+            { name: form, path: `/uscis/${slug}` },
+          ])}
+        />
       </Head>
       <Button
         variant="outline"
