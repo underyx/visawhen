@@ -44,6 +44,7 @@ import IvScheduleCard, {
 } from "../../../components/IvScheduleCard";
 import { ListItem, ListRow, ListRows } from "../../../components/ListRow";
 import PolicyBanner from "../../../components/PolicyBanner";
+import { breadcrumbList } from "../../../components/structuredData";
 import {
   hasEnded,
   issuanceSuspensionFor,
@@ -330,6 +331,12 @@ export default function ConsulateSelect({
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:url" content={canonicalUrl} />
+        <script
+          {...breadcrumbList([
+            { name: "Consulates", path: "/consulates" },
+            { name: postName, path: `/consulates/${postSlug}` },
+          ])}
+        />
       </Head>
       <Button
         variant="outline"
