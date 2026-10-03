@@ -172,6 +172,14 @@ function MyApp({ Component, pageProps }: AppProps) {
           gtag('config', 'G-3QQ9KQ0WCE');
         `}
       </Script>
+      {/* Cloudflare Web Analytics: visits, pages, countries, devices and page
+          speed, without cookies. The token is not a secret; every page shows
+          it. "spa" counts the pages Next.js opens without a full load too. */}
+      <Script
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        strategy="afterInteractive"
+        data-cf-beacon='{"token": "CLOUDFLARE_TOKEN_PENDING", "spa": true}'
+      />
     </>
   );
 }
