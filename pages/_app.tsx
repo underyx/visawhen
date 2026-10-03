@@ -173,12 +173,15 @@ function MyApp({ Component, pageProps }: AppProps) {
         `}
       </Script>
       {/* Cloudflare Web Analytics: visits, pages, countries, devices and page
-          speed, without cookies. The token is not a secret; every page shows
-          it. "spa" counts the pages Next.js opens without a full load too. */}
+          speed, without cookies. The snippet Cloudflare gives for the
+          visawhen.com site, with "spa" added, which counts the pages Next.js
+          opens without a full load too. The token is not a secret; every page
+          shows it. */}
       <Script
+        type="module"
         src="https://static.cloudflareinsights.com/beacon.min.js"
         strategy="afterInteractive"
-        data-cf-beacon='{"token": "CLOUDFLARE_TOKEN_PENDING", "spa": true}'
+        data-cf-beacon='{"token": "fe12ee17d6d445aba52059c663f12235", "spa": true}'
       />
     </>
   );
