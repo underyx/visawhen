@@ -67,9 +67,44 @@
 }
 
 .path {
+  position: relative;
+  isolation: isolate;
+  /* as tall as its own steps, not its row, so that the highlight fits it */
+  align-self: start;
   border-top: 2px solid var(--vw-ink);
   padding-top: var(--mantine-spacing-sm);
   scroll-margin-top: 5rem;
+}
+
+/* The path a link in the index jumped to is marked, since in two columns
+ * the path beside it starts at the same height: its rule turns violet and
+ * stays so, and the path is highlighted for a moment, then fades back. The
+ * fade has no movement, so it is kept for reduced motion too. */
+.path:target {
+  border-top-color: var(--vw-stamp);
+}
+
+.path::before {
+  content: "";
+  position: absolute;
+  inset: 0 -12px -12px;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.path:target::before,
+.path:target .step::before {
+  /* held at the end (the parts' own backgrounds) so that the index can
+   * play it again: see replayHighlight in pages/index.tsx */
+  animation: landed 2.4s ease-in forwards;
+}
+
+/* Only the start: each part fades back to its own background. */
+@keyframes landed {
+  from,
+  40% {
+    background-color: var(--vw-highlight);
+  }
 }
 
 .pathTitle {
