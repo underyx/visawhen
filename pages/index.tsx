@@ -108,6 +108,20 @@ const PATHS = [
   { id: "temporary", label: "Visitor, student or work visa" },
 ];
 
+/** Highlights the path again when its link in the index is followed while
+ * it is already the target: the browser still scrolls to it then, but does
+ * not start the highlight over, as the target has not changed. */
+function replayHighlight(id: string) {
+  if (window.location.hash !== `#${id}`) return;
+  document
+    .getElementById(id)
+    ?.getAnimations?.({ subtree: true })
+    .forEach((animation) => {
+      animation.cancel();
+      animation.play();
+    });
+}
+
 // The site's name leads, for people who search for the site by name
 const TITLE = "VisaWhen: US visa and green card wait times";
 const DESCRIPTION =
@@ -137,7 +151,9 @@ export default function Home() {
           <ul className={classes.index}>
             {PATHS.map(({ id, label }) => (
               <li key={id}>
-                <a href={`#${id}`}>{label}</a>
+                <a href={`#${id}`} onClick={() => replayHighlight(id)}>
+                  {label}
+                </a>
               </li>
             ))}
           </ul>
