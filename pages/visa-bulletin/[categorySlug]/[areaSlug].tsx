@@ -1,6 +1,7 @@
 import {
   Alert,
   Anchor,
+  Button,
   Paper,
   SimpleGrid,
   Stack,
@@ -13,6 +14,7 @@ import Head from "next/head";
 import Link from "next/link";
 import React from "react";
 import { getData } from "../../../api/visaBulletin";
+import { ChevronLeftIcon } from "../../../components/icons";
 import { ListRow, ListRows } from "../../../components/ListRow";
 import MoreDetails from "../../../components/MoreDetails";
 import {
@@ -141,7 +143,6 @@ function StaleNotice({ month }: { month: string }) {
         href={VISA_BULLETIN_URL}
         target="_blank"
         rel="noopener noreferrer"
-        inherit
       >
         the newest bulletin on its website
       </Anchor>
@@ -159,7 +160,7 @@ interface CutoffBoxProps {
 /** One chart's cutoff, large, with what it means */
 function CutoffBox({ label, cutoff, children }: CutoffBoxProps) {
   return (
-    <Paper withBorder p="md" radius="md">
+    <Paper withBorder p="md">
       <Text size="sm" c="dimmed" fw={500}>
         {label}
       </Text>
@@ -193,7 +194,6 @@ function filingMeaning(cutoff: string | undefined): React.ReactNode {
         href={ADJUSTMENT_FILING_CHARTS_URL}
         target="_blank"
         rel="noopener noreferrer"
-        inherit
       >
         USCIS says each month
       </Anchor>{" "}
@@ -359,12 +359,17 @@ export default function VisaBulletinPage({
           ])}
         />
       </Head>
+      <Button
+        variant="outline"
+        component={Link}
+        href="/visa-bulletin"
+        size="xs"
+        leftSection={<ChevronLeftIcon />}
+        style={{ alignSelf: "flex-start" }}
+      >
+        Change category
+      </Button>
       <Stack gap="sm">
-        <Text size="sm">
-          <Anchor component={Link} href="/visa-bulletin">
-            Visa Bulletin
-          </Anchor>
-        </Text>
         <Title order={1}>{title}</Title>
         <Text size="lg">
           {category.who}, {area.bornIn}.
@@ -381,11 +386,11 @@ export default function VisaBulletinPage({
             {filingMeaning(filingCutoff)}
           </CutoffBox>
         </SimpleGrid>
-        <Text size="sm" c="dimmed">
+        <Text size="xs" c="dimmed">
           Your priority date is usually the day USCIS received your I-130 or
           I-140 petition, or, when you needed a labor certification, the day it
           was filed. It is on your I-797 notice. Source:{" "}
-          <Anchor href={bulletinUrl} target="_blank" rel="noopener" inherit>
+          <Anchor href={bulletinUrl} target="_blank" rel="noopener">
             the {formatBulletinMonth(month)} Visa Bulletin
           </Anchor>
           .

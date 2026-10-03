@@ -455,7 +455,7 @@ export default function ConsulateStats({
       <Title order={1}>
         {postName}: {visaClassName} visas issued
       </Title>
-      <Text size="xl">
+      <Text size="lg">
         {visaType === "IV" ? "Immigrant" : "Nonimmigrant"} visa
         {visaClassDescription !== null && `: ${visaClassDescription}`}
       </Text>

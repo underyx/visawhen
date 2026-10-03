@@ -88,7 +88,11 @@ const theme = createTheme({
     },
   },
   components: {
-    Anchor: Anchor.extend({ defaultProps: { underline: "always" } }),
+    // A link takes the size, weight and leading of the text around it, so
+    // that one in a smaller paragraph or a table cell does not stand out.
+    Anchor: Anchor.extend({
+      defaultProps: { underline: "always", inherit: true },
+    }),
     // Yellow and orange notes read as a highlighter over the page rather
     // than a warning box; gray ones are plain white slips, blue ones pale ink.
     Alert: Alert.extend({

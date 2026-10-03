@@ -168,16 +168,11 @@ export default function VisaBulletinIndex({
       </Head>
       <Stack gap="sm">
         <Title order={1}>{TITLE}</Title>
-        <Text size="lg">
+        <Text>
           In the family and employment preference categories, only a limited
           number of green cards is given each year. People wait in line by their
           priority date. Each month, the State Department&rsquo;s{" "}
-          <Anchor
-            href={VISA_BULLETIN_URL}
-            target="_blank"
-            rel="noopener"
-            inherit
-          >
+          <Anchor href={VISA_BULLETIN_URL} target="_blank" rel="noopener">
             Visa Bulletin
           </Anchor>{" "}
           says how far the line has moved.
@@ -192,7 +187,7 @@ export default function VisaBulletinIndex({
       </Stack>
       <Stack gap="sm">
         <Title order={2} size="h3">
-          <Anchor href={bulletinUrl} target="_blank" rel="noopener" inherit>
+          <Anchor href={bulletinUrl} target="_blank" rel="noopener">
             {formatBulletinMonth(month)} Visa Bulletin
           </Anchor>
         </Title>

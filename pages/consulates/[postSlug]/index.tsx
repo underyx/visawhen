@@ -350,7 +350,7 @@ export default function ConsulateSelect({
       </Button>
       <Box>
         <Title order={1}>{postName}</Title>
-        {country !== null && <Text size="xl">{country}</Text>}
+        {country !== null && <Text size="lg">{country}</Text>}
       </Box>
       {inactivity !== null && (
         // role="note": a standing statement, which screen readers should not

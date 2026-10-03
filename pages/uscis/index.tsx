@@ -162,7 +162,7 @@ export default function UscisIndex({
       </Head>
       <Stack gap="sm">
         <Title order={1}>USCIS processing times by form</Title>
-        <Text size="xl">Latest USCIS data: {latestLabel}.</Text>
+        <Text>Latest USCIS data: {latestLabel}.</Text>
         <Text>
           USCIS publishes how many applications of each form it received,
           approved, denied, and still had waiting, and its median processing

@@ -65,7 +65,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
 
 function Source({ href, children }: React.PropsWithChildren<{ href: string }>) {
   return (
-    <Anchor href={href} target="_blank" rel="noopener" inherit>
+    <Anchor href={href} target="_blank" rel="noopener">
       {children}
     </Anchor>
   );

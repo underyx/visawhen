@@ -3,6 +3,7 @@ import {
   Alert,
   Anchor,
   Badge,
+  Box,
   Button,
   Chip,
   Group,
@@ -451,15 +452,14 @@ export default function UscisForm({
         Change form
       </Button>
       <Stack gap="sm">
-        {/* overflowWrap: a title such as the I-899's "Determination/Reasonable"
-            is one word wider than a phone */}
-        <Title order={1} style={{ overflowWrap: "anywhere" }}>
-          {form} processing times
-          <Text component="span" inherit c="dimmed">
-            {" "}
-            · {title}
+        <Box>
+          <Title order={1}>{form} processing times</Title>
+          {/* overflowWrap: a title such as the I-899's
+              "Determination/Reasonable" is one word wider than a phone */}
+          <Text size="lg" style={{ overflowWrap: "anywhere" }}>
+            {title}
           </Text>
-        </Title>
+        </Box>
         <PolicyBanner page={`/uscis/${slug}`} />
         {views.length > 1 && (
           <Stack gap={6}>
@@ -488,9 +488,7 @@ export default function UscisForm({
             )}
           </Stack>
         )}
-        <Text size="xl">
-          Latest USCIS data: {(newestMonth ?? statsCurrent).label}.
-        </Text>
+        <Text>Latest USCIS data: {(newestMonth ?? statsCurrent).label}.</Text>
         <UscisStats
           points={statsPoints}
           headline={viewRange}
@@ -582,7 +580,6 @@ export default function UscisForm({
                           href={
                             PRIORITY_DATE_CUTOFFS[range.key] ?? "/visa-bulletin"
                           }
-                          inherit
                         >
                           today&rsquo;s cutoff dates
                         </Anchor>

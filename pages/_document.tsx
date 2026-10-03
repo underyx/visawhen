@@ -12,7 +12,8 @@ export default function Document() {
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:creator" content="@underyx" />
         <meta name="twitter:creator:id" content="222041531" />
-        <meta name="theme-color" content="#242424" />
+        {/* the header's navy, so a phone's browser bar runs into it */}
+        <meta name="theme-color" content="#16233f" />
         <link
           rel="apple-touch-icon"
           sizes="180x180"
