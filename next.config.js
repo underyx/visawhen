@@ -78,7 +78,7 @@ class ClientDataCheck {
 const CONFIG = {
   // The site is a fully static export: `next build` writes it to out/, which
   // .github/workflows/deploy.yml uploads to Netlify and to Cloudflare Workers
-  // (visawhen.com is proxied through Cloudflare to Netlify; see deploy.yml).
+  // (the Worker serves visawhen.com; see deploy.yml).
   // A static export cannot set HTTP headers itself: the Cache-Control headers
   // are in public/_headers for Cloudflare Workers and written into out/_headers
   // by deploy.yml for Netlify.
