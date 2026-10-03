@@ -75,15 +75,17 @@ export function formatMonthYear(date: string): string {
   return monthYearFormatter.format(new Date(date));
 }
 
-/** Two ISO dates as a range of months: "Aug 2027 - Jul 2028", "Apr - Sep
- * 2027" within a year, or "Apr 2027" when both fall in the same month.
- * Non-breaking spaces keep each month with its year and the dash with the
- * start, so a narrow table cell wraps the range only between its ends. */
+/** Two ISO dates as a range of months: "Aug 2027 – Jul 2028", "Apr – Sep
+ * 2027" within a year, or "Apr 2027" when both fall in the same month. The
+ * en dash is the one the quarters' labels use ("Apr–Jun 2026"), spaced since
+ * its ends have spaces in them. Non-breaking spaces keep each month with its
+ * year and the dash with the start, so a narrow table cell wraps the range
+ * only between its ends. */
 export function formatMonthRange(from: string, to: string): string {
   const start = formatMonthYear(from).replace(" ", "\u00a0");
   const end = formatMonthYear(to).replace(" ", "\u00a0");
   if (start === end) return start;
   if (from.slice(0, 4) === to.slice(0, 4))
-    return `${monthOnlyFormatter.format(new Date(from))}\u00a0- ${end}`;
-  return `${start}\u00a0- ${end}`;
+    return `${monthOnlyFormatter.format(new Date(from))}\u00a0– ${end}`;
+  return `${start}\u00a0– ${end}`;
 }

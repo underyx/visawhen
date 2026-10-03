@@ -56,7 +56,7 @@ export default function UscisMonths({
         </Table>
       </Table.ScrollContainer>
       {notes.map(({ label, text }) => (
-        <Text size="sm" c="dimmed" key={`${label} ${text}`}>
+        <Text size="xs" c="dimmed" key={`${label} ${text}`}>
           USCIS&rsquo;s note for {label}: &ldquo;{text}&rdquo;
         </Text>
       ))}
@@ -64,7 +64,7 @@ export default function UscisMonths({
         Pending is counted on the last day of each month. USCIS counts months
         and quarters separately, so these can differ a little from the chart.
         Source: USCIS&rsquo;s{" "}
-        <Anchor href={source} target="_blank" rel="noopener" inherit>
+        <Anchor href={source} target="_blank" rel="noopener">
           Application Processing Data
         </Anchor>{" "}
         reports.

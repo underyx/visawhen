@@ -273,12 +273,7 @@ function ElsewhereNote({
     <Alert role="note" color="orange">
       <Text size="sm">
         The State Department&rsquo;s{" "}
-        <Anchor
-          href={IV_POSTS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          inherit
-        >
+        <Anchor href={IV_POSTS_URL} target="_blank" rel="noopener noreferrer">
           list of embassies and consulates for immigrant visas
         </Anchor>{" "}
         sends immigrant visa applicants from {country} to{" "}
@@ -287,9 +282,7 @@ function ElsewhereNote({
             {index > 0 && (index === posts.length - 1 ? " and " : ", ")}
             {/* Plain anchor: the consulate page's _next/data JSON is not
                 deployed (see the note in components/ListRow.tsx) */}
-            <Anchor href={`/consulates/${slug}`} inherit>
-              {name}
-            </Anchor>
+            <Anchor href={`/consulates/${slug}`}>{name}</Anchor>
             {only !== undefined && ` (${only} only)`}
           </React.Fragment>
         ))}
@@ -302,7 +295,6 @@ function ElsewhereNote({
               href={AFRICA_HUBS_URL}
               target="_blank"
               rel="noopener noreferrer"
-              inherit
             >
               State Department notice of July 15, 2026
             </Anchor>{" "}
@@ -312,7 +304,6 @@ function ElsewhereNote({
               href={EMBASSIES_URL}
               target="_blank"
               rel="noopener noreferrer"
-              inherit
             >
               usembassy.gov
             </Anchor>
@@ -377,17 +368,12 @@ export default function IvScheduleCard({
   const stale = today !== null && daysBetween(asOf, today) > MAX_AGE_DAYS;
   const updated = formatShortDate(asOf);
   const toolLink = (children: React.ReactNode) => (
-    <Anchor href={source} target="_blank" rel="noopener noreferrer" inherit>
+    <Anchor href={source} target="_blank" rel="noopener noreferrer">
       {children}
     </Anchor>
   );
   const embassiesLink = (
-    <Anchor
-      href={EMBASSIES_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      inherit
-    >
+    <Anchor href={EMBASSIES_URL} target="_blank" rel="noopener noreferrer">
       usembassy.gov
     </Anchor>
   );
@@ -398,7 +384,7 @@ export default function IvScheduleCard({
 
   if (note !== undefined)
     return (
-      <Paper withBorder p="md" radius="md">
+      <Paper withBorder p="md">
         <Stack gap="sm">
           <Title order={2} size="h3">
             Interview scheduling at {postName}
@@ -481,7 +467,7 @@ export default function IvScheduleCard({
     recentIssued !== undefined && recentIssued.count < FEW_IMMIGRANT_VISAS;
 
   return (
-    <Paper withBorder p="md" radius="md">
+    <Paper withBorder p="md">
       <Stack gap="sm">
         <Title order={2} size="h3">
           Interview scheduling at {postName}
@@ -601,13 +587,13 @@ export default function IvScheduleCard({
             wait time: it is the month most interviews are being scheduled for
             now, and it can move backwards. Family preference and employment
             cases also need a current priority date in the{" "}
-            <Anchor component={Link} href="/visa-bulletin" inherit>
+            <Anchor component={Link} href="/visa-bulletin">
               Visa Bulletin
             </Anchor>
             .
           </Text>
         )}
-        <Text size="sm" c="dimmed">
+        <Text size="xs" c="dimmed">
           {hasQueue &&
             "The State Department says it cannot predict exactly when a case will be scheduled. "}
           Source: {toolLink("State Department IV Scheduling Status Tool")},

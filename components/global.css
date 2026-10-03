@@ -31,6 +31,13 @@ li {
   text-wrap: pretty;
 }
 
+/* Running text keeps to a readable line length on wide screens, as on the
+ * home page; charts, tables and notices still take the full width. Low
+ * specificity, so that a component can set its own. */
+:where(.mantine-AppShell-main) p {
+  max-width: 68ch;
+}
+
 ::selection {
   background-color: var(--mantine-color-stamp-1);
   color: var(--vw-ink);
@@ -73,8 +80,20 @@ a.mantine-Anchor-root:hover {
   letter-spacing: 0;
 }
 
-/* Plain links written as <a> (in the charts' captions) look like the rest. */
-.mantine-AppShell-main a:not([class]) {
+/* Footnotes, such as where a chart's or a table's numbers come from and how
+ * to read them, are all one size: small and dimmed. A chart's are its
+ * <figcaption>; elsewhere they are <Text size="xs" c="dimmed">. */
+figure > figcaption {
+  margin-top: var(--mantine-spacing-xs);
+  font-size: var(--mantine-font-size-xs);
+  line-height: var(--mantine-line-height-xs);
+  color: var(--mantine-color-dimmed);
+}
+
+/* Plain links written as <a> (in the charts' captions) look like the rest.
+ * :where() keeps this from overriding a component's own link styles, such
+ * as the home page's index of paths. */
+:where(.mantine-AppShell-main a:not([class])) {
   color: var(--mantine-color-anchor);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;

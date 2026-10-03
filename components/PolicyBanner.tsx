@@ -49,23 +49,23 @@ function EntryDetails({
   const unchecked =
     today !== null &&
     daysBetween(entry.lastChecked, today) > MAX_UNCHECKED_DAYS;
-  // The badges wrap instead of cutting their text short on narrow screens.
+  // The badges wrap instead of cutting their text short on narrow screens,
+  // their lines starting on the left like the text under them.
   const badgeProps = {
     tt: "none",
     maw: "100%",
     h: "auto",
     radius: "sm",
-    styles: { label: { whiteSpace: "normal" } },
+    styles: { label: { whiteSpace: "normal", textAlign: "left" } },
   } as const;
-  // Everything here is in the body colour, not dimmed, and links in the dark
-  // blue of Mantine's light variants: the default blue and gray are too faint
-  // to read on the orange of an official notice.
+  // Everything here is in the body colour, not dimmed. Links keep the site's
+  // violet, which is 7.1:1 on the highlighter yellow of an official notice.
   return (
     <Stack gap="xs">
       {(entry.status === "reported" || entry.end !== null || unchecked) && (
         <Group gap="xs">
           {entry.status === "reported" && (
-            <Badge {...badgeProps} variant="filled" color="gray.7">
+            <Badge {...badgeProps} variant="filled" color="ink">
               News reports only; no State Department notice
             </Badge>
           )}
@@ -99,8 +99,6 @@ function EntryDetails({
                 href={source.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                c="blue.9"
-                inherit
               >
                 {source.label}
               </Anchor>

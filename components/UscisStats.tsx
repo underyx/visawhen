@@ -98,8 +98,8 @@ function ChangeStat({
 }
 
 /** A range of the wait: in months while prerendering and hydrating
- * ("11-22 months"), then as the months a decision would land in if filed
- * today ("Aug 2027 - Jul 2028"). */
+ * ("11–22 months"), then as the months a decision would land in if filed
+ * today ("Aug 2027 – Jul 2028"). */
 export function RangeText({ low, high }: { low: number; high: number }) {
   const today = useToday();
   return (

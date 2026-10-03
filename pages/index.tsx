@@ -336,7 +336,7 @@ export default function Home() {
           ]}
         />
       </div>
-      <Text size="sm" c="dimmed" className={classes.footnote}>
+      <Text size="xs" c="dimmed" className={classes.footnote}>
         These are the common routes, not legal advice: an immigration lawyer or
         accredited representative can tell you which one is yours and whether
         you qualify.

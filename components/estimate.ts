@@ -305,7 +305,7 @@ export function headlineRange(
     );
 }
 
-/** A range of months, "11-22 months" or "2.8-5.5 months": whole months,
+/** A range of months, "11–22 months" or "2.8–5.5 months": whole months,
  * but one decimal on both ends when the range starts below three months. */
 export function formatRangeMonths(
   low: number,
@@ -316,7 +316,7 @@ export function formatRangeMonths(
     low < 3 ? months.toFixed(1) : String(Math.round(months));
   const from = format(low);
   const to = format(high);
-  return from === to ? `about ${from} ${unit}` : `${from}-${to} ${unit}`;
+  return from === to ? `about ${from} ${unit}` : `${from}–${to} ${unit}`;
 }
 
 /** USCIS's median as it publishes it, to a tenth of a month: "13.0 months". */

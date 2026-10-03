@@ -3,7 +3,7 @@
  * screens. */
 .list {
   border: 1px solid var(--mantine-color-default-border);
-  border-radius: var(--mantine-radius-md);
+  border-radius: var(--mantine-radius-sm);
   background-color: var(--mantine-color-body);
   overflow: hidden;
 }

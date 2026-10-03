@@ -1,5 +1,6 @@
 import { ChevronLeftIcon } from "../../../components/icons";
 import {
+  Alert,
   Anchor,
   Button,
   Chip,
@@ -60,12 +61,15 @@ import {
 } from "../../../components/uscis";
 import { OutcomesChart, WaitChart } from "../../../components/UscisChart";
 import UscisStats, { RangeText } from "../../../components/UscisStats";
+import MoreDetails from "../../../components/MoreDetails";
 import PolicyBanner from "../../../components/PolicyBanner";
 import { breadcrumbList } from "../../../components/structuredData";
 
 /** How the field offices' piles compare with the national range, where they
  * are much longer than it suggests (fieldOfficeCaveat). */
 interface FieldOfficeCaveat {
+  /** The newest quarter, "Apr–Jun 2026" */
+  label: string;
   /** The field offices' pending count and decisions of the category in the
    * newest quarter, and the months it would take them to clear the former
    * at the pace of the latter; the same months the quarter before */
@@ -265,6 +269,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
         return months === null ? [] : [months];
       });
       caveat = {
+        label: fieldCurrent.label,
         pending: fieldCurrent.pending,
         decided: fieldCurrent.completions,
         months: fieldCurrent.waitMonths,
@@ -336,19 +341,16 @@ function who(form: string, view: CategoryView): string {
 }
 
 /** What USCIS's national numbers say a filer in the view's category can
- * expect, as the sentence the page leads with, and how the field offices'
- * piles compare with it when they are much longer (CategoryView.caveat);
- * nothing when the numbers say nothing. */
+ * expect, as the sentence the page leads with; nothing when the numbers say
+ * nothing. */
 function NationalRange({
   form,
   view,
   nationalLabel,
-  newestLabel,
 }: {
   form: string;
   view: CategoryView;
   nationalLabel: string;
-  newestLabel: string;
 }) {
   const range = view.nationalRange;
   if (range === null) return null;
@@ -360,7 +362,6 @@ function NationalRange({
         <Anchor
           component={Link}
           href={PRIORITY_DATE_CUTOFFS[range.key] ?? "/visa-bulletin"}
-          inherit
         >
           today&rsquo;s cutoff dates
         </Anchor>
@@ -368,37 +369,80 @@ function NationalRange({
       </>
     );
   if (range.suppressed !== null) return null;
-  const { caveat } = view;
   return (
     <>
       Nationally, {rangeWho} filers can expect a decision in{" "}
       <RangeText low={range.q[1]} high={range.q[3]} /> if they file today, going
       by USCIS&rsquo;s median for {nationalLabel}.{" "}
-      {range.shock &&
-        range.shockRatio !== null &&
-        `USCIS decided ${Math.round(
-          (1 - range.shockRatio) * 100,
-        )}% fewer of these that quarter than its average over the four before, so plan for the later end. `}
-      {caveat !== null && (
-        <strong>
-          {`But the field offices' piles are now much longer than that suggests: ${
-            caveat.moved
-              ? `after USCIS moved ${form} cases to the field offices in ${newestLabel}, `
-              : ""
-          }they had ${formatCount(caveat.pending)} ${
-            range.name
-          } cases pending and decided ${formatCount(
-            caveat.decided,
-          )} that quarter, ${formatMonths(caveat.months)}' worth at that pace${
-            caveat.previousMonths === null
-              ? ""
-              : ` (${formatMonths(caveat.previousMonths)} the quarter before)`
-          }. At ${caveat.over} of ${
-            caveat.offices
-          } field offices, the pile would take longer than the top of the most likely range to clear at the office's own pace. `}
-        </strong>
-      )}
     </>
+  );
+}
+
+/** Why the national range may understate the wait: USCIS deciding far fewer
+ * of these cases than usual (CategoryRange.shock), and the field offices'
+ * piles being much longer than the range suggests (CategoryView.caveat). A
+ * short summary, with the field offices' numbers behind "Details"; nothing
+ * when neither applies. */
+function RangeWarning({
+  form,
+  view,
+  nationalLabel,
+}: {
+  form: string;
+  view: CategoryView;
+  nationalLabel: string;
+}) {
+  const range = view.nationalRange;
+  if (range === null || range.priorityDate || range.suppressed !== null)
+    return null;
+  const { caveat } = view;
+  const shock =
+    range.shock && range.shockRatio !== null
+      ? `USCIS decided ${Math.round(
+          (1 - range.shockRatio) * 100,
+        )}% fewer of these cases in ${nationalLabel} than its average over the four quarters before.`
+      : null;
+  if (shock === null && caveat === null) return null;
+  // The summary stays within two sentences; with both warnings, the numbers
+  // of each go behind "Details".
+  const summary =
+    caveat === null
+      ? `${shock} Plan for the later end of the range.`
+      : shock === null
+      ? "The field offices have so many of these cases waiting that your case may take longer than this range."
+      : "USCIS is deciding far fewer of these cases than usual, and the field offices have so many waiting that your case may take longer than this range.";
+  return (
+    <Alert color="yellow">
+      <Stack gap="xs">
+        <Text inherit>{summary}</Text>
+        {caveat !== null && (
+          <MoreDetails>
+            {shock !== null && <Text size="sm">{shock}</Text>}
+            <Text size="sm">
+              {`${
+                caveat.moved
+                  ? `USCIS moved ${form} cases to the field offices in ${caveat.label}. At the end of that quarter, they`
+                  : `At the end of ${caveat.label}, the field offices`
+              } had ${formatCount(caveat.pending)} ${
+                range.name
+              } cases waiting, and they decided ${formatCount(
+                caveat.decided,
+              )} in the quarter. At that speed, deciding all of them would take ${formatMonths(
+                caveat.months,
+              )}${
+                caveat.previousMonths === null
+                  ? ""
+                  : ` (${formatMonths(
+                      caveat.previousMonths,
+                    )} the quarter before)`
+              }. At ${caveat.over} of the ${
+                caveat.offices
+              } field offices, the cases already waiting would take longer than the most likely range to decide, at that office's own speed.`}
+            </Text>
+          </MoreDetails>
+        )}
+      </Stack>
+    </Alert>
   );
 }
 
@@ -632,22 +676,22 @@ export default function UscisOffice({
             </Text>
           </Stack>
         )}
-        <Text size="xl">
+        <Text>
           USCIS does not publish processing times per office.{" "}
           <NationalRange
             form={form}
             view={view}
             nationalLabel={nationalLabel}
-            newestLabel={newest.label}
           />
-          <Anchor component={Link} href={`/uscis/${formSlug}`} inherit>
+          <Anchor component={Link} href={`/uscis/${formSlug}`}>
             {view.nationalRange !== null && !view.nationalRange.priorityDate
               ? `See the national ${form} range for each category`
               : `See the national ${form} numbers`}
           </Anchor>
           .
         </Text>
-        <Text size="xl">Latest USCIS data: {current.label}.</Text>
+        <RangeWarning form={form} view={view} nationalLabel={nationalLabel} />
+        <Text>Latest USCIS data: {current.label}.</Text>
         <UscisStats
           points={points}
           backlogSuppressed={backlogSuppressed}
@@ -667,7 +711,7 @@ export default function UscisOffice({
           </Text>
         )}
         <Text>
-          <strong>Quarter-over-quarter highlight:</strong>{" "}
+          <strong>What changed:</strong>{" "}
           {highlight(
             points,
             officePhrase,

@@ -85,7 +85,6 @@ function SeriesAgeNotice({
         href={NVC_TIMEFRAMES_URL}
         target="_blank"
         rel="noopener noreferrer"
-        inherit
       >
         today&rsquo;s time on NVC&rsquo;s website
       </Anchor>
@@ -269,7 +268,6 @@ function ReviewEstimate({ today, series }: ReviewEstimateProps) {
           href="https://travel.state.gov/content/travel/en/us-visas/immigrate/the-immigrant-visa-process/step-8-scan-collected-documents/step-9-upload-and-submit-scanned-documents.html"
           target="_blank"
           rel="noopener noreferrer"
-          inherit
         >
           in line for review
         </Anchor>{" "}
@@ -376,7 +374,6 @@ export default function NvcBacklog({ data }: Props) {
               href={NVC_TIMEFRAMES_URL}
               target="_blank"
               rel="noopener noreferrer"
-              inherit
             >
               today&rsquo;s times on NVC&rsquo;s website
             </Anchor>
@@ -384,9 +381,7 @@ export default function NvcBacklog({ data }: Props) {
           </Alert>
         )}
         {/* the alert above gives the date when the data is stale */}
-        {!stale && (
-          <Text size="xl">Last updated {formatDate(latestDate)}.</Text>
-        )}
+        {!stale && <Text>Last updated {formatDate(latestDate)}.</Text>}
         <Text>
           How long the National Visa Center is taking to create cases, review
           documents and answer inquiries. NVC usually updates these timeframes
