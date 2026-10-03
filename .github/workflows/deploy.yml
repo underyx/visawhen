@@ -16,54 +16,40 @@ on:
       cloudflare-account-id:
         required: false
 
-# How visawhen.com is served today: the visawhen.com zone on Cloudflare proxies
-# visawhen.com and www.visawhen.com to Netlify (visawhen.netlify.app), which
-# serves what this workflow uploads. The same build also goes to a Cloudflare
-# Workers static-assets Worker (visawhen.<account>.workers.dev, config in
-# wrangler.jsonc) that does not serve visawhen.com yet.
+# How visawhen.com is served: a route on the visawhen.com zone on Cloudflare
+# sends every request to visawhen.com to the Cloudflare Workers static-assets
+# Worker that "Deploy to Cloudflare Workers" uploads (config and route in
+# wrangler.jsonc). Rules in the Cloudflare dashboard, not in this repository,
+# redirect www.visawhen.com and http:// to https://visawhen.com. The same
+# build still goes to Netlify (visawhen.netlify.app), which served
+# visawhen.com through the Cloudflare proxy until 2026-10-03. The zone's DNS
+# records still point there, so deleting the route hands visawhen.com back to
+# Netlify.
 #
-# The Cloudflare proxy does not just pass requests on. On the apex host,
-# visawhen.com, a rule set in the Cloudflare dashboard (not in this repository)
-# keeps HTML and /_next/data JSON in Cloudflare's cache for over 100 minutes
-# and rewrites their Cache-Control to "public, max-age=1800, must-revalidate",
-# overriding the max-age=0 the Netlify step below sets. On 2026-09-25,
-# https://visawhen.com/nvc answered "cf-cache-status: HIT" with "age: 5295",
-# while www.visawhen.com and visawhen.netlify.app answered max-age=0 (www with
-# "cf-cache-status: DYNAMIC"). So for up to about two and a half hours after a
-# deploy, visitors to visawhen.com can get the previous build's pages: the old
-# data, and after a code change, pages whose scripts and styles are gone.
-# Only the owner can fix this, in the Cloudflare dashboard for the
-# visawhen.com zone:
+# The CLOUDFLARE_API_TOKEN secret needs Account > Workers Scripts > Edit and
+# Account > Account Settings > Read on the account, and Zone > Workers Routes
+# > Edit on the visawhen.com zone for the route (the "Edit Cloudflare Workers"
+# token template has all three).
 #
-#   - Caching > Cache Rules (or Rules > Page Rules): delete the rule that
-#     caches everything or sets an Edge Cache TTL on visawhen.com, or limit it
-#     to /_next/static/*.
-#   - Caching > Configuration > Browser Cache TTL: "Respect Existing Headers".
-#   - Check with `curl -sI https://visawhen.com/nvc`: the answer should carry
-#     max-age=0 and a cf-cache-status other than HIT.
+# Pages, sitemaps and data were byte for byte the same on both hosts on
+# 2026-10-03. The differences: the Worker redirects /nvc/, /nvc.html and
+# /index.html with a 307, where Netlify redirects /nvc/ with a 301 and serves
+# /nvc.html and /index.html; no link on the site or entry in the sitemap uses
+# those forms. And the Worker does not have the consulate pages' /_next/data
+# JSON (public/.assetsignore), which is why links to those pages load them in
+# full (components/ListRow.tsx).
 #
-# Cutting visawhen.com over to the Worker:
+# HTML and /_next/data JSON must not be cached past a deploy (see "Deploy to
+# netlify" below and public/_headers). Until late September 2026 a cache rule
+# on the zone kept them in Cloudflare's cache for over 100 minutes on
+# visawhen.com; it has been deleted, and on 2026-10-03 visawhen.com answered
+# "cf-cache-status: DYNAMIC" with max-age=0. Keep any cache rule on the zone
+# to /_next/static/*.
 #
-#   1. Create CLOUDFLARE_API_TOKEN with Account > Workers Scripts > Edit and
-#      Account > Account Settings > Read on the account, and Zone > Workers
-#      Routes > Edit on the visawhen.com zone, which attaching the custom
-#      domains in step 2 needs (the "Edit Cloudflare Workers" token template
-#      has all three). Add it and CLOUDFLARE_ACCOUNT_ID as repository secrets,
-#      and check that this job's Cloudflare steps go green on the next deploy.
-#   2. Attach the custom domains to the Worker: add the "routes" block from
-#      wrangler.jsonc (visawhen.com and www.visawhen.com with
-#      `custom_domain: true`). The next deploy creates the DNS records in the
-#      zone (the zone must be on the same account; remove any existing A/CNAME
-#      records for the hostnames first). Remove the apex cache rule above
-#      first, if it is still there.
-#   3. Once the Worker is serving visawhen.com, disable builds on the old
-#      Cloudflare Pages project (Settings > Builds & deployments > Disable
-#      automatic deployments) or delete it, drop the Netlify deploy step, and
-#      point "Check what is live" at the Worker's version.txt.
-#
-# One visible difference: the Worker redirects /nvc/, /nvc.html and /index.html
-# with a 307, where Netlify redirects /nvc/ with a 301 and serves /index.html.
-# No link on the site or entry in the sitemap uses those forms.
+# Left to do once the Worker has served visawhen.com for a few days: drop the
+# Netlify deploy step, point "Check what is live" at
+# https://visawhen.com/version.txt, and delete the Netlify site and the old
+# Cloudflare Pages project.
 
 jobs:
   deploy:
@@ -152,9 +138,7 @@ jobs:
       # hashed JS/CSS chunks, so a stale page references assets that no longer
       # exist and renders without scripts or styles (seen on 2026-08-24 with a
       # 1-hour max-age), and after a data change it shows the old numbers.
-      # Only the content-hashed /_next/static/* is cached long. (On
-      # visawhen.com, the Cloudflare proxy overrides this; see the top of this
-      # file.)
+      # Only the content-hashed /_next/static/* is cached long.
       - name: Deploy to netlify
         if: steps.live.outputs.newer != 'true'
         run: |

@@ -1,5 +1,6 @@
-// Cloudflare Workers static-assets deployment of the exported site. Deployed
-// by .github/workflows/deploy.yml (`wrangler deploy`) alongside Netlify.
+// Cloudflare Workers static-assets deployment of the exported site, which
+// serves visawhen.com. Deployed by .github/workflows/deploy.yml
+// (`wrangler deploy`), which also describes how requests reach it.
 // https://developers.cloudflare.com/workers/static-assets/
 {
   "$schema": "https://developers.cloudflare.com/workers/wrangler/config-schema.json",
@@ -22,11 +23,15 @@
   "observability": {
     "enabled": true
   },
-  // Serves the site at visawhen.<account>.workers.dev until the custom domain
-  // is attached. To cut over visawhen.com (zone already on this account), add:
-  // "routes": [
-  //   { "pattern": "visawhen.com", "custom_domain": true },
-  //   { "pattern": "www.visawhen.com", "custom_domain": true },
-  // ],
+  // A route rather than a custom domain: the Worker answers every request to
+  // visawhen.com, and the zone's DNS records for it, which still point at
+  // Netlify, only need to stay proxied, so nothing in DNS changes. Deleting
+  // the route under the Worker's Domains & Routes in the dashboard hands
+  // visawhen.com back to Netlify at once; remove it here too, or the next
+  // deploy adds it again. www.visawhen.com needs no route: a redirect rule in
+  // the dashboard sends it to https://visawhen.com.
+  "routes": [{ "pattern": "visawhen.com/*", "zone_name": "visawhen.com" }],
+  // Also serves visawhen.<account>.workers.dev, kept out of search results by
+  // public/_headers.
   "workers_dev": true
 }
