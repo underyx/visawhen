@@ -159,24 +159,13 @@ function MyApp({ Component, pageProps }: AppProps) {
           <Component {...pageProps} />
         </PageWrapper>
       </MantineProvider>
-      <Script
-        src="https://www.googletagmanager.com/gtag/js?id=G-3QQ9KQ0WCE"
-        strategy="afterInteractive"
-      />
-      <Script id="gtag" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-
-          gtag('config', 'G-3QQ9KQ0WCE');
-        `}
-      </Script>
       {/* Cloudflare Web Analytics: visits, pages, countries, devices and page
           speed, without cookies. The snippet Cloudflare gives for the
           visawhen.com site, with "spa" added, which counts the pages Next.js
           opens without a full load too. The token is not a secret; every page
-          shows it. */}
+          shows it. Google Analytics (G-3QQ9KQ0WCE) counted visits until
+          October 2026 and was removed because it sets cookies; its property
+          keeps the earlier history. */}
       <Script
         type="module"
         src="https://static.cloudflareinsights.com/beacon.min.js"
