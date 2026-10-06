@@ -1,9 +1,9 @@
 // Checks out/_redirects (copied from public/_redirects) after `next build`.
 //
 // Cloudflare Workers static assets follow a matching redirect even where a
-// page exists, while Netlify serves the page. A rule that matches a page, such
-// as a per-post rule for a class the post has since issued again, would hide
-// that page on Cloudflare only, so it is dropped here with a warning.
+// page exists. A rule that matches a page, such as a per-post rule for a class
+// the post has since issued again, would hide that page, so it is dropped here
+// with a warning.
 //
 // Cloudflare reads the file the way parseRedirects() in its workers-shared
 // package does: rules without a placeholder or splat count as static only

@@ -35,8 +35,8 @@ updates:
         update-types:
           - "version-update:semver-major"
 
-  # netlify-cli and wrangler, which .github/workflows/deploy.yml runs with the
-  # deploy tokens in their environment.
+  # wrangler, which .github/workflows/deploy.yml runs with the deploy token in
+  # its environment.
   - package-ecosystem: "npm"
     directory: "/.github/deploy-tools"
     schedule:

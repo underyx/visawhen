@@ -1,6 +1,5 @@
 # Response headers for the Cloudflare Workers static-assets deployment, which
-# serves visawhen.com. (The Netlify deploy, which served it until 2026-10-03,
-# gets its own _headers from .github/workflows/deploy.yml.)
+# serves visawhen.com.
 # https://developers.cloudflare.com/workers/static-assets/headers/
 #
 # HTML and /_next/data JSON deliberately keep Cloudflare's default ("public,
