@@ -77,11 +77,9 @@ class ClientDataCheck {
 /** @type {import('next').NextConfig} */
 const CONFIG = {
   // The site is a fully static export: `next build` writes it to out/, which
-  // .github/workflows/deploy.yml uploads to Netlify and to Cloudflare Workers
-  // (the Worker serves visawhen.com; see deploy.yml).
-  // A static export cannot set HTTP headers itself: the Cache-Control headers
-  // are in public/_headers for Cloudflare Workers and written into out/_headers
-  // by deploy.yml for Netlify.
+  // .github/workflows/deploy.yml uploads to Cloudflare Workers, which serves
+  // visawhen.com. A static export cannot set HTTP headers itself: the
+  // Cache-Control headers are in public/_headers.
   output: "export",
   reactStrictMode: true,
   // Stop `next dev` from dropping generated AGENTS.md/CLAUDE.md into the repo.

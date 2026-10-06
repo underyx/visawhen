@@ -8,52 +8,37 @@ on:
         required: true
         type: string
     secrets:
-      netlify-token:
-        required: true
-      # Optional: when unset, the Cloudflare deploy steps are skipped.
       cloudflare-api-token:
-        required: false
+        required: true
       cloudflare-account-id:
-        required: false
+        required: true
 
 # How visawhen.com is served: a route on the visawhen.com zone on Cloudflare
 # sends every request to visawhen.com to the Cloudflare Workers static-assets
 # Worker that "Deploy to Cloudflare Workers" uploads (config and route in
 # wrangler.jsonc). Rules in the Cloudflare dashboard, not in this repository,
-# redirect www.visawhen.com and http:// to https://visawhen.com. The same
-# build still goes to Netlify (visawhen.netlify.app), which served
-# visawhen.com through the Cloudflare proxy until 2026-10-03. The zone's DNS
-# records still point there, so deleting the route hands visawhen.com back to
-# Netlify.
+# redirect www.visawhen.com and http:// to https://visawhen.com. Netlify
+# served visawhen.com until 2026-10-03 and got every deploy until 2026-10-06;
+# nothing else serves the site now.
 #
 # The CLOUDFLARE_API_TOKEN secret needs Account > Workers Scripts > Edit and
 # Account > Account Settings > Read on the account, and Zone > Workers Routes
 # > Edit on the visawhen.com zone for the route (the "Edit Cloudflare Workers"
 # token template has all three).
 #
-# Pages, sitemaps and data were byte for byte the same on both hosts on
-# 2026-10-03. The differences: the Worker redirects /nvc/, /nvc.html and
-# /index.html with a 307, where Netlify redirects /nvc/ with a 301 and serves
-# /nvc.html and /index.html; no link on the site or entry in the sitemap uses
-# those forms. And the Worker does not have the consulate pages' /_next/data
-# JSON (public/.assetsignore), which is why links to those pages load them in
-# full (components/ListRow.tsx).
+# The Worker redirects /nvc/, /nvc.html and /index.html with a 307; no link on
+# the site or entry in the sitemap uses those forms. It does not have the
+# consulate pages' /_next/data JSON (public/.assetsignore), which is why links
+# to those pages load them in full (components/ListRow.tsx).
 #
-# HTML and /_next/data JSON must not be cached past a deploy (see "Deploy to
-# netlify" below and public/_headers). Until late September 2026 a cache rule
-# on the zone kept them in Cloudflare's cache for over 100 minutes on
-# visawhen.com; it has been deleted, and on 2026-10-03 visawhen.com answered
-# "cf-cache-status: DYNAMIC" with max-age=0. Keep any cache rule on the zone
-# to /_next/static/*.
-#
-# Left to do once the Worker has served visawhen.com for a few days: drop the
-# Netlify deploy step, point "Check what is live" at
-# https://visawhen.com/version.txt, and delete the Netlify site and the old
-# Cloudflare Pages project.
+# HTML and /_next/data JSON must not be cached past a deploy (see
+# public/_headers). Until late September 2026 a cache rule on the zone kept
+# them in Cloudflare's cache for over 100 minutes on visawhen.com; it has been
+# deleted. Keep any cache rule on the zone to /_next/static/*.
 
 jobs:
   deploy:
-    name: Deploy to Netlify and Cloudflare
+    name: Deploy to Cloudflare
     runs-on: ubuntu-24.04
     # Only main is published. Running a workflow by hand on another branch
     # builds that branch but does not deploy it. (In a called workflow,
@@ -98,8 +83,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           built=$(cat out/version.txt 2>/dev/null || true)
-          live=$(curl -fsS --max-time 30 https://visawhen.netlify.app/version.txt || true)
-          echo "Built: ${built:-unknown}; live on Netlify: ${live:-unknown}"
+          live=$(curl -fsS --max-time 30 https://visawhen.com/version.txt || true)
+          echo "Built: ${built:-unknown}; live on visawhen.com: ${live:-unknown}"
           if [[ $built =~ ^[0-9a-f]{40}$ && $live =~ ^[0-9a-f]{40}$ ]] &&
             [ "$(gh api "repos/$GITHUB_REPOSITORY/compare/$live...$built" --jq .status)" = behind ]; then
             echo "::notice::Not deploying $built: the site already serves $live, a newer commit"
@@ -115,69 +100,21 @@ jobs:
           cache: npm
           cache-dependency-path: .github/deploy-tools/package-lock.json
 
-      # netlify-cli and wrangler run with the deploy tokens in their
-      # environment, so they come at the exact versions and with the exact
-      # dependency tree of .github/deploy-tools/package-lock.json (updated by
-      # Dependabot) rather than whatever npm serves on the day, and without
-      # install scripts (neither CLI needs one to deploy).
-      - name: Install netlify-cli and wrangler
+      # wrangler runs with the deploy token in its environment, so it comes at
+      # the exact version and with the exact dependency tree of
+      # .github/deploy-tools/package-lock.json (updated by Dependabot) rather
+      # than whatever npm serves on the day, and without install scripts (it
+      # does not need one to deploy).
+      - name: Install wrangler
         if: steps.live.outputs.newer != 'true'
         run: npm ci --ignore-scripts --no-audit --no-fund --prefix .github/deploy-tools
-
-      # --no-build is required: since netlify-cli 21.0.0 (2025-05-06),
-      # "netlify deploy" runs the site's build command before deploying, which
-      # broke this workflow (the site is already built and we only upload the
-      # prebuilt out/ directory). --no-build restores the old behaviour.
-      #
-      # public/_headers and public/.assetsignore are for the Cloudflare deploy
-      # only, but next export copies them into out/. Netlify reads _headers
-      # from the publish directory too (with its own syntax), so swap in a
-      # Netlify version for the upload and restore the Cloudflare files after.
-      #
-      # HTML must not be cached past a deploy: a code change renames the
-      # hashed JS/CSS chunks, so a stale page references assets that no longer
-      # exist and renders without scripts or styles (seen on 2026-08-24 with a
-      # 1-hour max-age), and after a data change it shows the old numbers.
-      # Only the content-hashed /_next/static/* is cached long.
-      - name: Deploy to netlify
-        if: steps.live.outputs.newer != 'true'
-        run: |
-          mkdir -p "$RUNNER_TEMP/cloudflare-only"
-          mv out/_headers out/.assetsignore "$RUNNER_TEMP/cloudflare-only/"
-          cat > out/_headers <<'EOF'
-          /*
-            Cache-Control: public, max-age=0, must-revalidate
-          /_next/static/*
-            Cache-Control: public, max-age=31536000, immutable
-          EOF
-          .github/deploy-tools/node_modules/.bin/netlify deploy --prod --no-build --dir=out/ --timeout=3600
-          rm out/_headers
-          mv "$RUNNER_TEMP"/cloudflare-only/_headers "$RUNNER_TEMP"/cloudflare-only/.assetsignore out/
-        env:
-          NETLIFY_SITE_ID: e464072b-c4e2-4ca9-b6d5-317fd657ad16
-          NETLIFY_AUTH_TOKEN: ${{ secrets.netlify-token }}
-
-      # Secrets cannot be used in `if:` directly, so expose whether the token
-      # is set as a step output.
-      - name: Check for Cloudflare credentials
-        id: cloudflare
-        if: steps.live.outputs.newer != 'true'
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.cloudflare-api-token }}
-        run: |
-          if [ -n "$CLOUDFLARE_API_TOKEN" ]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::cloudflare-api-token secret is not set; skipping the Cloudflare deploy"
-          fi
 
       # Workers static assets allow 20,000 files per version. public/.assetsignore
       # keeps the per-page _next/data/*/consulates/ payloads out of the upload;
       # fail early (rather than half-way through the upload) if what is left
       # gets close to the limit.
       - name: Check asset count
-        if: steps.cloudflare.outputs.enabled == 'true'
+        if: steps.live.outputs.newer != 'true'
         run: |
           count=$(find out -type f ! -path 'out/_next/data/*/consulates/*' | wc -l)
           echo "$count files to upload (limit 20000, guard 19000)"
@@ -187,7 +124,7 @@ jobs:
           fi
 
       - name: Deploy to Cloudflare Workers
-        if: steps.cloudflare.outputs.enabled == 'true'
+        if: steps.live.outputs.newer != 'true'
         run: .github/deploy-tools/node_modules/.bin/wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.cloudflare-api-token }}

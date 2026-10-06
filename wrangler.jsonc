@@ -13,9 +13,8 @@
   "assets": {
     "directory": "./out",
     // /nvc -> out/nvc.html and /nvc/ redirects to /nvc, matching the Next.js
-    // export layout (no trailingSlash) and Netlify's pretty URLs. The Worker
-    // redirects with a 307 (Netlify with a 301), and redirects /nvc.html and
-    // /index.html too, which Netlify serves; nothing links to those forms.
+    // export layout (no trailingSlash). The Worker redirects with a 307, and
+    // redirects /nvc.html and /index.html too; nothing links to those forms.
     "html_handling": "auto-trailing-slash",
     // Serve out/404.html with a 404 status for unknown paths.
     "not_found_handling": "404-page"
@@ -24,12 +23,12 @@
     "enabled": true
   },
   // A route rather than a custom domain: the Worker answers every request to
-  // visawhen.com, and the zone's DNS records for it, which still point at
-  // Netlify, only need to stay proxied, so nothing in DNS changes. Deleting
-  // the route under the Worker's Domains & Routes in the dashboard hands
-  // visawhen.com back to Netlify at once; remove it here too, or the next
-  // deploy adds it again. www.visawhen.com needs no route: a redirect rule in
-  // the dashboard sends it to https://visawhen.com.
+  // visawhen.com, so the zone's DNS records for it only need to be proxied;
+  // where they point is never used. They still point at Netlify, which
+  // served visawhen.com until 2026-10-03 and no longer gets deploys, so
+  // without this route the site would be down or out of date.
+  // www.visawhen.com needs no route: a redirect rule in the dashboard sends
+  // it to https://visawhen.com.
   "routes": [{ "pattern": "visawhen.com/*", "zone_name": "visawhen.com" }],
   // Also serves visawhen.<account>.workers.dev, kept out of search results by
   // public/_headers.

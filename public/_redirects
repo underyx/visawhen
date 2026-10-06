@@ -1,15 +1,13 @@
-# Consulate pages that moved. Netlify and Cloudflare Workers static assets both
-# read this file. Every rule without a placeholder or splat must come before
-# the first rule with one: Cloudflare counts every rule after that first one as
-# one with a placeholder, keeps only 100 of those (and 2,000 without) and skips
-# the rest without failing the deploy. In this order the two hosts also agree
-# on which rule applies: Netlify follows the first rule that matches, and
-# Cloudflare the rules without a placeholder before the others. Cloudflare
-# follows a rule even where a page exists, so no rule may match an existing
-# page. scripts/check-redirects.mjs checks all of this after the build: it
-# drops from out/_redirects any rule that matches a page, and fails the build
-# on a rule without a placeholder or splat after one with, or past either
-# limit.
+# Consulate pages that moved, for Cloudflare Workers static assets. Every rule
+# without a placeholder or splat must come before the first rule with one:
+# Cloudflare counts every rule after that first one as one with a placeholder,
+# keeps only 100 of those (and 2,000 without) and skips the rest without
+# failing the deploy. Cloudflare applies the rules without a placeholder before
+# the others, and follows a rule even where a page exists, so no rule may
+# match an existing page. scripts/check-redirects.mjs checks all of this after
+# the build: it drops from out/_redirects any rule that matches a page, and
+# fails the build on a rule without a placeholder or splat after one with, or
+# past either limit.
 
 # Posts listed under another name for some months: Kazakhstan's capital was
 # Nur-Sultan from 2019 to 2022, and Belize's embassy is in Belmopan. Their
