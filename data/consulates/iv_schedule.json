@@ -5124,6 +5124,860 @@
         "preference": "2026-09",
         "employment": "2026-09"
       }
+    },
+    "2026-10-07": {
+      "abidjan": {
+        "name": "Abidjan",
+        "relative": "2026-03",
+        "preference": "2026-07",
+        "employment": "2026-10"
+      },
+      "abu-dhabi": {
+        "name": "Abu Dhabi",
+        "relative": "2025-03",
+        "preference": "2025-08",
+        "employment": "2023-10"
+      },
+      "accra": {
+        "name": "Accra",
+        "relative": "2024-03",
+        "preference": "2023-11",
+        "employment": "2023-11"
+      },
+      "addis-ababa": {
+        "name": "Addis Ababa",
+        "relative": "2025-07",
+        "preference": "2025-07",
+        "employment": "2026-10"
+      },
+      "algiers": {
+        "name": "Algiers",
+        "relative": "2026-07",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "almaty": {
+        "name": "Almaty",
+        "relative": "2026-07",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "amman": {
+        "name": "Amman",
+        "relative": "2025-10",
+        "preference": "2023-08",
+        "employment": "2026-09"
+      },
+      "amsterdam": {
+        "name": "Amsterdam",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "ankara": {
+        "name": "Ankara",
+        "relative": "2025-03",
+        "preference": "2023-09",
+        "employment": "2026-06"
+      },
+      "antananarivo": {
+        "name": "Antananarivo",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "ashgabat": {
+        "name": "Ashgabat",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "asmara": {
+        "name": "Asmara",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "asuncion": {
+        "name": "Asuncion",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "athens": {
+        "name": "Athens",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "auckland": {
+        "name": "Auckland",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "baghdad": {
+        "name": "Baghdad",
+        "relative": "2025-11",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "bangkok": {
+        "name": "Bangkok",
+        "relative": "2026-06",
+        "preference": "2026-10",
+        "employment": "2026-06"
+      },
+      "beirut": {
+        "name": "Beirut",
+        "relative": "2026-02",
+        "preference": "2024-10",
+        "employment": "2026-10"
+      },
+      "belgrade": {
+        "name": "Belgrade",
+        "relative": "2026-08",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "belmopan": {
+        "name": "Belmopan",
+        "relative": "2026-08",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "bern": {
+        "name": "Bern",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "bishkek": {
+        "name": "Bishkek",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "bogota": {
+        "name": "Bogota",
+        "relative": "2026-02",
+        "preference": "2025-09",
+        "employment": "2026-02"
+      },
+      "bratislava": {
+        "name": "Bratislava",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "brazzaville": {
+        "name": "Brazzaville",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "bridgetown": {
+        "name": "Bridgetown",
+        "relative": "2026-06",
+        "preference": "2026-07",
+        "employment": "2026-10"
+      },
+      "brussels": {
+        "name": "Brussels",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "bucharest": {
+        "name": "Bucharest",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "budapest": {
+        "name": "Budapest",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "buenos-aires": {
+        "name": "Buenos Aires",
+        "relative": "2026-07",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "bujumbura": {
+        "name": "Bujumbura",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "cairo": {
+        "name": "Cairo",
+        "relative": "2026-02",
+        "preference": "2026-02",
+        "employment": "2026-10"
+      },
+      "casablanca": {
+        "name": "Casablanca",
+        "relative": "2025-12",
+        "preference": "2025-12",
+        "employment": "2026-10"
+      },
+      "chisinau": {
+        "name": "Chisinau",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "ciudad-juarez": {
+        "name": "Ciudad Juarez",
+        "relative": "2024-12",
+        "preference": "2023-08",
+        "employment": "2023-07"
+      },
+      "colombo": {
+        "name": "Colombo",
+        "relative": "2026-08",
+        "preference": "2026-10",
+        "employment": "2026-07"
+      },
+      "cotonou": {
+        "name": "Cotonou",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "dakar": {
+        "name": "Dakar",
+        "relative": "2026-06",
+        "preference": "2026-06",
+        "employment": "2026-10"
+      },
+      "dar-es-salaam": {
+        "name": "Dar Es Salaam",
+        "relative": "2025-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "dhaka": {
+        "name": "Dhaka",
+        "relative": "2025-08",
+        "preference": "2021-12",
+        "employment": "2022-09"
+      },
+      "djibouti": {
+        "name": "Djibouti",
+        "relative": "2025-06",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "doha": {
+        "name": "Doha",
+        "relative": "2024-10",
+        "preference": "2026-10",
+        "employment": "2023-10"
+      },
+      "dublin": {
+        "name": "Dublin",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "dushanbe": {
+        "name": "Dushanbe",
+        "relative": "2025-06",
+        "preference": "2025-06",
+        "employment": "2026-10"
+      },
+      "frankfurt": {
+        "name": "Frankfurt",
+        "relative": "2026-06",
+        "preference": "2026-07",
+        "employment": "2026-05"
+      },
+      "freetown": {
+        "name": "Freetown",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "georgetown": {
+        "name": "Georgetown",
+        "relative": "2026-03",
+        "preference": "2025-01",
+        "employment": "2026-10"
+      },
+      "guangzhou": {
+        "name": "Guangzhou",
+        "relative": "2026-04",
+        "preference": "2025-03",
+        "employment": "2023-08"
+      },
+      "guatemala-city": {
+        "name": "Guatemala City",
+        "relative": "2025-09",
+        "preference": "2026-06",
+        "employment": "2026-10"
+      },
+      "guayaquil": {
+        "name": "Guayaquil",
+        "relative": "2026-04",
+        "preference": "2026-06",
+        "employment": "2026-10"
+      },
+      "hamilton": {
+        "name": "Hamilton",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "hanoi": {
+        "name": "Hanoi",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "harare": {
+        "name": "Harare",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "havana": {
+        "name": "Havana",
+        "relative": "2025-12",
+        "preference": "2022-10",
+        "employment": "2026-10"
+      },
+      "helsinki": {
+        "name": "Helsinki",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "ho-chi-minh-city": {
+        "name": "Ho Chi Minh City",
+        "relative": "2026-05",
+        "preference": "2025-01",
+        "employment": "2026-03"
+      },
+      "hong-kong": {
+        "name": "Hong Kong",
+        "relative": "2026-07",
+        "preference": "2026-07",
+        "employment": "2026-07"
+      },
+      "islamabad": {
+        "name": "Islamabad",
+        "relative": "2025-09",
+        "preference": "2024-10",
+        "employment": "2026-05"
+      },
+      "jakarta": {
+        "name": "Jakarta",
+        "relative": "2026-07",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "jerusalem": {
+        "name": "Jerusalem",
+        "relative": "2026-08",
+        "preference": "2025-06",
+        "employment": "2026-10"
+      },
+      "johannesburg": {
+        "name": "Johannesburg",
+        "relative": "2025-07",
+        "preference": "2025-03",
+        "employment": "2023-08"
+      },
+      "kabul": {
+        "name": "Kabul",
+        "relative": null,
+        "preference": null,
+        "employment": null
+      },
+      "kampala": {
+        "name": "Kampala",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "kathmandu": {
+        "name": "Kathmandu",
+        "relative": "2025-12",
+        "preference": "2026-01",
+        "employment": "2026-01"
+      },
+      "khartoum": {
+        "name": "Khartoum",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "kigali": {
+        "name": "Kigali",
+        "relative": "2026-01",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "kingston": {
+        "name": "Kingston",
+        "relative": "2026-04",
+        "preference": "2024-03",
+        "employment": "2026-04"
+      },
+      "kinshasa": {
+        "name": "Kinshasa",
+        "relative": "2025-05",
+        "preference": "2025-10",
+        "employment": "2026-10"
+      },
+      "kuala-lumpur": {
+        "name": "Kuala Lumpur",
+        "relative": "2026-08",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "kuwait-city": {
+        "name": "Kuwait",
+        "relative": "2026-03",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "kyiv": {
+        "name": "Kyiv",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "la-paz": {
+        "name": "La Paz",
+        "relative": "2026-07",
+        "preference": "2026-09",
+        "employment": "2026-10"
+      },
+      "lagos": {
+        "name": "Lagos",
+        "relative": "2025-05",
+        "preference": "2025-07",
+        "employment": "2025-02"
+      },
+      "libreville": {
+        "name": "Libreville",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "lilongwe": {
+        "name": "Lilongwe",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "lima": {
+        "name": "Lima",
+        "relative": "2026-03",
+        "preference": "2025-04",
+        "employment": "2026-10"
+      },
+      "ljubljana": {
+        "name": "Ljubljana",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "lome": {
+        "name": "Lome",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "london": {
+        "name": "London",
+        "relative": "2026-06",
+        "preference": "2026-03",
+        "employment": "2026-02"
+      },
+      "luanda": {
+        "name": "Luanda",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "lusaka": {
+        "name": "Lusaka",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "madrid": {
+        "name": "Madrid",
+        "relative": "2026-07",
+        "preference": "2026-03",
+        "employment": "2026-03"
+      },
+      "managua": {
+        "name": "Managua",
+        "relative": "2026-07",
+        "preference": "2026-07",
+        "employment": "2026-10"
+      },
+      "manama": {
+        "name": "Manama",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "manila": {
+        "name": "Manila",
+        "relative": "2026-02",
+        "preference": "2021-06",
+        "employment": "2023-03"
+      },
+      "monrovia": {
+        "name": "Monrovia",
+        "relative": "2024-10",
+        "preference": "2025-09",
+        "employment": "2026-10"
+      },
+      "montevideo": {
+        "name": "Montevideo",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "montreal": {
+        "name": "Montreal",
+        "relative": "2026-04",
+        "preference": "2025-09",
+        "employment": "2026-05"
+      },
+      "moscow": {
+        "name": "Moscow",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "mumbai": {
+        "name": "Mumbai (Bombay)",
+        "relative": "2026-03",
+        "preference": "2025-02",
+        "employment": "2026-04"
+      },
+      "muscat": {
+        "name": "Muscat",
+        "relative": "2025-06",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "naha": {
+        "name": "Naha",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "nairobi": {
+        "name": "Nairobi",
+        "relative": "2025-07",
+        "preference": "2024-11",
+        "employment": "2024-02"
+      },
+      "naples": {
+        "name": "Naples",
+        "relative": "2026-04",
+        "preference": "2026-10",
+        "employment": "2026-03"
+      },
+      "nassau": {
+        "name": "Nassau",
+        "relative": "2022-12",
+        "preference": "2023-01",
+        "employment": "2026-10"
+      },
+      "new-delhi": {
+        "name": "New Delhi",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "niamey": {
+        "name": "Niamey",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "nicosia": {
+        "name": "Nicosia",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "ouagadougou": {
+        "name": "Ouagadougou",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "panama-city": {
+        "name": "Panama City",
+        "relative": "2026-06",
+        "preference": "2026-07",
+        "employment": "2026-10"
+      },
+      "paris": {
+        "name": "Paris",
+        "relative": "2026-08",
+        "preference": "2026-10",
+        "employment": "2026-06"
+      },
+      "phnom-penh": {
+        "name": "Phnom Penh",
+        "relative": "2025-11",
+        "preference": "2023-09",
+        "employment": "2026-10"
+      },
+      "port-au-prince": {
+        "name": "Port Au Prince",
+        "relative": "2021-06",
+        "preference": "2020-08",
+        "employment": "2026-10"
+      },
+      "port-moresby": {
+        "name": "Port Moresby",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "port-of-spain": {
+        "name": "Port Of Spain",
+        "relative": "2026-07",
+        "preference": "2026-07",
+        "employment": "2026-10"
+      },
+      "prague": {
+        "name": "Prague",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "praia": {
+        "name": "Praia",
+        "relative": "2026-07",
+        "preference": "2026-02",
+        "employment": "2026-10"
+      },
+      "pristina": {
+        "name": "Pristina",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "rangoon": {
+        "name": "Rangoon",
+        "relative": "2026-07",
+        "preference": "2026-06",
+        "employment": "2026-10"
+      },
+      "reykjavik": {
+        "name": "Reykjavik",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "riga": {
+        "name": "Riga",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "rio-de-janeiro": {
+        "name": "Rio De Janeiro",
+        "relative": "2026-06",
+        "preference": "2025-09",
+        "employment": "2025-09"
+      },
+      "riyadh": {
+        "name": "Riyadh",
+        "relative": "2025-06",
+        "preference": "2024-10",
+        "employment": "2023-10"
+      },
+      "san-jose": {
+        "name": "San Jose",
+        "relative": "2026-07",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "san-salvador": {
+        "name": "San Salvador",
+        "relative": "2025-07",
+        "preference": "2025-07",
+        "employment": "2026-10"
+      },
+      "santiago": {
+        "name": "Santiago",
+        "relative": "2026-07",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "santo-domingo": {
+        "name": "Santo Domingo",
+        "relative": "2025-03",
+        "preference": "2024-02",
+        "employment": "2025-05"
+      },
+      "sarajevo": {
+        "name": "Sarajevo",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "seoul": {
+        "name": "Seoul",
+        "relative": "2026-07",
+        "preference": "2026-02",
+        "employment": "2023-11"
+      },
+      "singapore": {
+        "name": "Singapore",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "skopje": {
+        "name": "Skopje",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "sofia": {
+        "name": "Sofia",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "stockholm": {
+        "name": "Stockholm",
+        "relative": "2026-04",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "suva": {
+        "name": "Suva",
+        "relative": "2026-03",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "sydney": {
+        "name": "Sydney",
+        "relative": "2026-04",
+        "preference": "2026-10",
+        "employment": "2026-01"
+      },
+      "taipei": {
+        "name": "Taipei",
+        "relative": "2026-03",
+        "preference": "2025-08",
+        "employment": "2025-06"
+      },
+      "tallinn": {
+        "name": "Tallinn",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "tashkent": {
+        "name": "Tashkent",
+        "relative": "2025-11",
+        "preference": "2026-01",
+        "employment": "2026-10"
+      },
+      "tbilisi": {
+        "name": "Tbilisi",
+        "relative": "2026-07",
+        "preference": "2026-09",
+        "employment": "2026-10"
+      },
+      "tegucigalpa": {
+        "name": "Tegucigalpa",
+        "relative": "2025-04",
+        "preference": "2026-04",
+        "employment": "2026-10"
+      },
+      "tirana": {
+        "name": "Tirana",
+        "relative": "2026-06",
+        "preference": "2026-01",
+        "employment": "2026-10"
+      },
+      "tokyo": {
+        "name": "Tokyo",
+        "relative": "2026-07",
+        "preference": "2026-10",
+        "employment": "2026-06"
+      },
+      "tunis": {
+        "name": "Tunis",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "ulaanbaatar": {
+        "name": "Ulaanbataar",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "vancouver": {
+        "name": "Vancouver",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "vienna": {
+        "name": "Vienna",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "vientiane": {
+        "name": "Vientiane",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "vilnius": {
+        "name": "Vilnius",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      },
+      "warsaw": {
+        "name": "Warsaw",
+        "relative": "2026-09",
+        "preference": "2026-10",
+        "employment": "2026-06"
+      },
+      "yaounde": {
+        "name": "Yaounde",
+        "relative": "2026-05",
+        "preference": "2026-06",
+        "employment": "2026-10"
+      },
+      "yerevan": {
+        "name": "Yerevan",
+        "relative": "2025-03",
+        "preference": "2025-08",
+        "employment": "2025-03"
+      },
+      "zagreb": {
+        "name": "Zagreb",
+        "relative": "2026-10",
+        "preference": "2026-10",
+        "employment": "2026-10"
+      }
     }
   }
 }
