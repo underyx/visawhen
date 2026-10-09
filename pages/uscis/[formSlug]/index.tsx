@@ -72,13 +72,15 @@ import MoreDetails from "../../../components/MoreDetails";
 import PolicyBanner from "../../../components/PolicyBanner";
 import { breadcrumbList } from "../../../components/structuredData";
 import { ListRow, ListRows } from "../../../components/ListRow";
-import { normalize } from "../../../components/search";
+import { rankPlace } from "../../../components/search";
 import SearchStatus from "../../../components/SearchStatus";
 
 interface OfficeSummary {
   slug: string;
   name: string;
   stateCode: string | null;
+  /** "California" */
+  state: string | null;
   /** The category the rest are for, when it is not the form's leading one
    * (Props.officeCategory): the office's main category, at an office that
    * handles few of the leading one (openingOfficeCategory) */
@@ -91,6 +93,28 @@ interface OfficeSummary {
   /** Approvals in it, for when USCIS did not publish the denials */
   approved: number | null;
 }
+
+/** Other names the office search finds an office by, besides its own, its
+ * state and their first letters ("sf", "slc") */
+const OFFICE_ALIASES: Record<string, string[]> = {
+  Agana: ["Hagåtña"],
+  Brooklyn: ["New York City"],
+  "Charlotte Amalie": ["St. Thomas", "Saint Thomas"],
+  Christiansted: ["St. Croix", "Saint Croix"],
+  "Dover AFB": ["Dover Air Force Base"],
+  "Fort Myers": ["Ft. Myers"],
+  "Fort Smith": ["Ft. Smith"],
+  "Los Angeles County": ["LA County"],
+  "Mount Laurel": ["Mt. Laurel"],
+  "New Orleans": ["NOLA"],
+  "New York": ["New York City", "Manhattan"],
+  "Oklahoma City": ["OKC"],
+  Philadelphia: ["Philly"],
+  Queens: ["New York City"],
+  "St. Albans": ["Saint Albans"],
+  "St. Louis": ["Saint Louis"],
+  "St. Paul": ["Saint Paul"],
+};
 
 interface Props {
   form: string;
@@ -205,6 +229,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       slug: office.slug,
       name: office.name,
       stateCode: office.stateCode,
+      state: office.state,
       category:
         officeCategory === undefined || key === officeCategory.key
           ? null
@@ -364,14 +389,23 @@ export default function UscisForm({
   );
   const hasClearing = points.some(({ waitMonths }) => waitMonths !== null);
   const filteredOffices = useMemo<OfficeSummary[]>(() => {
-    const normalizedTerm = normalize(term);
-    // by the number each row shows: its decisions (or approvals)
-    return sortBy(
-      offices.filter(({ name, stateCode }) =>
-        normalize(`${name} ${stateCode ?? ""}`).includes(normalizedTerm),
-      ),
-      [({ completions, approved }) => -(completions ?? approved ?? 0), "name"],
-    );
+    const found = offices.flatMap((office) => {
+      const rank = rankPlace(
+        term,
+        [office.name, ...(OFFICE_ALIASES[office.name] ?? [])],
+        [office.stateCode, office.state],
+      );
+      return rank === null ? [] : [{ office, rank }];
+    });
+    // the offices whole words find first ("ca" is California before
+    // Carolina), then by the number each row shows: its decisions (or
+    // approvals)
+    return sortBy(found, [
+      ({ rank }) => rank,
+      ({ office: { completions, approved } }) =>
+        -(completions ?? approved ?? 0),
+      ({ office: { name } }) => name,
+    ]).map(({ office }) => office);
   }, [offices, term]);
 
   // "an I-130", "an N-400", "a G-325A"
@@ -816,7 +850,7 @@ export default function UscisForm({
             term={term}
             count={filteredOffices.length}
             noun={["office", "offices"]}
-            hint="Try the city or the two-letter state code, such as Houston or TX."
+            hint="Try the city or the state, such as Houston, Texas or TX."
           />
           {filteredOffices.length > 0 && (
             <ListRows>
