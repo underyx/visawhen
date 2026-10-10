@@ -1,0 +1,140 @@
+/* A timeline page: the steps of a path, in order, strung on a line like
+ * stops on a route, with the step the visitor's case is at marked. */
+
+.inputs {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--mantine-spacing-sm) var(--mantine-spacing-lg);
+  max-width: 44rem;
+}
+
+@media (min-width: $mantine-breakpoint-sm) {
+  .inputs {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* A field that takes the whole row: the "Where is your case?" list */
+.wide {
+  grid-column: 1 / -1;
+}
+
+.steps {
+  list-style: none;
+  counter-reset: step;
+  padding: 0;
+  margin: 0;
+  max-width: 44rem;
+}
+
+.step {
+  counter-increment: step;
+  position: relative;
+  padding: 0 0 var(--mantine-spacing-lg) 44px;
+}
+
+.step::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: -1px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 2px solid var(--vw-ink);
+  background: var(--vw-paper);
+  font-weight: 800;
+  font-size: 0.875rem;
+  font-stretch: 80%;
+  z-index: 1;
+}
+
+.step::after {
+  content: "";
+  position: absolute;
+  left: 13px;
+  top: 26px;
+  bottom: 0;
+  width: 2px;
+  background: var(--vw-rule);
+}
+
+.step:last-child {
+  padding-bottom: 0;
+}
+
+.step:last-child::after {
+  display: none;
+}
+
+/* A step the visitor's case is past: a tick in the circle, the text dimmed,
+ * and a solid line down to the current step */
+.done::before {
+  content: "✓";
+  color: var(--vw-paper);
+  background: var(--vw-ink);
+}
+
+.done::after {
+  background: var(--vw-ink);
+}
+
+.done .name,
+.done .what {
+  color: var(--mantine-color-dimmed);
+}
+
+/* The step the case is at: the violet of the stamp */
+.current::before {
+  color: var(--vw-paper);
+  border-color: var(--vw-stamp);
+  background: var(--vw-stamp);
+}
+
+/* A step that comes much later, from a date the page cannot know */
+.later::before {
+  content: "…";
+  border-style: dashed;
+  color: var(--mantine-color-dimmed);
+}
+
+.name {
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.headline {
+  font-stretch: 80%;
+  font-weight: 800;
+  font-size: 1.375rem;
+  line-height: 1.2;
+  margin-top: 4px;
+}
+
+.what {
+  max-width: 60ch;
+}
+
+/* The steps filed alongside another, the work permit with the I-485: a
+ * ruled block inside their sibling's step */
+.side {
+  list-style: none;
+  padding: 0;
+  margin: var(--mantine-spacing-sm) 0 0;
+  border-left: 2px solid var(--vw-rule);
+}
+
+.side li {
+  padding: var(--mantine-spacing-xs) 0 var(--mantine-spacing-xs)
+    var(--mantine-spacing-md);
+}
+
+.sideHeadline {
+  font-weight: 700;
+}
+
+.footnote {
+  max-width: 62ch;
+}

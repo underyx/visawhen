@@ -1,133 +1,74 @@
-import { Anchor, Text, Title } from "@mantine/core";
+import { Anchor, Stack, Text, Title } from "@mantine/core";
+import { GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import React from "react";
-import {
-  ADJUSTMENT_FILING_CHARTS_URL,
-  DOL_PROCESSING_TIMES_URL,
-  GLOBAL_VISA_WAIT_TIMES_URL,
-  I751_URL,
-} from "../components/links";
+import { getPathSummaryData } from "../api/timeline";
 import classes from "../components/Home.module.css";
+import { ListRow, ListRows } from "../components/ListRow";
 import { webSite } from "../components/structuredData";
+import { PATHS, pathSummary } from "../components/timeline";
 
-/** USCIS's eligibility page for immediate relatives' green cards, which says
- * who can adjust status in the US */
-const IMMEDIATE_RELATIVE_ELIGIBILITY_URL =
-  "https://www.uscis.gov/green-card/green-card-eligibility/green-card-for-immediate-relatives-of-us-citizen";
+// The front door: the visitor picks the path that matches their case and
+// gets its timeline. Each path's line here is what its first steps take
+// right now, from the same numbers its timeline page shows.
 
-/** USCIS's page on the registration an H-1B cap petition has to be selected
- * in first */
-const H1B_REGISTRATION_URL =
-  "https://www.uscis.gov/working-in-the-united-states/temporary-workers/h-1b-specialty-occupations-and-fashion-models/h-1b-electronic-registration-process";
-
-/** Where to see today's cutoffs, and how the Visa Bulletin's two charts
- * apply, for the preference paths; cutoffs is the Visa Bulletin page's
- * table for the path */
-function PriorityDateCharts({ cutoffs }: { cutoffs: string }) {
-  return (
-    <>
-      See <To href={cutoffs}>today&rsquo;s cutoff dates</To>. The Visa Bulletin
-      has two charts. In the US, USCIS says each month which of them decides
-      when you can file the I-485, on its{" "}
-      <To href={ADJUSTMENT_FILING_CHARTS_URL}>filing charts page</To>. Abroad,
-      NVC can have you send your documents once the Dates for Filing chart
-      passes your date, before an interview is possible: that needs your date to
-      be current in the Final Action Dates chart.
-    </>
-  );
-}
-
-/** A link to a page of this site, or to an official one in a new tab */
-function To({ href, children }: React.PropsWithChildren<{ href: string }>) {
-  return href.startsWith("/") ? (
-    <Anchor component={Link} href={href}>
-      {children}
-    </Anchor>
-  ) : (
-    <Anchor href={href} target="_blank" rel="noopener">
-      {children}
-    </Anchor>
-  );
-}
-
-/** When a conditional resident files the I-751, as uscis.gov/i-751 puts
- * it: jointly "during the 90-day period immediately before your
- * conditional residence expires", or individually, "with a request to
- * waive the joint filing requirement", "at any time before your
- * conditional permanent resident status expires". */
-function I751Timing() {
-  return (
-    <>
-      <To href="/uscis/i-751">I-751 to remove the conditions</To>, filed with
-      your spouse in the 90 days before the card expires, not earlier; or, with
-      a <To href={I751_URL}>waiver of the joint filing requirement</To> (after a
-      divorce, for example), any time before it expires.
-    </>
-  );
-}
-
-interface PathProps {
-  /** The anchor the index at the top of the page links to */
-  id: string;
+interface PathCard {
+  slug: string;
   title: string;
-  /** Who the path is for, in a sentence */
-  who: React.ReactNode;
-  /** The steps, in order */
-  steps: React.ReactNode[];
+  who: string;
+  /** "I-130: most likely 11–22 months, NVC: 24–54 days, then the interview
+   * queue at your consulate." */
+  summary: string;
 }
 
-/** One common route through the process, as its steps in order, each
- * linking to the page with its numbers. */
-function Path({ id, title, who, steps }: PathProps) {
-  return (
-    <section className={classes.path} id={id} aria-labelledby={`${id}-title`}>
-      <Title order={2} className={classes.pathTitle} id={`${id}-title`}>
-        {title}
-      </Title>
-      <Text className={classes.who}>{who}</Text>
-      <ol className={classes.steps}>
-        {steps.map((step, index) => (
-          <li key={index} className={classes.step}>
-            {step}
-          </li>
-        ))}
-      </ol>
-    </section>
-  );
+interface Props {
+  paths: PathCard[];
 }
 
-/** The paths, in the order the page lists them, for the index at its top */
-const PATHS = [
-  { id: "spouse-abroad", label: "Spouse, parent or child, abroad" },
-  { id: "spouse-in-us", label: "Spouse, in the US" },
-  { id: "fiance", label: "Fiancé(e)" },
-  { id: "citizenship", label: "Citizenship" },
-  { id: "employment", label: "Employment" },
-  { id: "other-family", label: "Other family" },
-  { id: "temporary", label: "Visitor, student or work visa" },
+export const getStaticProps: GetStaticProps<Props> = async () => ({
+  props: {
+    paths: await Promise.all(
+      PATHS.map(async (path) => ({
+        slug: path.slug,
+        title: path.title,
+        who: path.who,
+        summary: pathSummary(path, await getPathSummaryData(path)),
+      })),
+    ),
+  },
+});
+
+/** The sections, for people who want the numbers without a path */
+const SECTIONS = [
+  {
+    href: "/uscis",
+    title: "USCIS processing times",
+    text: "Every form, with the trend and your field office.",
+  },
+  {
+    href: "/nvc",
+    title: "National Visa Center wait times",
+    text: "Case creation and document review, week by week.",
+  },
+  {
+    href: "/consulates",
+    title: "Consulate interview queues",
+    text: "Which month each consulate is scheduling, and the visas it issues.",
+  },
+  {
+    href: "/visa-bulletin",
+    title: "Visa Bulletin dates",
+    text: "Priority date cutoffs and how far they moved.",
+  },
 ];
 
-/** Highlights the path again when its link in the index is followed while
- * it is already the target: the browser still scrolls to it then, but does
- * not start the highlight over, as the target has not changed. */
-function replayHighlight(id: string) {
-  if (window.location.hash !== `#${id}`) return;
-  document
-    .getElementById(id)
-    ?.getAnimations?.({ subtree: true })
-    .forEach((animation) => {
-      animation.cancel();
-      animation.play();
-    });
-}
-
 // The site's name leads, for people who search for the site by name
-const TITLE = "VisaWhen: US visa and green card wait times";
+const TITLE = "VisaWhen: when will your US visa or green card come?";
 const DESCRIPTION =
-  "How long each step of a US immigration case is taking: USCIS processing times, National Visa Center timeframes and consulate interview queues, for family, fiancé(e), employment and citizenship cases.";
+  "Say where your US immigration case is, and see when each step will most likely come, as dates: USCIS processing times, National Visa Center waits, consulate interview queues and the Visa Bulletin, for family, fiancé(e), employment and citizenship cases.";
 
-export default function Home() {
+export default function Home({ paths }: Props) {
   return (
     <>
       <Head>
@@ -141,201 +82,49 @@ export default function Home() {
       </Head>
       <header className={classes.hero}>
         <Title order={1} className={classes.title}>
-          How long each step of your US immigration case is taking
+          When will your case move?
         </Title>
         <Text className={classes.lead}>
-          Pick the path that matches your case. Each step links to the numbers
-          for it, with their source and how recent they are.
+          Pick the path that matches your case, say where it is, and see when
+          each step will most likely come, from the newest government numbers.
         </Text>
-        <nav aria-label="Paths">
-          <ul className={classes.index}>
-            {PATHS.map(({ id, label }) => (
-              <li key={id}>
-                <a href={`#${id}`} onClick={() => replayHighlight(id)}>
-                  {label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
       </header>
-      <div className={classes.paths}>
-        <Path
-          id="spouse-abroad"
-          title="Spouse, parent or child of a US citizen, living abroad"
-          who="Immediate relatives who immigrate through a US embassy or consulate (IR and CR visas)."
-          steps={[
-            <>
-              <To href="/uscis/i-130">I-130 petition</To>: your US citizen
-              relative files it with USCIS.
-            </>,
-            <>
-              <To href="/nvc">National Visa Center</To>: it creates your case
-              and reviews your documents until your case is{" "}
-              <em>documentarily complete</em> (older sources say{" "}
-              <em>documentarily qualified</em>). NVC emails you that date.
-            </>,
-            <>
-              <To href="/consulates">Interview at your consulate</To>: which
-              month of documentarily complete cases it is scheduling.
-            </>,
-            <>
-              A spouse married less than 2 years when they enter the US on the
-              visa gets a 2-year conditional green card (usually on a CR-1
-              visa): <I751Timing />
-            </>,
-          ]}
-        />
-        <Path
-          id="spouse-in-us"
-          title="Spouse of a US citizen, living in the US"
-          who={
-            <>
-              Getting a green card without leaving the US (adjustment of
-              status). This is generally for people who were{" "}
-              <To href={IMMEDIATE_RELATIVE_ELIGIBILITY_URL}>
-                inspected and admitted or paroled
-              </To>{" "}
-              into the US, as with a visa; if you entered another way, talk to
-              an immigration lawyer before filing.
-            </>
-          }
-          steps={[
-            <>
-              <To href="/uscis/i-130">I-130 petition</To> and{" "}
-              <To href="/uscis/i-485">I-485 green card application</To>, usually
-              filed together.
-            </>,
-            <>
-              While the I-485 is pending:{" "}
-              <To href="/uscis/i-765">I-765 work permit</To> and{" "}
-              <To href="/uscis/i-131">I-131 travel document</To>, usually filed
-              with it.
-            </>,
-            <>
-              If you were married less than 2 years when you got your green
-              card, it is a 2-year conditional one: <I751Timing />
-            </>,
-          ]}
-        />
-        <Path
-          id="fiance"
-          title="Fiancé(e) of a US citizen"
-          who="Coming to the US on a K-1 visa to marry within 90 days."
-          steps={[
-            <>
-              <To href="/uscis/i-129f">I-129F petition</To>: your US citizen
-              fiancé(e) files it with USCIS.
-            </>,
-            <>
-              K-1 interview at your consulate: State publishes no
-              interview-scheduling data for K visas, and NVC&rsquo;s timeframes
-              do not cover them; your{" "}
-              <To href="/consulates">consulate&rsquo;s page</To> shows how many
-              K-1 visas it issues.
-            </>,
-            <>
-              After you marry in the US:{" "}
-              <To href="/uscis/i-485">I-485 green card application</To>, with
-              the <To href="/uscis/i-765">I-765 work permit</To> and{" "}
-              <To href="/uscis/i-131">I-131 travel document</To>.
-            </>,
-            <>
-              If you have been married less than 2 years when the I-485 is
-              approved, as most K-1 couples are, you get a 2-year conditional
-              green card: <I751Timing />
-            </>,
-          ]}
-        />
-        <Path
-          id="citizenship"
-          title="Becoming a US citizen"
-          who="Naturalization for green card holders."
-          steps={[
-            <>
-              <To href="/uscis/n-400">N-400 application</To>: the national
-              range, and how your own field office is doing.
-            </>,
-          ]}
-        />
-        <Path
-          id="employment"
-          title="Employment-based green card"
-          who="EB-1, EB-2 and EB-3, sponsored by an employer or self-petitioned."
-          steps={[
-            <>
-              Prevailing wage and PERM labor certification, for most EB-2 and
-              EB-3 cases: decided by the Department of Labor and not covered
-              here; see{" "}
-              <To href={DOL_PROCESSING_TIMES_URL}>its processing times</To>.
-            </>,
-            <>
-              <To href="/uscis/i-140">I-140 petition</To>, filed with USCIS.
-            </>,
-            <>
-              Your priority date: in most categories you wait for it to be
-              reached.{" "}
-              <PriorityDateCharts cutoffs="/visa-bulletin#employment" />
-            </>,
-            <>
-              In the US:{" "}
-              <To href="/uscis/i-485">I-485 green card application</To>, with
-              the <To href="/uscis/i-765">I-765</To> and{" "}
-              <To href="/uscis/i-131">I-131</To>. Abroad:{" "}
-              <To href="/nvc">the National Visa Center</To> and an{" "}
-              <To href="/consulates">interview at your consulate</To>.
-            </>,
-          ]}
-        />
-        <Path
-          id="other-family"
-          title="Other family: siblings, adult children, relatives of green card holders"
-          who="The family preference categories (F1, F2A, F2B, F3 and F4)."
-          steps={[
-            <>
-              <To href="/uscis/i-130">I-130 petition</To>, filed by your
-              relative with USCIS.
-            </>,
-            <>
-              Your priority date: you wait, often for years, for it to be
-              reached. <PriorityDateCharts cutoffs="/visa-bulletin#family" />
-            </>,
-            <>
-              Abroad: <To href="/nvc">the National Visa Center</To> and an{" "}
-              <To href="/consulates">interview at your consulate</To>. In the
-              US, if you can adjust status there:{" "}
-              <To href="/uscis/i-485">I-485</To>.
-            </>,
-          ]}
-        />
-        <Path
-          id="temporary"
-          title="Visitor, student or temporary work visa"
-          who="B, F, J, H, L, O and other nonimmigrant visas."
-          steps={[
-            <>
-              Most employer-sponsored work visas (H, L, O, P, Q and R) start
-              with an <To href="/uscis/i-129">I-129 petition</To> from the
-              employer. For an H-1B under the annual cap, the employer first
-              registers the worker in{" "}
-              <To href={H1B_REGISTRATION_URL}>
-                USCIS&rsquo;s H-1B registration
-              </To>{" "}
-              and can file only if the worker is selected. For E and TN visas,
-              the I-129 is used only to change or extend status inside the US,
-              and J exchange visitors do not use it.
-            </>,
-            <>
-              Visa appointment waits at each consulate: the State
-              Department&rsquo;s{" "}
-              <To href={GLOBAL_VISA_WAIT_TIMES_URL}>Global Visa Wait Times</To>,
-              which are not covered here. The{" "}
-              <To href="/consulates">consulate pages</To> show how many visas of
-              each class a post issues.
-            </>,
-          ]}
-        />
-      </div>
+      <ListRows>
+        {paths.map(({ slug, title, who, summary }) => (
+          <ListRow
+            key={slug}
+            href={`/timeline/${slug}`}
+            label={
+              <Stack gap={4}>
+                <Text fw={600}>{title}</Text>
+                <Text size="sm" c="dimmed">
+                  {who}
+                </Text>
+                <Text size="sm">{summary}</Text>
+              </Stack>
+            }
+          />
+        ))}
+      </ListRows>
+      <Stack gap="sm" className={classes.sections}>
+        <Title order={2}>Or look up the numbers</Title>
+        <Text>
+          Every timeline is built from these pages, which show the trend, the
+          source and how recent each number is.
+        </Text>
+        <ul className={classes.sectionList}>
+          {SECTIONS.map(({ href, title, text }) => (
+            <li key={href}>
+              <Anchor component={Link} href={href} fw={600}>
+                {title}
+              </Anchor>
+              <Text size="sm" c="dimmed">
+                {text}
+              </Text>
+            </li>
+          ))}
+        </ul>
+      </Stack>
       <Text size="xs" c="dimmed" className={classes.footnote}>
         These are the common routes, not legal advice: an immigration lawyer or
         accredited representative can tell you which one is yours and whether

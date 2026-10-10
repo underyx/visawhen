@@ -21,6 +21,8 @@ The data lives in this repository and is refreshed by scheduled workflows that c
 
 The NVC and interview-queue scrapers run in the same workflow (`nvc_update_schedule.yml`), daily and hourly on Mondays; the others run daily.
 
+The home page leads to a timeline page per common route through the process (`/timeline/spouse-abroad` and six more). Each lists the route's steps with when each will most likely land, chained from where the visitor says their case is: the step's own page's estimate, counted from a date (`components/timeline.ts`; the data each page needs is assembled in `api/timeline.ts`). What the visitor enters stays in the page's memory and reaches no address, cookie or analytics.
+
 ## Running the site locally
 
 You need Node.js (the version in `.node-version`), Yarn (bundled in `.yarn/releases`, so `yarn` just works) and [sqlite-diffable](https://github.com/simonw/sqlite-diffable) on your `PATH` (`pipx install sqlite-diffable` or `uv tool install sqlite-diffable`) to rebuild the consulates database from its dump.
