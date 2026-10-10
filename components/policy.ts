@@ -213,17 +213,21 @@ export function namesPage(entry: PolicyEntry, page: ConsulatePage): boolean {
  * of its visa class pages by `consulate`, and for any other page by `page`,
  * its path, "/nvc". Without `immigrant`, for the page of a nonimmigrant class
  * that does not go through NVC, the entries about immigrant visas only are
- * left out. */
-export function policiesFor({
-  consulate,
-  page,
-  immigrant = true,
-}: {
-  consulate?: ConsulatePage;
-  page?: string;
-  immigrant?: boolean;
-}): PolicyEntry[] {
-  return POLICY_ENTRIES.filter(
+ * left out. The lookups here read the file's entries unless given others
+ * (the tests do). */
+export function policiesFor(
+  {
+    consulate,
+    page,
+    immigrant = true,
+  }: {
+    consulate?: ConsulatePage;
+    page?: string;
+    immigrant?: boolean;
+  },
+  entries: PolicyEntry[] = POLICY_ENTRIES,
+): PolicyEntry[] {
+  return entries.filter(
     (entry) =>
       (immigrant || entry.scope.immigrantVisasOnly !== true) &&
       ((consulate !== undefined && appliesToPage(entry, consulate)) ||
@@ -238,10 +242,11 @@ export function policiesFor({
  * the prerendered page can say (see hasStarted and hasEnded). */
 export function issuanceSuspensionFor(
   country: string | null,
+  entries: PolicyEntry[] = POLICY_ENTRIES,
 ): PolicyEntry | null {
   if (country === null) return null;
   return (
-    POLICY_ENTRIES.find(
+    entries.find(
       (entry) =>
         entry.suspendsIssuance === true &&
         (entry.scope.countries?.includes(country) ?? false) &&
@@ -297,16 +302,19 @@ export function scheduleOverrideFor(
   postSlug: string,
   asOf: string,
   today: string | null,
+  entries: PolicyEntry[] = POLICY_ENTRIES,
 ): PolicyEntry | null {
   const lastsUntil = (entry: PolicyEntry) => entry.end ?? "9999-12-31";
   return (
-    POLICY_ENTRIES.filter(
-      (entry) =>
-        entry.overridesSchedule === true &&
-        (coversAllPosts(entry, postSlug) ||
-          (entry.scope.posts?.includes(postSlug) ?? false)) &&
-        hasStarted(entry, today) &&
-        overridesUpdate(entry, asOf, null),
-    ).sort((a, b) => lastsUntil(b).localeCompare(lastsUntil(a)))[0] ?? null
+    entries
+      .filter(
+        (entry) =>
+          entry.overridesSchedule === true &&
+          (coversAllPosts(entry, postSlug) ||
+            (entry.scope.posts?.includes(postSlug) ?? false)) &&
+          hasStarted(entry, today) &&
+          overridesUpdate(entry, asOf, null),
+      )
+      .sort((a, b) => lastsUntil(b).localeCompare(lastsUntil(a)))[0] ?? null
   );
 }

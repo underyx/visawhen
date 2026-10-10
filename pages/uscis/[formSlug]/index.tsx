@@ -735,8 +735,6 @@ export default function UscisForm({
               : "Backlog over time"}
           </Title>
           <Text>
-            {hasRange &&
-              "The range starts from USCIS's own median processing time for your category and widens it by how far real waits have landed from that median in past quarters. "}
             Time to clear backlog is how long USCIS would need to decide every
             pending case if it kept deciding them at the same speed. It is not
             your wait: the pile includes cases on hold and{" "}
@@ -747,27 +745,33 @@ export default function UscisForm({
               ? "cases waiting for a visa number"
               : "cases USCIS cannot decide yet"}
             .
-            {clearingGaps &&
-              " The chart leaves it out for quarters in which USCIS decided fewer than 100, too few to divide by."}
-            {view.processingTimeSeries.length === 0
-              ? ` USCIS does not publish a median processing time for ${
-                  isTotal ? "this form" : "this category"
-                }.`
-              : view.lastMedian !== null &&
-                ` USCIS has not published a median for ${
-                  isTotal ? "this form" : "this category"
-                } since ${view.lastMedian}.`}
-            {view.processingTimeSeries.length > 0 &&
-              republished
-                .filter(({ quarter }) =>
-                  points.some((point) => point.quarter === quarter),
-                )
-                .map(
-                  ({ label }) =>
-                    ` For ${label}, USCIS published the quarter before's medians again, so the chart has none for ${label}.`,
-                )
-                .join("")}
           </Text>
+          <MoreDetails label="How the range and the chart are worked out">
+            <Text size="sm">
+              {hasRange &&
+                "The range starts from USCIS's own median processing time for your category and widens it by how far real waits have landed from that median in past quarters. "}
+              {clearingGaps &&
+                "The chart shows no time to clear the backlog for quarters in which USCIS decided fewer than 100, too few to divide by. "}
+              {view.processingTimeSeries.length === 0
+                ? `USCIS does not publish a median processing time for ${
+                    isTotal ? "this form" : "this category"
+                  }.`
+                : view.lastMedian !== null &&
+                  `USCIS has not published a median for ${
+                    isTotal ? "this form" : "this category"
+                  } since ${view.lastMedian}.`}
+              {view.processingTimeSeries.length > 0 &&
+                republished
+                  .filter(({ quarter }) =>
+                    points.some((point) => point.quarter === quarter),
+                  )
+                  .map(
+                    ({ label }) =>
+                      ` For ${label}, USCIS published the quarter before's medians again, so the chart has none for ${label}.`,
+                  )
+                  .join("")}
+            </Text>
+          </MoreDetails>
           <WaitChart
             points={points}
             subject={viewWho}
@@ -780,7 +784,7 @@ export default function UscisForm({
       {variants.length > 1 && (
         <Stack gap="sm">
           <Title order={2}>By category, {newest.label}</Title>
-          <Table.ScrollContainer minWidth={640}>
+          <Table.ScrollContainer minWidth={640} className="vw-sticky-column">
             <Table striped withTableBorder>
               <Table.Thead>
                 <Table.Tr>
@@ -827,9 +831,8 @@ export default function UscisForm({
         <Stack gap="sm">
           <Title order={2}>Select your field office</Title>
           <Text>
-            USCIS also publishes these numbers per office for the {form}. Your
-            case is handled by the field office whose jurisdiction covers your
-            home address (or by a service center). Not sure which one?{" "}
+            Your case is handled by the field office for your home address, or
+            by a service center. Not sure which one?{" "}
             <Anchor
               href="https://www.uscis.gov/about-us/find-a-uscis-office/field-offices"
               target="_blank"
@@ -837,20 +840,7 @@ export default function UscisForm({
             >
               Look it up on USCIS&rsquo;s office locator
             </Anchor>
-            .{" "}
-            {`Next to each office is how many ${
-              officeCategory === null ? form : `${form} (${officeCategory})`
-            } cases it decided, approved or denied, in ${
-              officeLabel ?? "the newest quarter"
-            }, and the offices are listed from the most to the fewest${
-              offices.some(({ category }) => category !== null)
-                ? "; for an office that handles few of those, or almost never approves them, the count is of its main category, named next to it"
-                : ""
-            }.${
-              officeCategory === null
-                ? ""
-                : " The office pages show every category."
-            }`}
+            .
           </Text>
           <TextInput
             size="lg"
@@ -866,6 +856,21 @@ export default function UscisForm({
             noun={["office", "offices"]}
             hint="Try the city or the state, such as Houston, Texas or TX."
           />
+          <Text size="sm" c="dimmed">
+            {`Next to each office is how many ${
+              officeCategory === null ? form : `${form} (${officeCategory})`
+            } cases it decided, approved or denied, in ${
+              officeLabel ?? "the newest quarter"
+            }, most first${
+              offices.some(({ category }) => category !== null)
+                ? "; for an office that handles few of those, or almost never approves them, the count is of its main category, named next to it"
+                : ""
+            }.${
+              officeCategory === null
+                ? ""
+                : " The office pages show every category."
+            }`}
+          </Text>
           {filteredOffices.length > 0 && (
             <ListRows>
               {filteredOffices.map(

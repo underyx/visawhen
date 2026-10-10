@@ -2,7 +2,7 @@ import type { Form } from "../api/uscis";
 import {
   categoryName,
   HEADLINE_CATEGORY,
-  QuarterPoint,
+  type QuarterPoint,
   STALLED_RATIO,
 } from "./uscis";
 

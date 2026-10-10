@@ -8,6 +8,7 @@
     "export": "yarn build",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "test": "node --import ./scripts/register-ts-hooks.mjs --test 'components/*.test.ts' 'api/*.test.ts' 'scripts/*.test.mjs'",
     "ensure-db": "cd data/consulates && gunzip -kf dump/backlogs.ndjson.gz && sqlite-diffable load consulates.sqlite dump/ --replace"
   },
   "dependencies": {

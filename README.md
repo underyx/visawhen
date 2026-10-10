@@ -6,7 +6,7 @@ Data on US visa wait times at the National Visa Center and at US embassies/consu
 
 The site is a static [Next.js](https://nextjs.org) export: `next build` renders every page (one per consulate and visa class, one per USCIS form and field office) to `out/`, which GitHub Actions deploys to Cloudflare Workers on every push to `main` (`.github/workflows/deploy.yml`, which also describes how visawhen.com is served). Only `main` is deployed.
 
-Pull requests run pre-commit, ESLint, `tsc` and a full build, with a read-only token and no secrets; one that touches `data/uscis` also rebuilds `forms.json` from the reports cached on `main` (`forms.py --offline`) and fails when it differs from the committed file.
+Pull requests run pre-commit, ESLint, `tsc`, the unit tests and a full build, with a read-only token and no secrets; one that touches `data/uscis` also rebuilds `forms.json` from the reports cached on `main` (`forms.py --offline`) and fails when it differs from the committed file.
 
 The data lives in this repository and is refreshed by scheduled workflows that commit their results and trigger a deploy:
 
@@ -33,7 +33,10 @@ yarn dev        # rebuilds data/consulates/consulates.sqlite, then serves the si
 yarn build      # the static export, into out/
 yarn lint       # eslint
 yarn typecheck  # tsc
+yarn test       # the unit tests
 ```
+
+The unit tests (`*.test.ts` next to the modules they test, run by Node's own test runner) cover the logic the pages rest on: the planning ranges and the rules that suppress them (`components/estimate.ts`), the NVC review range (`components/nvcReview.ts`), which policy notices a page shows (`components/policy.ts`), the USCIS figures and the sentences under the cards (`components/uscis.ts`), the Visa Bulletin arithmetic, the search ranking and the redirects check. Node loads the TypeScript modules as they are, so a `.ts` module may not import a `.tsx` one, and must say `import type` for a type (ESLint checks that); the pure date helpers live in `components/dates.ts` for that reason, apart from the `useToday` hook in `components/Freshness.tsx`. The NVC backtest (`yarn node data/nvc/backtest.mjs`) runs the same modules the same way.
 
 ## Running the scrapers
 

@@ -2,6 +2,7 @@ import { Stack, Text } from "@mantine/core";
 import React from "react";
 import { CategoryRange, formatMedian, formatRangeMonths } from "./estimate";
 import { addMonths, formatMonthRange, useToday } from "./Freshness";
+import { NotShown, Stat, StatProps, Stats } from "./Stats";
 import {
   approvalRatesComparable,
   approximately,
@@ -21,49 +22,10 @@ import {
 } from "./uscis";
 import classes from "./UscisStats.module.css";
 
-// a non-breaking space keeps the cards the same height when one has no
-// line to show under its value
-const NO_LINE = " ";
-
 const tooFewToCompare = (period: Span) =>
   `too few to compare with the ${period} before`;
 const stalledBefore = (period: Span) =>
   `not compared: USCIS nearly stopped deciding these the ${period} before`;
-
-interface StatProps {
-  label: string;
-  value: React.ReactNode;
-  /** The line under the value */
-  line: string | null;
-  lineColor: string;
-}
-
-/** A card's big figure. Not a heading: screen readers' heading lists would
- * read "5.2 years" and "78%" as section titles. */
-function StatValue({ children }: React.PropsWithChildren) {
-  return <Text className={classes.boxValue}>{children}</Text>;
-}
-
-/** A card's value when there is none to show, with why. */
-function NotShown({ children }: React.PropsWithChildren) {
-  return (
-    <Text fw={700} lh={1.3}>
-      {children}
-    </Text>
-  );
-}
-
-function Stat({ label, value, line, lineColor }: StatProps) {
-  return (
-    <div className={classes.box}>
-      <Text className={classes.boxLabel}>{label}</Text>
-      {typeof value === "string" ? <StatValue>{value}</StatValue> : value}
-      <Text size="xs" c={lineColor}>
-        {line ?? NO_LINE}
-      </Text>
-    </div>
-  );
-}
 
 /** A change vs. the previous quarter (or month), in green when it is good
  * news and red when it is bad; the darkest shades, as the lighter ones are
@@ -234,7 +196,7 @@ export default function UscisStats({
           </Stack>
         </div>
       )}
-      <div className={classes.boxes}>
+      <Stats>
         <Stat
           label="Time to clear backlog"
           value={
@@ -397,7 +359,7 @@ export default function UscisStats({
             }
           />
         )}
-      </div>
+      </Stats>
     </Stack>
   );
 }
