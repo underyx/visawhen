@@ -74,6 +74,7 @@ import { breadcrumbList } from "../../../components/structuredData";
 import { ListRow, ListRows } from "../../../components/ListRow";
 import { rankPlace } from "../../../components/search";
 import SearchStatus from "../../../components/SearchStatus";
+import TemporaryNotice from "../../../components/TemporaryNotice";
 
 interface OfficeSummary {
   slug: string;
@@ -674,7 +675,7 @@ export default function UscisForm({
           </Table.ScrollContainer>
           {premium !== undefined && <Alert color="blue">{premium.note}</Alert>}
           {shocked.length > 0 && (
-            <Alert color="yellow">
+            <TemporaryNotice>
               <Stack gap="xs">
                 <Text inherit>
                   USCIS is deciding fewer of these cases than usual:{" "}
@@ -699,7 +700,7 @@ export default function UscisForm({
                   </Text>
                 </MoreDetails>
               </Stack>
-            </Alert>
+            </TemporaryNotice>
           )}
         </Stack>
       )}

@@ -16,6 +16,7 @@ import {
 } from "../components/Freshness";
 import MoreDetails from "../components/MoreDetails";
 import PolicyBanner from "../components/PolicyBanner";
+import TemporaryNotice from "../components/TemporaryNotice";
 import {
   front,
   getStall,
@@ -78,7 +79,7 @@ function SeriesAgeNotice({
   if (today === null || pageStale || !isStale(series, today)) return null;
   const [date] = getLatestReading(series);
   return (
-    <Alert color="yellow" role="note">
+    <TemporaryNotice>
       Our newest {what} time is from {formatDate(date)},{" "}
       {daysBetween(date, today)} days ago, so it may be out of date. See{" "}
       <Anchor
@@ -89,7 +90,7 @@ function SeriesAgeNotice({
         today&rsquo;s time on NVC&rsquo;s website
       </Anchor>
       .
-    </Alert>
+    </TemporaryNotice>
   );
 }
 
@@ -99,7 +100,7 @@ function StallNotice({ series, what }: { series: NvcSeries; what: string }) {
   if (stall === null) return null;
   const [, lastDays] = getLatestReading(series);
   return (
-    <Alert color="yellow" role="note">
+    <TemporaryNotice>
       <Stack gap="xs">
         <Text inherit>
           NVC&rsquo;s {what} has almost stopped moving. Anything you submit now
@@ -114,7 +115,7 @@ function StallNotice({ series, what }: { series: NvcSeries; what: string }) {
           </Text>
         </MoreDetails>
       </Stack>
-    </Alert>
+    </TemporaryNotice>
   );
 }
 
@@ -366,7 +367,7 @@ export default function NvcBacklog({ data }: Props) {
         <Title order={1}>NVC wait times</Title>
         <PolicyBanner page="/nvc" />
         {stale && (
-          <Alert color="yellow">
+          <TemporaryNotice>
             Our newest data is from {formatDate(latestDate)}, {ageDays} days
             ago, but NVC usually updates every week, so it may be faster or
             slower now. See{" "}
@@ -378,31 +379,54 @@ export default function NvcBacklog({ data }: Props) {
               today&rsquo;s times on NVC&rsquo;s website
             </Anchor>
             .
-          </Alert>
+          </TemporaryNotice>
         )}
         {/* the alert above gives the date when the data is stale */}
         {!stale && <Text>Last updated {formatDate(latestDate)}.</Text>}
         <Text>
           How long the National Visa Center is taking to create cases, review
-          documents and answer inquiries. NVC usually updates these timeframes
-          every week, and we check its page for new ones every day.
+          documents and answer inquiries. NVC usually updates these every week.
         </Text>
-        <Text>
-          These timeframes do not apply to K (fiancé(e)) visas, diversity visas,
-          special immigrant visas or adoptions, per NVC. For spouses, parents
-          and children of US citizens, NVC usually takes weeks, and{" "}
-          <Anchor component={Link} href="/consulates">
-            the longest wait is usually the interview queue at your consulate
-          </Anchor>
-          . In the family and employment preference categories, the longest wait
-          is usually for your priority date, often years: once the{" "}
-          <Anchor component={Link} href="/visa-bulletin">
-            Visa Bulletin
-          </Anchor>
-          &rsquo;s Dates for Filing chart passes it, NVC can tell you to send
-          your documents, but you can only get an interview once your priority
-          date is current in its Final Action Dates chart.
-        </Text>
+        <Alert role="note" color="gray">
+          <Stack gap="sm">
+            <div>
+              <Text inherit fw={700}>
+                These timeframes do not apply to
+              </Text>
+              <Text inherit>
+                K (fiancé(e)) visas, diversity visas, special immigrant visas
+                and adoptions.
+              </Text>
+            </div>
+            <div>
+              <Text inherit fw={700}>
+                Spouses, parents and children of US citizens
+              </Text>
+              <Text inherit>
+                NVC usually takes weeks.{" "}
+                <Anchor component={Link} href="/consulates">
+                  The longest wait is usually the interview queue at your
+                  consulate
+                </Anchor>
+                .
+              </Text>
+            </div>
+            <div>
+              <Text inherit fw={700}>
+                Family and employment preference categories
+              </Text>
+              <Text inherit>
+                The longest wait is usually for your priority date, often years.
+                NVC asks for your documents once the{" "}
+                <Anchor component={Link} href="/visa-bulletin">
+                  Visa Bulletin
+                </Anchor>
+                &rsquo;s Dates for Filing chart passes it, and you get an
+                interview once it is current in the Final Action Dates chart.
+              </Text>
+            </div>
+          </Stack>
+        </Alert>
       </Stack>
       <Stack gap="sm">
         <ChartHeading series={data.review}>Document review</ChartHeading>

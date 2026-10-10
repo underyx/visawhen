@@ -1,5 +1,4 @@
 import {
-  Alert,
   Anchor,
   Button,
   Paper,
@@ -46,6 +45,7 @@ import {
   Series,
 } from "../../../components/visaBulletin";
 import { daysBetween, useToday } from "../../../components/Freshness";
+import TemporaryNotice from "../../../components/TemporaryNotice";
 
 const DATA_URL =
   "https://github.com/underyx/visawhen/blob/main/data/visa_bulletin/data.json";
@@ -136,7 +136,7 @@ function StaleNotice({ month }: { month: string }) {
   const due = monthStart(addMonthsToMonth(month, 1));
   if (daysBetween(due, today) <= GRACE_DAYS) return null;
   return (
-    <Alert color="yellow" role="note">
+    <TemporaryNotice>
       Our newest Visa Bulletin is for {formatBulletinMonth(month)}, but the
       State Department has probably published a newer one. See{" "}
       <Anchor
@@ -147,7 +147,7 @@ function StaleNotice({ month }: { month: string }) {
         the newest bulletin on its website
       </Anchor>
       .
-    </Alert>
+    </TemporaryNotice>
   );
 }
 
