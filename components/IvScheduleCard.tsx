@@ -622,10 +622,10 @@ export default function IvScheduleCard({
             <MoreDetails label="What this month means">
               <Text size="sm">
                 It is not a wait time. It is the month most interviews are being
-                scheduled for now, and it can move backwards. &ldquo;Current&rdquo;
-                means the cases NVC is scheduling include the month of the update
-                itself. The State Department says it cannot predict exactly when a
-                case will be scheduled.
+                scheduled for now, and it can move backwards.
+                &ldquo;Current&rdquo; means the cases NVC is scheduling include
+                the month of the update itself. The State Department says it
+                cannot predict exactly when a case will be scheduled.
               </Text>
               <Text size="sm">
                 Family preference and employment cases also need a current

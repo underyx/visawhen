@@ -193,11 +193,15 @@ export default function UscisIndex({
         hint="Try a form number such as I-130, or words such as green card, work permit or citizenship."
       />
       <Text size="sm" c="dimmed">
-        The range next to a form is how long a decision will most likely take
-        if you file today, going by USCIS&rsquo;s median for {latestLabel}; for
-        a form with several categories, it is for the one named under it. For
-        your own case, also check USCIS&rsquo;s{" "}
-        <Anchor href={USCIS_PROCESSING_TIMES_URL} target="_blank" rel="noopener">
+        The range next to a form is how long a decision will most likely take if
+        you file today, going by USCIS&rsquo;s median for {latestLabel}; for a
+        form with several categories, it is for the one named under it. For your
+        own case, also check USCIS&rsquo;s{" "}
+        <Anchor
+          href={USCIS_PROCESSING_TIMES_URL}
+          target="_blank"
+          rel="noopener"
+        >
           processing times tool
         </Anchor>
         .

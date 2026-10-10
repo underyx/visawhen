@@ -83,7 +83,10 @@ a.mantine-Anchor-root:hover {
 }
 
 /* the header row's tr carries data-striped too, but is never striped */
-.vw-sticky-column tbody > tr[data-striped="odd"]:nth-of-type(odd) > :first-child {
+.vw-sticky-column
+  tbody
+  > tr[data-striped="odd"]:nth-of-type(odd)
+  > :first-child {
   background-color: var(--table-striped-color);
 }
 
