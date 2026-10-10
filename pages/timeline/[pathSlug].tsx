@@ -77,20 +77,20 @@ function To({ href, children }: React.PropsWithChildren<{ href: string }>) {
   );
 }
 
-/** The stamp's first line, which the range line finishes as one sentence:
- *  "Your interview will most likely be" + "May – Nov 2027" */
+/** The stamp's first line, short enough for one line on a phone, which the
+ *  range line finishes: "Interview most likely:" + "May – Nov 2027" */
 function stampLabel({ spec }: StageResult): string {
   switch (spec.kind) {
     case "uscis":
-      return `Your ${spec.form} decision will most likely come`;
+      return `${spec.form} decision most likely:`;
     case "nvc-creation":
-      return "Your NVC case number will most likely come";
+      return "NVC case number most likely:";
     case "nvc-review":
-      return "NVC will most likely finish reviewing your documents";
+      return "NVC review done most likely:";
     case "interview":
-      return "Your interview will most likely be";
+      return "Interview most likely:";
     default:
-      return `${spec.name}: most likely`;
+      return "Most likely:";
   }
 }
 
@@ -136,9 +136,9 @@ function Stamp({
             ? formatDateRange(total.end)
             : `in ${formatDuration(total.days)}`}
         </div>
-        <div className={stampClasses.stampFoot}>
-          {reported ? "based on where your case is now" : "if you start today"}
-        </div>
+        {!reported && (
+          <div className={stampClasses.stampFoot}>if you start today</div>
+        )}
       </div>
       <Stack gap={6} className={stampClasses.aside}>
         <Text size="sm">
