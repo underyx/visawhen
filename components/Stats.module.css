@@ -1,0 +1,37 @@
+/* A row of figures, as the boxes of a printed form: one ruled strip, each box
+ * with its caption at the top. Two columns on a phone and four from sm up,
+ * unless the row sets --stat-columns (and --stat-columns-phone). */
+.boxes {
+  display: grid;
+  grid-template-columns: repeat(var(--stat-columns-phone, 2), 1fr);
+  gap: 1px;
+  background: var(--vw-rule);
+  border: 1px solid var(--vw-rule);
+  border-radius: var(--mantine-radius-sm);
+  overflow: hidden;
+}
+
+@media (min-width: $mantine-breakpoint-sm) {
+  .boxes {
+    grid-template-columns: repeat(var(--stat-columns, 4), 1fr);
+  }
+}
+
+.box {
+  background: var(--mantine-color-body);
+  padding: 10px 14px 12px;
+}
+
+.boxLabel {
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 600;
+  color: var(--mantine-color-dimmed);
+}
+
+.boxValue {
+  font-stretch: 75%;
+  font-weight: 800;
+  font-size: clamp(1.5rem, 1.2rem + 1.4vw, 1.875rem);
+  line-height: 1.15;
+  margin-top: 2px;
+}

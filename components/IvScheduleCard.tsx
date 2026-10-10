@@ -1,4 +1,4 @@
-import { Alert, Anchor, Box, Paper, Stack, Text, Title } from "@mantine/core";
+import { Alert, Anchor, Paper, Stack, Text, Title } from "@mantine/core";
 import Link from "next/link";
 import React from "react";
 import {
@@ -6,6 +6,7 @@ import {
   formatCount,
   formatIvMonth,
   formatLongMonth,
+  formatShortIvMonth,
   IV_CATEGORIES,
   IvCategory,
   IvPostElsewhere,
@@ -16,6 +17,7 @@ import { daysBetween, formatShortDate, useToday } from "./Freshness";
 import { AFRICA_HUBS_URL, EMBASSIES_URL, IV_POSTS_URL } from "./links";
 import MoreDetails from "./MoreDetails";
 import { hasEnded, overridesUpdate, PolicyEntry } from "./policy";
+import { NotShown, Stat, Stats } from "./Stats";
 /** State updates the tool monthly, so an update older than this means we
  * have missed at least one. */
 const MAX_AGE_DAYS = 45;
@@ -24,9 +26,9 @@ const MAX_AGE_DAYS = 45;
 // of their categories, so the labels say so: the EB-2 page's line is the
 // month for every employment case, not an EB-2 queue of its own.
 const CATEGORY_LABELS: Record<IvCategory, string> = {
-  relative: "Spouses, children and parents of U.S. citizens",
-  preference: "Family preference (one month for F1, F2A, F2B, F3 and F4)",
-  employment: "Employment (one month for EB-1, EB-2, EB-3 and EB-5)",
+  relative: "Spouses, children and parents of US citizens",
+  preference: "Family preference: F1, F2A, F2B, F3 and F4",
+  employment: "Employment: EB-1, EB-2, EB-3 and EB-5",
 };
 
 /** What State's tool says about one category at a post, split around the
@@ -182,40 +184,64 @@ export function describeRelativeQueue(
   }`;
 }
 
-interface LineProps {
+/** What the update before said, as the line under a box's month: null when
+ * there was no previous month, or both are current. The month moving forward
+ * (to a later month) is good news for those waiting, so it is green; moving
+ * back is red. */
+function previousLine(
+  cutoff: string,
+  current: boolean,
+  previous: PreviousMonth | null,
+): { text: string; color: string } | null {
+  if (previous === null) return null;
+  const update = `the update before (${formatShortDate(previous.asOf)})`;
+  const previousCurrent = monthsBehind(previous.asOf, previous.cutoff) <= 0;
+  if (previousCurrent)
+    return current
+      ? null
+      : { text: `moved back: current in ${update}`, color: "red.9" };
+  if (previous.cutoff === cutoff)
+    return { text: `same month as in ${update}`, color: "dimmed" };
+  const forward = cutoff > previous.cutoff;
+  return {
+    text: `moved ${forward ? "forward" : "back"} from ${formatShortIvMonth(
+      previous.cutoff,
+    )} in ${update}`,
+    color: forward ? "teal.9" : "red.9",
+  };
+}
+
+interface BoxProps {
   label: string;
   asOf: string;
   cutoff: string | null;
   previous: PreviousMonth | null;
-  wholePost: boolean;
 }
 
-function QueueLine({ label, asOf, cutoff, previous, wholePost }: LineProps) {
-  let text: React.ReactNode;
-  if (cutoff === null) text = "No month given (N/A).";
-  else {
-    const { before, month, after } = describeQueue(
-      asOf,
-      cutoff,
-      previous,
-      wholePost,
-      false,
+/** One category's month, set big, with what the update before said under
+ * it. A current category says so instead of its month, which is the month
+ * of the update. */
+function QueueBox({ label, asOf, cutoff, previous }: BoxProps) {
+  if (cutoff === null)
+    return (
+      <Stat
+        label={label}
+        value={<NotShown>No month given</NotShown>}
+        line="N/A in the State Department's tool"
+      />
     );
-    text = (
-      <>
-        {before}
-        <strong>{month}</strong>
-        {after}
-      </>
-    );
-  }
+  const current = monthsBehind(asOf, cutoff) <= 0;
+  const changed = previousLine(cutoff, current, previous);
   return (
-    <Box>
-      <Text size="sm" fw={600}>
-        {label}
-      </Text>
-      <Text>{text}</Text>
-    </Box>
+    <Stat
+      label={label}
+      value={current ? "Current" : formatIvMonth(cutoff)}
+      line={
+        changed?.text ??
+        (current ? `${formatIvMonth(cutoff)}, the month of the update` : null)
+      }
+      lineColor={changed?.color ?? "dimmed"}
+    />
   );
 }
 
@@ -429,7 +455,8 @@ export default function IvScheduleCard({
       : wholePost
       ? [
           {
-            label: "All three categories",
+            label:
+              "All three categories: immediate relatives, family preference and employment",
             cutoff: schedule.relative,
             previous: previousWhole
               ? previousMonth(schedule, "relative")
@@ -537,16 +564,22 @@ export default function IvScheduleCard({
           </Text>
         ) : (
           <>
-            {lines.map(({ label, cutoff, previous }) => (
-              <QueueLine
-                key={label}
-                label={label}
-                asOf={asOf}
-                cutoff={cutoff}
-                previous={previous}
-                wholePost={wholePost}
-              />
-            ))}
+            <Text>
+              NVC is scheduling most interviews for cases that became{" "}
+              <em>documentarily complete</em> in these months, in the State
+              Department&rsquo;s update of {updated}:
+            </Text>
+            <Stats columns={lines.length} phoneColumns={1}>
+              {lines.map(({ label, cutoff, previous }) => (
+                <QueueBox
+                  key={label}
+                  label={label}
+                  asOf={asOf}
+                  cutoff={cutoff}
+                  previous={previous}
+                />
+              ))}
+            </Stats>
           </>
         )}
         {(postCurrent || someCurrent) && few && recentIssued !== undefined ? (
@@ -581,21 +614,31 @@ export default function IvScheduleCard({
           </Text>
         )}
         {hasQueue && (
-          <Text size="sm">
-            Compare this with the month NVC told you your case was documentarily
-            complete, which means NVC accepted all your documents. It is not a
-            wait time: it is the month most interviews are being scheduled for
-            now, and it can move backwards. Family preference and employment
-            cases also need a current priority date in the{" "}
-            <Anchor component={Link} href="/visa-bulletin">
-              Visa Bulletin
-            </Anchor>
-            .
-          </Text>
+          <Stack gap="xs">
+            <Text>
+              Compare this with the month NVC emailed you that your case was
+              documentarily complete: that NVC had accepted all your documents.
+            </Text>
+            <MoreDetails label="What this month means">
+              <Text size="sm">
+                It is not a wait time. It is the month most interviews are being
+                scheduled for now, and it can move backwards. &ldquo;Current&rdquo;
+                means the cases NVC is scheduling include the month of the update
+                itself. The State Department says it cannot predict exactly when a
+                case will be scheduled.
+              </Text>
+              <Text size="sm">
+                Family preference and employment cases also need a current
+                priority date in the{" "}
+                <Anchor component={Link} href="/visa-bulletin">
+                  Visa Bulletin
+                </Anchor>
+                .
+              </Text>
+            </MoreDetails>
+          </Stack>
         )}
         <Text size="xs" c="dimmed">
-          {hasQueue &&
-            "The State Department says it cannot predict exactly when a case will be scheduled. "}
           Source: {toolLink("State Department IV Scheduling Status Tool")},
           updated {updated}.
         </Text>

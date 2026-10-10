@@ -70,6 +70,33 @@ a.mantine-Anchor-root:hover {
   color: var(--vw-ink);
 }
 
+/* A wide table's first column (the category) stays in view while the rest
+ * scrolls sideways on a phone: the cells are opaque, in the row's own colour,
+ * with a rule down their right edge. */
+.vw-sticky-column th:first-child,
+.vw-sticky-column td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background-color: var(--mantine-color-body);
+  box-shadow: 1px 0 0 var(--mantine-color-default-border);
+}
+
+/* the header row's tr carries data-striped too, but is never striped */
+.vw-sticky-column tbody > tr[data-striped="odd"]:nth-of-type(odd) > :first-child {
+  background-color: var(--table-striped-color);
+}
+
+/* On a phone the column's long descriptions would take nearly the whole
+ * screen and leave no room for the figures, so it wraps at a fixed width. */
+@media (max-width: $mantine-breakpoint-sm) {
+  .vw-sticky-column th:first-child,
+  .vw-sticky-column td:first-child {
+    width: 11rem;
+    min-width: 11rem;
+  }
+}
+
 /* A notice is a slip on the page: a rule of ink down its left edge. The
  * yellow and orange ones are also highlighted (see the Alert theme). */
 .mantine-Alert-root {

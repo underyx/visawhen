@@ -127,16 +127,9 @@ export default function ConsulateSelect({
       </Head>
       <Title order={1}>US embassies and consulates</Title>
       <Text>
-        For the {ivSchedulePosts} embassies and consulates in the State
-        Department&rsquo;s{" "}
-        <Anchor href={ivScheduleSource} target="_blank" rel="noopener">
-          interview-scheduling tool
-        </Anchor>
-        , their page shows the month of documentarily complete cases for which
-        NVC is scheduling most immigrant visa interviews there (updated{" "}
-        {formatShortDate(ivScheduleAsOf)}). Every post&rsquo;s page shows how
-        many visas of each class it issued, from State Department figures
-        through {formatMonth(recentWindow.to)}.
+        Pick your embassy or consulate to see which month of cases it is
+        scheduling immigrant visa interviews for, and how many visas of each
+        class it issues.
       </Text>
       <TextInput
         size="lg"
@@ -153,8 +146,13 @@ export default function ConsulateSelect({
         hint="Try the city or the country, such as Manila or Philippines."
       />
       <Text size="sm" c="dimmed">
-        Badges: average visas issued per month, {formatMonth(recentWindow.from)}{" "}
-        to {formatMonth(recentWindow.to)}.
+        Interview months: the State Department&rsquo;s{" "}
+        <Anchor href={ivScheduleSource} target="_blank" rel="noopener">
+          interview-scheduling tool
+        </Anchor>
+        , updated {formatShortDate(ivScheduleAsOf)}, for {ivSchedulePosts}{" "}
+        posts. Badges: average visas issued per month,{" "}
+        {formatMonth(recentWindow.from)} to {formatMonth(recentWindow.to)}.
       </Text>
       {filteredPosts.length > 0 && (
         <ListRows>
