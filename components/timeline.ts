@@ -13,6 +13,7 @@ import {
   daysBetween,
   formatDate,
   formatMonthRange,
+  formatMonthYear,
   formatShortDate,
 } from "./dates";
 import { formatIvMonth, monthsBehind } from "./consulates";
@@ -24,7 +25,6 @@ import {
   formatCutoff,
   formatMonths as formatWholeMonths,
   isDate,
-  monthsBetweenDates,
 } from "./visaBulletin";
 
 // The timeline pages: one page per common route through the process (a
@@ -65,7 +65,7 @@ export interface Milestone {
   id: string;
   /** As the "Where is your case?" list shows it: "USCIS approved the I-130" */
   label: string;
-  /** The date field's label: "The day it was approved" */
+  /** The month field's label: "When it was approved" */
   dateLabel: string;
 }
 
@@ -121,22 +121,22 @@ export interface PathSpec {
 const I130_FILED: Milestone = {
   id: "i-130-filed",
   label: "I filed the I-130",
-  dateLabel: "The day USCIS received it",
+  dateLabel: "When USCIS received it",
 };
 const I130_APPROVED: Milestone = {
   id: "i-130-approved",
   label: "USCIS approved the I-130",
-  dateLabel: "The day it was approved",
+  dateLabel: "When it was approved",
 };
 const I485_FILED: Milestone = {
   id: "i-485-filed",
   label: "I filed the I-485",
-  dateLabel: "The day USCIS received it",
+  dateLabel: "When USCIS received it",
 };
 const I485_APPROVED: Milestone = {
   id: "i-485-approved",
   label: "USCIS approved the I-485",
-  dateLabel: "The day it was approved",
+  dateLabel: "When it was approved",
 };
 
 const I751_NOTE =
@@ -213,12 +213,12 @@ export const PATHS: PathSpec[] = [
         start: {
           id: "sent-to-nvc",
           label: "USCIS sent my case to the State Department",
-          dateLabel: "The day the USCIS case status changed",
+          dateLabel: "When the USCIS case status changed",
         },
         end: {
           id: "nvc-created",
           label: "NVC created my case",
-          dateLabel: "The date of NVC’s welcome letter",
+          dateLabel: "When NVC’s welcome letter came",
         },
       },
       {
@@ -230,7 +230,7 @@ export const PATHS: PathSpec[] = [
         end: {
           id: "documents-submitted",
           label: "I submitted my documents to NVC",
-          dateLabel: "The day you last submitted them",
+          dateLabel: "When you last submitted them",
         },
       },
       {
@@ -243,7 +243,7 @@ export const PATHS: PathSpec[] = [
         end: {
           id: "documentarily-complete",
           label: "NVC said my case is documentarily complete",
-          dateLabel: "The day NVC said so",
+          dateLabel: "When NVC said so",
         },
       },
       {
@@ -256,7 +256,7 @@ export const PATHS: PathSpec[] = [
         end: {
           id: "interview-scheduled",
           label: "My interview is scheduled",
-          dateLabel: "The interview date",
+          dateLabel: "Month of the interview",
         },
       },
       {
@@ -327,12 +327,12 @@ export const PATHS: PathSpec[] = [
         start: {
           id: "i-129f-filed",
           label: "I filed the I-129F",
-          dateLabel: "The day USCIS received it",
+          dateLabel: "When USCIS received it",
         },
         end: {
           id: "i-129f-approved",
           label: "USCIS approved the I-129F",
-          dateLabel: "The day it was approved",
+          dateLabel: "When it was approved",
         },
       },
       {
@@ -345,7 +345,7 @@ export const PATHS: PathSpec[] = [
         end: {
           id: "k1-at-consulate",
           label: "The consulate received my case",
-          dateLabel: "The day it told you so",
+          dateLabel: "When it told you so",
         },
       },
       {
@@ -358,7 +358,7 @@ export const PATHS: PathSpec[] = [
         end: {
           id: "k1-interview",
           label: "My K-1 interview is scheduled",
-          dateLabel: "The interview date",
+          dateLabel: "Month of the interview",
         },
       },
       {
@@ -370,7 +370,7 @@ export const PATHS: PathSpec[] = [
         end: {
           id: "married",
           label: "We got married in the US",
-          dateLabel: "The wedding day",
+          dateLabel: "When you married",
         },
       },
       {
@@ -415,12 +415,12 @@ export const PATHS: PathSpec[] = [
         start: {
           id: "n-400-filed",
           label: "I filed the N-400",
-          dateLabel: "The day USCIS received it",
+          dateLabel: "When USCIS received it",
         },
         end: {
           id: "n-400-approved",
           label: "USCIS approved the N-400",
-          dateLabel: "The day it was approved",
+          dateLabel: "When it was approved",
         },
       },
       {
@@ -453,7 +453,7 @@ export const PATHS: PathSpec[] = [
         end: {
           id: "perm-certified",
           label: "The Department of Labor certified the PERM",
-          dateLabel: "The day it was certified",
+          dateLabel: "When it was certified",
         },
       },
       {
@@ -468,12 +468,12 @@ export const PATHS: PathSpec[] = [
         start: {
           id: "i-140-filed",
           label: "I filed the I-140",
-          dateLabel: "The day USCIS received it",
+          dateLabel: "When USCIS received it",
         },
         end: {
           id: "i-140-approved",
           label: "USCIS approved the I-140",
-          dateLabel: "The day it was approved",
+          dateLabel: "When it was approved",
         },
       },
       {
@@ -585,12 +585,12 @@ export const PATHS: PathSpec[] = [
         start: {
           id: "i-129-filed",
           label: "My employer filed the I-129",
-          dateLabel: "The day USCIS received it",
+          dateLabel: "When USCIS received it",
         },
         end: {
           id: "i-129-approved",
           label: "USCIS approved the I-129",
-          dateLabel: "The day it was approved",
+          dateLabel: "When it was approved",
         },
       },
       {
@@ -684,7 +684,7 @@ export interface TimelineData {
 export interface TimelineInputs {
   /** A Milestone.id, or "" for none */
   milestone: string;
-  /** Its date, "2026-03-14", or "" */
+  /** Its month, "2026-03", or "" */
   date: string;
   /** A post slug, or "" */
   post: string;
@@ -693,7 +693,7 @@ export interface TimelineInputs {
   /** A Visa Bulletin category key and area key, or "" */
   category: string;
   area: string;
-  /** The priority date, "2019-03-14", or "" */
+  /** The month of the priority date, "2019-03", or "" */
   priorityDate: string;
 }
 
@@ -710,7 +710,7 @@ export const EMPTY_INPUTS: TimelineInputs = {
 // The answers in the page's address
 
 /** The name each answer goes by in the page's address, after the #
- * ("#milestone=nvc-created&date=2026-03-14&consulate=manila"), so a
+ * ("#milestone=nvc-created&date=2026-03&consulate=manila"), so a
  * filled-in timeline can be bookmarked or shared */
 const HASH_KEYS: [keyof TimelineInputs, string][] = [
   ["milestone", "milestone"],
@@ -733,8 +733,10 @@ export function inputsToHash(inputs: TimelineInputs): string {
 
 /** The answers a page's fragment holds. `allowed` lists the values each
  * select offers; a value it does not list, a name the page does not know, a
- * date that is not one, or a date without its milestone count as not
- * answered, so an old or edited link never shows a choice the page lacks */
+ * month that is not one, or a month without its milestone count as not
+ * answered, so an old or edited link never shows a choice the page lacks.
+ * A full date, as links made before the page asked for months have, counts
+ * as its month. */
 export function inputsFromHash(
   hash: string,
   allowed: Partial<Record<keyof TimelineInputs, readonly string[]>>,
@@ -749,7 +751,9 @@ export function inputsFromHash(
         ? options.includes(value)
           ? value
           : ""
-        : validDate(value, null) ?? "";
+        : isIsoDate(value)
+        ? value.slice(0, 7)
+        : validMonth(value, null) ?? "";
   }
   if (inputs.milestone === "") inputs.date = "";
   return inputs;
@@ -824,11 +828,47 @@ function isIsoDate(date: string): boolean {
   );
 }
 
-/** The visitor's milestone date, when it is a date and not in the future */
-export function validDate(date: string, today: string | null): string | null {
-  if (!isIsoDate(date)) return null;
-  if (today !== null && date > today) return null;
-  return date;
+/** The visitor's month, "2026-03", when it is one and not in the future */
+export function validMonth(month: string, today: string | null): string | null {
+  const match = /^(\d{4})-(\d{2})$/.exec(month);
+  if (match === null || Number(match[1]) < 1900) return null;
+  if (Number(match[2]) < 1 || Number(match[2]) > 12) return null;
+  if (today !== null && month > today.slice(0, 7)) return null;
+  return month;
+}
+
+/** The days a month the visitor gave can stand for: all of it, up to today
+ * ("2026-10" on Oct 10, 2026 is Oct 1–10). The visitor gives months, not
+ * days, as the estimates are not precise enough for a day to matter; the
+ * month's span carries into the steps' ranges. */
+export function monthSpan(month: string, today: string | null): DateRange {
+  const [year, number] = month.split("-").map(Number);
+  // day 0 of the next month is the last day of this one
+  const last = new Date(Date.UTC(year, number, 0)).toISOString().slice(0, 10);
+  return {
+    low: `${month}-01`,
+    high: today !== null && last > today ? today : last,
+  };
+}
+
+/** A step's start as words: "Sep 2026" for a month the visitor gave, else
+ * the dates */
+function formatStart(range: DateRange): string {
+  return range.low !== range.high &&
+    range.low.endsWith("-01") &&
+    monthOf(range.low) === monthOf(range.high)
+    ? formatMonthYear(range.low)
+    : formatDateRange(range);
+}
+
+/** The same with what joins it to a verb: "in Sep 2026", "on Oct 10,
+ * 2026", or the dates */
+function formatSince(range: DateRange): string {
+  const start = formatStart(range);
+  if (range.low === range.high) return `on ${start}`;
+  return range.low.endsWith("-01") && monthOf(range.low) === monthOf(range.high)
+    ? `in ${start}`
+    : start;
 }
 
 // The estimates
@@ -1177,17 +1217,17 @@ function nvcReviewStage(
       warning,
       headline: `Most likely ${formatDuration(duration)} ${afterText(spec)}`,
     };
-  // the visitor's own submission date: the /nvc page's range, which reads
-  // NVC's pace too, unless the readings are stale or NVC has stalled
+  // the visitor's own submission month: the /nvc page's range for its
+  // first and last days, which reads NVC's pace too, unless the readings
+  // are stale or NVC has stalled
   if (
     status === "current" &&
     today !== null &&
     !stale &&
     stall === null &&
-    start.low === start.high
+    monthOf(start.low) === monthOf(start.high)
   ) {
-    const submitted = start.low;
-    if (submitted <= reached)
+    if (start.high <= reached)
       return {
         ...base,
         end: { low: date, high: date },
@@ -1200,27 +1240,36 @@ function nvcReviewStage(
           reached,
         )}, so it has most likely reviewed yours. Check CEAC for its message.`,
       };
-    const range = reviewRange(series, submitted);
-    if (range !== null) {
-      const end = { low: range.lower, high: range.upper };
+    // a month NVC is partway through reads from the front of its queue
+    const first = reviewRange(
+      series,
+      start.low > reached ? start.low : reached,
+    );
+    const last = reviewRange(series, start.high);
+    if (first !== null && last !== null) {
+      const end = { low: first.lower, high: last.upper };
+      const around = (low: string, high: string) =>
+        low === high ? formatDate(low) : formatDateRange({ low, high });
       const paceBasis: string[] = [
-        `If NVC’s queue stays as long as it is now, it would reach documents submitted on ${formatDate(
-          submitted,
-        )} around ${formatDate(range.queueDate)}.`,
+        `If NVC’s queue stays as long as it is now, it would reach documents submitted ${formatSince(
+          start,
+        )} around ${around(first.queueDate, last.queueDate)}.`,
       ];
-      if (range.pace !== null)
+      if (first.pace !== null && last.pace !== null)
         paceBasis.push(
-          `From ${formatDate(range.pace.from[0])} to ${formatDate(
+          `From ${formatDate(last.pace.from[0])} to ${formatDate(
             date,
           )}, NVC’s queue ${
-            range.pace.date > range.queueDate ? "grew" : "shrank"
-          }: at that pace it would reach them around ${formatDate(
-            range.pace.date,
+            last.pace.date > last.queueDate ? "grew" : "shrank"
+          }: at that pace it would reach them around ${around(
+            first.pace.date,
+            last.pace.date,
           )}.`,
         );
-      if (range.burstDays !== null)
+      const burstDays = last.burstDays ?? first.burstDays;
+      if (burstDays !== null)
         paceBasis.push(
-          `Lately NVC has moved in bursts and pauses, so the range also goes up to its longest review time of the last six weeks: ${range.burstDays} days.`,
+          `Lately NVC has moved in bursts and pauses, so the range also goes up to its longest review time of the last six weeks: ${burstDays} days.`,
         );
       paceBasis.push(
         "We tested this method on NVC’s timeframes since November 2020: more than 9 reviews in 10 fell inside the range.",
@@ -1229,16 +1278,16 @@ function nvcReviewStage(
         ...base,
         end,
         days: {
-          low: daysBetween(submitted, range.lower),
-          high: daysBetween(submitted, range.upper),
+          low: Math.max(0, daysBetween(start.low, end.low)),
+          high: daysBetween(start.high, end.high),
         },
         basis: [...basis, ...paceBasis],
         warning,
         headline:
-          today > range.upper
+          today > end.high
             ? "Most likely reviewed already"
-            : today >= range.lower
-            ? `Most likely by ${formatShortDate(range.upper)}`
+            : today >= end.low
+            ? `Most likely by ${formatShortDate(end.high)}`
             : `Most likely ${formatDateRange(end)}`,
       };
     }
@@ -1252,7 +1301,7 @@ function nvcReviewStage(
   if (status === "current" && today !== null) {
     if (today > end.high) {
       headline = "Past NVC’s usual review time";
-      warning ??= `By NVC’s review time of ${days} days, documents submitted ${formatDateRange(
+      warning ??= `By NVC’s review time of ${days} days, documents submitted ${formatSince(
         start,
       )} have most likely been reviewed. Check CEAC for its message.`;
       end = { low: today, high: today };
@@ -1302,6 +1351,12 @@ export function queuePace(post: PostQueue): QueuePace | null {
  * complete in: its month */
 function monthOf(date: string): string {
   return date.slice(0, 7);
+}
+
+/** A month counted from year 0, so that two months subtract: "2026-03" is
+ * 2026 * 12 + 2 */
+function monthNumber(month: string): number {
+  return Number(month.slice(0, 4)) * 12 + Number(month.slice(5, 7)) - 1;
 }
 
 /** When NVC would reach cases documentarily complete on `dq` at a post, by
@@ -1391,7 +1446,7 @@ function interviewStage(
       headline:
         start === null
           ? "As soon as your case is complete: this consulate is listed as current"
-          : `Scheduled soon after ${formatDateRange(start)}: listed as current`,
+          : `Scheduled soon after ${formatStart(start)}: listed as current`,
     };
   }
   basis.push(
@@ -1440,7 +1495,7 @@ function interviewStage(
   );
   dates.sort();
   let end = { low: dates[0], high: dates[dates.length - 1] };
-  if (status === "current" && start.low === start.high) {
+  if (status === "current" && monthOf(start.low) === monthOf(start.high)) {
     const behind = monthsBehind(monthOf(start.low), month);
     if (behind <= 0)
       return {
@@ -1460,7 +1515,7 @@ function interviewStage(
     );
   }
   basis.push(
-    `If the queue stays as long as it is now, NVC would reach a case completed ${formatDateRange(
+    `If the queue stays as long as it is now, NVC would reach a case completed ${formatSince(
       start,
     )} around ${
       low.queue === high.queue
@@ -1492,7 +1547,7 @@ function interviewStage(
   if (status === "current" && today !== null) {
     if (today > end.high) {
       headline = "NVC should be reaching your case about now";
-      warning = `By this consulate’s queue, NVC would have reached a case completed ${formatDateRange(
+      warning = `By this consulate’s queue, NVC would have reached a case completed ${formatSince(
         start,
       )} by ${formatShortDate(end.high)}. Watch for NVC’s email, and check ${
         post.name
@@ -1516,7 +1571,7 @@ function priorityDateStage(
   start: DateRange | null,
   status: StageStatus,
   { data, inputs }: Context,
-  priorityDate: string | null,
+  priorityMonth: string | null,
 ): StageResult {
   const base = {
     spec,
@@ -1561,21 +1616,24 @@ function priorityDateStage(
       )}; with that chart, you can send your documents to NVC, and in the US, USCIS says each month which chart decides when you can file the I-485.`,
     );
   }
-  if (priorityDate !== null && isDate(cell.final)) {
-    const behind = monthsBetweenDates(cell.final, priorityDate);
-    if (priorityDate < cell.final)
-      headline = `Your priority date is current: ${formatShortDate(
-        priorityDate,
-      )} is before the cutoff, ${formatCutoff(cell.final)}`;
-    else
+  if (priorityMonth !== null && isDate(cell.final)) {
+    const cutoffMonth = monthOf(cell.final);
+    const yours = formatMonthYear(`${priorityMonth}-01`);
+    const cutoff = formatCutoff(cell.final);
+    if (priorityMonth < cutoffMonth)
+      headline = `Your priority date is current: ${yours} is before the cutoff, ${cutoff}`;
+    else if (priorityMonth === cutoffMonth) {
+      headline = `Your priority date is at the cutoff, ${cutoff}`;
       basis.unshift(
-        `Your priority date, ${formatShortDate(
-          priorityDate,
-        )}, is ${formatWholeMonths(
-          Math.max(behind, 1),
+        `The cutoff is in the month of your priority date, ${yours}: your date is current if it is earlier than ${cutoff}.`,
+      );
+    } else
+      basis.unshift(
+        `Your priority date, ${yours}, is ${formatWholeMonths(
+          monthNumber(priorityMonth) - monthNumber(cutoffMonth),
         )} after the cutoff: the cutoff has to move that far to reach it.`,
       );
-  } else if (priorityDate !== null && cell.final === "C")
+  } else if (priorityMonth !== null && cell.final === "C")
     headline = `Your priority date is current: the category has no line`;
   if (cell.year !== null && cell.year.months !== null)
     basis.push(
@@ -1628,22 +1686,25 @@ export function estimateTimeline(
   today: string | null,
 ): TimelineResult {
   const context = { data, inputs, today };
-  const date = validDate(inputs.date, today);
+  const month = validMonth(inputs.date, today);
+  // the days the visitor's month can stand for
+  const span = month === null ? null : monthSpan(month, today);
   // which stage the milestone belongs to, and whether it starts or ends it
   const main = path.stages.filter(
     (stage) => stage.parallelTo === undefined && stage.detached !== true,
   );
   let reported: { index: number; at: "start" | "end" } | null = null;
-  if (date !== null && inputs.milestone !== "")
+  if (span !== null && inputs.milestone !== "")
     main.forEach((stage, index) => {
       if (stage.start?.id === inputs.milestone)
         reported = { index, at: "start" };
       if (stage.end?.id === inputs.milestone) reported = { index, at: "end" };
     });
-  // the priority date: the one given, else the day the I-130 was filed
-  const priorityDate =
-    validDate(inputs.priorityDate, today) ??
-    (date !== null && inputs.milestone === I130_FILED.id ? date : null);
+  // the priority date's month: the one given, else the month the I-130 was
+  // filed
+  const priorityMonth =
+    validMonth(inputs.priorityDate, today) ??
+    (month !== null && inputs.milestone === I130_FILED.id ? month : null);
 
   const results = new Map<string, StageResult>();
   let previousEnd: DateRange | null =
@@ -1651,31 +1712,35 @@ export function estimateTimeline(
   main.forEach((stage, index) => {
     let status: StageStatus = "ahead";
     let start: DateRange | null = previousEnd;
-    if (reported !== null && date !== null) {
+    if (reported !== null && span !== null) {
       const { index: reportedIndex, at } = reported as {
         index: number;
         at: "start" | "end";
       };
-      const onDate = { low: date, high: date };
       if (index < reportedIndex || (index === reportedIndex && at === "end"))
         status = "done";
       else if (index === reportedIndex) {
         status = "current";
-        start = onDate;
+        start = span;
       } else if (index === reportedIndex + 1 && at === "end") {
         // the step after one that ended on the date has been under way
         // since then, unless the visitor files it (a USCIS form), which
         // they would have said: that one starts today at the earliest
-        if (stage.kind === "uscis") {
-          const from = today !== null && today > date ? today : date;
-          start = { low: from, high: from };
-        } else {
+        if (stage.kind === "uscis")
+          start = today !== null ? { low: today, high: today } : span;
+        else {
           status = "current";
-          start = onDate;
+          start = span;
         }
       }
     }
-    const estimate = estimateStage(stage, start, status, context, priorityDate);
+    const estimate = estimateStage(
+      stage,
+      start,
+      status,
+      context,
+      priorityMonth,
+    );
     // a step under way cannot have ended before today
     const result =
       status === "current" && today !== null && estimate.end !== null
@@ -1692,13 +1757,13 @@ export function estimateTimeline(
         sibling?.start ?? null,
         sibling?.status ?? "ahead",
         context,
-        priorityDate,
+        priorityMonth,
       );
       results.set(stage.id, result);
     } else if (stage.detached === true)
       results.set(
         stage.id,
-        estimateStage(stage, null, "ahead", context, priorityDate),
+        estimateStage(stage, null, "ahead", context, priorityMonth),
       );
   }
   const stages = path.stages.map(
@@ -1727,7 +1792,7 @@ function estimateStage(
   start: DateRange | null,
   status: StageStatus,
   context: Context,
-  priorityDate: string | null,
+  priorityMonth: string | null,
 ): StageResult {
   switch (stage.kind) {
     case "uscis":
@@ -1741,7 +1806,7 @@ function estimateStage(
     case "interview":
       return interviewStage(stage, start, status, context);
     case "priority-date":
-      return priorityDateStage(stage, start, status, context, priorityDate);
+      return priorityDateStage(stage, start, status, context, priorityMonth);
     case "note":
       return noteStage(stage, start, status);
   }

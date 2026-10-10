@@ -5,7 +5,6 @@ import {
   NativeSelect,
   Stack,
   Text,
-  TextInput,
   Title,
 } from "@mantine/core";
 import { GetStaticPaths, GetStaticProps } from "next";
@@ -15,6 +14,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { getTimelineData } from "../../api/timeline";
 import { formatDate, useToday } from "../../components/Freshness";
 import { ChevronLeftIcon } from "../../components/icons";
+import MonthInput from "../../components/MonthInput";
 import MoreDetails from "../../components/MoreDetails";
 import { breadcrumbList } from "../../components/structuredData";
 import { formatBulletinMonth } from "../../components/visaBulletin";
@@ -48,6 +48,9 @@ import stampClasses from "../../components/UscisStats.module.css";
 interface Props {
   slug: PathSlug;
   data: TimelineData;
+  /** The year of the build, which the month lists end at until the page
+   * knows today */
+  year: number;
 }
 
 export const getStaticPaths: GetStaticPaths = async () => ({
@@ -61,7 +64,13 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       ? pathBySlug(params.pathSlug)
       : undefined;
   if (path === undefined) return { notFound: true };
-  return { props: { slug: path.slug, data: await getTimelineData(path) } };
+  return {
+    props: {
+      slug: path.slug,
+      data: await getTimelineData(path),
+      year: new Date().getUTCFullYear(),
+    },
+  };
 };
 
 /** A link to a page of this site, or to an official one in a new tab */
@@ -269,7 +278,7 @@ function officeVerdict(
   }
 }
 
-export default function TimelinePage({ slug, data }: Props) {
+export default function TimelinePage({ slug, data, year }: Props) {
   const path = pathBySlug(slug) as PathSpec;
   const today = useToday();
   const [inputs, setInputs] = useState<TimelineInputs>(EMPTY_INPUTS);
@@ -381,12 +390,13 @@ export default function TimelinePage({ slug, data }: Props) {
           ]}
         />
         {milestone !== undefined && (
-          <TextInput
-            type="date"
+          <MonthInput
+            key={milestone.id}
             label={milestone.dateLabel}
-            max={today ?? undefined}
             value={inputs.date}
-            onChange={(event) => set({ date: event.currentTarget.value })}
+            onChange={(date) => set({ date })}
+            today={today}
+            year={year}
           />
         )}
         {path.inputs.includes("consulate") && data.posts !== null && (
@@ -429,14 +439,12 @@ export default function TimelinePage({ slug, data }: Props) {
                 })),
               ]}
             />
-            <TextInput
-              type="date"
+            <MonthInput
               label="Your priority date, if you have one"
-              max={today ?? undefined}
               value={inputs.priorityDate}
-              onChange={(event) =>
-                set({ priorityDate: event.currentTarget.value })
-              }
+              onChange={(priorityDate) => set({ priorityDate })}
+              today={today}
+              year={year}
             />
           </>
         )}
