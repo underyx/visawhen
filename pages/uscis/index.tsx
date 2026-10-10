@@ -69,6 +69,15 @@ const CATEGORY_ORDER = [
   "Supplemental Processing",
 ];
 
+/** The headings the forms are listed under: USCIS's category names in plain
+ * words. A category not here keeps USCIS's name. */
+const CATEGORY_HEADINGS: Record<string, string> = {
+  "Family Based": "Family",
+  "Lawful Permanent Residence": "Green card",
+  "Citizenship and Nationality": "Citizenship",
+  "Employment Based": "Work",
+};
+
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const data = cleanData(await getData());
   const forms = getActiveForms(data).map((form) => {
@@ -164,22 +173,9 @@ export default function UscisIndex({
         <Title order={1}>USCIS processing times by form</Title>
         <Text>Latest USCIS data: {latestLabel}.</Text>
         <Text>
-          USCIS publishes how many applications of each form it received,
-          approved, denied, and still had waiting, and its median processing
-          time for most of them. Pick your form to see the trend, and for the
-          N-400, I-130 and I-485 also how your own field office is doing. The
-          range next to a form is how long a decision will most likely take if
-          you file today, going by USCIS&rsquo;s median for {latestLabel}; for a
-          form with several categories, it is for the one named under it. For
-          your own case, also check USCIS&rsquo;s{" "}
-          <Anchor
-            href={USCIS_PROCESSING_TIMES_URL}
-            target="_blank"
-            rel="noopener"
-          >
-            processing times tool
-          </Anchor>
-          .
+          Pick your form to see how fast USCIS is deciding it and what to expect
+          if you file today. For the N-400, I-130 and I-485, you can also pick
+          your field office.
         </Text>
       </Stack>
       <TextInput
@@ -196,6 +192,20 @@ export default function UscisIndex({
         noun={["form", "forms"]}
         hint="Try a form number such as I-130, or words such as green card, work permit or citizenship."
       />
+      <Text size="sm" c="dimmed">
+        The range next to a form is how long a decision will most likely take if
+        you file today, going by USCIS&rsquo;s median for {latestLabel}; for a
+        form with several categories, it is for the one named under it. For your
+        own case, also check USCIS&rsquo;s{" "}
+        <Anchor
+          href={USCIS_PROCESSING_TIMES_URL}
+          target="_blank"
+          rel="noopener"
+        >
+          processing times tool
+        </Anchor>
+        .
+      </Text>
       {searchesDol && (
         <Text>
           PERM labor certification and prevailing wage determinations are
@@ -213,7 +223,7 @@ export default function UscisIndex({
       )}
       {groups.map(({ category, items }) => (
         <Stack gap="sm" key={category}>
-          <Title order={2}>{category}</Title>
+          <Title order={2}>{CATEGORY_HEADINGS[category] ?? category}</Title>
           <ListRows>
             {items.map(
               ({

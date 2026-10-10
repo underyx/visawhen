@@ -15,6 +15,7 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { BulletinChart, getData } from "../../api/visaBulletin";
 import { VISA_BULLETIN_URL } from "../../components/links";
+import MoreDetails from "../../components/MoreDetails";
 import { CREATOR, LICENSE_URL } from "../../components/structuredData";
 import {
   Area,
@@ -71,7 +72,9 @@ function CutoffTable({ id, title, categories, chart }: CutoffTableProps) {
     // below the fixed header when a link jumps here
     <Stack gap="xs" id={id} style={{ scrollMarginTop: "5rem" }}>
       <Title order={2}>{title}</Title>
-      <Table.ScrollContainer minWidth={720}>
+      {/* The category column stays in view while the table scrolls sideways
+          on a phone, so a reader can tell which row they are on. */}
+      <Table.ScrollContainer minWidth={720} className="vw-sticky-column">
         <Table striped withTableBorder>
           <Table.Thead>
             <Table.Tr>
@@ -178,12 +181,16 @@ export default function VisaBulletinIndex({
           says how far the line has moved.
         </Text>
         <Text>
-          Your priority date is usually the day USCIS received your I-130 or
-          I-140 petition, or, when you needed a labor certification, the day it
-          was filed. Your country here is usually the country where you were
-          born, not your citizenship. Pick your category and country to see how
-          fast its line has moved.
+          Pick your category and the country where you were born (not your
+          citizenship) to see how fast its line has moved.
         </Text>
+        <MoreDetails label="What is my priority date?">
+          <Text size="sm">
+            Your priority date is usually the day USCIS received your I-130 or
+            I-140 petition, or, when you needed a labor certification, the day
+            it was filed. It is on your I-797 notice.
+          </Text>
+        </MoreDetails>
       </Stack>
       <Stack gap="sm">
         <Title order={2} size="h3">

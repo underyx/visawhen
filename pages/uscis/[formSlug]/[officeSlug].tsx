@@ -724,7 +724,7 @@ export default function UscisOffice({
       {views.length > 1 && (
         <Stack gap="sm">
           <Title order={2}>By category, {newest.label}</Title>
-          <Table.ScrollContainer minWidth={560}>
+          <Table.ScrollContainer minWidth={560} className="vw-sticky-column">
             <Table striped withTableBorder>
               <Table.Thead>
                 <Table.Tr>
@@ -830,18 +830,25 @@ export default function UscisOffice({
           {viewWaitsForVisas
             ? "cases waiting for a visa number"
             : "cases USCIS cannot decide yet"}
-          , and USCIS sometimes moves pending cases between offices.
-          {breaks.length > 0 &&
-            " A dashed line marks a quarter in which it did: the pile, and the time to clear it, then include the cases moved in (or leave out those moved away), so they don't show the office falling behind or catching up."}
-          {clearingGaps &&
-            ` ${
-              hasClearing
-                ? "The chart leaves it out for"
-                : "It is not shown for"
-            } quarters in which the office decided fewer than 100 ${
-              isTotal ? "cases" : "of these cases"
-            }.`}
+          .
         </Text>
+        {(breaks.length > 0 || clearingGaps) && (
+          <MoreDetails label="How to read the chart">
+            <Text size="sm">
+              USCIS sometimes moves pending cases between offices.
+              {breaks.length > 0 &&
+                " A dashed line marks a quarter in which it did: the pile, and the time to clear it, then include the cases moved in (or leave out those moved away), so they don't show the office falling behind or catching up."}
+              {clearingGaps &&
+                ` ${
+                  hasClearing
+                    ? "The chart leaves it out for"
+                    : "It is not shown for"
+                } quarters in which the office decided fewer than 100 ${
+                  isTotal ? "cases" : "of these cases"
+                }.`}
+            </Text>
+          </MoreDetails>
+        )}
         {hasClearing && (
           <WaitChart
             points={points}

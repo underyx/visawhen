@@ -2,6 +2,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { RefObject, useEffect, useRef, useState } from "react";
 import { DiscordIcon } from "./icons";
+import { DISCORD_URL } from "./links";
 import { Container, Flex, Image, Text } from "@mantine/core";
 import classes from "./Navbar.module.css";
 
@@ -64,7 +65,12 @@ export default function Navbar() {
         gap="md"
         h="100%"
       >
-        <Flex align="center" gap="lg" wrap="nowrap" miw={0}>
+        <Flex
+          align="center"
+          gap={{ base: "md", xs: "lg" }}
+          wrap="nowrap"
+          miw={0}
+        >
           <Link href="/" className={classes.brand} aria-label="VisaWhen home">
             <Image src="/logo.svg" alt="" w={32} h={32} />
             <Text
@@ -98,18 +104,20 @@ export default function Navbar() {
             ))}
           </nav>
         </Flex>
+        {/* Below xs the four section links take the whole bar; the footer
+            has the Discord link on every screen. */}
         <a
           className={classes.discord}
           target="_blank"
           rel="noopener"
-          href="https://discord.gg/zkf8w2QtQY"
+          href={DISCORD_URL}
           aria-label="Join the Discord community"
         >
           <DiscordIcon />
           <Text component="span" inherit visibleFrom="sm">
             Join the Discord community
           </Text>
-          <Text component="span" inherit hiddenFrom="sm" visibleFrom="xs">
+          <Text component="span" inherit hiddenFrom="sm">
             Discord
           </Text>
         </a>
