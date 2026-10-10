@@ -3,6 +3,9 @@ updates:
   # Version updates wait until a release is a few days old (cooldown), so that
   # a compromised release is likely to have been caught and pulled first.
   # Security updates are not delayed.
+  #
+  # Every merge to main deploys the site, so updates are grouped where they
+  # can be: one pull request to check and merge instead of one per package.
 
   # Actions are pinned to commit SHAs with a "# vX.Y.Z" comment; Dependabot
   # keeps both the SHA and the comment up to date.
@@ -28,6 +31,13 @@ updates:
         update-types:
           - "minor"
           - "patch"
+      # Most security updates are of packages the site only depends on
+      # through others (tar, undici, js-yaml); without a group they come one
+      # pull request each.
+      npm-security:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
     ignore:
       # @types/node follows the Node.js major in .node-version (24); a new
       # major of the types would describe APIs that Node.js does not have.
@@ -48,23 +58,24 @@ updates:
         patterns:
           - "*"
 
+  # The scrapers' Python projects, one uv.lock each. They only run on a
+  # schedule in their workflows, so an update that breaks one shows up in
+  # that workflow's run, not on the site.
   - package-ecosystem: "uv"
-    directory: "/data/nvc"
+    directories:
+      - "/data/nvc"
+      - "/data/consulates"
+      - "/data/uscis"
+      - "/data/visa_bulletin"
     schedule:
       interval: "weekly"
     cooldown:
       default-days: 7
-
-  - package-ecosystem: "uv"
-    directory: "/data/consulates"
-    schedule:
-      interval: "weekly"
-    cooldown:
-      default-days: 7
-
-  - package-ecosystem: "uv"
-    directory: "/data/uscis"
-    schedule:
-      interval: "weekly"
-    cooldown:
-      default-days: 7
+    groups:
+      uv:
+        patterns:
+          - "*"
+      uv-security:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
