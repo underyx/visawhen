@@ -85,8 +85,8 @@ export default function Home({ paths }: Props) {
           When will your case move?
         </Title>
         <Text className={classes.lead}>
-          Pick the path that matches your case, say where it is, and see when
-          each step will most likely come, from the newest government numbers.
+          Pick your path and say where your case is. We show when each step will
+          most likely come.
         </Text>
       </header>
       <ListRows>
@@ -108,10 +108,6 @@ export default function Home({ paths }: Props) {
       </ListRows>
       <Stack gap="sm" className={classes.sections}>
         <Title order={2}>Or look up the numbers</Title>
-        <Text>
-          Every timeline is built from these pages, which show the trend, the
-          source and how recent each number is.
-        </Text>
         <ul className={classes.sectionList}>
           {SECTIONS.map(({ href, title, text }) => (
             <li key={href}>
@@ -126,9 +122,8 @@ export default function Home({ paths }: Props) {
         </ul>
       </Stack>
       <Text size="xs" c="dimmed" className={classes.footnote}>
-        These are the common routes, not legal advice: an immigration lawyer or
-        accredited representative can tell you which one is yours and whether
-        you qualify.
+        Not sure which path is yours? An immigration lawyer or accredited
+        representative can tell you.
       </Text>
     </>
   );

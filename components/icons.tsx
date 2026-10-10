@@ -42,6 +42,22 @@ export function ChevronLeftIcon(props: IconProps) {
   );
 }
 
+/** For a notice that holds only for now */
+export function HourglassIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M6 3h12M6 21h12" />
+      <path d="M7.5 3c0 5 4.5 6 4.5 9s-4.5 4-4.5 9M16.5 3c0 5-4.5 6-4.5 9s4.5 4 4.5 9" />
+      {/* the sand: some left at the top, a heap at the bottom */}
+      <path
+        d="M9.6 7.5h4.8c-.6 1-1.5 1.7-2.4 2.3-.9-.6-1.8-1.3-2.4-2.3zM8.4 21h7.2c0-1.9-1.9-3.2-3.6-3.8-1.7.6-3.6 1.9-3.6 3.8z"
+        fill="currentColor"
+        stroke="none"
+      />
+    </StrokeIcon>
+  );
+}
+
 export function SearchIcon(props: IconProps) {
   return (
     <StrokeIcon {...props}>

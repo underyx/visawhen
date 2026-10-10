@@ -1,6 +1,5 @@
 import { ChevronLeftIcon } from "../../../components/icons";
 import {
-  Alert,
   Anchor,
   Button,
   Chip,
@@ -64,6 +63,7 @@ import UscisStats, { RangeText } from "../../../components/UscisStats";
 import MoreDetails from "../../../components/MoreDetails";
 import PolicyBanner from "../../../components/PolicyBanner";
 import { breadcrumbList } from "../../../components/structuredData";
+import TemporaryNotice from "../../../components/TemporaryNotice";
 
 /** How the field offices' piles compare with the national range, where they
  * are much longer than it suggests (fieldOfficeCaveat). */
@@ -412,7 +412,7 @@ function RangeWarning({
       ? "The field offices have so many of these cases waiting that your case may take longer than this range."
       : "USCIS is deciding far fewer of these cases than usual, and the field offices have so many waiting that your case may take longer than this range.";
   return (
-    <Alert color="yellow">
+    <TemporaryNotice>
       <Stack gap="xs">
         <Text inherit>{summary}</Text>
         {caveat !== null && (
@@ -442,7 +442,7 @@ function RangeWarning({
           </MoreDetails>
         )}
       </Stack>
-    </Alert>
+    </TemporaryNotice>
   );
 }
 

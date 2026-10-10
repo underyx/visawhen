@@ -5,7 +5,6 @@ import {
   NativeSelect,
   Stack,
   Text,
-  TextInput,
   Title,
 } from "@mantine/core";
 import { GetStaticPaths, GetStaticProps } from "next";
@@ -15,7 +14,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import { getTimelineData } from "../../api/timeline";
 import { formatDate, useToday } from "../../components/Freshness";
 import { ChevronLeftIcon } from "../../components/icons";
+import MonthInput from "../../components/MonthInput";
 import MoreDetails from "../../components/MoreDetails";
+import TemporaryNotice from "../../components/TemporaryNotice";
 import { breadcrumbList } from "../../components/structuredData";
 import { formatBulletinMonth } from "../../components/visaBulletin";
 import type {
@@ -48,6 +49,9 @@ import stampClasses from "../../components/UscisStats.module.css";
 interface Props {
   slug: PathSlug;
   data: TimelineData;
+  /** The year of the build, which the month lists end at until the page
+   * knows today */
+  year: number;
 }
 
 export const getStaticPaths: GetStaticPaths = async () => ({
@@ -61,7 +65,13 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       ? pathBySlug(params.pathSlug)
       : undefined;
   if (path === undefined) return { notFound: true };
-  return { props: { slug: path.slug, data: await getTimelineData(path) } };
+  return {
+    props: {
+      slug: path.slug,
+      data: await getTimelineData(path),
+      year: new Date().getUTCFullYear(),
+    },
+  };
 };
 
 /** A link to a page of this site, or to an official one in a new tab */
@@ -112,21 +122,6 @@ function Stamp({
     (total.end !== null && today !== null && total.end.high <= today)
   )
     return null;
-  // the first step after the stamp's that is not counted, and why
-  const main = result.stages.filter(
-    ({ spec }) => spec.parallelTo === undefined && spec.detached !== true,
-  );
-  const next = main[main.indexOf(total.stage) + 1];
-  const after =
-    next === undefined
-      ? null
-      : next.needs === "consulate"
-      ? "Choose your consulate above to count the interview queue too."
-      : next.needs === "bulletin"
-      ? "Choose your category and country of birth above to see where the line is."
-      : next.spec.kind === "priority-date"
-      ? "The wait for your priority date after it cannot be predicted from the numbers, so it is not counted."
-      : "The steps after it have no published numbers, so they are not counted.";
   return (
     <div className={stampClasses.estimate}>
       <div className={stampClasses.stamp}>
@@ -140,17 +135,6 @@ function Stamp({
           <div className={stampClasses.stampFoot}>if you start today</div>
         )}
       </div>
-      <Stack gap={6} className={stampClasses.aside}>
-        <Text size="sm">
-          The steps below add up to this. Each one rests on the newest
-          government numbers for it: open a step to see which.
-        </Text>
-        {after !== null && (
-          <Text size="sm" c="dimmed">
-            {after}
-          </Text>
-        )}
-      </Stack>
     </div>
   );
 }
@@ -165,7 +149,7 @@ function StepBody({
   /** A step filed alongside another: smaller */
   side?: boolean;
 }) {
-  const { spec, status, headline, warning, basis } = result;
+  const { spec, status, headline, warning, news, basis } = result;
   return (
     <>
       {status === "done" ? (
@@ -179,23 +163,30 @@ function StepBody({
           </Text>
         )
       )}
-      {status !== "done" && warning !== null && spec.detached !== true && (
-        <Alert color="yellow" role="note" mt="xs">
-          {warning}
-        </Alert>
+      {status !== "done" &&
+        warning !== null &&
+        spec.detached !== true &&
+        (news ? (
+          <TemporaryNotice mt="xs">{warning}</TemporaryNotice>
+        ) : (
+          <Alert color="yellow" role="note" mt="xs">
+            {warning}
+          </Alert>
+        ))}
+      {status !== "done" && (
+        <Text size="sm" className={classes.what} mt="xs">
+          {spec.what}
+          {spec.href !== null && spec.hrefText !== undefined && (
+            <>
+              {" "}
+              <To href={spec.href}>
+                {spec.hrefText.charAt(0).toUpperCase() + spec.hrefText.slice(1)}
+              </To>
+              .
+            </>
+          )}
+        </Text>
       )}
-      <Text size="sm" className={classes.what} mt="xs">
-        {spec.what}
-        {spec.href !== null && spec.hrefText !== undefined && (
-          <>
-            {" "}
-            <To href={spec.href}>
-              {spec.hrefText.charAt(0).toUpperCase() + spec.hrefText.slice(1)}
-            </To>
-            .
-          </>
-        )}
-      </Text>
       {status !== "done" && basis.length > 0 && (
         <MoreDetails label="How we worked this out">
           {basis.map((sentence) => (
@@ -269,7 +260,7 @@ function officeVerdict(
   }
 }
 
-export default function TimelinePage({ slug, data }: Props) {
+export default function TimelinePage({ slug, data, year }: Props) {
   const path = pathBySlug(slug) as PathSpec;
   const today = useToday();
   const [inputs, setInputs] = useState<TimelineInputs>(EMPTY_INPUTS);
@@ -370,7 +361,7 @@ export default function TimelinePage({ slug, data }: Props) {
         <NativeSelect
           className={classes.wide}
           label="Where is your case?"
-          description="Your answers go in this page’s address, so you can bookmark or share it. We do not save them."
+          description="Your answers are kept only in this page’s link, so you can bookmark it."
           value={inputs.milestone}
           onChange={(event) =>
             set({ milestone: event.currentTarget.value, date: "" })
@@ -381,12 +372,13 @@ export default function TimelinePage({ slug, data }: Props) {
           ]}
         />
         {milestone !== undefined && (
-          <TextInput
-            type="date"
+          <MonthInput
+            key={milestone.id}
             label={milestone.dateLabel}
-            max={today ?? undefined}
             value={inputs.date}
-            onChange={(event) => set({ date: event.currentTarget.value })}
+            onChange={(date) => set({ date })}
+            today={today}
+            year={year}
           />
         )}
         {path.inputs.includes("consulate") && data.posts !== null && (
@@ -429,14 +421,12 @@ export default function TimelinePage({ slug, data }: Props) {
                 })),
               ]}
             />
-            <TextInput
-              type="date"
+            <MonthInput
               label="Your priority date, if you have one"
-              max={today ?? undefined}
               value={inputs.priorityDate}
-              onChange={(event) =>
-                set({ priorityDate: event.currentTarget.value })
-              }
+              onChange={(priorityDate) => set({ priorityDate })}
+              today={today}
+              year={year}
             />
           </>
         )}
@@ -474,18 +464,10 @@ export default function TimelinePage({ slug, data }: Props) {
           />
         ))}
       </ol>
-      <Stack gap="xs" className={classes.footnote}>
-        <Text size="xs" c="dimmed">
-          Newest data: {sources.join("; ")}. The ranges say what most cases like
-          yours are taking now, not what yours will take: a request for
-          evidence, a background check or a change in policy can add months.
-        </Text>
-        <Text size="xs" c="dimmed">
-          These are the common routes, not legal advice: an immigration lawyer
-          or accredited representative can tell you which one is yours and
-          whether you qualify.
-        </Text>
-      </Stack>
+      <Text size="xs" c="dimmed" className={classes.footnote}>
+        Newest numbers: {sources.join("; ")}. Your case can take longer: a
+        request for evidence or a background check can add months.
+      </Text>
     </Stack>
   );
 }

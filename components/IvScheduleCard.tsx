@@ -18,6 +18,7 @@ import { AFRICA_HUBS_URL, EMBASSIES_URL, IV_POSTS_URL } from "./links";
 import MoreDetails from "./MoreDetails";
 import { hasEnded, overridesUpdate, PolicyEntry } from "./policy";
 import { NotShown, Stat, Stats } from "./Stats";
+import TemporaryNotice from "./TemporaryNotice";
 /** State updates the tool monthly, so an update older than this means we
  * have missed at least one. */
 const MAX_AGE_DAYS = 45;
@@ -506,10 +507,10 @@ export default function IvScheduleCard({
           <SuspensionNote postName={postName} suspension={suspension} />
         )}
         {stale && (
-          <Alert color="yellow">
+          <TemporaryNotice>
             This is from the State Department&rsquo;s update of {updated}, the
             newest we have. {toolLink("Check the tool")} for a newer one.
-          </Alert>
+          </TemporaryNotice>
         )}
         {schedule === null ? (
           <Text>
