@@ -62,8 +62,8 @@ let pageDates;
  * which would teach search engines to ignore it. Nor is it the date the data
  * is about: USCIS publishes a quarter's numbers months after it ends, and a
  * lastmod of the quarter's end would look older than the search engine's
- * last visit. Undefined for the home page, whose text does not change with
- * the data. */
+ * last visit. The home page and the timeline pages change with every
+ * source they show a number from. */
 function getPageDates() {
   if (pageDates === undefined) {
     const uscis = changedOn("data/uscis/forms.json");
@@ -94,6 +94,16 @@ function getPageDates() {
     pageDates = {
       sections: {
         ...sections,
+        // the steps' ranges: USCIS, NVC, the interview queues and the Visa
+        // Bulletin
+        "/timeline": latest([
+          uscis,
+          sections["/nvc"],
+          changedOn("data/consulates/iv_schedule.json"),
+          sections["/visa-bulletin"],
+        ]),
+        // its line on each path: the USCIS ranges and NVC's readings
+        "/": latest([uscis, sections["/nvc"]]),
         // it lists the newest date of every source, and of the notices
         "/about": latest([
           ...Object.values(sections),
@@ -137,7 +147,8 @@ module.exports = {
     if (isNoindex(loc)) return null;
     const { sections, pages } = getPageDates();
     const section = Object.keys(sections).find(
-      (prefix) => loc === prefix || loc.startsWith(`${prefix}/`),
+      (prefix) =>
+        loc === prefix || (prefix !== "/" && loc.startsWith(`${prefix}/`)),
     );
     return {
       loc,

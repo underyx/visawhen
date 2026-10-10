@@ -402,3 +402,25 @@ export async function getIvSchedule(
         : ivScheduleLine(snapshots, previousAsOf, postSlug),
   };
 }
+
+/** Every post in the newest update of State's IV Scheduling Status Tool,
+ * with its month for one of the tool's categories in each update we have,
+ * oldest first: the update's date and the month, or null where State gave
+ * N/A. Updates that do not list the post are left out. */
+export async function getIvScheduleHistory(
+  category: IvCategory,
+): Promise<
+  { slug: string; name: string; history: [string, string | null][] }[]
+> {
+  const { snapshots } = await readIvScheduleData();
+  const dates = Object.keys(snapshots).sort();
+  const asOf = dates[dates.length - 1];
+  return Object.entries(snapshots[asOf]).map(([slug, { name }]) => ({
+    slug,
+    name,
+    history: dates.flatMap((date): [string, string | null][] => {
+      const row = snapshots[date][slug];
+      return row === undefined ? [] : [[date, row[category]]];
+    }),
+  }));
+}

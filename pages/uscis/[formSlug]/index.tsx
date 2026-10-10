@@ -367,6 +367,7 @@ export default function UscisForm({
   const newest = totalPoints[totalPoints.length - 1];
   const opening = views[0].points[views[0].points.length - 1];
   const related = RELATED_FORMS[form];
+  const relatedLinks = related?.links;
   // the view's own range, when it has one: the headline for a form with one
   // category, none for all categories together
   const viewRange =
@@ -561,23 +562,36 @@ export default function UscisForm({
         )}
         {related !== undefined && (
           <Text>
-            {related.lead}{" "}
-            {related.links.map((link, index) => (
-              <React.Fragment key={link.href}>
-                {index > 0 &&
-                  (index === related.links.length - 1 ? " and " : ", ")}
-                {link.href.startsWith("/") ? (
-                  <Anchor component={Link} href={link.href}>
-                    {link.text}
-                  </Anchor>
-                ) : (
-                  <Anchor href={link.href} target="_blank" rel="noopener">
-                    {link.text}
-                  </Anchor>
-                )}
-              </React.Fragment>
-            ))}
-            .
+            {relatedLinks !== undefined && (
+              <>
+                {related.lead}{" "}
+                {relatedLinks.map((link, index) => (
+                  <React.Fragment key={link.href}>
+                    {index > 0 &&
+                      (index === relatedLinks.length - 1 ? " and " : ", ")}
+                    {link.href.startsWith("/") ? (
+                      <Anchor component={Link} href={link.href}>
+                        {link.text}
+                      </Anchor>
+                    ) : (
+                      <Anchor href={link.href} target="_blank" rel="noopener">
+                        {link.text}
+                      </Anchor>
+                    )}
+                  </React.Fragment>
+                ))}
+                .{related.timeline !== undefined && " "}
+              </>
+            )}
+            {related.timeline !== undefined && (
+              <>
+                See the whole wait as dates on{" "}
+                <Anchor component={Link} href={related.timeline.href}>
+                  {related.timeline.text}
+                </Anchor>
+                .
+              </>
+            )}
           </Text>
         )}
       </Stack>
