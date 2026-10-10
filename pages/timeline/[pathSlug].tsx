@@ -75,19 +75,20 @@ function To({ href, children }: React.PropsWithChildren<{ href: string }>) {
   );
 }
 
-/** What the stamp counts to: "the I-130 decision", "your interview" */
-function stampFoot({ spec }: StageResult): string {
+/** The stamp's first line, which the range line finishes as one sentence:
+ *  "Your interview will most likely be" + "May – Nov 2027" */
+function stampLabel({ spec }: StageResult): string {
   switch (spec.kind) {
     case "uscis":
-      return `to the ${spec.form} decision`;
+      return `Your ${spec.form} decision will most likely come`;
     case "nvc-creation":
-      return "to your NVC case number";
+      return "Your NVC case number will most likely come";
     case "nvc-review":
-      return "to NVC’s review of your documents";
+      return "NVC will most likely finish reviewing your documents";
     case "interview":
-      return "to your interview";
+      return "Your interview will most likely be";
     default:
-      return `to ${spec.name.toLowerCase()}`;
+      return `${spec.name}: most likely`;
   }
 }
 
@@ -127,17 +128,15 @@ function Stamp({
   return (
     <div className={stampClasses.estimate}>
       <div className={stampClasses.stamp}>
-        <div className={stampClasses.stampLabel}>
-          {reported
-            ? "From where your case is, most likely"
-            : "If you start today, most likely"}
-        </div>
+        <div className={stampClasses.stampLabel}>{stampLabel(total.stage)}</div>
         <div className={stampClasses.stampRange}>
           {total.end !== null
             ? formatDateRange(total.end)
-            : formatDuration(total.days)}
+            : `in ${formatDuration(total.days)}`}
         </div>
-        <div className={stampClasses.stampFoot}>{stampFoot(total.stage)}</div>
+        <div className={stampClasses.stampFoot}>
+          {reported ? "based on where your case is now" : "if you start today"}
+        </div>
       </div>
       <Stack gap={6} className={stampClasses.aside}>
         <Text size="sm">
