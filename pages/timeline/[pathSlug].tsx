@@ -11,7 +11,7 @@ import {
 import { GetStaticPaths, GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { getTimelineData } from "../../api/timeline";
 import { formatDate, useToday } from "../../components/Freshness";
 import { ChevronLeftIcon } from "../../components/icons";
@@ -31,6 +31,8 @@ import {
   estimateTimeline,
   formatDateRange,
   formatDuration,
+  inputsFromHash,
+  inputsToHash,
   pathBySlug,
   pathMilestones,
   PATHS,
@@ -75,19 +77,20 @@ function To({ href, children }: React.PropsWithChildren<{ href: string }>) {
   );
 }
 
-/** What the stamp counts to: "the I-130 decision", "your interview" */
-function stampFoot({ spec }: StageResult): string {
+/** The stamp's first line, short enough for one line on a phone, which the
+ *  range line finishes: "Interview most likely:" + "May – Nov 2027" */
+function stampLabel({ spec }: StageResult): string {
   switch (spec.kind) {
     case "uscis":
-      return `to the ${spec.form} decision`;
+      return `${spec.form} decision most likely:`;
     case "nvc-creation":
-      return "to your NVC case number";
+      return "NVC case number most likely:";
     case "nvc-review":
-      return "to NVC’s review of your documents";
+      return "NVC review done most likely:";
     case "interview":
-      return "to your interview";
+      return "Interview most likely:";
     default:
-      return `to ${spec.name.toLowerCase()}`;
+      return "Most likely:";
   }
 }
 
@@ -127,17 +130,15 @@ function Stamp({
   return (
     <div className={stampClasses.estimate}>
       <div className={stampClasses.stamp}>
-        <div className={stampClasses.stampLabel}>
-          {reported
-            ? "From where your case is, most likely"
-            : "If you start today, most likely"}
-        </div>
+        <div className={stampClasses.stampLabel}>{stampLabel(total.stage)}</div>
         <div className={stampClasses.stampRange}>
           {total.end !== null
             ? formatDateRange(total.end)
-            : formatDuration(total.days)}
+            : `in ${formatDuration(total.days)}`}
         </div>
-        <div className={stampClasses.stampFoot}>{stampFoot(total.stage)}</div>
+        {!reported && (
+          <div className={stampClasses.stampFoot}>if you start today</div>
+        )}
       </div>
       <Stack gap={6} className={stampClasses.aside}>
         <Text size="sm">
@@ -272,9 +273,39 @@ export default function TimelinePage({ slug, data }: Props) {
   const path = pathBySlug(slug) as PathSpec;
   const today = useToday();
   const [inputs, setInputs] = useState<TimelineInputs>(EMPTY_INPUTS);
-  const set = (patch: Partial<TimelineInputs>) =>
-    setInputs((current) => ({ ...current, ...patch }));
   const milestones = useMemo(() => pathMilestones(path), [path]);
+  // The answers live in the page's address, after the #, so a filled-in
+  // timeline can be bookmarked or shared: they are read on arrival (and
+  // when the address is edited) and written on every change, without
+  // adding to the browser's history
+  useEffect(() => {
+    const read = () =>
+      setInputs(
+        inputsFromHash(window.location.hash, {
+          milestone: milestones.map(({ id }) => id),
+          post: (data.posts ?? []).map(({ slug: postSlug }) => postSlug),
+          office: (data.offices ?? []).map(
+            ({ slug: officeSlug }) => officeSlug,
+          ),
+          category: (data.bulletin?.categories ?? []).map(({ key }) => key),
+          area: (data.bulletin?.areas ?? []).map(({ key }) => key),
+        }),
+      );
+    read();
+    window.addEventListener("hashchange", read);
+    return () => window.removeEventListener("hashchange", read);
+  }, [milestones, data]);
+  const set = (patch: Partial<TimelineInputs>) => {
+    const next = { ...inputs, ...patch };
+    setInputs(next);
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${window.location.pathname}${window.location.search}${inputsToHash(
+        next,
+      )}`,
+    );
+  };
   const milestone = milestones.find(({ id }) => id === inputs.milestone);
   const result = useMemo(
     () => estimateTimeline(path, data, inputs, today),
@@ -339,7 +370,7 @@ export default function TimelinePage({ slug, data }: Props) {
         <NativeSelect
           className={classes.wide}
           label="Where is your case?"
-          description="Nothing you enter here is saved or sent anywhere."
+          description="Your answers go in this page’s address, so you can bookmark or share it. We do not save them."
           value={inputs.milestone}
           onChange={(event) =>
             set({ milestone: event.currentTarget.value, date: "" })
