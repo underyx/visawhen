@@ -7,6 +7,8 @@ import {
   estimateTimeline,
   formatDateRange,
   formatDuration,
+  inputsFromHash,
+  inputsToHash,
   pathBySlug,
   pathMilestones,
   type PathSpec,
@@ -437,6 +439,68 @@ describe("estimateTimeline", () => {
       "priority-date",
     );
     assert.match(priority.headline, /^Your priority date is current/);
+  });
+});
+
+describe("inputsToHash", () => {
+  it("is empty when nothing is filled in", () => {
+    assert.equal(inputsToHash(EMPTY_INPUTS), "");
+  });
+  it("names each answer in plain words", () => {
+    assert.equal(
+      inputsToHash({
+        milestone: "documentarily-complete",
+        date: "2026-09-15",
+        post: "manila",
+        office: "san-francisco-ca",
+        category: "F4",
+        area: "philippines",
+        priorityDate: "2008-05-15",
+      }),
+      "#milestone=documentarily-complete&date=2026-09-15&consulate=manila&office=san-francisco-ca&category=F4&country=philippines&priority=2008-05-15",
+    );
+  });
+});
+
+describe("inputsFromHash", () => {
+  const allowed = {
+    milestone: ["documentarily-complete", "sent-to-nvc"],
+    post: ["manila", "london"],
+    office: ["san-francisco-ca"],
+    category: ["F4"],
+    area: ["philippines"],
+  };
+  it("round-trips the answers", () => {
+    const inputs = {
+      milestone: "documentarily-complete",
+      date: "2026-09-15",
+      post: "manila",
+      office: "san-francisco-ca",
+      category: "F4",
+      area: "philippines",
+      priorityDate: "2008-05-15",
+    };
+    assert.deepEqual(inputsFromHash(inputsToHash(inputs), allowed), inputs);
+  });
+  it("drops what the page does not offer", () => {
+    assert.deepEqual(
+      inputsFromHash(
+        "#milestone=interview-scheduled&date=2026-09-15&consulate=paris&office=&category=F4&country=mars&priority=2008-13-01&extra=1",
+        allowed,
+      ),
+      { ...EMPTY_INPUTS, category: "F4" },
+    );
+  });
+  it("keeps a date only with its milestone", () => {
+    assert.deepEqual(inputsFromHash("#date=2026-09-15", allowed), EMPTY_INPUTS);
+    assert.deepEqual(
+      inputsFromHash("#milestone=sent-to-nvc&date=2026-09-15", allowed),
+      { ...EMPTY_INPUTS, milestone: "sent-to-nvc", date: "2026-09-15" },
+    );
+  });
+  it("is empty for an empty or unknown fragment", () => {
+    assert.deepEqual(inputsFromHash("", allowed), EMPTY_INPUTS);
+    assert.deepEqual(inputsFromHash("#spouse-abroad", allowed), EMPTY_INPUTS);
   });
 });
 

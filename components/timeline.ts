@@ -707,6 +707,54 @@ export const EMPTY_INPUTS: TimelineInputs = {
   priorityDate: "",
 };
 
+// The answers in the page's address
+
+/** The name each answer goes by in the page's address, after the #
+ * ("#milestone=nvc-created&date=2026-03-14&consulate=manila"), so a
+ * filled-in timeline can be bookmarked or shared */
+const HASH_KEYS: [keyof TimelineInputs, string][] = [
+  ["milestone", "milestone"],
+  ["date", "date"],
+  ["post", "consulate"],
+  ["office", "office"],
+  ["category", "category"],
+  ["area", "country"],
+  ["priorityDate", "priority"],
+];
+
+/** The answers as the page's fragment, or "" when nothing is filled in */
+export function inputsToHash(inputs: TimelineInputs): string {
+  const params = new URLSearchParams();
+  for (const [field, key] of HASH_KEYS)
+    if (inputs[field] !== "") params.set(key, inputs[field]);
+  const query = params.toString();
+  return query === "" ? "" : `#${query}`;
+}
+
+/** The answers a page's fragment holds. `allowed` lists the values each
+ * select offers; a value it does not list, a name the page does not know, a
+ * date that is not one, or a date without its milestone count as not
+ * answered, so an old or edited link never shows a choice the page lacks */
+export function inputsFromHash(
+  hash: string,
+  allowed: Partial<Record<keyof TimelineInputs, readonly string[]>>,
+): TimelineInputs {
+  const params = new URLSearchParams(hash.replace(/^#/, ""));
+  const inputs = { ...EMPTY_INPUTS };
+  for (const [field, key] of HASH_KEYS) {
+    const value = params.get(key) ?? "";
+    const options = allowed[field];
+    inputs[field] =
+      options !== undefined
+        ? options.includes(value)
+          ? value
+          : ""
+        : validDate(value, null) ?? "";
+  }
+  if (inputs.milestone === "") inputs.date = "";
+  return inputs;
+}
+
 // Dates and durations
 
 export interface DateRange {
