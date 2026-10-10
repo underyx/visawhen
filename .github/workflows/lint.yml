@@ -1,7 +1,7 @@
-# ESLint and the TypeScript check. next build type-checks too, but since
-# Next.js 16 it no longer runs ESLint. This is a workflow of its own rather
-# than steps in build.yml, so that a lint error does not hold back the data
-# workflows' deploys.
+# ESLint, the TypeScript check and the unit tests. next build type-checks
+# too, but since Next.js 16 it no longer runs ESLint. This is a workflow of
+# its own rather than steps in build.yml, so that a lint error or a failing
+# test does not hold back the data workflows' deploys.
 name: Lint
 
 on:
@@ -14,7 +14,7 @@ on:
 
 jobs:
   lint:
-    name: Lint and typecheck
+    name: Lint, typecheck and test
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -30,3 +30,4 @@ jobs:
       - run: yarn install --mode=skip-build
       - run: yarn lint
       - run: yarn typecheck
+      - run: yarn test

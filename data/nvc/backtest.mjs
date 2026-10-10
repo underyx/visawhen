@@ -13,38 +13,14 @@
 // fell in the range. Dates given on the command line print the range for
 // documents submitted that day, from the readings up to it.
 import { readFileSync } from "node:fs";
-import ts from "typescript";
+import { register } from "node:module";
 
 const root = new URL("../../", import.meta.url);
 
-/** A TypeScript file of the site as a module to import */
-function load(path, replacements) {
-  let source = ts.transpileModule(readFileSync(new URL(path, root), "utf-8"), {
-    compilerOptions: {
-      module: ts.ModuleKind.ESNext,
-      target: ts.ScriptTarget.ES2022,
-    },
-  }).outputText;
-  for (const [from, to] of replacements) {
-    if (!source.includes(from)) throw new Error(`${path}: no ${from}`);
-    source = source.replace(from, to);
-  }
-  return `data:text/javascript;base64,${Buffer.from(source).toString(
-    "base64",
-  )}`;
-}
-
-// Freshness's hook is not needed here, and React would be
-const freshness = load("components/Freshness.tsx", [
-  [
-    'import { useSyncExternalStore } from "react";',
-    "const useSyncExternalStore = () => null;",
-  ],
-]);
-const { addDays, daysBetween } = await import(freshness);
-const { reviewRange, front } = await import(
-  load("components/nvcReview.ts", [['"./Freshness"', `"${freshness}"`]])
-);
+// The site's TypeScript modules, loaded as they are (see scripts/ts-hooks.mjs)
+register("./scripts/ts-hooks.mjs", root);
+const { addDays, daysBetween } = await import("../../components/dates.ts");
+const { reviewRange, front } = await import("../../components/nvcReview.ts");
 
 const all = Object.entries(
   JSON.parse(readFileSync(new URL("data/nvc/data.json", root), "utf-8")).review,

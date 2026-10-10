@@ -3,7 +3,7 @@ import type {
   Cutoff,
   VisaBulletinData,
 } from "../api/visaBulletin";
-import { daysBetween } from "./Freshness";
+import { daysBetween } from "./dates";
 
 // The Visa Bulletin pages' categories and chargeability areas, their names in
 // plain English, and the arithmetic on cutoff dates. The keys are the ones

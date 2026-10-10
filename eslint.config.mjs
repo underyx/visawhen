@@ -13,4 +13,16 @@ export default defineConfig([
     "data/**/.venv/**",
   ]),
   ...nextConfig,
+  {
+    // The .ts modules are loaded by Node as they are in `yarn test` (see
+    // scripts/ts-hooks.mjs), which strips types but keeps every import, so
+    // an import of a type alone has to say so.
+    files: ["**/*.ts"],
+    rules: {
+      "@typescript-eslint/consistent-type-imports": [
+        "error",
+        { fixStyle: "inline-type-imports" },
+      ],
+    },
+  },
 ]);

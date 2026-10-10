@@ -17,11 +17,8 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 
-const MAX_DYNAMIC = 100;
-const MAX_STATIC = 2000;
-
-const outDir = process.argv[2] ?? "out";
-const redirectsPath = join(outDir, "_redirects");
+export const MAX_DYNAMIC = 100;
+export const MAX_STATIC = 2000;
 
 function* files(dir) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -31,8 +28,9 @@ function* files(dir) {
   }
 }
 
-/** Every URL path the export answers: /nvc for nvc.html, / for index.html. */
-function servedPaths() {
+/** Every URL path the export in `outDir` answers: /nvc for nvc.html, / for
+ * index.html. */
+export function servedPaths(outDir) {
   const paths = new Set();
   for (const file of files(outDir)) {
     const path = `/${relative(outDir, file).split(sep).join("/")}`;
@@ -49,7 +47,7 @@ function servedPaths() {
 
 /** A rule's source as a regular expression: a placeholder matches one path
  * segment, a splat anything. */
-function sourcePattern(source) {
+export function sourcePattern(source) {
   const pattern = source
     .split(/(:[A-Za-z]\w*|\*)/)
     .map((part) =>
@@ -63,70 +61,91 @@ function sourcePattern(source) {
   return new RegExp(`^${pattern}$`);
 }
 
-if (!existsSync(redirectsPath)) {
-  console.log(`${redirectsPath} does not exist; nothing to check`);
-  process.exit(0);
+/** Checks the lines of a _redirects file against the paths served: the
+ * lines to keep (those that match a page dropped), what is wrong with the
+ * file, warnings about it, and how many rules Cloudflare counts as static
+ * and as dynamic. */
+export function checkRedirects(lines, served) {
+  const servedList = [...served];
+  const errors = [];
+  const warnings = [];
+  const sources = new Set();
+  let dynamicRules = 0;
+  let staticRules = 0;
+  /** The first rule with a placeholder or splat, "line 230" */
+  let firstDynamic = null;
+  const kept = lines.filter((line, index) => {
+    const tokens = line
+      .replace(/\s+#.*$/, "")
+      .trim()
+      .split(/\s+/);
+    const [source, target] = tokens;
+    if (source === "" || source.startsWith("#")) return true;
+    const where = `line ${index + 1} ("${line.trim()}")`;
+    if (tokens.length < 2 || tokens.length > 3) {
+      errors.push(`${where} is not "from to [status]"`);
+      return true;
+    }
+    const pattern = sourcePattern(source);
+    const shadowed = servedList.find((path) => pattern.test(path));
+    if (shadowed !== undefined) {
+      warnings.push(
+        `dropping the redirect "${line.trim()}": ${shadowed} is a page; remove the rule from public/_redirects`,
+      );
+      return false;
+    }
+    // Cloudflare ignores every rule for a source but the first.
+    if (sources.has(source)) errors.push(`${where} repeats an earlier source`);
+    sources.add(source);
+    if (/[:*]/.test(source)) {
+      firstDynamic ??= `line ${index + 1}`;
+      dynamicRules++;
+    } else if (firstDynamic !== null) {
+      errors.push(
+        `${where} has no placeholder or splat but comes after one that does (${firstDynamic}), so Cloudflare counts it as dynamic; move it above ${firstDynamic}`,
+      );
+      dynamicRules++;
+    } else {
+      staticRules++;
+      if (!served.has(target.split(/[?#]/)[0]))
+        warnings.push(`the redirect "${line.trim()}" leads to no page`);
+    }
+    return true;
+  });
+  if (dynamicRules > MAX_DYNAMIC)
+    errors.push(
+      `${dynamicRules} rules from ${firstDynamic} on count as dynamic, more than the ${MAX_DYNAMIC} Cloudflare keeps`,
+    );
+  if (staticRules > MAX_STATIC)
+    errors.push(
+      `${staticRules} static rules, more than the ${MAX_STATIC} Cloudflare keeps`,
+    );
+  return { kept, errors, warnings, staticRules, dynamicRules };
 }
 
-const served = servedPaths();
-const servedList = [...served];
-const lines = readFileSync(redirectsPath, "utf-8").split("\n");
-const errors = [];
-const sources = new Set();
-let dynamicRules = 0;
-let staticRules = 0;
-/** The first rule with a placeholder or splat, "line 230" */
-let firstDynamic = null;
-const kept = lines.filter((line, index) => {
-  const tokens = line
-    .replace(/\s+#.*$/, "")
-    .trim()
-    .split(/\s+/);
-  const [source, target] = tokens;
-  if (source === "" || source.startsWith("#")) return true;
-  const where = `line ${index + 1} ("${line.trim()}")`;
-  if (tokens.length < 2 || tokens.length > 3) {
-    errors.push(`${where} is not "from to [status]"`);
-    return true;
+function main() {
+  const outDir = process.argv[2] ?? "out";
+  const redirectsPath = join(outDir, "_redirects");
+  if (!existsSync(redirectsPath)) {
+    console.log(`${redirectsPath} does not exist; nothing to check`);
+    return 0;
   }
-  const pattern = sourcePattern(source);
-  const shadowed = servedList.find((path) => pattern.test(path));
-  if (shadowed !== undefined) {
-    console.log(
-      `::warning::dropping the redirect "${line.trim()}": ${shadowed} is a page; remove the rule from public/_redirects`,
-    );
-    return false;
-  }
-  // Cloudflare ignores every rule for a source but the first.
-  if (sources.has(source)) errors.push(`${where} repeats an earlier source`);
-  sources.add(source);
-  if (/[:*]/.test(source)) {
-    firstDynamic ??= `line ${index + 1}`;
-    dynamicRules++;
-  } else if (firstDynamic !== null) {
-    errors.push(
-      `${where} has no placeholder or splat but comes after one that does (${firstDynamic}), so Cloudflare counts it as dynamic; move it above ${firstDynamic}`,
-    );
-    dynamicRules++;
-  } else {
-    staticRules++;
-    if (!served.has(target.split(/[?#]/)[0]))
-      console.log(`::warning::the redirect "${line.trim()}" leads to no page`);
-  }
-  return true;
-});
+  const lines = readFileSync(redirectsPath, "utf-8").split("\n");
+  const { kept, errors, warnings, staticRules, dynamicRules } = checkRedirects(
+    lines,
+    servedPaths(outDir),
+  );
+  for (const warning of warnings) console.log(`::warning::${warning}`);
+  if (kept.length !== lines.length)
+    writeFileSync(redirectsPath, kept.join("\n"));
+  console.log(
+    `${redirectsPath}: ${staticRules} static rules (limit ${MAX_STATIC}), then ${dynamicRules} with placeholders or splats (limit ${MAX_DYNAMIC})`,
+  );
+  for (const error of errors)
+    console.log(`::error::${redirectsPath}: ${error}`);
+  return errors.length > 0 ? 1 : 0;
+}
 
-if (kept.length !== lines.length) writeFileSync(redirectsPath, kept.join("\n"));
-console.log(
-  `${redirectsPath}: ${staticRules} static rules (limit ${MAX_STATIC}), then ${dynamicRules} with placeholders or splats (limit ${MAX_DYNAMIC})`,
-);
-if (dynamicRules > MAX_DYNAMIC)
-  errors.push(
-    `${dynamicRules} rules from ${firstDynamic} on count as dynamic, more than the ${MAX_DYNAMIC} Cloudflare keeps`,
-  );
-if (staticRules > MAX_STATIC)
-  errors.push(
-    `${staticRules} static rules, more than the ${MAX_STATIC} Cloudflare keeps`,
-  );
-for (const error of errors) console.log(`::error::${redirectsPath}: ${error}`);
-if (errors.length > 0) process.exit(1);
+// Run as a script, not imported (by the tests)
+if (process.argv[1] !== undefined && import.meta.filename === process.argv[1])
+  process.exit(main());

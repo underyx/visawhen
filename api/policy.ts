@@ -2,7 +2,7 @@ import policyData from "../data/policy.json";
 import {
   POLICY_ENTRIES,
   POLICY_PAGES,
-  PolicyScope,
+  type PolicyScope,
 } from "../components/policy";
 
 // Checks data/policy.json when the site is built, so that no page shows a
@@ -43,7 +43,7 @@ function isTextList(value: unknown): value is string[] {
 }
 
 /** What is wrong with an entry of the file, if anything */
-function problemsWith(entry: Record<string, unknown>): string[] {
+export function problemsWith(entry: Record<string, unknown>): string[] {
   const scope = (entry.scope ?? {}) as Record<string, unknown>;
   const sources = entry.sources;
   const checks: [boolean, string][] = [

@@ -1,4 +1,4 @@
-import { deburr } from "lodash";
+import deburr from "lodash/deburr";
 
 /** Text as the list pages' search boxes compare it: accents stripped, lower
  * case, letters and digits only. "São Paulo", "sao paulo" and "saopaulo" all
