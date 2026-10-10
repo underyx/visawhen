@@ -1,7 +1,6 @@
 import { Anchor, AppShell, Container, Text } from "@mantine/core";
 import Link from "next/link";
 import React from "react";
-import { DISCORD_URL } from "./links";
 import Navbar from "./Navbar";
 import classes from "./PageWrapper.module.css";
 
@@ -28,13 +27,6 @@ export default function PageWrapper({ children }: React.PropsWithChildren) {
                 .
               </Text>
               <div>
-                <Text size="sm" mb="sm">
-                  Have a question about your case? Ask in the{" "}
-                  <Anchor href={DISCORD_URL} target="_blank" rel="noopener">
-                    Discord community
-                  </Anchor>
-                  , where people on the same path help each other.
-                </Text>
                 <Text size="sm">
                   Hey, I&rsquo;m{" "}
                   <Anchor href="https://underyx.me">Bence Nagy</Anchor> and I
@@ -42,8 +34,8 @@ export default function PageWrapper({ children }: React.PropsWithChildren) {
                   <Anchor href="https://github.com/underyx/visawhen">
                     source code on GitHub
                   </Anchor>
-                  ) while waiting for my CR-1 visa. If you found it useful,
-                  consider{" "}
+                  ) while waiting for my CR-1 visa in 2021. If you found it
+                  useful, consider{" "}
                   <Anchor href="https://ko-fi.com/underyx">
                     getting me a coffee
                   </Anchor>

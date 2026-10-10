@@ -58,5 +58,5 @@ export const ISSUANCE_STATISTICS_URLS = {
   NIV: "https://travel.state.gov/content/travel/en/legal/visa-law0/visa-statistics/nonimmigrant-visa-statistics/monthly-nonimmigrant-visa-issuances.html",
 } as const;
 
-/** The site's Discord community, linked from the header and the footer */
+/** The site's Discord community, linked from the header */
 export const DISCORD_URL = "https://discord.gg/zkf8w2QtQY";
