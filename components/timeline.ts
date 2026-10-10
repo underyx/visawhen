@@ -1,8 +1,8 @@
 import type { NvcSeries } from "../api/nvc";
 import type { PolicyEntry } from "./policy";
 import { scheduleOverrideFor } from "./policy";
+import type { CategoryRange } from "./estimate";
 import {
-  CategoryRange,
   formatMedian,
   formatRangeMonths,
   PRIORITY_DATE_TEXT,
@@ -14,16 +14,16 @@ import {
   formatDate,
   formatMonthRange,
   formatShortDate,
-} from "./Freshness";
+} from "./dates";
 import { formatIvMonth, monthsBehind } from "./consulates";
 import { DOL_PROCESSING_TIMES_URL, GLOBAL_VISA_WAIT_TIMES_URL } from "./links";
 import { front, getStall, reviewRange } from "./nvcReview";
+import type { Movement } from "./visaBulletin";
 import {
   formatBulletinMonth,
   formatCutoff,
   formatMonths as formatWholeMonths,
   isDate,
-  Movement,
   monthsBetweenDates,
 } from "./visaBulletin";
 
@@ -765,8 +765,15 @@ function fromToday(range: DateRange, today: string): DateRange {
   };
 }
 
+/** A real calendar date in ISO form: "2026-02-30" is not one, though
+ * Date.parse reads it as March 2 */
 function isIsoDate(date: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}$/.test(date) && !Number.isNaN(Date.parse(date));
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+  const parsed = Date.parse(date);
+  return (
+    !Number.isNaN(parsed) &&
+    new Date(parsed).toISOString().slice(0, 10) === date
+  );
 }
 
 /** The visitor's milestone date, when it is a date and not in the future */
@@ -1263,9 +1270,10 @@ function interviewDates(
   if (pace === null || pace.moved <= 0 || pace.over <= 0)
     return { queue, pace: null, capped: false };
   const perMonth = pace.moved / pace.over;
-  // the month reaches the case's when month + perMonth * t = monthOf(dq)
+  // the month reaches the case's when month + perMonth * t = monthOf(dq):
+  // t months, a fraction of a month included, counted in days
   const behind = monthsBehind(monthOf(dq), month);
-  const projected = addMonths(asOf, behind / perMonth);
+  const projected = addDays(asOf, Math.round((behind / perMonth) * MONTH_DAYS));
   const cap = addMonths(queue, PACE_CAP_MONTHS);
   return {
     queue,

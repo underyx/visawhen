@@ -18,6 +18,14 @@ import { ChevronLeftIcon } from "../../components/icons";
 import MoreDetails from "../../components/MoreDetails";
 import { breadcrumbList } from "../../components/structuredData";
 import { formatBulletinMonth } from "../../components/visaBulletin";
+import type {
+  PathSlug,
+  PathSpec,
+  StageResult,
+  TimelineData,
+  TimelineInputs,
+  TimelineResult,
+} from "../../components/timeline";
 import {
   EMPTY_INPUTS,
   estimateTimeline,
@@ -26,12 +34,6 @@ import {
   pathBySlug,
   pathMilestones,
   PATHS,
-  PathSlug,
-  PathSpec,
-  StageResult,
-  TimelineData,
-  TimelineInputs,
-  TimelineResult,
 } from "../../components/timeline";
 import classes from "../../components/Timeline.module.css";
 import stampClasses from "../../components/UscisStats.module.css";
