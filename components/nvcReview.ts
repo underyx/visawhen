@@ -1,5 +1,5 @@
 import type { NvcSeries } from "../api/nvc";
-import { addDays, daysBetween } from "./Freshness";
+import { addDays, daysBetween } from "./dates";
 
 // When NVC will review documents submitted on a date, and when not to say.
 // Everything the /nvc estimate rests on is in this file.

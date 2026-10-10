@@ -1,6 +1,6 @@
 import type { MonthlyData, MonthlyRow } from "../api/uscis";
-import { formatMonthYear } from "./Freshness";
-import { ALL_CATEGORIES, flowCheck, QuarterPoint } from "./uscis";
+import { formatMonthYear } from "./dates";
+import { ALL_CATEGORIES, flowCheck, type QuarterPoint } from "./uscis";
 
 // USCIS's monthly Application Processing Data report (data/uscis/monthly.py):
 // newer than the quarterly all-forms report the rest of a form's page is
