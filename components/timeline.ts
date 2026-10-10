@@ -140,7 +140,7 @@ const I485_APPROVED: Milestone = {
 };
 
 const I751_NOTE =
-  "If you were married for less than 2 years when you got your green card, the card is valid for 2 years. File the I-751 in the 90 days before it expires, with your spouse, or alone with a waiver at any time before it expires.";
+  "If you were married for less than 2 years when you got your green card, it is valid for 2 years. File the I-751 in the 90 days before it expires.";
 
 /** The I-751, as the paths that can end in a 2-year green card list it */
 const I751_STAGE: StageSpec = {
@@ -161,7 +161,7 @@ const EAD_STAGE: StageSpec = {
   form: "I-765",
   category: "adjustment-of-status",
   name: "Work permit (I-765)",
-  what: "Usually filed together with the I-485, at no extra fee. You can work in the US once it is approved.",
+  what: "Usually filed with the I-485, at no extra fee. You can work once it is approved.",
   href: "/uscis/i-765",
   hrefText: "I-765 processing times",
   parallelTo: "i-485",
@@ -173,7 +173,7 @@ const AP_STAGE: StageSpec = {
   form: "I-131",
   category: "advance-parole",
   name: "Travel document (I-131)",
-  what: "Usually filed together with the I-485. Leaving the US before it is approved can cancel your I-485, unless you hold H or L status.",
+  what: "Usually filed with the I-485. Leaving the US before it is approved can cancel your I-485, unless you hold H or L status.",
   href: "/uscis/i-131",
   hrefText: "I-131 processing times",
   parallelTo: "i-485",
@@ -187,7 +187,7 @@ export const PATHS: PathSpec[] = [
       "Spouse visa timeline (CR-1, IR-1): I-130, NVC and interview waits",
     description:
       "How long each step takes right now for a spouse, parent or child of a US citizen immigrating through a US consulate: the I-130 at USCIS, the National Visa Center, and the interview queue at your consulate, as dates.",
-    who: "Immediate relatives who immigrate through a US embassy or consulate (IR-1 and CR-1 for spouses, IR-2 for children, IR-5 for parents).",
+    who: "IR-1, CR-1, IR-2 and IR-5 visas, through a US embassy or consulate.",
     inputs: ["consulate", "office"],
     officeForm: { form: "I-130", category: "immediate-relative" },
     stages: [
@@ -197,7 +197,7 @@ export const PATHS: PathSpec[] = [
         form: "I-130",
         category: "immediate-relative",
         name: "USCIS decides the I-130 petition",
-        what: "Your US citizen relative files Form I-130 with USCIS. USCIS checks that the relationship is real and approves the petition.",
+        what: "Your US citizen relative files Form I-130 with USCIS.",
         href: "/uscis/i-130",
         hrefText: "I-130 processing times",
         start: I130_FILED,
@@ -207,7 +207,7 @@ export const PATHS: PathSpec[] = [
         kind: "nvc-creation",
         id: "nvc-creation",
         name: "NVC creates your case",
-        what: "USCIS sends the approved petition to the National Visa Center (NVC). NVC creates a case for it and emails you a welcome letter with your case number.",
+        what: "USCIS sends the approved petition to the National Visa Center (NVC), which emails you your case number.",
         href: "/nvc",
         hrefText: "NVC wait times",
         start: {
@@ -225,7 +225,7 @@ export const PATHS: PathSpec[] = [
         kind: "your-step",
         id: "documents",
         name: "You pay the fees and submit your documents",
-        what: "You pay the fees, fill in the DS-260 form and upload your civil and financial documents on CEAC. This step takes as long as you need.",
+        what: "You pay the fees, fill in the DS-260 and upload your documents on CEAC.",
         href: null,
         end: {
           id: "documents-submitted",
@@ -237,7 +237,7 @@ export const PATHS: PathSpec[] = [
         kind: "nvc-review",
         id: "nvc-review",
         name: "NVC reviews your documents",
-        what: "NVC checks documents in the order they came in. When it accepts all of yours, your case is documentarily complete, and it waits in line for an interview.",
+        what: "NVC checks documents in the order they came in. When it accepts all of yours, your case is documentarily complete.",
         href: "/nvc",
         hrefText: "NVC wait times",
         end: {
@@ -250,7 +250,7 @@ export const PATHS: PathSpec[] = [
         kind: "interview",
         id: "interview",
         name: "Interview at your consulate",
-        what: "NVC schedules interviews by the month cases became documentarily complete. Each month, the State Department publishes which month each consulate is scheduling now.",
+        what: "NVC schedules interviews in the order cases became documentarily complete.",
         href: "/consulates",
         hrefText: "consulate interview queues",
         end: {
@@ -263,7 +263,7 @@ export const PATHS: PathSpec[] = [
         kind: "note",
         id: "visa",
         name: "Visa and travel",
-        what: "If the visa is approved at the interview, you usually get your passport back with the visa within days to weeks. After you pay the USCIS immigrant fee and enter the US, your green card comes by mail.",
+        what: "If the visa is approved, your passport comes back with it within weeks. Pay the USCIS immigrant fee; the green card comes by mail after you enter the US.",
         href: null,
       },
       I751_STAGE,
@@ -276,7 +276,7 @@ export const PATHS: PathSpec[] = [
       "Marriage green card timeline in the US: I-130, I-485, work permit waits",
     description:
       "How long each step takes right now for the spouse of a US citizen getting a green card without leaving the US: the I-485 with the I-130, the work permit and the travel document, as dates.",
-    who: "Getting a green card without leaving the US (adjustment of status), after entering with a visa or another inspection. If you entered another way, talk to an immigration lawyer before filing.",
+    who: "A green card without leaving the US (adjustment of status). If you entered without inspection, talk to a lawyer first.",
     inputs: ["office"],
     officeForm: { form: "I-485", category: "family" },
     stages: [
@@ -286,7 +286,7 @@ export const PATHS: PathSpec[] = [
         form: "I-485",
         category: "family",
         name: "USCIS decides the I-130 and the I-485",
-        what: "You usually file the I-130 petition and the I-485 green card application together. USCIS decides them together, usually after an interview with both of you.",
+        what: "You usually file the I-130 and the I-485 together. USCIS decides them after an interview with both of you.",
         href: "/uscis/i-485",
         hrefText: "I-485 processing times",
         start: I485_FILED,
@@ -298,7 +298,7 @@ export const PATHS: PathSpec[] = [
         kind: "note",
         id: "card",
         name: "Green card",
-        what: "USCIS mails the card within weeks of the approval. If you were married for less than 2 years when it was approved, it is a 2-year conditional card.",
+        what: "USCIS mails the card within weeks. If you were married for less than 2 years when it was approved, it is valid for 2 years.",
         href: null,
       },
       I751_STAGE,
@@ -339,7 +339,7 @@ export const PATHS: PathSpec[] = [
         kind: "note",
         id: "nvc",
         name: "NVC sends your case to the consulate",
-        what: "The National Visa Center gives K-1 cases a case number and sends them on to the consulate, usually within a few weeks. Its published timeframes do not cover K visas, so there is no number for this step.",
+        what: "The National Visa Center sends K-1 cases on to the consulate, usually within a few weeks.",
         href: "/nvc",
         hrefText: "NVC wait times",
         end: {
@@ -352,7 +352,7 @@ export const PATHS: PathSpec[] = [
         kind: "note",
         id: "k1-interview",
         name: "K-1 interview at your consulate",
-        what: "The consulate sends you instructions, and you book the interview and the medical exam. The State Department publishes no scheduling data for K-1 interviews; your consulate’s page shows how many K-1 visas it issues each month.",
+        what: "The consulate sends you instructions, and you book the interview and the medical exam.",
         href: "/consulates",
         hrefText: "consulate pages",
         end: {
@@ -379,7 +379,7 @@ export const PATHS: PathSpec[] = [
         form: "I-485",
         category: "family",
         name: "USCIS decides the I-485",
-        what: "After the wedding, you file the I-485 green card application, usually with the I-765 and I-131. Until then, you cannot work or travel.",
+        what: "After the wedding, you file the I-485, usually with the I-765 and I-131.",
         href: "/uscis/i-485",
         hrefText: "I-485 processing times",
         start: I485_FILED,
@@ -389,7 +389,7 @@ export const PATHS: PathSpec[] = [
       AP_STAGE,
       {
         ...I751_STAGE,
-        what: "Most K-1 couples get a 2-year conditional green card, since they are married for less than 2 years when it is approved. File the I-751 in the 90 days before it expires.",
+        what: "Most K-1 couples get a green card valid for 2 years. File the I-751 in the 90 days before it expires.",
       },
     ],
   },
@@ -409,7 +409,7 @@ export const PATHS: PathSpec[] = [
         form: "N-400",
         category: "civilian",
         name: "USCIS decides the N-400",
-        what: "You file the N-400, give your fingerprints, and go to an interview with the English and civics test at your field office. USCIS usually decides at the interview.",
+        what: "You file the N-400, give your fingerprints, and take the English and civics test at an interview. USCIS usually decides there.",
         href: "/uscis/n-400",
         hrefText: "N-400 processing times by office",
         start: {
@@ -427,7 +427,7 @@ export const PATHS: PathSpec[] = [
         kind: "note",
         id: "oath",
         name: "Oath ceremony",
-        what: "You become a citizen at the oath ceremony, often on the day of the interview or within a few weeks after it. USCIS publishes no data on this wait.",
+        what: "You become a citizen at the oath ceremony, often on the day of the interview or within weeks.",
         href: null,
       },
     ],
@@ -447,7 +447,7 @@ export const PATHS: PathSpec[] = [
         kind: "note",
         id: "perm",
         name: "PERM labor certification",
-        what: "For most EB-2 and EB-3 cases, your employer first gets a prevailing wage determination and a PERM labor certification from the Department of Labor. Those waits are not covered here: see the Department of Labor’s processing times.",
+        what: "For most EB-2 and EB-3 cases, your employer first gets a prevailing wage and a PERM labor certification from the Department of Labor.",
         href: DOL_PROCESSING_TIMES_URL,
         hrefText: "Department of Labor processing times",
         end: {
@@ -462,7 +462,7 @@ export const PATHS: PathSpec[] = [
         form: "I-140",
         category: "all",
         name: "USCIS decides the I-140 petition",
-        what: "Your employer, or you, files Form I-140 with USCIS. For an extra fee, premium processing gets a decision within 15 business days (45 for some cases).",
+        what: "Your employer, or you, files Form I-140. Premium processing, for an extra fee, gets a decision within 15 business days (45 for some).",
         href: "/uscis/i-140",
         hrefText: "I-140 processing times",
         start: {
@@ -481,7 +481,7 @@ export const PATHS: PathSpec[] = [
         id: "priority-date",
         categories: "employment",
         name: "Your priority date becomes current",
-        what: "Only a limited number of green cards is given each year in each category and country of birth, so people wait in line by their priority date: the day the PERM was filed, or the I-140 if no PERM was needed. Each month, the Visa Bulletin says which dates have reached the front of the line.",
+        what: "Green cards are limited by category and country of birth, so people wait in line by their priority date: the day the PERM was filed, or the I-140 if there was no PERM.",
         href: "/visa-bulletin",
         hrefText: "Visa Bulletin dates",
       },
@@ -491,7 +491,7 @@ export const PATHS: PathSpec[] = [
         form: "I-485",
         category: "employment",
         name: "In the US: USCIS decides the I-485",
-        what: "Once the Visa Bulletin lets you, you file the I-485 green card application, usually with the I-765 and I-131. USCIS can approve it only when your priority date is current in the Final Action Dates chart.",
+        what: "Once the Visa Bulletin lets you, you file the I-485, usually with the I-765 and I-131.",
         href: "/uscis/i-485",
         hrefText: "I-485 processing times",
         start: I485_FILED,
@@ -503,7 +503,7 @@ export const PATHS: PathSpec[] = [
         kind: "note",
         id: "abroad",
         name: "Abroad: NVC and the interview at your consulate",
-        what: "If you are outside the US, your case goes to the National Visa Center once your priority date is current in the Dates for Filing chart, and then to an interview at your consulate.",
+        what: "Outside the US, your case goes to the National Visa Center and then to an interview at your consulate.",
         href: "/nvc",
         hrefText: "NVC wait times",
       },
@@ -526,7 +526,7 @@ export const PATHS: PathSpec[] = [
         form: "I-130",
         category: "all-other-relative",
         name: "USCIS decides the I-130 petition",
-        what: "Your relative files Form I-130 with USCIS. The day USCIS receives it is your priority date, your place in line, whenever USCIS decides the petition.",
+        what: "Your relative files Form I-130 with USCIS. The day USCIS receives it is your priority date: your place in line.",
         href: "/uscis/i-130",
         hrefText: "I-130 processing times",
         start: I130_FILED,
@@ -537,7 +537,7 @@ export const PATHS: PathSpec[] = [
         id: "priority-date",
         categories: "family",
         name: "Your priority date becomes current",
-        what: "Only a limited number of green cards is given each year in each category and country of birth, so people wait in line by their priority date, often for years. Each month, the Visa Bulletin says which dates have reached the front of the line.",
+        what: "Green cards are limited by category and country of birth, so people wait in line by their priority date, often for years.",
         href: "/visa-bulletin",
         hrefText: "Visa Bulletin dates",
       },
@@ -545,7 +545,7 @@ export const PATHS: PathSpec[] = [
         kind: "note",
         id: "abroad",
         name: "Abroad: NVC and the interview at your consulate",
-        what: "Once your priority date is current in the Dates for Filing chart, NVC can have you pay the fees and submit your documents. The interview comes once your date is current in the Final Action Dates chart and your consulate reaches your case.",
+        what: "NVC asks for your fees and documents once the Visa Bulletin lets you, then your consulate schedules the interview.",
         href: "/nvc",
         hrefText: "NVC wait times",
       },
@@ -555,7 +555,7 @@ export const PATHS: PathSpec[] = [
         form: "I-485",
         category: "family",
         name: "In the US: USCIS decides the I-485",
-        what: "If you can adjust status in the US, you file the I-485 once the Visa Bulletin lets you, usually with the I-765 and I-131.",
+        what: "In the US, you file the I-485 once the Visa Bulletin lets you, usually with the I-765 and I-131.",
         href: "/uscis/i-485",
         hrefText: "I-485 processing times",
         start: I485_FILED,
@@ -579,7 +579,7 @@ export const PATHS: PathSpec[] = [
         form: "I-129",
         category: "all",
         name: "USCIS decides the I-129 petition",
-        what: "Most employer-sponsored work visas (H, L, O, P, Q and R) start with an I-129 petition from the employer. For an H-1B under the annual cap, the employer first registers you in USCIS’s H-1B registration and can file only if you are selected. For an extra fee, premium processing gets a decision within 15 business days. E and TN visas use the I-129 only to change or extend status inside the US, and J exchange visitors and visitors and students do not use it at all.",
+        what: "Work visas (H, L, O, P, Q and R) start with an I-129 petition from the employer; for a capped H-1B, only after you are selected in the lottery. Visitors, students and exchange visitors skip this step.",
         href: "/uscis/i-129",
         hrefText: "I-129 processing times",
         start: {
@@ -597,7 +597,7 @@ export const PATHS: PathSpec[] = [
         kind: "note",
         id: "appointment",
         name: "Visa appointment at your consulate",
-        what: "You book the visa interview at a US consulate. The wait for an appointment is in the State Department’s Global Visa Wait Times, which this site does not cover. Your consulate’s page shows how many visas of each class it issues.",
+        what: "You book the visa interview at a US consulate.",
         href: GLOBAL_VISA_WAIT_TIMES_URL,
         hrefText: "Global Visa Wait Times",
       },
@@ -894,6 +894,9 @@ export interface StageResult {
   basis: string[];
   /** A warning shown before the headline */
   warning: string | null;
+  /** Whether the warning is our own reading of the newest numbers, for
+   * now (a stall, a sharp drop, old data), not about the visitor's case */
+  news: boolean;
   /** The input the step needs before it can say anything */
   needs: PathInput | null;
 }
@@ -944,6 +947,7 @@ function uscisStage(
     outerDays: null,
     basis: [] as string[],
     warning: null,
+    news: false,
     needs: null,
   };
   const range = data.ranges[`${spec.form}/${spec.category}`];
@@ -1006,12 +1010,15 @@ function uscisStage(
       "The median counts premium and regular cases together. With premium processing, USCIS acts within weeks; without it, expect the later end of the range, or longer.",
     );
   let warning: string | null = null;
-  if (range.shock && range.shockRatio !== null)
+  let news = false;
+  if (range.shock && range.shockRatio !== null) {
+    news = true;
     warning = `USCIS decided ${Math.round(
       (1 - range.shockRatio) * 100,
     )}% fewer of these cases in ${
       data.quarterLabel
     } than its average over the four quarters before. Plan for the later end of the range.`;
+  }
   if (start === null)
     return {
       ...base,
@@ -1019,6 +1026,7 @@ function uscisStage(
       outerDays,
       basis,
       warning,
+      news,
       headline: `Most likely ${formatDuration(days)} ${afterText(spec)}`,
     };
   let end = shiftMonths(start, range.q[1], range.q[3]);
@@ -1029,6 +1037,7 @@ function uscisStage(
   if (status === "current" && today !== null) {
     if (today > outer.high) {
       headline = `This is taking longer than 9 in 10 cases did`;
+      news = false;
       warning = `Your case has waited longer than 9 in 10 cases did (${formatDateRange(
         outer,
       )}). You can ask USCIS about a case that is outside its normal processing time: its processing times tool says from which date.`;
@@ -1036,6 +1045,7 @@ function uscisStage(
       outer = end;
     } else if (today > end.high) {
       headline = `Most likely by ${formatShortDate(outer.high)}`;
+      news = false;
       warning = `Your case has already taken longer than most (the most likely range ended ${formatShortDate(
         end.high,
       )}). It could still take until ${formatShortDate(outer.high)}.`;
@@ -1050,7 +1060,17 @@ function uscisStage(
       outer = fromToday(outer, today);
     }
   }
-  return { ...base, end, outer, days, outerDays, basis, warning, headline };
+  return {
+    ...base,
+    end,
+    outer,
+    days,
+    outerDays,
+    basis,
+    warning,
+    news,
+    headline,
+  };
 }
 
 /** NVC's newest reading of a series: its date and its days */
@@ -1088,6 +1108,7 @@ function nvcCreationStage(
     outerDays: null,
     basis: [] as string[],
     warning: null,
+    news: false,
     needs: null,
   };
   if (data.nvc === null) return { ...base, headline: "No NVC data." };
@@ -1117,12 +1138,14 @@ function nvcCreationStage(
   const stall = getStall(data.nvc.creation);
   if (stall !== null)
     warning = `NVC’s case creation has almost stopped moving, so this may take longer than ${days} days.`;
+  let news = warning !== null;
   if (start === null)
     return {
       ...base,
       days: duration,
       basis,
       warning,
+      news,
       headline: `Most likely ${formatDuration(duration)} ${afterText(spec)}`,
     };
   let end = shift(start, duration);
@@ -1130,6 +1153,7 @@ function nvcCreationStage(
   if (status === "current" && today !== null) {
     if (today > end.high) {
       headline = "This is taking longer than usual";
+      news = false;
       warning = `On ${formatDate(
         date,
       )}, NVC was taking ${days} days to create cases, and yours has waited ${daysBetween(
@@ -1139,7 +1163,7 @@ function nvcCreationStage(
       end = { low: today, high: today };
     } else end = fromToday(end, today);
   }
-  return { ...base, end, days: duration, basis, warning, headline };
+  return { ...base, end, days: duration, basis, warning, news, headline };
 }
 
 function yourStepStage(
@@ -1158,6 +1182,7 @@ function yourStepStage(
     headline: "As soon as you submit them",
     basis: [],
     warning: null,
+    news: false,
     needs: null,
   };
 }
@@ -1183,6 +1208,7 @@ function nvcReviewStage(
     outerDays: null,
     basis: [] as string[],
     warning: null,
+    news: false,
     needs: null,
   };
   if (data.nvc === null) return { ...base, headline: "No NVC data." };
@@ -1209,12 +1235,14 @@ function nvcReviewStage(
   const stall = getStall(series);
   if (stall !== null)
     warning = `NVC’s document review has almost stopped moving: anything submitted now may take longer than ${days} days.`;
+  const news = warning !== null;
   if (start === null)
     return {
       ...base,
       days: duration,
       basis,
       warning,
+      news,
       headline: `Most likely ${formatDuration(duration)} ${afterText(spec)}`,
     };
   // the visitor's own submission month: the /nvc page's range for its
@@ -1307,7 +1335,7 @@ function nvcReviewStage(
       end = { low: today, high: today };
     } else end = fromToday(end, today);
   }
-  return { ...base, end, days: duration, basis, warning, headline };
+  return { ...base, end, days: duration, basis, warning, news, headline };
 }
 
 /** How far back the interview estimate measures the pace of a post's
@@ -1401,6 +1429,7 @@ function interviewStage(
     outerDays: null,
     basis: [] as string[],
     warning: null,
+    news: false,
     needs: null,
   };
   const post = data.posts?.find(({ slug }) => slug === inputs.post);
@@ -1544,9 +1573,11 @@ function interviewStage(
     pace !== null && pace.moved <= 0
       ? "The month this consulate is scheduling has not moved forward in the last year. The estimate takes the queue as it is now; it could take much longer."
       : null;
+  let news = warning !== null;
   if (status === "current" && today !== null) {
     if (today > end.high) {
       headline = "NVC should be reaching your case about now";
+      news = false;
       warning = `By this consulate’s queue, NVC would have reached a case completed ${formatSince(
         start,
       )} by ${formatShortDate(end.high)}. Watch for NVC’s email, and check ${
@@ -1555,7 +1586,7 @@ function interviewStage(
       end = { low: today, high: today };
     } else end = fromToday(end, today);
   }
-  return { ...base, end, days, basis, headline, warning };
+  return { ...base, end, days, basis, headline, warning, news };
 }
 
 /** "moved forward 4 months", "did not move", "moved back 3 months" */
@@ -1583,6 +1614,7 @@ function priorityDateStage(
     outerDays: null,
     basis: [] as string[],
     warning: null,
+    news: false,
     needs: null,
   };
   const bulletin = data.bulletin;
@@ -1673,6 +1705,7 @@ function noteStage(
     headline: "",
     basis: [],
     warning: null,
+    news: false,
     needs: null,
   };
 }

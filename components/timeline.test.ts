@@ -316,6 +316,8 @@ describe("estimateTimeline", () => {
     assert.equal(i130.status, "current");
     assert.equal(i130.headline, "This is taking longer than 9 in 10 cases did");
     assert.match(i130.warning ?? "", /longer than 9 in 10 cases/);
+    // about this case, not news about the numbers
+    assert.equal(i130.news, false);
     assert.deepEqual(i130.end, { low: TODAY, high: TODAY });
     assert.deepEqual(stage(SPOUSE_ABROAD, inputs, "nvc-creation").start, {
       low: TODAY,
@@ -424,6 +426,8 @@ describe("estimateTimeline", () => {
       "interview",
     );
     assert.match(interview.warning ?? "", /has not moved forward/);
+    // our reading of the numbers, for now: shown as temporary news
+    assert.equal(interview.news, true);
     // the queue as it is only: 22 months from each end of the month
     assert.deepEqual(interview.end, {
       low: addMonths("2026-09-01", 22),
