@@ -5,13 +5,8 @@ description = ""
 authors = [{ name = "Bence Nagy", email = "nagy@bence.dev" }]
 license = "MIT"
 requires-python = ">=3.11"
+# forms.py and monthly.py; the quarterly reports come as XLSX, CSV or PDF
 dependencies = [
-  "httpx>=0.28.1,<0.29",
-  "attrs>=26.1.0,<27",
-  "pandas>=3.0.5,<4",
-  "sqlite-diffable>=0.6,<0.7",
-  "arrow>=1.4.0,<2",
-  # forms.py: quarterly reports come as XLSX, CSV or PDF
   "requests>=2.34.2,<3",
   "beautifulsoup4>=4.15.0,<5",
   "lxml>=6.1.2,<7",
