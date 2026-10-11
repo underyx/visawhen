@@ -37,6 +37,7 @@ import {
   CATEGORIES,
   getMovement,
   getSeries,
+  latestChange,
   newestMonth,
 } from "../components/visaBulletin";
 import { daysBetween } from "../components/Freshness";
@@ -170,9 +171,19 @@ async function bulletinOptions(
       const series = getSeries(data, "finalAction", category.key, area.key);
       const final = newest.finalAction[category.key]?.[area.key];
       if (final === undefined || series.length === 0) continue;
+      // a line the Dates for Filing chart leaves out takes its Final Action
+      // Date, which has no change of its own to show under it
+      const filing = newest.datesForFiling[category.key]?.[area.key];
       cells[category.key][area.key] = {
         final,
-        filing: newest.datesForFiling[category.key]?.[area.key] ?? final,
+        filing: filing ?? final,
+        finalChange: latestChange(series),
+        filingChange:
+          filing === undefined
+            ? null
+            : latestChange(
+                getSeries(data, "datesForFiling", category.key, area.key),
+              ),
         year: getMovement(series, 12),
         fiveYears: getMovement(series, 60),
       };

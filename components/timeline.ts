@@ -696,10 +696,20 @@ export interface OfficeOption {
   verdict: "longer" | "shorter" | "close" | null;
 }
 
+/** The change line under a cutoff (latestChange): its text and colour */
+export interface CutoffChange {
+  text: string;
+  color: string;
+}
+
 export interface BulletinCell {
   /** The newest bulletin's Final Action Date and Date for Filing */
   final: string;
   filing: string;
+  /** How each moved since the bulletin before; null when there is no
+   * bulletin before, or the chart gives the line no cutoff of its own */
+  finalChange: CutoffChange | null;
+  filingChange: CutoffChange | null;
   /** How far the Final Action Date moved in the last 12 and 60 months */
   year: Movement | null;
   fiveYears: Movement | null;
@@ -1793,6 +1803,60 @@ function priorityDateStage(
     "The line does not move at a steady pace: it can stand still for months, jump forward, or move back, often in the summer. So past movement cannot say when your date will come, and this page does not guess.",
   );
   return { ...base, basis, headline };
+}
+
+/** A move as "+8 months", "−3 months" or "0 months" */
+function signedMonths(months: number): string {
+  const sign = months > 0 ? "+" : months < 0 ? "−" : "";
+  return `${sign}${formatWholeMonths(months)}`;
+}
+
+/** A move forward is good news for those waiting (teal) and one back is bad
+ * (red): the opposite of NVC's days, as latestChange says */
+function moveColor(months: number): string {
+  if (months === 0) return "dimmed";
+  return months > 0 ? "teal.9" : "red.9";
+}
+
+/** The "Moved in 12 months" box of a timeline page's cutoff strip */
+export interface MovementStat {
+  /** The move, "+8 months", or null when it cannot be counted; then
+   * `notShown` says why, in the figure's place */
+  value: string | null;
+  notShown: string | null;
+  /** The 5-year move under the figure, or what a figure not shown is
+   * measured from */
+  line: string | null;
+  lineColor: string;
+}
+
+/** How far the Final Action Date moved in the last 12 months, for the box
+ * next to the cutoffs. A cutoff that was Current or Unavailable a year ago
+ * (or is now) has no distance to count, so the box says what it was then
+ * instead. */
+export function movementStat(cell: BulletinCell): MovementStat {
+  const { year, fiveYears } = cell;
+  const fiveYearLine =
+    fiveYears !== null && fiveYears.months !== null
+      ? {
+          line: `${signedMonths(fiveYears.months)} in 5 years`,
+          lineColor: moveColor(fiveYears.months),
+        }
+      : { line: null, lineColor: "dimmed" };
+  if (year === null)
+    return { value: null, notShown: "Not known yet", ...fiveYearLine };
+  if (year.months === null) {
+    const was = year.from[1];
+    return {
+      value: null,
+      notShown: `was ${
+        isDate(was) ? formatCutoff(was) : formatCutoff(was).toLowerCase()
+      }`,
+      line: "a year ago",
+      lineColor: "dimmed",
+    };
+  }
+  return { value: signedMonths(year.months), notShown: null, ...fiveYearLine };
 }
 
 function noteStage(

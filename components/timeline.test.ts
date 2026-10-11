@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import { addDays, addMonths } from "./dates";
 import type { CategoryRange } from "./estimate";
 import {
+  type BulletinCell,
   caseNote,
   EMPTY_INPUTS,
   estimateTimeline,
@@ -11,6 +12,7 @@ import {
   inputsFromHash,
   inputsToHash,
   monthSpan,
+  movementStat,
   pathBySlug,
   pathForms,
   pathMilestones,
@@ -140,6 +142,8 @@ const DATA: TimelineData = {
         philippines: {
           final: "2008-05-15",
           filing: "2009-01-01",
+          finalChange: { text: "+1 month since Sep", color: "teal.9" },
+          filingChange: { text: "same as in Sep", color: "dimmed" },
           year: {
             from: ["2025-10", "2007-11-15"],
             to: ["2026-10", "2008-05-15"],
@@ -656,6 +660,119 @@ describe("queuePace", () => {
         ],
       }),
       null,
+    );
+  });
+});
+
+describe("movementStat", () => {
+  const cell = (
+    year: BulletinCell["year"],
+    fiveYears: BulletinCell["fiveYears"] = null,
+  ): BulletinCell => ({
+    final: "2008-05-15",
+    filing: "2009-01-01",
+    finalChange: null,
+    filingChange: null,
+    year,
+    fiveYears,
+  });
+  const moved = (from: string, to: string, months: number | null) => ({
+    from: ["2025-10", from] as [string, string],
+    to: ["2026-10", to] as [string, string],
+    months,
+  });
+
+  it("signs the year's move, with a real minus sign", () => {
+    assert.deepEqual(movementStat(cell(moved("2007-11-15", "2008-05-15", 6))), {
+      value: "+6 months",
+      notShown: null,
+      line: null,
+      lineColor: "dimmed",
+    });
+    assert.deepEqual(
+      movementStat(cell(moved("2008-08-15", "2008-05-15", -3))),
+      {
+        value: "−3 months",
+        notShown: null,
+        line: null,
+        lineColor: "dimmed",
+      },
+    );
+    assert.equal(
+      movementStat(cell(moved("2008-05-15", "2008-05-15", 0))).value,
+      "0 months",
+    );
+    assert.equal(
+      movementStat(cell(moved("2005-03-15", "2008-05-15", 38))).value,
+      "+3 years and 2 months",
+    );
+  });
+
+  it("puts the 5-year move under it, coloured by its own sign", () => {
+    const forward = movementStat(
+      cell(
+        moved("2008-08-15", "2008-05-15", -3),
+        moved("2005-11-15", "2008-05-15", 30),
+      ),
+    );
+    assert.equal(forward.value, "−3 months");
+    assert.equal(forward.line, "+2 years and 6 months in 5 years");
+    assert.equal(forward.lineColor, "teal.9");
+    const back = movementStat(
+      cell(
+        moved("2008-05-15", "2008-05-15", 0),
+        moved("2008-07-15", "2008-05-15", -2),
+      ),
+    );
+    assert.equal(back.line, "−2 months in 5 years");
+    assert.equal(back.lineColor, "red.9");
+    const still = movementStat(
+      cell(
+        moved("2008-05-15", "2008-05-15", 0),
+        moved("2008-05-15", "2008-05-15", 0),
+      ),
+    );
+    assert.equal(still.line, "0 months in 5 years");
+    assert.equal(still.lineColor, "dimmed");
+    // a 5-year move with a Current end has no distance to show
+    assert.equal(
+      movementStat(
+        cell(
+          moved("2008-08-15", "2008-05-15", -3),
+          moved("C", "2008-05-15", null),
+        ),
+      ).line,
+      null,
+    );
+  });
+
+  it("says it is not known yet without a bulletin a year back", () => {
+    assert.deepEqual(movementStat(cell(null)), {
+      value: null,
+      notShown: "Not known yet",
+      line: null,
+      lineColor: "dimmed",
+    });
+    assert.equal(
+      movementStat(cell(null, moved("2005-11-15", "2008-05-15", 30))).line,
+      "+2 years and 6 months in 5 years",
+    );
+  });
+
+  it("says what the cutoff was when either end is Current or Unavailable", () => {
+    assert.deepEqual(movementStat(cell(moved("C", "2008-05-15", null))), {
+      value: null,
+      notShown: "was current",
+      line: "a year ago",
+      lineColor: "dimmed",
+    });
+    assert.equal(
+      movementStat(cell(moved("U", "2008-05-15", null))).notShown,
+      "was unavailable",
+    );
+    assert.equal(
+      movementStat(cell(moved("2024-06-01", "C", null))).notShown,
+      "was Jun 1, 2024",
     );
   });
 });
