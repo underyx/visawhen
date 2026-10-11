@@ -2,6 +2,7 @@ import { SearchIcon } from "../../components/icons";
 import {
   Anchor,
   Badge,
+  Box,
   Group,
   Highlight,
   Stack,
@@ -169,15 +170,12 @@ export default function UscisIndex({
         <meta property="og:description" content={description} />
         <meta property="og:url" content="https://visawhen.com/uscis" />
       </Head>
-      <Stack gap="sm">
+      <Box>
         <Title order={1}>USCIS processing times by form</Title>
-        <Text>Latest USCIS data: {latestLabel}.</Text>
-        <Text>
-          Pick your form to see how fast USCIS is deciding it and what to expect
-          if you file today. For the N-400, I-130 and I-485, you can also pick
-          your field office.
+        <Text size="lg">
+          USCIS&rsquo;s own numbers, form by form. Newest: {latestLabel}.
         </Text>
-      </Stack>
+      </Box>
       {/* one block: a Stack would pay its gap around the empty live region */}
       <div>
         <TextInput
