@@ -9,6 +9,22 @@ import classes from "./NoteChip.module.css";
 // click elsewhere or Escape, and it can hold links. On a phone it is a
 // panel across the bottom of the screen with a close button, which stays
 // while the page scrolls behind it, so a long note can be read.
+//
+// The site's conventions for chips and notes (Bence's, from the pass that
+// moved the pages' asides into chips):
+// - A plain chip, for a piece of news or a special case, has no icon.
+// - A warning about our own reading of the numbers (a queue that has
+//   stalled, USCIS deciding fewer cases, old data, an interview month not
+//   moving) is a chip with tone="warning", icon={<WarningIcon />} and a
+//   title, as /nvc's "stalled" chip is. It carries a TemporaryNotice's
+//   meaning without its hourglass; TemporaryNotice stays for open slips
+//   that qualify a figure they sit under.
+// - A row's lead is "Recent news:" or "Special cases:", and nothing else.
+//   The rows go in a <Stack gap="xs">, news first.
+// - A note's content is <Text size="sm">, or a Stack of them with gap
+//   "xs". A note never holds a MoreDetails toggle: the visitor has already
+//   asked for it, so details go under a <Divider />. MoreDetails stays for
+//   toggles in the page body.
 
 /** How long a note stays open after the mouse leaves its chip, so that it
  * can be moved onto the note itself */
