@@ -89,7 +89,7 @@ export const FORM_SEARCH_TERMS: Record<string, FormSearchTerms> = {
     keywords: ["follow to join"],
   },
   "I-601A": {
-    aka: "Provisional unlawful presence waiver",
+    aka: null,
     keywords: ["waiver", "3 year bar", "10 year bar"],
   },
   "I-526": { aka: "EB-5 investor petition", keywords: ["EB5", "investor"] },
