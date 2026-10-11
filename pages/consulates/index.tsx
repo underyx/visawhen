@@ -107,7 +107,7 @@ export default function ConsulateSelect({
   )}), and how many visas each one issued, by visa class.`;
 
   return (
-    <Stack>
+    <Stack gap="xl">
       <Head>
         <title>{title}</title>
         <meta name="description" content={description} />
