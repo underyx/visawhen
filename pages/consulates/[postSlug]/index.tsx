@@ -50,7 +50,11 @@ import {
   issuanceSuspensionFor,
   scheduleOverrideFor,
 } from "../../../components/policy";
-import { formatShortDate, useToday } from "../../../components/Freshness";
+import {
+  formatDate,
+  formatShortDate,
+  useToday,
+} from "../../../components/Freshness";
 import { normalize } from "../../../components/search";
 import SearchStatus from "../../../components/SearchStatus";
 import { POST_COUNTRIES } from "../../../api/searchTerms";
@@ -350,7 +354,20 @@ export default function ConsulateSelect({
       </Button>
       <Box>
         <Title order={1}>{postName}</Title>
-        {country !== null && <Text size="lg">{country}</Text>}
+        {/* The country alone: its other names (POST_COUNTRIES) are for the
+            list's search box. The data's date goes here, not in the card
+            (Bence: numbers first, the date once). */}
+        <Text size="lg">
+          {consulate.country !== null && `${consulate.country}. `}
+          {ivSchedule === null ? (
+            <>Visas issued, in the State Department&rsquo;s own figures.</>
+          ) : (
+            <>
+              Interview months from the State Department&rsquo;s update of{" "}
+              {formatDate(ivScheduleAsOf)}.
+            </>
+          )}
+        </Text>
       </Box>
       {inactivity !== null && (
         // role="note": a standing statement, which screen readers should not
