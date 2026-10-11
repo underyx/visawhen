@@ -437,9 +437,9 @@ export default function ConsulateSelect({
           hint="Try a class code such as CR1, or a word such as spouse."
         />
       </div>
-      <Text size="sm" c="dimmed">
-        Badges: average visas issued per month, {formatMonth(recentWindow.from)}{" "}
-        to {formatMonth(recentWindow.to)}.
+      <Text size="xs" c="dimmed">
+        Badges: visas issued a month, {formatMonth(recentWindow.from)} &ndash;{" "}
+        {formatMonth(recentWindow.to)}.
       </Text>
       {issuedVisas.length > 0 && (
         <ListRows>
