@@ -1,0 +1,40 @@
+/* Who NVC's times are for (NvcAudience): on a phone one slip whose rows
+ * open, set like the policy notices' row above it (PolicyBanner.module.css);
+ * from sm up a row of chips instead. Only one of the two is shown. */
+.phone {
+  display: block;
+}
+
+.desktop {
+  display: none;
+}
+
+@media (min-width: $mantine-breakpoint-sm) {
+  .phone {
+    display: none;
+  }
+
+  .desktop {
+    display: block;
+  }
+}
+
+/* The rows of the slip: white, the ink rule down the left edge, a hairline
+ * between rows; Mantine's contained variant rounds the first and last. */
+.item {
+  background-color: var(--mantine-color-body);
+  border: 0;
+  border-left: 4px solid var(--vw-ink);
+}
+
+.item[data-active] {
+  background-color: var(--mantine-color-body);
+}
+
+.item + .item {
+  border-top: 1px solid var(--vw-rule);
+}
+
+.label {
+  padding-block: var(--mantine-spacing-sm);
+}

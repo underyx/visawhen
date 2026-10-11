@@ -5,16 +5,7 @@ import React, { useState } from "react";
 import NvcChart from "../components/NvcChart";
 import { jsonLdScriptProps } from "react-schemaorg";
 import { Dataset } from "schema-dts";
-import {
-  Alert,
-  Anchor,
-  Box,
-  Stack,
-  Text,
-  TextInput,
-  Title,
-} from "@mantine/core";
-import Link from "next/link";
+import { Anchor, Box, Stack, Text, TextInput, Title } from "@mantine/core";
 import {
   daysBetween,
   formatDate,
@@ -24,6 +15,7 @@ import {
   useToday,
 } from "../components/Freshness";
 import MoreDetails from "../components/MoreDetails";
+import NvcAudience from "../components/NvcAudience";
 import PolicyBanner from "../components/PolicyBanner";
 import { Stat, Stats } from "../components/Stats";
 import TemporaryNotice from "../components/TemporaryNotice";
@@ -473,45 +465,7 @@ export default function NvcBacklog({ data }: Props) {
       </Stack>
       <Stack gap="sm">
         <PolicyBanner page="/nvc" collapseAll />
-        {/* Who the times are for, by case: every heading names a group of
-            visitors, and every line says what the times mean for them. */}
-        <Alert role="note" color="gray">
-          <Stack gap="sm">
-            <div>
-              <Text inherit fw={700}>
-                K (fiancé(e)) visas, diversity visas, special immigrant visas
-                and adoptions
-              </Text>
-              <Text inherit>These times do not apply to you.</Text>
-            </div>
-            <div>
-              <Text inherit fw={700}>
-                Spouses, parents and children of US citizens
-              </Text>
-              <Text inherit>
-                NVC usually takes weeks.{" "}
-                <Anchor component={Link} href="/consulates">
-                  The interview queue at your consulate
-                </Anchor>{" "}
-                is usually your longest wait.
-              </Text>
-            </div>
-            <div>
-              <Text inherit fw={700}>
-                Family and employment preference categories
-              </Text>
-              <Text inherit>
-                Your priority date is usually your longest wait, often years.
-                NVC asks for your documents once the{" "}
-                <Anchor component={Link} href="/visa-bulletin">
-                  Visa Bulletin
-                </Anchor>
-                &rsquo;s Dates for Filing chart passes it, and you get an
-                interview once the Final Action Dates chart does.
-              </Text>
-            </div>
-          </Stack>
-        </Alert>
+        <NvcAudience />
       </Stack>
       <Stack gap="sm">
         <Title order={2}>Document review</Title>
