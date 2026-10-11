@@ -67,6 +67,20 @@ jobs:
           fetch: false
       - id: head_commit
         run: echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      # Tells a Discord channel the N-400's new quarterly numbers, when the
+      # commit above added a quarter for it (see data/notify.py; a report
+      # that only republishes old quarters posts nothing). Only this step
+      # sees the webhook URL; without the secret it prints the message and
+      # ends green. It pings the "n400-watch" role of the DISCORD_ROLES
+      # repository variable. A refused post fails the job, but the build and
+      # deploy below still run: the data is committed by then.
+      - name: Post the changes to Discord
+        if: ${{ steps.commit.outputs.pushed == 'true' }}
+        working-directory: .
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_ROLES: ${{ vars.DISCORD_ROLES || secrets.DISCORD_ROLES }}
+        run: python3 -u data/notify.py
 
   build:
     if: needs.update-forms-data.outputs.updated == 'true'
