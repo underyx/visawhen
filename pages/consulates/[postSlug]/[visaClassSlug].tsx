@@ -483,12 +483,6 @@ export default function ConsulateStats({
           visaType === "IV" || NVC_NONIMMIGRANT_CLASSES.includes(visaClassSlug)
         }
       />
-      <PolicyNews
-        consulate={consulate}
-        immigrant={
-          visaType === "IV" || NVC_NONIMMIGRANT_CLASSES.includes(visaClassSlug)
-        }
-      />
       {(ivCategory !== undefined || classNote !== undefined) && (
         <IvScheduleCard
           postName={postName}
@@ -529,6 +523,13 @@ export default function ConsulateStats({
         {formatLongMonth(recent.to)}, so it cannot show what has changed since
         then, such as pauses that started or ended later.
       </Text>
+      {/* The news comes after the figures, as on /nvc (Bence) */}
+      <PolicyNews
+        consulate={consulate}
+        immigrant={
+          visaType === "IV" || NVC_NONIMMIGRANT_CLASSES.includes(visaClassSlug)
+        }
+      />
       <ConsulateChart
         issuances={issuances}
         visaType={visaType}

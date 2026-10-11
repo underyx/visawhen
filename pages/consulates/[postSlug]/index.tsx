@@ -360,7 +360,6 @@ export default function ConsulateSelect({
         </Alert>
       )}
       <PolicyNotices consulate={consulate} />
-      <PolicyNews consulate={consulate} />
       <IvScheduleCard
         postName={postName}
         asOf={ivScheduleAsOf}
@@ -384,6 +383,10 @@ export default function ConsulateSelect({
               }
         }
       />
+      {/* The news comes after the months, as on /nvc: two thirds of visits
+          are phones, where the notices pushed the months below the fold
+          (Bence) */}
+      <PolicyNews consulate={consulate} />
       <Title order={2}>Visa classes at {postName}</Title>
       {/* one block: a Stack would pay its gap around the empty live region */}
       <div>
