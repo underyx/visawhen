@@ -23,6 +23,11 @@ const monthOnlyFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
   timeZone: "UTC",
 });
+const monthDayFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  timeZone: "UTC",
+});
 
 /** The average length of a month in days. */
 const MONTH_DAYS = 30.44;
@@ -47,6 +52,34 @@ export function formatDate(date: string): string {
 /** An ISO date as "Jul 13, 2026". */
 export function formatShortDate(date: string): string {
   return shortDateFormatter.format(new Date(date));
+}
+
+/** An ISO date as "Jul 13", for a date whose year the text around it
+ * gives, such as a reading a week before the newest */
+export function formatMonthDay(date: string): string {
+  return monthDayFormatter.format(new Date(date));
+}
+
+/** Two ISO dates as the months they fall in when they are far apart ("Aug
+ * 2027 – Jul 2028"), else as days ("Nov 3 – Nov 24, 2026"). Non-breaking
+ * spaces keep each date whole and the dash with the start, so that a range
+ * too long for its line, as in a stamp on a phone, breaks only after the
+ * dash. */
+export function formatDateRange({
+  low,
+  high,
+}: {
+  low: string;
+  high: string;
+}): string {
+  if (daysBetween(low, high) > 90) return formatMonthRange(low, high);
+  if (low === high) return formatShortDate(low);
+  const whole = (date: string) => date.replace(/ /g, " ");
+  const start =
+    low.slice(0, 4) === high.slice(0, 4)
+      ? formatShortDate(low).replace(/, \d{4}$/, "")
+      : formatShortDate(low);
+  return `${whole(start)} – ${whole(formatShortDate(high))}`;
 }
 
 /** The ISO date some months after another, counting average months of

@@ -12,7 +12,7 @@ import {
   addMonths,
   daysBetween,
   formatDate,
-  formatMonthRange,
+  formatDateRange,
   formatMonthYear,
   formatShortDate,
 } from "./dates";
@@ -785,17 +785,9 @@ export function formatDuration({ low, high }: Days): string {
   return formatRangeMonths(low / MONTH_DAYS, high / MONTH_DAYS);
 }
 
-/** Two dates as the months they fall in when they are far apart ("Aug
- * 2027 – Jul 2028"), else as days ("Nov 3 – Nov 24, 2026") */
-export function formatDateRange({ low, high }: DateRange): string {
-  if (daysBetween(low, high) > 90) return formatMonthRange(low, high);
-  if (low === high) return formatShortDate(low);
-  if (low.slice(0, 4) === high.slice(0, 4)) {
-    const start = formatShortDate(low).replace(/, \d{4}$/, "");
-    return `${start} – ${formatShortDate(high)}`;
-  }
-  return `${formatShortDate(low)} – ${formatShortDate(high)}`;
-}
+// formatDateRange, which the /nvc page uses too, lives in dates.ts and is
+// re-exported here for the timeline page and its tests.
+export { formatDateRange };
 
 function shift(range: DateRange, days: Days): DateRange {
   return {

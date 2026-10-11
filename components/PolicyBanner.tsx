@@ -125,20 +125,41 @@ function EntryDetails({
   );
 }
 
-type Props =
-  /** A post's own page or one of its visa class pages. The page of a
-   * nonimmigrant class that does not go through NVC passes `immigrant`
-   * false, and leaves out the notices about immigrant visas only. */
-  | { consulate: ConsulatePage; immigrant?: boolean; page?: undefined }
-  /** Any other page, by its path, "/nvc" */
-  | { page: string; consulate?: undefined; immigrant?: undefined };
+/** A post's own page or one of its visa class pages. The page of a
+ * nonimmigrant class that does not go through NVC passes `immigrant` false,
+ * and leaves out the notices about immigrant visas only. */
+interface ConsulatePageProps {
+  consulate: ConsulatePage;
+  immigrant?: boolean;
+  page?: undefined;
+}
+
+/** Any other page, by its path, "/nvc" */
+interface OtherPageProps {
+  page: string;
+  consulate?: undefined;
+  immigrant?: undefined;
+}
+
+type Props = (ConsulatePageProps | OtherPageProps) & {
+  /** Whether to list every entry collapsed, the ones marked `expanded`
+   * too: for a page whose own numbers can be read without them, such as
+   * /nvc, where the notices are about the interview that comes after NVC,
+   * and the numbers come first */
+  collapseAll?: boolean;
+};
 
 /** The policies that affect a page's visas, from data/policy.json: those
  * about the page in particular (its post, the nationality of most of its
  * applicants or its visa class) or marked `expanded` open, and the rest,
  * such as those about every post, in one collapsed section that lists their
  * titles, so that thousands of pages do not open with the same banners. */
-export default function PolicyBanner({ consulate, immigrant, page }: Props) {
+export default function PolicyBanner({
+  consulate,
+  immigrant,
+  page,
+  collapseAll = false,
+}: Props) {
   // The prerendered page is served for weeks, so which entries have started,
   // have expired or have gone unchecked too long is decided on the client
   // only.
@@ -149,14 +170,17 @@ export default function PolicyBanner({ consulate, immigrant, page }: Props) {
   // The entries about the page in particular, such as a suspension for most
   // of its applicants' nationality, come before the ones expanded
   // everywhere.
-  const expandedEntries = sortBy(
-    shown.filter((entry) =>
-      consulate === undefined
-        ? entry.expanded === true
-        : isAboutPage(entry, consulate),
-    ),
-    (entry) => (consulate !== undefined && namesPage(entry, consulate) ? 0 : 1),
-  );
+  const expandedEntries = collapseAll
+    ? []
+    : sortBy(
+        shown.filter((entry) =>
+          consulate === undefined
+            ? entry.expanded === true
+            : isAboutPage(entry, consulate),
+        ),
+        (entry) =>
+          consulate !== undefined && namesPage(entry, consulate) ? 0 : 1,
+      );
   const otherEntries = shown.filter(
     (entry) => !expandedEntries.includes(entry),
   );

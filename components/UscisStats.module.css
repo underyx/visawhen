@@ -55,14 +55,16 @@
   line-height: 1.2;
 }
 
+/* The range wraps only when it has to: a range of days across a year's end
+ * ("Nov 14, 2026 – Feb 7, 2027") is wider than a phone, and then breaks after
+ * the dash (see formatDateRange). */
 .stampRange {
   font-stretch: 68%;
   font-weight: 850;
   font-size: clamp(2rem, 1.3rem + 3vw, 3rem);
-  line-height: 1;
+  line-height: 1.05;
   letter-spacing: -0.01em;
   margin-block: 6px 4px;
-  white-space: nowrap;
 }
 
 .stampFoot {

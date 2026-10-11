@@ -9,6 +9,8 @@ export {
   addMonths,
   daysBetween,
   formatDate,
+  formatDateRange,
+  formatMonthDay,
   formatMonthRange,
   formatMonthYear,
   formatShortDate,
