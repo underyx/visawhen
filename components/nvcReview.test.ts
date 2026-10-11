@@ -1,7 +1,14 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { addDays } from "./dates";
-import { front, getStall, type Reading, reviewRange } from "./nvcReview";
+import {
+  front,
+  getStall,
+  latest,
+  latestChange,
+  type Reading,
+  reviewRange,
+} from "./nvcReview";
 
 /** Weekly readings from a Monday, with the days of each */
 function weekly(from: string, days: number[]): Record<string, number> {
@@ -13,6 +20,35 @@ function weekly(from: string, days: number[]): Record<string, number> {
 describe("front", () => {
   it("is the as-of date minus the days", () => {
     assert.equal(front(["2026-02-09", 30]), "2026-01-10");
+  });
+});
+
+describe("latest", () => {
+  it("is the newest reading", () => {
+    assert.deepEqual(latest(weekly("2026-01-05", [30, 33])), [
+      "2026-01-12",
+      33,
+    ]);
+  });
+});
+
+describe("latestChange", () => {
+  it("compares the newest reading with the one before", () => {
+    assert.deepEqual(latestChange(weekly("2026-01-05", [30, 33, 29])), {
+      previous: ["2026-01-12", 33],
+      days: -4,
+    });
+  });
+
+  it("is null with a single reading", () => {
+    assert.equal(latestChange(weekly("2026-01-05", [30])), null);
+  });
+
+  it("compares across a gap in the readings", () => {
+    assert.deepEqual(latestChange({ "2026-07-13": 33, "2026-09-21": 55 }), {
+      previous: ["2026-07-13", 33],
+      days: 22,
+    });
   });
 });
 

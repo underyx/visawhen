@@ -72,6 +72,25 @@ export function readings(series: NvcSeries): Reading[] {
   return Object.entries(series);
 }
 
+/** The newest reading of a series */
+export function latest(series: NvcSeries): Reading {
+  const all = readings(series);
+  return all[all.length - 1];
+}
+
+/** How the newest reading compares with the one before it: the reading
+ * before, and the days the time grew by, negative when it shrank. Null when
+ * there is only one reading. The two can be weeks apart, when readings are
+ * missing in between, so the page says which date the change is since. */
+export function latestChange(
+  series: NvcSeries,
+): { previous: Reading; days: number } | null {
+  const all = readings(series);
+  if (all.length < 2) return null;
+  const previous = all[all.length - 2];
+  return { previous, days: all[all.length - 1][1] - previous[1] };
+}
+
 /** Where the front stood over its latest readings, when it has barely moved:
  * the longest run of consecutive readings, ending with the newest, over which
  * the front moved no more than STALL_DAYS. Its N days then only measure how

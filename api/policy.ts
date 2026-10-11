@@ -53,6 +53,7 @@ export function problemsWith(entry: Record<string, unknown>): string[] {
       'status must be "official" or "reported"',
     ],
     [isText(entry.title), "title must be a non-empty string"],
+    [isText(entry.label), "label must be a non-empty string"],
     [isText(entry.summary), "summary must be a non-empty string"],
     [isText(entry.body), "body must be a non-empty string"],
     [

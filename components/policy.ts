@@ -75,6 +75,9 @@ export interface PolicyEntry {
   id: string;
   status: PolicyStatus;
   title: string;
+  /** The title in a few words, for a chip that opens the entry as a note
+   * (the NVC page's "Recent news:" row): "Interview delays" */
+  label: string;
   /** What a visitor needs to know, in one or two short sentences of plain
    * English: most visitors read English as a second language. Shown first;
    * the body is behind "Details". The build warns when it runs long (see
