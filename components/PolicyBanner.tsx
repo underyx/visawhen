@@ -11,6 +11,7 @@ import {
 import { sortBy } from "lodash";
 import React from "react";
 import { daysBetween, formatShortDate, useToday } from "./Freshness";
+import classes from "./PolicyBanner.module.css";
 import MoreDetails from "./MoreDetails";
 import {
   ConsulatePage,
@@ -204,16 +205,21 @@ export default function PolicyBanner({
       {otherEntries.length > 0 && (
         // keepMounted={false}: the collapsed entries stay out of the HTML of
         // every page until someone opens them.
-        <Accordion variant="contained" order={2} keepMounted={false}>
+        <Accordion
+          variant="contained"
+          order={2}
+          keepMounted={false}
+          classNames={{ item: classes.item, label: classes.label }}
+        >
           <Accordion.Item value="policies">
             {/* The titles are listed under the label, so that what the
-            entries are about shows without opening them. Spans: the control
-            is a button. */}
+            entries are about shows without opening them, set like a
+            notice's title and text. Spans: the control is a button. */}
             <Accordion.Control>
-              <Text span display="block" inherit>
+              <Text span display="block" size="sm" fw={700}>
                 {`Policy changes that may affect your visa (${otherEntries.length})`}
               </Text>
-              <Text span display="block" size="sm" c="dimmed">
+              <Text span display="block" size="sm">
                 {otherEntries.map((entry) => entry.title).join("; ")}
               </Text>
             </Accordion.Control>
