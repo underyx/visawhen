@@ -352,7 +352,6 @@ export default function UscisForm({
   const newest = totalPoints[totalPoints.length - 1];
   const opening = views[0].points[views[0].points.length - 1];
   const related = RELATED_FORMS[form];
-  const relatedLinks = related?.links;
   // the view's own range, when it has one: the headline for a form with one
   // category, none for all categories together
   const viewRange =
@@ -364,10 +363,6 @@ export default function UscisForm({
             !range.priorityDate &&
             range.suppressed === null,
         ) ?? null;
-  // whether any category gets a range, not just a reason why not
-  const hasRange = ranges.some(
-    ({ priorityDate, suppressed }) => !priorityDate && suppressed === null,
-  );
   const backlogSuppressed = clearingSuppressed(current);
   // quarters the chart leaves the time to clear the backlog out of
   const clearingGaps = points.some(
@@ -522,34 +517,27 @@ export default function UscisForm({
         )}
         {related !== undefined && (
           <Text>
-            {relatedLinks !== undefined && (
+            {related.next !== undefined && (
               <>
-                {related.lead}{" "}
-                {relatedLinks.map((link, index) => (
-                  <React.Fragment key={link.href}>
-                    {index > 0 &&
-                      (index === relatedLinks.length - 1 ? " and " : ", ")}
-                    {link.href.startsWith("/") ? (
-                      <Anchor component={Link} href={link.href}>
-                        {link.text}
-                      </Anchor>
-                    ) : (
-                      <Anchor href={link.href} target="_blank" rel="noopener">
-                        {link.text}
-                      </Anchor>
-                    )}
-                  </React.Fragment>
-                ))}
-                .{related.timeline !== undefined && " "}
+                {related.next.map((part, index) =>
+                  typeof part === "string" ? (
+                    <React.Fragment key={index}>{part}</React.Fragment>
+                  ) : (
+                    <Anchor component={Link} href={part.href} key={index}>
+                      {part.text}
+                    </Anchor>
+                  ),
+                )}
+                {related.timeline !== undefined && " "}
               </>
             )}
             {related.timeline !== undefined && (
               <>
-                See the whole wait as dates on{" "}
+                The{" "}
                 <Anchor component={Link} href={related.timeline.href}>
                   {related.timeline.text}
-                </Anchor>
-                .
+                </Anchor>{" "}
+                puts the whole wait as dates.
               </>
             )}
           </Text>
@@ -558,11 +546,6 @@ export default function UscisForm({
       {ranges.length > 0 && (
         <Stack gap="sm">
           <Title order={2}>If you file today</Title>
-          <Text>
-            {hasRange
-              ? `How long ${article} ${form} filed today is likely to take, by category. In past quarters, the typical wait landed in the most likely range about half the time, and in the could-be range 8 times in 10.`
-              : `USCIS's median processing time for each category of the ${form}, and why there is no range for it.`}
-          </Text>
           <Table.ScrollContainer minWidth={300}>
             <Table striped withTableBorder horizontalSpacing={6}>
               <Table.Thead>
@@ -592,14 +575,13 @@ export default function UscisForm({
                       </Table.Td>
                     ) : range.suppressed === "too few decisions" ? (
                       <Table.Td colSpan={2}>
-                        Too few decisions last quarter to estimate
+                        No range: too few decisions last quarter
                       </Table.Td>
                     ) : range.suppressed === "nearly stopped" ? (
                       <Table.Td colSpan={2}>
-                        USCIS has nearly stopped deciding these:{" "}
+                        No range: USCIS has nearly stopped deciding these (
                         {Math.round((1 - (range.shockRatio ?? 0)) * 100)}% fewer
-                        decisions last quarter than its average over the four
-                        before
+                        than usual)
                       </Table.Td>
                     ) : (
                       <>
@@ -742,8 +724,7 @@ export default function UscisForm({
         <Stack gap="sm">
           <Title order={2}>Select your field office</Title>
           <Text>
-            Your case is handled by the field office for your home address, or
-            by a service center. Not sure which one?{" "}
+            Not sure which office has your case?{" "}
             <Anchor
               href="https://www.uscis.gov/about-us/find-a-uscis-office/field-offices"
               target="_blank"
@@ -770,19 +751,13 @@ export default function UscisForm({
               hint="Try the city or the state, such as Houston, Texas or TX."
             />
           </div>
-          <Text size="sm" c="dimmed">
-            {`Next to each office is how many ${
+          <Text size="xs" c="dimmed">
+            {`Each office's ${
               officeCategory === null ? form : `${form} (${officeCategory})`
-            } cases it decided, approved or denied, in ${
-              officeLabel ?? "the newest quarter"
-            }, most first${
+            } decisions in ${officeLabel ?? "the newest quarter"}, most first.${
               offices.some(({ category }) => category !== null)
-                ? "; for an office that handles few of those, or almost never approves them, the count is of its main category, named next to it"
+                ? " An office whose count is of another category names it."
                 : ""
-            }.${
-              officeCategory === null
-                ? ""
-                : " The office pages show every category."
             }`}
           </Text>
           {filteredOffices.length > 0 && (

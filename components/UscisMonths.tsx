@@ -23,8 +23,8 @@ export default function UscisMonths({
     <Stack gap="xs" id={MONTHS_ID}>
       <Text>
         {wholeForm === null
-          ? `The last ${points.length} months, one by one:`
-          : `The last ${points.length} months, one by one, for all ${wholeForm} categories together:`}
+          ? "Month by month:"
+          : `Month by month, all ${wholeForm} categories together:`}
       </Text>
       {/* narrow enough for a 360px phone without wrapping a cell */}
       <Table.ScrollContainer minWidth={280}>
