@@ -5,13 +5,15 @@
     uv run python notify.py --dry-run               # print the message and post nothing
 
 The NVC workflow runs this right after it commits what main.py found, so the
-commit before HEAD holds data.json as it was before the run. For each
-timeframe (document review, case creation, inquiry response) the message
-gives the newest number of days, how it changed since NVC's previous reading
-and the submission date NVC has reached; a timeframe NVC gave no new number
-for says so. Nothing is posted when no timeframe has a newer reading than
-before: the commit only changed the interview-queue data, or the Wayback
-Machine only filled in older readings.
+commit before HEAD holds data.json as it was before the run. The message
+gives, for each timeframe (document review, case creation, inquiry
+response), the previous and the new number of days, with a circle for what
+the change means: red when the wait got 3 or more days longer, yellow when it
+got 1 or 2 days longer, green when it got 3 or more days shorter and white
+otherwise; a timeframe NVC gave no new number for says so. The title links
+to visawhen.com/nvc and pings a role. Nothing is posted when no timeframe
+has a newer reading than before: the commit only changed the interview-queue
+data, or the Wayback Machine only filled in older readings.
 
 The webhook URL comes from the DISCORD_NVC_WEBHOOK_URL environment variable,
 a GitHub Actions secret of the same name (Discord: the channel's settings,
@@ -20,6 +22,11 @@ printed and the run ends green, so that forks and runs before the secret is
 set do not fail. A post that Discord refuses fails the run: the data is
 committed by then, so the site is still built and deployed, and the red run
 says the webhook needs attention. The URL is never printed.
+
+The role to ping comes from DISCORD_NVC_ROLE_ID, a GitHub Actions variable
+holding the role's numeric ID (Discord: Settings, Advanced, Developer Mode;
+then Server Settings, Roles, the role's menu, Copy Role ID). A webhook cannot
+name a role, only mention it by ID. Without it, nobody is pinged.
 """
 
 from __future__ import annotations
@@ -30,8 +37,6 @@ import os
 import subprocess
 import sys
 import time
-from datetime import date
-from datetime import timedelta
 from pathlib import Path
 from typing import Any
 from typing import Literal
@@ -45,28 +50,30 @@ Reading = tuple[str, int]
 
 DATA_PATH = Path(os.environ.get("NVC_DATA_PATH", "data.json"))
 WEBHOOK_ENV = "DISCORD_NVC_WEBHOOK_URL"
+ROLE_ENV = "DISCORD_NVC_ROLE_ID"
+# In angle brackets so that Discord adds no preview card under the message
 PAGE_URL = "https://visawhen.com/nvc"
-SOURCE = "NVC's timeframes page on travel.state.gov"
-# The violet of the site's links and stamp (pages/_app.tsx, shade 7)
-COLOR = 0x6C47AA
 TIMEOUT = 30
 # Discord's rate limit answers with 429 and the seconds to wait; one retry is
 # plenty for a message a week.
 MAX_RETRY_AFTER = 30
 
-# In the order the site shows them: the series' key in data.json, its name,
-# and what NVC is doing to the submissions of the date it has reached.
-TIMEFRAMES: list[tuple[TimeframeName, str, str]] = [
-    ("review", "Document review", "Reviewing documents submitted on {date}"),
-    ("creation", "Case creation", "Creating cases received from USCIS on {date}"),
-    ("inquiry", "Inquiry response", "Answering inquiries received on {date}"),
+TITLE = "New NVC numbers"
+# What the change means for the wait: 3 or more days longer, 1 or 2 days
+# longer, 3 or more days shorter, and anything else (the same, or 1 or 2 days
+# shorter)
+MUCH_LONGER = "\N{LARGE RED CIRCLE}"
+LONGER = "\N{LARGE YELLOW CIRCLE}"
+MUCH_SHORTER = "\N{LARGE GREEN CIRCLE}"
+SAME = "\N{MEDIUM WHITE CIRCLE}"
+MUCH_DAYS = 3
+
+# In the order the site shows them: the series' key in data.json and its name
+TIMEFRAMES: list[tuple[TimeframeName, str]] = [
+    ("review", "Document review"),
+    ("creation", "Case creation"),
+    ("inquiry", "Inquiry response"),
 ]
-
-
-def format_date(iso: str) -> str:
-    """"October 5, 2026", as the site writes dates."""
-    day = date.fromisoformat(iso)
-    return f"{day:%B} {day.day}, {day.year}"
 
 
 def newest(series: dict[str, int]) -> Reading | None:
@@ -75,12 +82,6 @@ def newest(series: dict[str, int]) -> Reading | None:
         return None
     as_of = max(series)
     return as_of, series[as_of]
-
-
-def front(reading: Reading) -> str:
-    """The submission date NVC had reached on a reading, in ISO format."""
-    as_of, days = reading
-    return (date.fromisoformat(as_of) - timedelta(days=days)).isoformat()
 
 
 def load_data(path: Path) -> Data:
@@ -110,7 +111,7 @@ def load_before(before: str) -> Data:
 def changed_series(before: Data, after: Data) -> dict[TimeframeName, Reading]:
     """The newest reading of each series that has one newer than before."""
     changes: dict[TimeframeName, Reading] = {}
-    for name, _title, _phrase in TIMEFRAMES:
+    for name, _title in TIMEFRAMES:
         new = newest(after.get(name, {}))
         old = newest(before.get(name, {}))
         if new is not None and (old is None or new[0] > old[0]):
@@ -118,80 +119,41 @@ def changed_series(before: Data, after: Data) -> dict[TimeframeName, Reading]:
     return changes
 
 
-def describe_change(new: Reading, old: Reading | None, note_date: bool) -> str:
-    """"**62 days** · was 56 (+6)", or just the days when there is nothing older."""
+def describe(new: Reading | None, old: Reading | None) -> str:
+    """"🔴 56 -> 62 days", or what there is when a reading is missing."""
+    if new is None:
+        return f"{SAME} no update" if old is None else f"{SAME} {old[1]} days (no update)"
     days = new[1]
-    text = f"**{days} day{'' if days == 1 else 's'}**"
+    unit = "day" if days == 1 else "days"
     if old is None:
-        return text
-    old_days = old[1]
-    was = f"was {old_days}"
-    if note_date:
-        was += f" on {format_date(old[0])}"
-    change = "no change" if days == old_days else f"{days - old_days:+d}"
-    return f"{text} · {was} ({change})"
+        return f"{SAME} {days} {unit}"
+    change = days - old[1]
+    if change >= MUCH_DAYS:
+        circle = MUCH_LONGER
+    elif change > 0:
+        circle = LONGER
+    elif change <= -MUCH_DAYS:
+        circle = MUCH_SHORTER
+    else:
+        circle = SAME
+    return f"{circle} {old[1]} -> {days} {unit}"
 
 
-def build_message(before: Data, after: Data) -> dict[str, Any] | None:
-    """The webhook payload, or None when no series has a newer reading."""
+def build_message(before: Data, after: Data, role_id: str | None) -> str | None:
+    """The message, or None when no series has a newer reading."""
     changes = changed_series(before, after)
     if not changes:
         return None
-
-    as_of_dates = {as_of for as_of, _days in changes.values()}
-    previous = {
-        old[0] for name in changes if (old := newest(before.get(name, {}))) is not None
-    }
-    # Each series has its own date: the scraper matches NVC's three sentences
-    # separately. When they agree, the title and description carry the dates;
-    # otherwise each timeframe names its own.
-    same_as_of = len(as_of_dates) == 1
-    same_previous = len(previous) == 1
-
-    title = (
-        f"NVC wait times as of {format_date(max(as_of_dates))}"
-        if same_as_of
-        else "NVC updated its wait times"
-    )
-    description = (
-        f"Changes are since NVC's previous update on {format_date(max(previous))}. "
-        if same_previous
-        else ""
-    ) + f"Charts and estimates: [visawhen.com/nvc]({PAGE_URL})"
-
-    fields = []
-    for name, field_title, phrase in TIMEFRAMES:
+    title = f"[{TITLE}](<{PAGE_URL}>)"
+    if role_id is not None:
+        title += f" <@&{role_id}>"
+    lines = [title]
+    for name, title in TIMEFRAMES:
         new = changes.get(name)
-        if new is None:
-            last = newest(after.get(name, {}))
-            value = (
-                "No new number from NVC."
-                if last is None
-                else f"No new number from NVC. The last one was **{last[1]} days** on {format_date(last[0])}."
-            )
-        else:
-            old = newest(before.get(name, {}))
-            first_line = describe_change(new, old, note_date=not same_previous)
-            if not same_as_of:
-                first_line += f" · as of {format_date(new[0])}"
-            second_line = phrase.format(date=format_date(front(new)))
-            if old is not None:
-                second_line += f" (was {format_date(front(old))})"
-            value = f"{first_line}\n{second_line}"
-        fields.append({"name": field_title, "value": value, "inline": False})
-
-    return {
-        "embeds": [
-            {
-                "title": title,
-                "url": PAGE_URL,
-                "description": description,
-                "color": COLOR,
-                "fields": fields,
-                "footer": {"text": f"Source: {SOURCE}"},
-            }
-        ]
-    }
+        old = newest(before.get(name, {}))
+        # a series with nothing new keeps its newest reading, which is "old"
+        lines += ["", title, describe(new, old if new is not None else newest(after.get(name, {})))]
+    return "\n".join(lines)
 
 
 def post(webhook_url: str, payload: dict[str, Any]) -> bool:
@@ -240,20 +202,30 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    role_id: str | None = os.environ.get(ROLE_ENV, "").strip() or None
+    if role_id is not None and not role_id.isdigit():
+        print(f"::warning::{ROLE_ENV} is not a role ID (a number), so no role is pinged")
+        role_id = None
+
     before = load_before(args.before)
     after = load_data(DATA_PATH)
-    payload = build_message(before, after)
-    if payload is None:
+    message = build_message(before, after, role_id)
+    if message is None:
         print("No timeframe has a newer reading than before; nothing to post")
         return 0
 
-    print(json.dumps(payload, indent=2, ensure_ascii=False))
+    print(message)
     if args.dry_run:
         return 0
     webhook_url = os.environ.get(WEBHOOK_ENV, "")
     if not webhook_url:
         print(f"::notice::{WEBHOOK_ENV} is not set, so the message above was not posted to Discord")
         return 0
+    # Only that role can be pinged, whatever else the text says
+    payload = {
+        "content": message,
+        "allowed_mentions": {"parse": [], "roles": [] if role_id is None else [role_id]},
+    }
     return 0 if post(webhook_url, payload) else 1
 
 
