@@ -1,7 +1,7 @@
 import { SearchIcon } from "../../components/icons";
 import {
-  Anchor,
   Badge,
+  Box,
   Highlight,
   Stack,
   Text,
@@ -15,8 +15,6 @@ import React, { useMemo } from "react";
 import {
   getAllPosts,
   getIvScheduleAsOf,
-  getIvSchedulePostCount,
-  getIvScheduleSource,
   getLastIssuedByPost,
   getRecentIssuancesByPost,
   getRecentWindow,
@@ -42,12 +40,9 @@ interface Props {
   /** Visas issued per post in the last 12 months of the data */
   recentIssuances: RecentPostIssuancesRow[];
   recentWindow: RecentWindow;
-  /** The date of State's newest IV Scheduling Status Tool update we have */
+  /** The date of State's newest IV Scheduling Status Tool update we have,
+   * for the meta description */
   ivScheduleAsOf: string;
-  /** How many posts that update lists */
-  ivSchedulePosts: number;
-  /** The tool's address */
-  ivScheduleSource: string;
   /** For the posts that issued no visas in the last 12 months of the data:
    * the newest month they issued any in, by post slug */
   lastIssued: Record<string, string>;
@@ -66,8 +61,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       recentIssuances: await getRecentIssuancesByPost(),
       recentWindow,
       ivScheduleAsOf: await getIvScheduleAsOf(),
-      ivSchedulePosts: await getIvSchedulePostCount(),
-      ivScheduleSource: await getIvScheduleSource(),
       lastIssued: Object.fromEntries(
         Object.entries(await getLastIssuedByPost()).filter(
           ([, month]) => month < recentWindow.from,
@@ -89,8 +82,6 @@ export default function ConsulateSelect({
   recentIssuances,
   recentWindow,
   ivScheduleAsOf,
-  ivSchedulePosts,
-  ivScheduleSource,
   lastIssued,
 }: Props) {
   const recentMap = useMemo<Map<string, number>>(
@@ -125,12 +116,14 @@ export default function ConsulateSelect({
         <meta property="og:description" content={description} />
         <meta property="og:url" content="https://visawhen.com/consulates" />
       </Head>
-      <Title order={1}>US embassies and consulates</Title>
-      <Text>
-        Pick your embassy or consulate to see which month of cases it is
-        scheduling immigrant visa interviews for, and how many visas of each
-        class it issues.
-      </Text>
+      <Box>
+        <Title order={1}>US embassies and consulates</Title>
+        <Text size="lg">
+          How many visas each one issues per month,{" "}
+          {formatMonth(recentWindow.from)} – {formatMonth(recentWindow.to)}, in
+          the State Department&rsquo;s own figures.
+        </Text>
+      </Box>
       {/* one block: a Stack would pay its gap around the empty live region */}
       <div>
         <TextInput
@@ -148,15 +141,6 @@ export default function ConsulateSelect({
           hint="Try the city or the country, such as Manila or Philippines."
         />
       </div>
-      <Text size="sm" c="dimmed">
-        Interview months: the State Department&rsquo;s{" "}
-        <Anchor href={ivScheduleSource} target="_blank" rel="noopener">
-          interview-scheduling tool
-        </Anchor>
-        , updated {formatShortDate(ivScheduleAsOf)}, for {ivSchedulePosts}{" "}
-        posts. Badges: average visas issued per month,{" "}
-        {formatMonth(recentWindow.from)} to {formatMonth(recentWindow.to)}.
-      </Text>
       {filteredPosts.length > 0 && (
         <ListRows>
           {filteredPosts.map(({ post, postSlug, country }) => (
