@@ -4,7 +4,9 @@ import React from "react";
 import { ChipRow, NoteChip } from "./NoteChip";
 
 // Who NVC's times are for: a chip for each kind of case, which opens a note
-// on what the times mean for it, or that they do not apply to it. The order
+// on what the times mean for it, or that they do not apply to it. A note
+// says only what the page does not show already (Bence: not "NVC usually
+// takes weeks", which the numbers above it say). The order
 // (the family-based cases, then employment, then the rest) packs the chips
 // into three lines of a 360px phone, after "Special cases:".
 
@@ -34,9 +36,8 @@ const CASES: Case[] = [
           <Text span inherit fw={700}>
             Spouses, parents and children of US citizens:
           </Text>{" "}
-          NVC usually takes weeks.{" "}
           <Anchor component={Link} href="/consulates">
-            The interview queue at your consulate
+            the interview queue at your consulate
           </Anchor>{" "}
           is usually your longest wait.
         </Text>
