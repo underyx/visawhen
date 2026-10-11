@@ -69,7 +69,7 @@ import {
   MonthlyNumbers,
 } from "../../../components/monthlyNumbers";
 import MoreDetails from "../../../components/MoreDetails";
-import PolicyBanner from "../../../components/PolicyBanner";
+import { PolicyNews } from "../../../components/PolicyBanner";
 import { breadcrumbList } from "../../../components/structuredData";
 import { ListRow, ListRows } from "../../../components/ListRow";
 import { rankPlace } from "../../../components/search";
@@ -496,7 +496,7 @@ export default function UscisForm({
             {title}
           </Text>
         </Box>
-        <PolicyBanner page={`/uscis/${slug}`} />
+        <PolicyNews page={`/uscis/${slug}`} />
         {views.length > 1 && (
           <Stack gap={6}>
             <Chip.Group

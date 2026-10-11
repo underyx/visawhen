@@ -3,13 +3,13 @@ import { describe, it } from "node:test";
 import {
   hasEnded,
   hasStarted,
-  isAboutPage,
   issuanceSuspensionFor,
   namesPage,
   overridesUpdate,
   type PolicyEntry,
   policiesFor,
   scheduleOverrideFor,
+  staysOpen,
 } from "./policy";
 
 function entry(fields: Partial<PolicyEntry> & { id: string }): PolicyEntry {
@@ -188,22 +188,33 @@ describe("policiesFor", () => {
   });
 });
 
-describe("isAboutPage and namesPage", () => {
-  it("expand an entry that names the page, or is expanded, but not on a nonimmigrant class's page", () => {
+describe("namesPage", () => {
+  it("is true for an entry about the page's post, country or visa class", () => {
     const lagos = { postSlug: "lagos", country: "Nigeria" };
     assert.equal(namesPage(nigerians, lagos), true);
     assert.equal(namesPage(worldwide, lagos), false);
-    assert.equal(isAboutPage(worldwide, lagos), true);
+    assert.equal(namesPage(nvcOnly, lagos), false);
+    assert.equal(namesPage(dvOnly, { ...lagos, visaClassSlug: "dv" }), true);
+  });
+});
+
+describe("staysOpen", () => {
+  it("keeps open an entry that names the post, or pauses every post", () => {
+    const lagos = { postSlug: "lagos", country: "Nigeria" };
+    assert.equal(staysOpen(juba, { postSlug: "juba", country: null }), true);
+    assert.equal(staysOpen(juba, lagos), false);
+    assert.equal(staysOpen(worldwide, lagos), true);
     assert.equal(
-      isAboutPage(worldwide, {
-        ...lagos,
-        visaClassSlug: "h1b",
-        nonimmigrant: true,
-      }),
+      staysOpen(worldwide, { postSlug: "budapest", country: "Hungary" }),
       false,
     );
-    assert.equal(isAboutPage(nvcOnly, lagos), false);
-    assert.equal(namesPage(dvOnly, { ...lagos, visaClassSlug: "dv" }), true);
+  });
+
+  it("makes a chip of an entry about the applicants' nationality or every post", () => {
+    const lagos = { postSlug: "lagos", country: "Nigeria" };
+    assert.equal(staysOpen(nigerians, lagos), false);
+    assert.equal(staysOpen(nvcOnly, lagos), false);
+    assert.equal(staysOpen(dvOnly, { ...lagos, visaClassSlug: "dv" }), false);
   });
 });
 

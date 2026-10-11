@@ -61,7 +61,7 @@ import {
 import { OutcomesChart, WaitChart } from "../../../components/UscisChart";
 import UscisStats, { RangeText } from "../../../components/UscisStats";
 import MoreDetails from "../../../components/MoreDetails";
-import PolicyBanner from "../../../components/PolicyBanner";
+import { PolicyNews } from "../../../components/PolicyBanner";
 import { breadcrumbList } from "../../../components/structuredData";
 import TemporaryNotice from "../../../components/TemporaryNotice";
 
@@ -647,7 +647,7 @@ export default function UscisOffice({
         <Title order={1}>
           {form} processing at {fullName}
         </Title>
-        <PolicyBanner page={`/uscis/${formSlug}`} />
+        <PolicyNews page={`/uscis/${formSlug}`} />
         {views.length > 1 && (
           <Stack gap={6}>
             <Chip.Group

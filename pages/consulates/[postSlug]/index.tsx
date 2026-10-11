@@ -43,7 +43,7 @@ import IvScheduleCard, {
   showsSuspension,
 } from "../../../components/IvScheduleCard";
 import { ListItem, ListRow, ListRows } from "../../../components/ListRow";
-import PolicyBanner from "../../../components/PolicyBanner";
+import { PolicyNews, PolicyNotices } from "../../../components/PolicyBanner";
 import { breadcrumbList } from "../../../components/structuredData";
 import {
   hasEnded,
@@ -359,7 +359,8 @@ export default function ConsulateSelect({
           {inactivity}
         </Alert>
       )}
-      <PolicyBanner consulate={consulate} />
+      <PolicyNotices consulate={consulate} />
+      <PolicyNews consulate={consulate} />
       <IvScheduleCard
         postName={postName}
         asOf={ivScheduleAsOf}

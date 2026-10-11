@@ -34,7 +34,7 @@ import {
   NVC_NONIMMIGRANT_CLASSES,
 } from "../../../components/consulates";
 import IvScheduleCard from "../../../components/IvScheduleCard";
-import PolicyBanner from "../../../components/PolicyBanner";
+import { PolicyNews, PolicyNotices } from "../../../components/PolicyBanner";
 import { breadcrumbList } from "../../../components/structuredData";
 import {
   issuanceSuspensionFor,
@@ -476,7 +476,13 @@ export default function ConsulateStats({
           {inactivity}
         </Alert>
       )}
-      <PolicyBanner
+      <PolicyNotices
+        consulate={consulate}
+        immigrant={
+          visaType === "IV" || NVC_NONIMMIGRANT_CLASSES.includes(visaClassSlug)
+        }
+      />
+      <PolicyNews
         consulate={consulate}
         immigrant={
           visaType === "IV" || NVC_NONIMMIGRANT_CLASSES.includes(visaClassSlug)
