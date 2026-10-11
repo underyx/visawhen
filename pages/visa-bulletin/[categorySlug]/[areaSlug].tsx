@@ -223,20 +223,23 @@ function movedText(months: number): string {
   return `moved ${months > 0 ? "forward" : "back"} ${formatMonths(months)}`;
 }
 
-/** What a movement was, as a sentence, or null when it cannot be said in
- * months (one end is "C" or "U") */
-function movementSentence(movement: Movement, span: string): string | null {
+/** What the last year's movement was, as a sentence, or null when it cannot
+ * be said in months (one end is "C" or "U") */
+function yearSentence(movement: Movement): string | null {
   if (movement.months !== null)
-    return `In the last ${span}, the Final Action Date ${movedText(
+    return `In the last year, the Final Action Date ${movedText(
       movement.months,
     )}.`;
   const [, from] = movement.from;
   const [, to] = movement.to;
   if (from === to)
-    return `It was ${formatCutoff(from).toLowerCase()} ${span} ago too.`;
+    return `It was ${formatCutoff(from).toLowerCase()} a year ago too.`;
   return null;
 }
 
+/** How long the people at the front of the line have waited, and how far
+ * the line moved in the last year and the last 5 years. A current category
+ * gets no first sentence: the sentence under the figures says it. */
 function Movements({ series, month }: { series: Series; month: string }) {
   const latest = series[series.length - 1]?.[1];
   const year = getMovement(series, 12);
@@ -244,15 +247,14 @@ function Movements({ series, month }: { series: Series; month: string }) {
   const sentences: string[] = [];
   if (latest !== undefined && isDate(latest)) {
     const waited = monthsBetweenDates(latest, monthStart(month));
+    // "about 0 months" is nonsense on a page whose line is nearly gone
     sentences.push(
-      `The people at the front of the line now have a priority date from ${formatBulletinMonth(
-        latest.slice(0, 7),
-      )}: they have waited about ${formatMonths(
-        waited >= 24 ? Math.round(waited / 12) * 12 : waited,
-      )}.`,
+      waited < 2
+        ? "There is almost no line now."
+        : `People at the front of the line have waited about ${formatMonths(
+            waited >= 24 ? Math.round(waited / 12) * 12 : waited,
+          )}.`,
     );
-  } else if (latest === "C") {
-    sentences.push("This category is current: there is no line.");
   } else if (latest === "U") {
     sentences.push(
       "No visas are left in this category this month, so the line is not moving.",
@@ -265,8 +267,8 @@ function Movements({ series, month }: { series: Series; month: string }) {
         )} bulletin, was ${formatCutoff(lastDated[1])}.`,
       );
   }
-  const yearSentence = year && movementSentence(year, "12 months");
-  if (yearSentence) sentences.push(yearSentence);
+  const lastYear = year && yearSentence(year);
+  if (lastYear) sentences.push(lastYear);
   if (fiveYears !== null && fiveYears.months !== null) {
     const perYear = Math.round(fiveYears.months / 5);
     sentences.push(
@@ -289,11 +291,8 @@ function Movements({ series, month }: { series: Series; month: string }) {
       ))}
       <MoreDetails>
         <Text size="sm">
-          The line does not move at a steady pace. It can stand still for
-          months, jump forward, or move back. It often moves back in the summer,
-          near the end of the US government&rsquo;s year, and forward again in
-          October. So past movement cannot tell you exactly when your date will
-          come.
+          The line can stand still for months, jump forward, or move back. It
+          often moves back in summer and forward again in October.
         </Text>
         {shown.map(({ from: [fromMonth, fromCutoff] }) => (
           <Text size="sm" key={fromMonth}>
