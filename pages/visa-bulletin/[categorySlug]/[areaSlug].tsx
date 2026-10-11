@@ -138,8 +138,8 @@ function StaleNotice({ month }: { month: string }) {
   if (daysBetween(due, today) <= GRACE_DAYS) return null;
   return (
     <TemporaryNotice>
-      Our newest Visa Bulletin is for {formatBulletinMonth(month)}, but the
-      State Department has probably published a newer one. See{" "}
+      The State Department has probably published a newer bulletin than{" "}
+      {formatBulletinMonth(month)}&rsquo;s. See{" "}
       <Anchor
         href={VISA_BULLETIN_URL}
         target="_blank"
@@ -441,7 +441,7 @@ export default function VisaBulletinPage({
         links={otherAreas}
       />
       <OtherLinks
-        title={`Other ${category.kind} categories: ${area.name}`}
+        title={`Other ${category.kind} categories`}
         links={otherCategories}
       />
     </Stack>
