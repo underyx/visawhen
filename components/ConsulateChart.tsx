@@ -153,14 +153,7 @@ export default function ConsulateChart({
       </Plot>
       <figcaption>
         Source: the U.S. Department of State&rsquo;s{" "}
-        <a href={source.url}>monthly {source.kind} visa issuance statistics</a>
-        .
-        <br />
-        The monthly counts are stored in{" "}
-        <a href="https://github.com/underyx/visawhen/blob/main/data/consulates/dump">
-          JSON lines files on GitHub
-        </a>
-        .
+        <a href={source.url}>monthly {source.kind} visa issuance statistics</a>.
       </figcaption>
     </Paper>
   );

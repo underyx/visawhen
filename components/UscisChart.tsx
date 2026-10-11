@@ -65,12 +65,6 @@ function SourceCaption({ source, what }: { source: string; what: string }) {
     <>
       Source: USCIS&rsquo;s quarterly <a href={source}>{what}</a> reports, via
       the <a href={USCIS_DATA_URL}>Immigration and Citizenship Data</a> page.
-      <br />
-      The numbers are stored in a{" "}
-      <a href="https://github.com/underyx/visawhen/blob/main/data/uscis/forms.json">
-        JSON file on GitHub
-      </a>
-      .
     </>
   );
 }
@@ -169,6 +163,25 @@ function formatCountTick(value: number): string {
 
 /** The sentences under a chart on its breaks and marked points: those of the
  * breaks within the points, and what a diamond means when there is one. */
+/** What a chart's dashed lines and diamonds mean, one note each */
+function noteTexts(
+  points: QuarterPoint[],
+  breaks: ChartBreak[],
+  suspects: boolean,
+): string[] {
+  // the breaks in the quarters the chart shows at first; older ones have
+  // their line and its label
+  const shown = points.slice(-CHART_QUARTERS);
+  return [
+    ...breaks
+      .filter((chartBreak) =>
+        shown.some(({ quarter }) => quarter === chartBreak.quarter),
+      )
+      .map(({ label, text }) => `A dashed line ("${label}"): ${text}`),
+    ...(suspects ? [SUSPECT_NOTE] : []),
+  ];
+}
+
 function Notes({
   points,
   breaks,
@@ -178,17 +191,7 @@ function Notes({
   breaks: ChartBreak[];
   suspects: boolean;
 }) {
-  // the breaks in the quarters the chart shows at first; older ones have
-  // their line and its label
-  const shown = points.slice(-CHART_QUARTERS);
-  const texts = [
-    ...breaks
-      .filter((chartBreak) =>
-        shown.some(({ quarter }) => quarter === chartBreak.quarter),
-      )
-      .map(({ label, text }) => `A dashed line ("${label}"): ${text}`),
-    ...(suspects ? [SUSPECT_NOTE] : []),
-  ];
+  const texts = noteTexts(points, breaks, suspects);
   if (texts.length === 0) return null;
   return (
     <>
@@ -591,6 +594,12 @@ export function WaitChart({
     range: [plotHeight, 0],
     nice: true,
   });
+  // The caption is left out when it has nothing to say (the office pages
+  // have no median series): an empty one still takes its margin.
+  const captioned =
+    processingTimeSeries.length > 0 ||
+    ceiling !== null ||
+    noteTexts(points, breaks, suspects).length > 0;
   return (
     <Paper withBorder p="md" mx={0} component="figure">
       <ChartHeader
@@ -741,16 +750,15 @@ export function WaitChart({
           </>
         )}
       </Plot>
-      <figcaption>
-        Time to clear backlog is the pending applications at the end of each
-        quarter, divided by the decisions (approvals and denials) made per month
-        during it.
-        {processingTimeSeries.length > 0 &&
-          " USCIS's median is how long the cases it decided in the quarter had taken."}
-        {ceiling !== null &&
-          " A triangle marks a quarter far off the top of the scale, such as one in which USCIS decided almost nothing; hover over or tap it for its numbers."}
-        <Notes points={points} breaks={breaks} suspects={suspects} />
-      </figcaption>
+      {captioned && (
+        <figcaption>
+          {processingTimeSeries.length > 0 &&
+            "USCIS's median is how long the cases it decided in the quarter had taken."}
+          {ceiling !== null &&
+            " A triangle marks a quarter far off the top of the scale, such as one in which USCIS decided almost nothing; hover over or tap it for its numbers."}
+          <Notes points={points} breaks={breaks} suspects={suspects} />
+        </figcaption>
+      )}
     </Paper>
   );
 }

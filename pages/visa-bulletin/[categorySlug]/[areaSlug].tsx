@@ -47,9 +47,6 @@ import {
 import { daysBetween, useToday } from "../../../components/Freshness";
 import TemporaryNotice from "../../../components/TemporaryNotice";
 
-const DATA_URL =
-  "https://github.com/underyx/visawhen/blob/main/data/visa_bulletin/data.json";
-
 interface OtherLink {
   name: string;
   href: string;
@@ -402,7 +399,6 @@ export default function VisaBulletinPage({
         {hasDates && (
           <VisaBulletinChart
             series={series}
-            dataUrl={DATA_URL}
             label={`${category.name}, ${area.name}`}
           />
         )}
