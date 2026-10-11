@@ -15,6 +15,7 @@ import React, { useMemo } from "react";
 import {
   getAllPosts,
   getIvScheduleAsOf,
+  getIvScheduleMonths,
   getLastIssuedByPost,
   getRecentIssuancesByPost,
   getRecentWindow,
@@ -22,7 +23,11 @@ import {
   RecentPostIssuancesRow,
   RecentWindow,
 } from "../../api/consulates";
-import { formatMonth, formatMonthlyRate } from "../../components/consulates";
+import {
+  formatMonth,
+  formatMonthlyRate,
+  ivMonthBadge,
+} from "../../components/consulates";
 import { formatShortDate } from "../../components/Freshness";
 import { ListRow, ListRows } from "../../components/ListRow";
 import { normalize } from "../../components/search";
@@ -41,8 +46,12 @@ interface Props {
   recentIssuances: RecentPostIssuancesRow[];
   recentWindow: RecentWindow;
   /** The date of State's newest IV Scheduling Status Tool update we have,
-   * for the meta description */
+   * which the badges read their months against */
   ivScheduleAsOf: string;
+  /** Each post's month in that update for spouses, children and parents of
+   * US citizens, by post slug: null where State gives N/A. Posts the tool
+   * does not list are left out. */
+  ivMonths: Record<string, string | null>;
   /** For the posts that issued no visas in the last 12 months of the data:
    * the newest month they issued any in, by post slug */
   lastIssued: Record<string, string>;
@@ -61,6 +70,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       recentIssuances: await getRecentIssuancesByPost(),
       recentWindow,
       ivScheduleAsOf: await getIvScheduleAsOf(),
+      ivMonths: await getIvScheduleMonths(),
       lastIssued: Object.fromEntries(
         Object.entries(await getLastIssuedByPost()).filter(
           ([, month]) => month < recentWindow.from,
@@ -77,7 +87,12 @@ function sortItems(posts: Post[], recentMap: Map<string, number>): Post[] {
   ]);
 }
 
-interface RateBadgeProps {
+interface PostBadgeProps {
+  /** The date of State's newest tool update (Props.ivScheduleAsOf) */
+  asOf: string;
+  /** The post's month in it for spouses, children and parents of US
+   * citizens (Props.ivMonths), undefined when the tool does not list it */
+  month: string | null | undefined;
   /** Visas the post issued in the last 12 months of the data */
   issuances: number;
   /** The newest month it issued any in, when that is before those 12
@@ -85,31 +100,31 @@ interface RateBadgeProps {
   lastIssued: string | undefined;
 }
 
-/** The badge at a row's right: the post's visas per month, or "none" with
- * the month it last issued any as a small line under it. One badge saying
- * "none since Sep 2024" was wide enough to wrap a long post name onto three
- * lines on a phone; the /uscis rows put their category under the badge the
- * same way. */
-function RateBadge({ issuances, lastIssued }: RateBadgeProps) {
-  const badge = (text: string) => (
-    <Badge
-      size="lg"
-      radius="sm"
-      variant="outline"
-      color="gray"
-      tt="none"
-      fw={500}
-    >
-      {text}
-    </Badge>
-  );
-  if (issuances > 0) return badge(formatMonthlyRate(issuances / 12));
-  if (lastIssued === undefined) return badge("none issued");
+/** The badge at a row's right is the post's interview month, with its
+ * visas per month as a small line under it. The month is what the post's
+ * page leads with and what most visitors come for, so it gets the badge;
+ * the rate still tells a busy post from a quiet one, and a second badge or
+ * a wider one would squeeze a long post name onto three lines on a phone,
+ * so it goes in the line, as the /uscis rows put their category. */
+function PostBadge({ asOf, month, issuances, lastIssued }: PostBadgeProps) {
   return (
     <Stack gap={2} align="flex-end">
-      {badge("none")}
+      <Badge
+        size="lg"
+        radius="sm"
+        variant="outline"
+        color="gray"
+        tt="none"
+        fw={500}
+      >
+        {ivMonthBadge(asOf, month)}
+      </Badge>
       <Text size="xs" c="dimmed" ta="right">
-        since {formatMonth(lastIssued)}
+        {issuances > 0
+          ? formatMonthlyRate(issuances / 12)
+          : lastIssued === undefined
+          ? "none issued"
+          : `none since ${formatMonth(lastIssued)}`}
       </Text>
     </Stack>
   );
@@ -120,6 +135,7 @@ export default function ConsulateSelect({
   recentIssuances,
   recentWindow,
   ivScheduleAsOf,
+  ivMonths,
   lastIssued,
 }: Props) {
   const recentMap = useMemo<Map<string, number>>(
@@ -140,9 +156,9 @@ export default function ConsulateSelect({
   }, [recentMap, posts, term]);
 
   const title = "US consulates: immigrant visa interview scheduling";
-  const description = `The month of documentarily complete cases for which NVC is scheduling most immigrant visa interviews at U.S. embassies and consulates, from the State Department's scheduling tool (updated ${formatShortDate(
+  const description = `Each U.S. embassy and consulate's interview month for spouses, children and parents of U.S. citizens, the month of documentarily complete cases NVC is scheduling immigrant visa interviews for, from the State Department's scheduling tool (updated ${formatShortDate(
     ivScheduleAsOf,
-  )}), and how many visas each one issued, by visa class.`;
+  )}), and how many visas it issues per month.`;
 
   return (
     <Stack gap="xl">
@@ -157,9 +173,8 @@ export default function ConsulateSelect({
       <Box>
         <Title order={1}>US embassies and consulates</Title>
         <Text size="lg">
-          How many visas each one issues per month,{" "}
-          {formatMonth(recentWindow.from)} – {formatMonth(recentWindow.to)}, in
-          the State Department&rsquo;s own figures.
+          Each one&rsquo;s interview month, and how many visas it issues per
+          month.
         </Text>
       </Box>
       {/* one block: a Stack would pay its gap around the empty live region */}
@@ -187,7 +202,9 @@ export default function ConsulateSelect({
               href={`/consulates/${postSlug}`}
               hardNavigation
               rightSection={
-                <RateBadge
+                <PostBadge
+                  asOf={ivScheduleAsOf}
+                  month={ivMonths[postSlug]}
                   issuances={recentMap.get(postSlug) ?? 0}
                   lastIssued={lastIssued[postSlug]}
                 />
@@ -211,6 +228,14 @@ export default function ConsulateSelect({
           ))}
         </ListRows>
       )}
+      <Text size="xs" c="dimmed">
+        Interview month: for spouses, children and parents of US citizens, the
+        month of complete cases that NVC is scheduling interviews for, in the
+        State Department&rsquo;s tool of {formatShortDate(ivScheduleAsOf)}.
+        Visas: the average per month for {formatMonth(recentWindow.from)} –{" "}
+        {formatMonth(recentWindow.to)}, in the State Department&rsquo;s own
+        figures.
+      </Text>
     </Stack>
   );
 }

@@ -358,11 +358,19 @@ export async function getIvScheduleSource(): Promise<string> {
   return (await readIvScheduleData()).source;
 }
 
-/** How many posts the newest update of State's IV Scheduling Status Tool
- * lists */
-export async function getIvSchedulePostCount(): Promise<number> {
+/** Every post in the newest update of State's IV Scheduling Status Tool,
+ * by slug, with its month for one of the tool's categories, "2026-02", or
+ * null where State gave N/A */
+export async function getIvScheduleMonths(
+  category: IvCategory = "relative",
+): Promise<Record<string, string | null>> {
   const { snapshots } = await readIvScheduleData();
-  return Object.keys(snapshots[await getIvScheduleAsOf()]).length;
+  return Object.fromEntries(
+    Object.entries(snapshots[await getIvScheduleAsOf()]).map(([slug, row]) => [
+      slug,
+      row[category],
+    ]),
+  );
 }
 
 /** A post's line in the update of State's IV Scheduling Status Tool of

@@ -12,6 +12,7 @@ import {
   formatMonthlyRate,
   formatShortIvMonth,
   IV_CATEGORY_BY_CLASS,
+  ivMonthBadge,
   IV_POSTS_ELSEWHERE,
   monthsBehind,
   summarizeInactivity,
@@ -40,6 +41,16 @@ describe("formatting", () => {
   it("counts the months a tool month is behind its update", () => {
     assert.equal(monthsBehind("2026-09-23", "2026-02"), 7);
     assert.equal(monthsBehind("2026-01-15", "2025-11"), 2);
+  });
+  it("names a post's interview month for its row in the list", () => {
+    assert.equal(ivMonthBadge("2026-09-23", "2026-02"), "Feb 2026");
+    assert.equal(ivMonthBadge("2026-09-23", "2026-08"), "Aug 2026");
+    // the update's own month, and one past it, are current
+    assert.equal(ivMonthBadge("2026-09-23", "2026-09"), "Current");
+    assert.equal(ivMonthBadge("2026-09-23", "2026-10"), "Current");
+    // N/A in the tool, and a post the tool does not list
+    assert.equal(ivMonthBadge("2026-09-23", null), "no month");
+    assert.equal(ivMonthBadge("2026-09-23", undefined), "no month");
   });
 });
 

@@ -588,3 +588,16 @@ export function formatIvMonth(month: string): string {
 export function formatShortIvMonth(month: string): string {
   return formatMonth(`${month}-01T00:00:00.000Z`);
 }
+
+/** A post's interview month for its row in the consulate list: "Current"
+ * when the tool's month is the update's own month or later, as the post
+ * pages read the tool, else the month, "Mar 2026"; "no month" where the
+ * tool lists the post with N/A (null) or does not list it at all
+ * (undefined). */
+export function ivMonthBadge(
+  asOf: string,
+  month: string | null | undefined,
+): string {
+  if (month === null || month === undefined) return "no month";
+  return monthsBehind(asOf, month) <= 0 ? "Current" : formatShortIvMonth(month);
+}
