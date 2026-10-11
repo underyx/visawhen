@@ -49,12 +49,12 @@ const SECTIONS = [
   {
     href: "/nvc",
     title: "National Visa Center wait times",
-    text: "Case creation and document review, week by week.",
+    text: "Case creation and document review.",
   },
   {
     href: "/consulates",
     title: "Consulate interview queues",
-    text: "Which month each consulate is scheduling, and the visas it issues.",
+    text: "Interview months and visas issued.",
   },
   {
     href: "/visa-bulletin",
@@ -84,10 +84,7 @@ export default function Home({ paths }: Props) {
         <Title order={1} className={classes.title}>
           When will your case move?
         </Title>
-        <Text className={classes.lead}>
-          Pick your path and say where your case is. We show when each step will
-          most likely come.
-        </Text>
+        <Text className={classes.lead}>Pick your path.</Text>
       </header>
       <ListRows>
         {paths.map(({ slug, title, who, summary }) => (
@@ -95,12 +92,14 @@ export default function Home({ paths }: Props) {
             key={slug}
             href={`/timeline/${slug}`}
             label={
+              // the figures are the row's reward, so they come right
+              // under the title; the visa codes identify the path under them
               <Stack gap={4}>
                 <Text fw={600}>{title}</Text>
+                <Text>{summary}</Text>
                 <Text size="sm" c="dimmed">
                   {who}
                 </Text>
-                <Text size="sm">{summary}</Text>
               </Stack>
             }
           />
@@ -122,8 +121,7 @@ export default function Home({ paths }: Props) {
         </ul>
       </Stack>
       <Text size="xs" c="dimmed" className={classes.footnote}>
-        Not sure which path is yours? An immigration lawyer or accredited
-        representative can tell you.
+        Not sure which path is yours? Ask an immigration lawyer.
       </Text>
     </>
   );
