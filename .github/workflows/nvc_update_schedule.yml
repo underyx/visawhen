@@ -81,7 +81,7 @@ jobs:
       - name: Post the changes to Discord
         if: ${{ !cancelled() && steps.commit.outputs.pushed == 'true' }}
         env:
-          DISCORD_NVC_WEBHOOK_URL: ${{ secrets.DISCORD_NVC_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           DISCORD_ROLES: ${{ vars.DISCORD_ROLES || secrets.DISCORD_ROLES }}
         run: uv run python -u notify.py
 

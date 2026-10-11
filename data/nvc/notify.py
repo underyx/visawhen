@@ -15,7 +15,7 @@ to visawhen.com/nvc and pings a role. Nothing is posted when no timeframe
 has a newer reading than before: the commit only changed the interview-queue
 data, or the Wayback Machine only filled in older readings.
 
-The webhook URL comes from the DISCORD_NVC_WEBHOOK_URL environment variable,
+The webhook URL comes from the DISCORD_WEBHOOK_URL environment variable,
 a GitHub Actions secret of the same name (Discord: the channel's settings,
 Integrations, Webhooks, Copy Webhook URL). Without it, the message is only
 printed and the run ends green, so that forks and runs before the secret is
@@ -51,7 +51,7 @@ Data = dict[TimeframeName, dict[str, int]]
 Reading = tuple[str, int]
 
 DATA_PATH = Path(os.environ.get("NVC_DATA_PATH", "data.json"))
-WEBHOOK_ENV = "DISCORD_NVC_WEBHOOK_URL"
+WEBHOOK_ENV = "DISCORD_WEBHOOK_URL"
 ROLES_ENV = "DISCORD_ROLES"
 ROLE_NAME = "nvc-watch"
 # In angle brackets so that Discord adds no preview card under the message
