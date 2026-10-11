@@ -4,6 +4,7 @@ import {
   hasEnded,
   hasStarted,
   issuanceSuspensionFor,
+  isUnchecked,
   namesPage,
   overridesUpdate,
   type PolicyEntry,
@@ -220,10 +221,16 @@ describe("staysOpen", () => {
 
 describe("issuanceSuspensionFor", () => {
   it("finds the entry that stops visas for the country's nationals", () => {
-    assert.equal(issuanceSuspensionFor("Nigeria", entries)?.id, "proclamation");
-    assert.equal(issuanceSuspensionFor("Cuba", entries)?.id, "proclamation");
-    assert.equal(issuanceSuspensionFor("Hungary", entries), null);
-    assert.equal(issuanceSuspensionFor(null, entries), null);
+    assert.equal(
+      issuanceSuspensionFor("Nigeria", null, entries)?.id,
+      "proclamation",
+    );
+    assert.equal(
+      issuanceSuspensionFor("Cuba", null, entries)?.id,
+      "proclamation",
+    );
+    assert.equal(issuanceSuspensionFor("Hungary", null, entries), null);
+    assert.equal(issuanceSuspensionFor(null, null, entries), null);
   });
   it("leaves out an entry that covers no immigrant visas for the country", () => {
     const nonimmigrantOnly = entry({
@@ -239,15 +246,33 @@ describe("issuanceSuspensionFor", () => {
         ],
       },
     });
-    assert.equal(issuanceSuspensionFor("Nigeria", [nonimmigrantOnly]), null);
     assert.equal(
-      issuanceSuspensionFor("Cuba", [nonimmigrantOnly])?.id,
+      issuanceSuspensionFor("Nigeria", null, [nonimmigrantOnly]),
+      null,
+    );
+    assert.equal(
+      issuanceSuspensionFor("Cuba", null, [nonimmigrantOnly])?.id,
       "proclamation",
     );
   });
   it("leaves out an entry that has ended by the time it was last checked", () => {
     const ended = entry({ ...nigerians, end: "2026-09-01" });
-    assert.equal(issuanceSuspensionFor("Nigeria", [ended]), null);
+    assert.equal(issuanceSuspensionFor("Nigeria", null, [ended]), null);
+  });
+  it("leaves out an entry nobody has re-checked for 29 days, on the client", () => {
+    assert.equal(
+      issuanceSuspensionFor("Nigeria", "2026-10-23", entries)?.id,
+      "proclamation",
+    );
+    assert.equal(issuanceSuspensionFor("Nigeria", "2026-10-24", entries), null);
+  });
+});
+
+describe("isUnchecked", () => {
+  it("is true 29 days after the last check, by today on the client only", () => {
+    assert.equal(isUnchecked(juba, null), false);
+    assert.equal(isUnchecked(juba, "2026-10-23"), false);
+    assert.equal(isUnchecked(juba, "2026-10-24"), true);
   });
 });
 
@@ -280,6 +305,16 @@ describe("scheduleOverrideFor", () => {
     assert.equal(
       scheduleOverrideFor("juba", "2026-06-15", null, entries)?.id,
       "juba-pause",
+    );
+  });
+  it("stops once nobody has re-checked the entry for 29 days", () => {
+    assert.equal(
+      scheduleOverrideFor("juba", "2026-09-23", "2026-10-23", entries)?.id,
+      "juba-pause",
+    );
+    assert.equal(
+      scheduleOverrideFor("juba", "2026-09-23", "2026-10-24", entries),
+      null,
     );
   });
   it("counts an entry from its start, by today on the client", () => {

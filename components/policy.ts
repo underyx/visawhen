@@ -1,4 +1,5 @@
 import policyData from "../data/policy.json";
+import { daysBetween } from "./dates";
 import { AREAS, CATEGORIES, pagePath } from "./visaBulletin";
 
 // The policy notices shown on the consulate and NVC pages, from
@@ -6,7 +7,8 @@ import { AREAS, CATEGORIES, pagePath } from "./visaBulletin";
 // moved their visa services, nationalities whose visas are suspended), and
 // the scheduling and issuance data cannot be read without them. Each entry is
 // written by hand from its sources and re-checked about weekly; the pages say
-// when it was last checked, and drop it 60 days after it ends. A consulate
+// when it was last checked, drop it 60 days after it ends, and drop it once
+// nobody has re-checked it for UNCHECKED_DAYS (isUnchecked). A consulate
 // page shows the few entries its interview card cannot be read without open,
 // above the card, and every other entry as a chip in a "Recent news:" row
 // (see PolicyBanner.tsx).
@@ -263,9 +265,11 @@ export function policiesFor(
  * the country most of a page's immigrant visa applicants are nationals of,
  * if one does:
  * one that has started and not ended by the day it was last checked, which
- * the prerendered page can say (see hasStarted and hasEnded). */
+ * the prerendered page can say (see hasStarted and hasEnded), and that
+ * someone has re-checked lately by `today`, on the client (isUnchecked). */
 export function issuanceSuspensionFor(
   country: string | null,
+  today: string | null = null,
   entries: PolicyEntry[] = POLICY_ENTRIES,
 ): PolicyEntry | null {
   if (country === null) return null;
@@ -276,7 +280,8 @@ export function issuanceSuspensionFor(
         (entry.scope.countries?.includes(country) ?? false) &&
         (countryVisasFor(entry, country)?.immigrant ?? true) &&
         hasStarted(entry, null) &&
-        !hasEnded(entry, null),
+        !hasEnded(entry, null) &&
+        !isUnchecked(entry, today),
     ) ?? null
   );
 }
@@ -302,6 +307,22 @@ export function hasEnded(entry: PolicyEntry, today: string | null): boolean {
   );
 }
 
+/** An entry nobody has re-checked against its sources for this many days is
+ * dropped from the site, and applied nowhere, until someone checks it again
+ * (Bence): a notice that may be out of date is worse than none, and the
+ * weekly re-check keeps the live ones under it. The build warns a week
+ * ahead (see api/policy.ts). */
+export const UNCHECKED_DAYS = 29;
+
+/** Whether an entry has gone unchecked too long (UNCHECKED_DAYS) by `today`,
+ * which only the client knows: the prerendered page, served for weeks,
+ * cannot tell, so it keeps every entry and the client drops the stale ones. */
+export function isUnchecked(entry: PolicyEntry, today: string | null): boolean {
+  return (
+    today !== null && daysBetween(entry.lastChecked, today) >= UNCHECKED_DAYS
+  );
+}
+
 /** Whether State's tool update of `asOf` still has to be ignored under an
  * entry: while the entry applies (on the client, until `today` reaches its
  * end), and after it ends for as long as the newest update predates the end,
@@ -319,7 +340,8 @@ export function overridesUpdate(
  * several apply (Juba is both paused and moved to a hub), the one that lasts
  * longest wins, so the card does not start showing a queue when the shorter
  * one ends. An entry counts from its start, by `today` on the client and by
- * the day it was last checked while prerendering (`today` null). The
+ * the day it was last checked while prerendering (`today` null), and not
+ * once nobody has re-checked it for UNCHECKED_DAYS, by `today`. The
  * prerendered page cannot know today's date, so an entry due to end later
  * counts there; IvScheduleCard re-checks that on the client. */
 export function scheduleOverrideFor(
@@ -337,6 +359,7 @@ export function scheduleOverrideFor(
           (coversAllPosts(entry, postSlug) ||
             (entry.scope.posts?.includes(postSlug) ?? false)) &&
           hasStarted(entry, today) &&
+          !isUnchecked(entry, today) &&
           overridesUpdate(entry, asOf, null),
       )
       .sort((a, b) => lastsUntil(b).localeCompare(lastsUntil(a)))[0] ?? null

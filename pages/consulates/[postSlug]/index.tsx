@@ -233,7 +233,7 @@ export default function ConsulateSelect({
     inactive: inactivity !== null,
     elsewhere,
   })
-    ? issuanceSuspensionFor(consulate.country)
+    ? issuanceSuspensionFor(consulate.country, today)
     : null;
   const recentToolIssued = countToolClassIssuances(recentIssuances);
   const issuedDescription = `How many visas ${postName} issued every month ${

@@ -1,8 +1,10 @@
 import policyData from "../data/policy.json";
+import { daysBetween } from "../components/dates";
 import {
   POLICY_ENTRIES,
   POLICY_PAGES,
   type PolicyScope,
+  UNCHECKED_DAYS,
 } from "../components/policy";
 
 // Checks data/policy.json when the site is built, so that no page shows a
@@ -247,5 +249,22 @@ export function checkPolicies({
         .join(
           ", ",
         )}); keep it to ${MAX_OPEN_ENDED} or fewer, so that each is re-checked every week: set the end date of those that have ended, or remove those that no longer need a notice.`,
+    );
+
+  // The pages drop an entry UNCHECKED_DAYS after its last check; the site
+  // builds daily with the data, so this says so a week ahead.
+  const today = new Date().toISOString().slice(0, 10);
+  const stale = POLICY_ENTRIES.filter(
+    (entry) => daysBetween(entry.lastChecked, today) >= UNCHECKED_DAYS - 7,
+  );
+  if (stale.length > 0)
+    console.warn(
+      `data/policy.json has entries last checked ${
+        UNCHECKED_DAYS - 7
+      } or more days ago (${stale
+        .map((entry) => `${entry.id} on ${entry.lastChecked}`)
+        .join(
+          ", ",
+        )}); the pages drop an entry ${UNCHECKED_DAYS} days after its last check, so re-check these against their sources and set lastChecked.`,
     );
 }

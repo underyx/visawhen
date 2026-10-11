@@ -16,6 +16,7 @@ import {
   ConsulatePage,
   hasEnded,
   hasStarted,
+  isUnchecked,
   namesPage,
   PolicyEntry,
   policiesFor,
@@ -31,8 +32,6 @@ import {
 
 /** How long an entry stays up after it ends */
 const SHOW_ENDED_DAYS = 60;
-/** An entry last checked longer ago than this says it may be out of date. */
-const MAX_UNCHECKED_DAYS = 30;
 
 /** Whether an entry ended so long ago that it is no longer shown: by today
  * on the client, and by the day it was last checked while prerendering. */
@@ -44,14 +43,7 @@ function hasExpired(entry: PolicyEntry, today: string | null): boolean {
 }
 
 /** An entry's body, its sources and the day it was last checked */
-function EntryBody({
-  entry,
-  unchecked,
-}: {
-  entry: PolicyEntry;
-  /** Whether the entry has gone too long without a check */
-  unchecked: boolean;
-}) {
+function EntryBody({ entry }: { entry: PolicyEntry }) {
   return (
     <>
       {/* A blank line in the body starts a new paragraph. */}
@@ -72,20 +64,7 @@ function EntryBody({
         ))}
         .
       </Text>
-      <Text size="sm">
-        Last checked {formatShortDate(entry.lastChecked)}
-        {unchecked ? (
-          <>
-            ;{" "}
-            <Text span inherit fw={700}>
-              this may be out of date
-            </Text>
-            .
-          </>
-        ) : (
-          "."
-        )}
-      </Text>
+      <Text size="sm">Last checked {formatShortDate(entry.lastChecked)}.</Text>
     </>
   );
 }
@@ -104,9 +83,6 @@ function EntryDetails({
   today: string | null;
   open?: boolean;
 }) {
-  const unchecked =
-    today !== null &&
-    daysBetween(entry.lastChecked, today) > MAX_UNCHECKED_DAYS;
   // The badges wrap instead of cutting their text short on narrow screens,
   // their lines starting on the left like the text under them.
   const badgeProps = {
@@ -120,7 +96,7 @@ function EntryDetails({
   // violet, which is 7.1:1 on the highlighter yellow of an official notice.
   return (
     <Stack gap="xs">
-      {(entry.status === "reported" || entry.end !== null || unchecked) && (
+      {(entry.status === "reported" || entry.end !== null) && (
         <Group gap="xs">
           {entry.status === "reported" && (
             <Badge {...badgeProps} variant="filled" color="ink">
@@ -133,22 +109,17 @@ function EntryDetails({
               {formatShortDate(entry.end)}
             </Badge>
           )}
-          {unchecked && (
-            <Badge {...badgeProps} variant="default">
-              May be out of date
-            </Badge>
-          )}
         </Group>
       )}
       <Text size="sm">{entry.summary}</Text>
       {open ? (
         <>
           <Divider />
-          <EntryBody entry={entry} unchecked={unchecked} />
+          <EntryBody entry={entry} />
         </>
       ) : (
         <MoreDetails>
-          <EntryBody entry={entry} unchecked={unchecked} />
+          <EntryBody entry={entry} />
         </MoreDetails>
       )}
     </Stack>
@@ -180,7 +151,10 @@ function useShownEntries({ consulate, immigrant, page }: Props) {
   // only.
   const today = useToday();
   const shown = policiesFor({ consulate, page, immigrant }).filter(
-    (entry) => hasStarted(entry, today) && !hasExpired(entry, today),
+    (entry) =>
+      hasStarted(entry, today) &&
+      !hasExpired(entry, today) &&
+      !isUnchecked(entry, today),
   );
   return { today, shown };
 }
