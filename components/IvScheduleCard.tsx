@@ -2,10 +2,11 @@ import { Alert, Anchor, Paper, Stack, Text, Title } from "@mantine/core";
 import Link from "next/link";
 import React from "react";
 import {
+  elsewhereNames,
   FEW_IMMIGRANT_VISAS,
   formatCount,
   formatIvMonth,
-  formatLongMonth,
+  formatMonth,
   formatShortIvMonth,
   IV_CATEGORIES,
   IvCategory,
@@ -13,7 +14,12 @@ import {
   IvSchedule,
   monthsBehind,
 } from "./consulates";
-import { daysBetween, formatShortDate, useToday } from "./Freshness";
+import {
+  daysBetween,
+  formatMonthDay,
+  formatShortDate,
+  useToday,
+} from "./Freshness";
 import { AFRICA_HUBS_URL, EMBASSIES_URL, IV_POSTS_URL } from "./links";
 import MoreDetails from "./MoreDetails";
 import { hasEnded, overridesUpdate, PolicyEntry } from "./policy";
@@ -185,30 +191,36 @@ export function describeRelativeQueue(
   }`;
 }
 
-/** What the update before said, as the line under a box's month: null when
- * there was no previous month, or both are current. The month moving forward
- * (to a later month) is good news for those waiting, so it is green; moving
- * back is red. */
+/** "2 months", "1 month" */
+function formatMonths(months: number): string {
+  return `${months} ${months === 1 ? "month" : "months"}`;
+}
+
+/** What the update before said, as the line under a box's month: "same as
+ * on Sep 23", "+2 months since Sep 23", "was current on Sep 23"; null when
+ * there was no previous month, or both are current. The month moving
+ * forward, to a later month, is good news for those waiting, so it is
+ * green, and moving back is red. That is the opposite of /nvc's days, where
+ * + is more waiting and so red: do not "fix" one to match the other. */
 function previousLine(
   cutoff: string,
   current: boolean,
   previous: PreviousMonth | null,
 ): { text: string; color: string } | null {
   if (previous === null) return null;
-  const update = `the update before (${formatShortDate(previous.asOf)})`;
+  const since = formatMonthDay(previous.asOf);
   const previousCurrent = monthsBehind(previous.asOf, previous.cutoff) <= 0;
   if (previousCurrent)
-    return current
-      ? null
-      : { text: `moved back: current in ${update}`, color: "red.9" };
-  if (previous.cutoff === cutoff)
-    return { text: `same month as in ${update}`, color: "dimmed" };
-  const forward = cutoff > previous.cutoff;
+    return current ? null : { text: `was current on ${since}`, color: "red.9" };
+  // positive when the month moved forward: monthsBehind counts the months
+  // from its second date to its first
+  const moved = monthsBehind(cutoff, previous.cutoff);
+  if (moved === 0) return { text: `same as on ${since}`, color: "dimmed" };
   return {
-    text: `moved ${forward ? "forward" : "back"} from ${formatShortIvMonth(
-      previous.cutoff,
-    )} in ${update}`,
-    color: forward ? "teal.9" : "red.9",
+    text: `${moved > 0 ? "+" : "−"}${formatMonths(
+      Math.abs(moved),
+    )} since ${since}`,
+    color: moved > 0 ? "teal.9" : "red.9",
   };
 }
 
@@ -219,16 +231,16 @@ interface BoxProps {
   previous: PreviousMonth | null;
 }
 
-/** One category's month, set big, with what the update before said under
- * it. A current category says so instead of its month, which is the month
- * of the update. */
+/** One category's month, set big, with how it moved since the update
+ * before under it. A current category says so instead of its month, which
+ * is the month of the update. */
 function QueueBox({ label, asOf, cutoff, previous }: BoxProps) {
   if (cutoff === null)
     return (
       <Stat
         label={label}
         value={<NotShown>No month given</NotShown>}
-        line="N/A in the State Department's tool"
+        line="N/A in the State Department’s tool"
       />
     );
   const current = monthsBehind(asOf, cutoff) <= 0;
@@ -239,7 +251,7 @@ function QueueBox({ label, asOf, cutoff, previous }: BoxProps) {
       value={current ? "Current" : formatIvMonth(cutoff)}
       line={
         changed?.text ??
-        (current ? `${formatIvMonth(cutoff)}, the month of the update` : null)
+        (current ? `the update’s month, ${formatShortIvMonth(cutoff)}` : null)
       }
       lineColor={changed?.color ?? "dimmed"}
     />
@@ -266,12 +278,12 @@ interface Props {
    * keep its <title> and meta description from calling the post current or
    * naming the tool's month. */
   scheduleOverride?: PolicyEntry;
-  /** The notice, shown above the card, that suspends visas for the nationals
-   * of the country most of the page's applicants are nationals of
-   * (issuanceSuspensionFor() in policy.ts), with that country, "Cuba", and
-   * who the applicants are, "immigrant visa" or a class, "SQ". The card
-   * says that most applicants are affected, since NVC keeps scheduling
-   * their interviews. */
+  /** The notice that suspends visas for the nationals of the country most
+   * of the page's applicants are nationals of (issuanceSuspensionFor() in
+   * policy.ts), with that country, "Cuba", and who the applicants are,
+   * "immigrant visa" or a class, "SQ". The card says under its months that
+   * most applicants are affected, since NVC keeps scheduling their
+   * interviews. */
   suspension?: { entry: PolicyEntry; country: string; applicants: string };
   /** How many family and employment immigrant visas, the classes the tool
    * covers, the post issued in the last 12 months of State's monthly
@@ -288,85 +300,67 @@ interface Props {
 }
 
 /** That State's list of immigrant visa posts names another post for the
- * post's country, with links to it and to the list */
-function ElsewhereNote({
+ * post's country, with links to it; the list itself and State's contrary
+ * notice are behind "Details". A slip under the months, which the class
+ * pages without a card show under their figures. */
+export function ElsewhereNote({
   postName,
-  elsewhere: { country, posts, alsoHub },
+  elsewhere,
 }: {
   postName: string;
   elsewhere: IvPostElsewhere;
 }) {
-  return (
-    <Alert role="note" color="orange">
-      <Text size="sm">
-        The State Department&rsquo;s{" "}
-        <Anchor href={IV_POSTS_URL} target="_blank" rel="noopener noreferrer">
-          list of embassies and consulates for immigrant visas
-        </Anchor>{" "}
-        sends immigrant visa applicants from {country} to{" "}
-        {posts.map(({ slug, name, only }, index) => (
-          <React.Fragment key={slug}>
-            {index > 0 && (index === posts.length - 1 ? " and " : ", ")}
-            {/* Plain anchor: the consulate page's _next/data JSON is not
-                deployed (see the note in components/ListRow.tsx) */}
-            <Anchor href={`/consulates/${slug}`}>{name}</Anchor>
-            {only !== undefined && ` (${only} only)`}
-          </React.Fragment>
-        ))}
-        , not to {postName}.
-        {alsoHub === true && (
-          <>
-            {" "}
-            But a{" "}
-            <Anchor
-              href={AFRICA_HUBS_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              State Department notice of July 15, 2026
-            </Anchor>{" "}
-            names {postName} as a regional visa hub. Check the embassy&rsquo;s
-            own website, listed at{" "}
-            <Anchor
-              href={EMBASSIES_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              usembassy.gov
-            </Anchor>
-            .
-          </>
-        )}
-      </Text>
-    </Alert>
-  );
-}
-
-/** That most of a page's applicants are nationals whose visas are
- * suspended, though NVC can still schedule their interviews. Not all of
- * them: there are dual nationals and applicants of other nationalities. */
-function SuspensionNote({
-  postName,
-  suspension: { entry, country, applicants },
-}: {
-  postName: string;
-  suspension: NonNullable<Props["suspension"]>;
-}) {
+  const { country, posts, alsoHub } = elsewhere;
   return (
     <Alert role="note" color="orange">
       <Stack gap="xs">
         <Text size="sm">
-          Most {applicants} applicants at {postName} are citizens of {country},
-          and immigrant visas for citizens of {country} are suspended. They can
-          still get an interview, but they may not get a visa.
+          The State Department sends immigrant visa applicants from {country} to{" "}
+          {posts.map(({ slug, name, only }, index) => (
+            <React.Fragment key={slug}>
+              {index > 0 && (index === posts.length - 1 ? " and " : ", ")}
+              {/* Plain anchor: the consulate page's _next/data JSON is not
+                  deployed (see the note in components/ListRow.tsx) */}
+              <Anchor href={`/consulates/${slug}`}>{name}</Anchor>
+              {only !== undefined && ` (${only} only)`}
+            </React.Fragment>
+          ))}
+          , not {postName}.
         </Text>
         <MoreDetails>
           <Text size="sm">
-            NVC can still schedule their interviews, but the State Department
-            says applicants covered by the suspension may not be eligible for a
-            visa. People with two nationalities who apply with the passport of a
-            country not covered are an exception. See &ldquo;
-            {entry.title}&rdquo; above.
+            Its{" "}
+            <Anchor
+              href={IV_POSTS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              list of embassies and consulates for immigrant visas
+            </Anchor>{" "}
+            names {elsewhereNames(elsewhere, true)}.
+            {alsoHub === true && (
+              <>
+                {" "}
+                But its{" "}
+                <Anchor
+                  href={AFRICA_HUBS_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  notice of July 15, 2026
+                </Anchor>{" "}
+                names {postName} as a regional visa hub, so check the
+                embassy&rsquo;s own website (
+                <Anchor
+                  href={EMBASSIES_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  usembassy.gov
+                </Anchor>
+                ).
+              </>
+            )}
           </Text>
         </MoreDetails>
       </Stack>
@@ -374,8 +368,35 @@ function SuspensionNote({
   );
 }
 
+/** That most of a page's applicants are nationals whose visas are
+ * suspended, though NVC can still schedule their interviews. A slip under
+ * the months. On a class page it names the exception, dual nationals; the
+ * post's own page has that as a chip in its "Special cases:" row. */
+export function SuspensionNote({
+  postName,
+  suspension: { country, applicants },
+  classPage = false,
+}: {
+  postName: string;
+  suspension: NonNullable<Props["suspension"]>;
+  classPage?: boolean;
+}) {
+  return (
+    <Alert role="note" color="orange">
+      <Text size="sm">
+        Most {applicants} applicants at {postName} are citizens of {country},
+        and their immigrant visas are suspended. They can still get an
+        interview, but may not get a visa.
+        {classPage &&
+          " Dual nationals who apply with the passport of a country not covered are an exception."}
+      </Text>
+    </Alert>
+  );
+}
+
 /** Which month of documentarily complete cases NVC is scheduling interviews
- * for at a post, from State's IV Scheduling Status Tool. */
+ * for at a post, from State's IV Scheduling Status Tool: the months as
+ * boxes, then the slips that qualify them, then what the month means. */
 export default function IvScheduleCard({
   postName,
   asOf,
@@ -392,7 +413,7 @@ export default function IvScheduleCard({
   // The prerendered page is served for weeks, so whether the update is stale
   // is decided on the client only.
   const today = useToday();
-  const stale = today !== null && daysBetween(asOf, today) > MAX_AGE_DAYS;
+  const ageDays = today === null ? null : daysBetween(asOf, today);
   const updated = formatShortDate(asOf);
   const toolLink = (children: React.ReactNode) => (
     <Anchor href={source} target="_blank" rel="noopener noreferrer">
@@ -420,7 +441,11 @@ export default function IvScheduleCard({
             <ElsewhereNote postName={postName} elsewhere={elsewhere} />
           )}
           {suspended && suspension !== undefined && (
-            <SuspensionNote postName={postName} suspension={suspension} />
+            <SuspensionNote
+              postName={postName}
+              suspension={suspension}
+              classPage
+            />
           )}
           <Text>{note}</Text>
         </Stack>
@@ -493,6 +518,9 @@ export default function IvScheduleCard({
     cutoffs.some((cutoff) => monthsBehind(asOf, cutoff) <= 0);
   const few =
     recentIssued !== undefined && recentIssued.count < FEW_IMMIGRANT_VISAS;
+  // The Visa Bulletin matters to the family preference and employment
+  // cases: not on an immediate relative class's page.
+  const visaBulletin = first === undefined || first !== "relative";
 
   return (
     <Paper withBorder p="md">
@@ -500,16 +528,10 @@ export default function IvScheduleCard({
         <Title order={2} size="h3">
           Interview scheduling at {postName}
         </Title>
-        {elsewhere !== undefined && (
-          <ElsewhereNote postName={postName} elsewhere={elsewhere} />
-        )}
-        {suspended && suspension !== undefined && !overridden && (
-          <SuspensionNote postName={postName} suspension={suspension} />
-        )}
-        {stale && (
+        {ageDays !== null && ageDays > MAX_AGE_DAYS && (
           <TemporaryNotice>
-            This is from the State Department&rsquo;s update of {updated}, the
-            newest we have. {toolLink("Check the tool")} for a newer one.
+            Our newest update is from {updated}, {ageDays} days ago.{" "}
+            {toolLink("Check the tool")} for a newer one.
           </TemporaryNotice>
         )}
         {schedule === null ? (
@@ -556,19 +578,15 @@ export default function IvScheduleCard({
                 update.
               </>
             ) : (
-              <>
-                {" "}
-                while the notice above, &ldquo;{scheduleOverride.title}&rdquo;,
-                is in effect.
-              </>
+              " while the notice above is in effect."
             )}
           </Text>
         ) : (
           <>
+            {/* "most": State's wording, which the month can move back on */}
             <Text>
               NVC is scheduling most interviews for cases that became{" "}
-              <em>documentarily complete</em> in these months, in the State
-              Department&rsquo;s update of {updated}:
+              <em>documentarily complete</em> in:
             </Text>
             <Stats columns={lines.length} phoneColumns={1}>
               {lines.map(({ label, cutoff, previous }) => (
@@ -583,59 +601,62 @@ export default function IvScheduleCard({
             </Stats>
           </>
         )}
+        {suspended && suspension !== undefined && !overridden && (
+          <SuspensionNote
+            postName={postName}
+            suspension={suspension}
+            classPage={first !== undefined}
+          />
+        )}
+        {elsewhere !== undefined && (
+          <ElsewhereNote postName={postName} elsewhere={elsewhere} />
+        )}
         {(postCurrent || someCurrent) && few && recentIssued !== undefined ? (
           // Where the post issues almost none of these visas, "current" most
-          // likely means it schedules few such interviews or none, so it is
-          // said in the body text rather than as a small caveat.
-          <Text>
-            But {postName} issued{" "}
+          // likely means it schedules few such interviews or none: our
+          // reading of the numbers, so an hourglass slip.
+          <TemporaryNotice>
+            {postName} issued{" "}
             {recentIssued.count === 0
               ? "no"
               : `only ${formatCount(recentIssued.count)}`}{" "}
             family or employment immigrant{" "}
             {recentIssued.count === 1 ? "visa" : "visas"} from{" "}
-            {formatLongMonth(recentIssued.from)} to{" "}
-            {formatLongMonth(recentIssued.to)}, so &ldquo;current&rdquo; may
-            mean it schedules few of these interviews, or none. Check the
-            embassy&rsquo;s own website, listed at {embassiesLink}, before you
-            rely on it.
-          </Text>
+            {formatMonth(recentIssued.from)} to {formatMonth(recentIssued.to)},
+            so &ldquo;current&rdquo; may mean it schedules few of these
+            interviews, or none.
+          </TemporaryNotice>
         ) : postCurrent ? (
-          <Text size="sm">
-            &ldquo;Current&rdquo; can also mean the post is not scheduling
-            immigrant visa interviews at all. Check the embassy&rsquo;s own
-            website, listed at {embassiesLink}.
+          <Text>
+            Current can also mean {postName} is not scheduling immigrant visa
+            interviews at all.
           </Text>
         ) : null}
-        {someCurrent && !few && (
-          <Text size="sm">
-            &ldquo;Current&rdquo; can also mean the post is not scheduling those
-            cases at all. Check the embassy&rsquo;s own website, listed at{" "}
-            {embassiesLink}.
-          </Text>
-        )}
         {hasQueue && (
           <Stack gap="xs">
             <Text>
-              Compare this with the month NVC emailed you that your case was
-              documentarily complete: that NVC had accepted all your documents.
+              Compare with the month NVC emailed you that your case was
+              documentarily complete.
             </Text>
             <MoreDetails label="What this month means">
               <Text size="sm">
-                It is not a wait time. It is the month most interviews are being
-                scheduled for now, and it can move backwards.
-                &ldquo;Current&rdquo; means the cases NVC is scheduling include
-                the month of the update itself. The State Department says it
-                cannot predict exactly when a case will be scheduled.
+                It is not a wait time: it is the month NVC is scheduling most
+                interviews for now, and it can move backwards.
+                &ldquo;Current&rdquo; means NVC is already scheduling cases from
+                the update&rsquo;s month; it can also mean the post schedules
+                none, so check the embassy&rsquo;s own website ({embassiesLink}
+                ). Documentarily complete: NVC has accepted all your documents.
               </Text>
-              <Text size="sm">
-                Family preference and employment cases also need a current
-                priority date in the{" "}
-                <Anchor component={Link} href="/visa-bulletin">
-                  Visa Bulletin
-                </Anchor>
-                .
-              </Text>
+              {visaBulletin && (
+                <Text size="sm">
+                  Family preference and employment cases also need a current
+                  priority date in the{" "}
+                  <Anchor component={Link} href="/visa-bulletin">
+                    Visa Bulletin
+                  </Anchor>
+                  .
+                </Text>
+              )}
             </MoreDetails>
           </Stack>
         )}

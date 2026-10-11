@@ -371,7 +371,7 @@ export const IV_POSTS_ELSEWHERE: Partial<Record<string, IvPostElsewhere>> = {
 /** "Nassau", "Kuala Lumpur and Singapore", "Warsaw, Almaty (IR-5 only),
  * and Tashkent (IR-5 only)"; without `withCases`, only the posts named for
  * every case, "Warsaw" (all of them if none is) */
-function elsewhereNames(
+export function elsewhereNames(
   { posts }: IvPostElsewhere,
   withCases: boolean,
 ): string {
