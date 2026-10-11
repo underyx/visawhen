@@ -1,31 +1,24 @@
-import {
-  Anchor,
-  Button,
-  Paper,
-  SimpleGrid,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
+import { Anchor, Box, Button, Stack, Text, Title } from "@mantine/core";
 import { findLast, last } from "lodash";
 import { GetStaticPaths, GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import React from "react";
-import { getData } from "../../../api/visaBulletin";
+import { Cutoff, getData } from "../../../api/visaBulletin";
 import { ChevronLeftIcon } from "../../../components/icons";
 import { ListRow, ListRows } from "../../../components/ListRow";
 import MoreDetails from "../../../components/MoreDetails";
-import {
-  ADJUSTMENT_FILING_CHARTS_URL,
-  VISA_BULLETIN_URL,
-} from "../../../components/links";
+import { VISA_BULLETIN_URL } from "../../../components/links";
+import { PolicyNews } from "../../../components/PolicyBanner";
+import { Stat, Stats } from "../../../components/Stats";
+import VisaBulletinCases from "../../../components/VisaBulletinCases";
 import VisaBulletinChart from "../../../components/VisaBulletinChart";
 import { breadcrumbList } from "../../../components/structuredData";
 import {
   addMonthsToMonth,
   Area,
   areaBySlug,
+  bornInText,
   Category,
   categoryBySlug,
   CATEGORIES,
@@ -37,6 +30,7 @@ import {
   getMovement,
   getSeries,
   isDate,
+  latestChange,
   monthsBetweenDates,
   monthStart,
   Movement,
@@ -48,6 +42,11 @@ import {
 import { daysBetween, useToday } from "../../../components/Freshness";
 import TemporaryNotice from "../../../components/TemporaryNotice";
 
+// The page leads with the newest bulletin's two cutoffs as figures, each
+// with how it moved since the bulletin before, then one sentence on what
+// they mean. The news and the special cases come after the numbers as
+// chips, and how the line has moved after those.
+
 interface OtherLink {
   name: string;
   href: string;
@@ -57,6 +56,8 @@ interface OtherLink {
 interface Props {
   category: Category;
   area: Area;
+  /** For people "born in India" (bornInText) */
+  bornIn: string;
   /** The newest bulletin's month, "2026-10" */
   month: string;
   bulletinUrl: string;
@@ -88,10 +89,12 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   const month = newestMonth(data);
   const bulletin = data.bulletins[month];
   const chart = bulletin.finalAction;
+  const areas = chartAreas({ [category.key]: chart[category.key] });
   return {
     props: {
       category,
       area,
+      bornIn: bornInText(area, areas),
       month,
       bulletinUrl: bulletin.url,
       series: {
@@ -103,7 +106,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
           area.key,
         ),
       },
-      otherAreas: chartAreas({ [category.key]: chart[category.key] })
+      otherAreas: areas
         .filter(({ key }) => key !== area.key)
         .map((other) => ({
           name: other.name,
@@ -149,55 +152,69 @@ function StaleNotice({ month }: { month: string }) {
   );
 }
 
-interface CutoffBoxProps {
+interface CutoffStatProps {
   label: string;
-  cutoff: string | undefined;
-  children: React.ReactNode;
+  series: Series;
+  /** The newest bulletin's month: a series that stops before it has no
+   * cutoff to show */
+  month: string;
 }
 
-/** One chart's cutoff, large, with what it means */
-function CutoffBox({ label, cutoff, children }: CutoffBoxProps) {
+/** One chart's cutoff in the newest bulletin, as a box, with how it moved
+ * since the bulletin before under it (latestChange) */
+function CutoffStat({ label, series, month }: CutoffStatProps) {
+  const newest = last(series);
+  if (newest === undefined || newest[0] !== month)
+    return <Stat label={label} value="Not given" line={null} />;
+  const change = latestChange(series);
   return (
-    <Paper withBorder p="md">
-      <Text size="sm" c="dimmed" fw={500}>
-        {label}
-      </Text>
-      <Text fz="h2" fw={700} lh={1.35}>
-        {cutoff === undefined ? "Not given" : formatCutoff(cutoff)}
-      </Text>
-      <Text size="sm">{children}</Text>
-    </Paper>
+    <Stat
+      label={label}
+      value={formatCutoff(newest[1])}
+      line={change?.text ?? null}
+      lineColor={change?.color}
+    />
   );
 }
 
-function finalActionMeaning(cutoff: string | undefined): string {
-  if (cutoff === "C")
-    return "There is no line this month: you can get your visa or green card whatever your priority date is.";
-  if (cutoff === "U")
-    return "No visas are left in this category this month, whatever your priority date is.";
-  return "You can get your visa or green card if your priority date is earlier than this date.";
-}
+const GET = "get your visa or green card";
+const SEND = "send your documents to NVC";
 
-function filingMeaning(cutoff: string | undefined): React.ReactNode {
-  const who =
-    cutoff === "C"
-      ? "You can send in your documents whatever your priority date is."
-      : cutoff === "U"
-      ? "No one can send in their documents with this chart this month."
-      : "You can send your documents to the National Visa Center if your priority date is earlier than this date.";
-  return (
-    <>
-      {who} In the US,{" "}
-      <Anchor
-        href={ADJUSTMENT_FILING_CHARTS_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        USCIS says each month
-      </Anchor>{" "}
-      which chart decides when you can file Form I-485.
-    </>
-  );
+/** What the two cutoffs mean for the reader, in one or two sentences, or
+ * null when the bulletin gives neither */
+function meaningSentence(
+  finalAction: Cutoff | undefined,
+  filing: Cutoff | undefined,
+): string | null {
+  if (finalAction === "C" && filing === "C")
+    return `No line this month: you can ${GET}, and ${SEND}, whatever your priority date is.`;
+  if (
+    finalAction !== undefined &&
+    isDate(finalAction) &&
+    filing !== undefined &&
+    isDate(filing)
+  )
+    return `Your priority date must be earlier than the Final Action Date to ${GET}, and earlier than the Date for Filing to ${SEND}.`;
+  const sentences: string[] = [];
+  if (finalAction === "C")
+    sentences.push(`You can ${GET} whatever your priority date is.`);
+  else if (finalAction === "U")
+    sentences.push(
+      "No visas are left in this category this month, whatever your priority date is.",
+    );
+  else if (finalAction !== undefined)
+    sentences.push(
+      `Your priority date must be earlier than the Final Action Date to ${GET}.`,
+    );
+  if (filing === "C")
+    sentences.push(`You can ${SEND} whatever your priority date is.`);
+  else if (filing === "U")
+    sentences.push("No one can send their documents to NVC this month.");
+  else if (filing !== undefined)
+    sentences.push(
+      `Your priority date must be earlier than the Date for Filing to ${SEND}.`,
+    );
+  return sentences.length === 0 ? null : sentences.join(" ");
 }
 
 /** "moved forward 4 months", "did not move", "moved back 3 months" */
@@ -313,6 +330,7 @@ function OtherLinks({ title, links }: { title: string; links: OtherLink[] }) {
 export default function VisaBulletinPage({
   category,
   area,
+  bornIn,
   month,
   bulletinUrl,
   series,
@@ -324,6 +342,7 @@ export default function VisaBulletinPage({
   const finalActionCutoff =
     finalAction?.[0] === month ? finalAction[1] : undefined;
   const filingCutoff = filing?.[0] === month ? filing[1] : undefined;
+  const meaning = meaningSentence(finalActionCutoff, filingCutoff);
   // a chart of fewer than two different dates would have nothing to show
   const hasDates =
     new Set(
@@ -333,9 +352,11 @@ export default function VisaBulletinPage({
     ).size >= 2;
   const title = `${category.name} Visa Bulletin dates: ${area.name}`;
   const path = pagePath(category, area);
-  const description = `${category.name} Final Action Date for people ${
-    area.bornIn
-  } in the ${formatBulletinMonth(month)} Visa Bulletin: ${
+  const description = `${
+    category.name
+  } Final Action Date for people ${bornIn} in the ${formatBulletinMonth(
+    month,
+  )} Visa Bulletin: ${
     finalActionCutoff === undefined
       ? "not given"
       : formatCutoff(finalActionCutoff)
@@ -368,26 +389,40 @@ export default function VisaBulletinPage({
         Change category
       </Button>
       <Stack gap="sm">
-        <Title order={1}>{title}</Title>
-        <Text size="lg">
-          {category.who}, {area.bornIn}.
-        </Text>
+        <Box>
+          <Title order={1}>{title}</Title>
+          <Text size="lg">
+            {category.who}, {bornIn}. Newest bulletin:{" "}
+            {formatBulletinMonth(month)}.
+          </Text>
+        </Box>
         <StaleNotice month={month} />
+        <Stats columns={2} phoneColumns={2}>
+          <CutoffStat
+            label="Final Action Date"
+            series={series.finalAction}
+            month={month}
+          />
+          <CutoffStat
+            label="Date for Filing"
+            series={series.datesForFiling}
+            month={month}
+          />
+        </Stats>
+        {meaning !== null && <Text>{meaning}</Text>}
       </Stack>
       <Stack gap="sm">
-        <Title order={2}>{formatBulletinMonth(month)} Visa Bulletin</Title>
-        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
-          <CutoffBox label="Final Action Date" cutoff={finalActionCutoff}>
-            {finalActionMeaning(finalActionCutoff)}
-          </CutoffBox>
-          <CutoffBox label="Date for Filing" cutoff={filingCutoff}>
-            {filingMeaning(filingCutoff)}
-          </CutoffBox>
-        </SimpleGrid>
+        <Stack gap="xs">
+          <PolicyNews page={path} />
+          <VisaBulletinCases area={area} />
+        </Stack>
+        <MoreDetails label="What is my priority date?">
+          <Text size="sm">{PRIORITY_DATE_DEFINITION}</Text>
+        </MoreDetails>
         <Text size="xs" c="dimmed">
-          {PRIORITY_DATE_DEFINITION} Source:{" "}
+          Source: the{" "}
           <Anchor href={bulletinUrl} target="_blank" rel="noopener">
-            the {formatBulletinMonth(month)} Visa Bulletin
+            {formatBulletinMonth(month)} Visa Bulletin
           </Anchor>
           .
         </Text>
