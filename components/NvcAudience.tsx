@@ -7,7 +7,9 @@ import classes from "./NvcAudience.module.css";
 // open. On a phone the parts are the rows of one slip, like the policy
 // notices' row above it; from sm up they are chips in a row, and the picked
 // one's line shows under them. Every part's title names a group of
-// visitors, and its line says what the times mean for them.
+// visitors, short enough for one line of a phone's row and for the three
+// chips to share a row (measured in the site's font at 360px and 1280px),
+// and its line says what the times mean for them.
 
 interface Part {
   key: string;
@@ -18,13 +20,12 @@ interface Part {
 const PARTS: Part[] = [
   {
     key: "other",
-    title:
-      "K (fiancé(e)) visas, diversity visas, special immigrant visas and adoptions",
-    line: "These times do not apply to you.",
+    title: "K visas, DV, SIV and adoptions",
+    line: "These times do not apply to fiancé(e) visas, diversity visas, special immigrant visas or adoptions.",
   },
   {
     key: "relatives",
-    title: "Spouses, parents and children of US citizens",
+    title: "Spouse, parent or child of a US citizen",
     line: (
       <>
         NVC usually takes weeks.{" "}
@@ -37,7 +38,7 @@ const PARTS: Part[] = [
   },
   {
     key: "preference",
-    title: "Family and employment preference categories",
+    title: "Family and employment preference",
     line: (
       <>
         Your priority date is usually your longest wait, often years. NVC asks
@@ -71,7 +72,7 @@ export default function NvcAudience() {
         {PARTS.map(({ key, title, line }) => (
           <Accordion.Item key={key} value={key}>
             <Accordion.Control>
-              <Text span size="sm" fw={700}>
+              <Text span size="sm">
                 {title}
               </Text>
             </Accordion.Control>
