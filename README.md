@@ -78,6 +78,10 @@ State's monthly issuance reports give every row a visa class code. `baselines.ip
 
 The consulate list shows and searches each post's country, from `POST_COUNTRIES` in `api/searchTerms.ts`, which is written by hand; the build fails on a post that has none, so add one when State reports a new post. The same file has the plain-language names and search words of the USCIS forms ("work permit" for the I-765).
 
+### Discord notifications
+
+When the NVC workflow commits new timeframes, `data/nvc/notify.py` posts them to a Discord channel: for each of the three timeframes, the newest number of days, how it changed since NVC's previous update and the submission date NVC has reached, or that NVC gave no new number for it. It posts nothing when only the interview-queue data changed. The webhook URL is the `DISCORD_NVC_WEBHOOK_URL` Actions secret (in Discord: the channel's settings, Integrations, Webhooks, Copy Webhook URL); without it the step only prints the message. To see what a message would say, `cd data/nvc && uv run python notify.py --before <commit> --dry-run` compares `data.json` with that commit's copy; without `--dry-run` and with the URL in `DISCORD_NVC_WEBHOOK_URL`, it posts the message.
+
 ### Stale data alerts
 
 A scraper that finds nothing new, or cannot reach its source, still finishes green. The daily `freshness.yml` workflow runs `data/freshness.py`, which compares each source's newest date with how often it publishes (NVC weekly, the interview-queue tool, the Visa Bulletin and USCIS's monthly report monthly, USCIS's other reports quarterly and State's issuance statistics with a lag of several months). For each source that is overdue it opens one issue labelled `stale-data`, keeps it up to date while the data stays stale and closes it when new data arrives. `python3 data/freshness.py` prints the same report locally.

@@ -69,6 +69,17 @@ jobs:
       - id: head_commit
         if: ${{ !cancelled() }}
         run: echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      # Tells a Discord channel how each NVC timeframe changed, when the
+      # commit above added NVC readings (see data/nvc/notify.py; it posts
+      # nothing when only the interview queue changed). Only this step sees
+      # the webhook URL; without the secret it prints the message and ends
+      # green. A refused post fails the job, but the build and deploy below
+      # still run: the data is committed by then.
+      - name: Post the changes to Discord
+        if: ${{ !cancelled() && steps.commit.outputs.pushed == 'true' }}
+        env:
+          DISCORD_NVC_WEBHOOK_URL: ${{ secrets.DISCORD_NVC_WEBHOOK_URL }}
+        run: uv run python -u notify.py
 
   build:
     # !cancelled(): build what was committed even when one of the two scripts
