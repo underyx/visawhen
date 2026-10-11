@@ -47,6 +47,7 @@ import type {
   PostQueue,
   TimelineData,
 } from "../components/timeline";
+import { pathForms } from "../components/timeline";
 
 // The data a timeline page is built with, at build time: only what its
 // path's steps need, from the same files and by the same rules as the
@@ -203,17 +204,15 @@ function getUscis(): Promise<UscisData> {
   return uscisPromise;
 }
 
-/** The ranges of the USCIS steps of a path, by "form/category" */
+/** The ranges of the USCIS forms a path's page shows (its steps' and its
+ * cases'), by "form/category" */
 function pathRanges(uscis: UscisData, path: PathSpec): TimelineData["ranges"] {
   const ranges: TimelineData["ranges"] = {};
-  for (const stage of path.stages) {
-    if (stage.kind !== "uscis") continue;
-    const form = uscis.forms.find((candidate) => candidate.form === stage.form);
+  for (const { form: formName, category } of pathForms(path)) {
+    const form = uscis.forms.find((candidate) => candidate.form === formName);
     if (form === undefined) continue;
-    const range = categoryRanges(form).find(
-      ({ key }) => key === stage.category,
-    );
-    if (range !== undefined) ranges[`${stage.form}/${stage.category}`] = range;
+    const range = categoryRanges(form).find(({ key }) => key === category);
+    if (range !== undefined) ranges[`${formName}/${category}`] = range;
   }
   return ranges;
 }

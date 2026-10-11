@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import { addDays, addMonths } from "./dates";
 import type { CategoryRange } from "./estimate";
 import {
+  caseNote,
   EMPTY_INPUTS,
   estimateTimeline,
   formatDateRange,
@@ -11,7 +12,9 @@ import {
   inputsToHash,
   monthSpan,
   pathBySlug,
+  pathForms,
   pathMilestones,
+  PATHS,
   type PathSpec,
   pathSummary,
   queuePace,
@@ -80,6 +83,7 @@ const DATA: TimelineData = {
     ),
     "I-485/family": range("family", "Family", 7, [4, 6, 7, 12, 18]),
     "I-129F/all": range("all", "I-129F", 9, [5, 7, 9, 11, 14]),
+    "I-751/all": range("all", "I-751", 8, [4, 6, 8, 11, 16]),
   },
   nvc: {
     creation: weekly([20, 27, 24]),
@@ -603,18 +607,62 @@ describe("queuePace", () => {
 });
 
 describe("pathSummary", () => {
-  it("is one line on the path's first steps", () => {
+  it("is one line on the path's first steps, with 'most likely' once", () => {
     assert.equal(
       plain(pathSummary(SPOUSE_ABROAD, DATA)),
-      "I-130: most likely 11–22 months, NVC: 37–87 days, then the interview queue at your consulate.",
+      "I-130 most likely 11–22 months, NVC 37–87 days, then the interview queue at your consulate.",
     );
     assert.equal(
       plain(pathSummary(OTHER_FAMILY, DATA)),
-      "Your priority date, often years, then I-485: most likely 6–12 months.",
+      "Your priority date, often years, then I-485 most likely 6–12 months.",
     );
     assert.equal(
       plain(pathSummary(FIANCE, DATA)),
-      "I-129F: most likely 7–11 months, then I-485: most likely 6–12 months.",
+      "I-129F most likely 7–11 months, then I-485 6–12 months.",
     );
+  });
+});
+
+describe("cases", () => {
+  it("lists the paths' branches, none of them a step", () => {
+    const labels = Object.fromEntries(
+      PATHS.map(({ slug, cases }) => [slug, cases.map(({ label }) => label)]),
+    );
+    assert.deepEqual(labels, {
+      "spouse-abroad": ["Married under 2 years"],
+      "spouse-in-us": ["Entered without inspection", "Married under 2 years"],
+      fiance: ["Married under 2 years"],
+      citizenship: [],
+      employment: ["EB-1: no PERM", "Premium processing", "Living abroad"],
+      "other-family": ["Living abroad"],
+      temporary: [],
+    });
+    for (const { stages } of PATHS)
+      assert.ok(
+        stages.every(({ id }) => id !== "i-751" && id !== "abroad"),
+        "the I-751 and the consular route are cases, not steps",
+      );
+  });
+
+  it("adds the I-751's current range to its note, when there is one", () => {
+    const [i751] = SPOUSE_ABROAD.cases;
+    assert.equal(
+      plain(caseNote(i751, DATA)),
+      "Your green card is valid for 2 years. File the I-751 in the 90 days before it expires. USCIS most likely decides it in 6–11 months.",
+    );
+    assert.equal(
+      caseNote(i751, { ...DATA, ranges: {} }),
+      "Your green card is valid for 2 years. File the I-751 in the 90 days before it expires.",
+    );
+    // the K-1 wording, with the same figure
+    assert.match(plain(caseNote(FIANCE.cases[0], DATA)), /^Most K-1 couples/);
+    assert.match(plain(caseNote(FIANCE.cases[0], DATA)), /6–11 months\.$/);
+  });
+
+  it("names the I-751 among the forms a page needs ranges for", () => {
+    assert.deepEqual(pathForms(SPOUSE_ABROAD), [
+      { form: "I-130", category: "immediate-relative" },
+      { form: "I-751", category: "all" },
+    ]);
   });
 });

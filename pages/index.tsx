@@ -17,7 +17,7 @@ interface PathCard {
   slug: string;
   title: string;
   who: string;
-  /** "I-130: most likely 11–22 months, NVC: 24–54 days, then the interview
+  /** "I-130 most likely 11–22 months, NVC 24–54 days, then the interview
    * queue at your consulate." */
   summary: string;
 }

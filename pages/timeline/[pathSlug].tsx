@@ -16,10 +16,12 @@ import { formatDate, useToday } from "../../components/Freshness";
 import { ChevronLeftIcon } from "../../components/icons";
 import MonthInput from "../../components/MonthInput";
 import MoreDetails from "../../components/MoreDetails";
+import { ChipRow, NoteChip } from "../../components/NoteChip";
 import TemporaryNotice from "../../components/TemporaryNotice";
 import { breadcrumbList } from "../../components/structuredData";
 import { formatBulletinMonth } from "../../components/visaBulletin";
 import type {
+  PathCase,
   PathSlug,
   PathSpec,
   StageResult,
@@ -28,6 +30,7 @@ import type {
   TimelineResult,
 } from "../../components/timeline";
 import {
+  caseNote,
   EMPTY_INPUTS,
   estimateTimeline,
   formatDateRange,
@@ -165,7 +168,6 @@ function StepBody({
       )}
       {status !== "done" &&
         warning !== null &&
-        spec.detached !== true &&
         (news ? (
           <TemporaryNotice mt="xs">{warning}</TemporaryNotice>
         ) : (
@@ -213,7 +215,6 @@ function Step({
     classes.step,
     status === "done" ? classes.done : "",
     status === "current" ? classes.current : "",
-    spec.detached === true ? classes.later : "",
   ]
     .filter((name) => name !== "")
     .join(" ");
@@ -258,6 +259,41 @@ function officeVerdict(
     default:
       return `No verdict on ${office.name} right now: in its newest quarter, cases moved in or out, it decided too few, or it approves almost none of them.`;
   }
+}
+
+/** The path's branches and exceptions as a "Special cases:" row of chips,
+ * each opening its note (PathCase), or nothing for a path without one */
+function TimelineCases({
+  cases,
+  data,
+}: {
+  cases: PathCase[];
+  data: TimelineData;
+}) {
+  if (cases.length === 0) return null;
+  return (
+    <ChipRow lead="Special cases:">
+      {cases.map((pathCase) => (
+        <NoteChip key={pathCase.label} label={pathCase.label}>
+          <Text size="sm">
+            {caseNote(pathCase, data)}
+            {pathCase.links !== undefined && pathCase.links.length > 0 && (
+              <>
+                {" See "}
+                {pathCase.links.map(({ href, text }, index) => (
+                  <React.Fragment key={href}>
+                    {index > 0 && " and "}
+                    <To href={href}>{text}</To>
+                  </React.Fragment>
+                ))}
+                .
+              </>
+            )}
+          </Text>
+        </NoteChip>
+      ))}
+    </ChipRow>
+  );
 }
 
 export default function TimelinePage({ slug, data, year }: Props) {
@@ -454,6 +490,9 @@ export default function TimelinePage({ slug, data, year }: Props) {
           </Text>
         )}
       </form>
+      <Stack gap="xs" className={classes.rows}>
+        <TimelineCases cases={path.cases} data={data} />
+      </Stack>
       <Stamp result={result} reported={reported} today={today} />
       <ol className={classes.steps}>
         {mainSteps.map((stage) => (

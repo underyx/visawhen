@@ -85,9 +85,6 @@ interface StageBase {
   /** Runs alongside the stage with this id, from the same start, and does
    * not hold the next step up: the work permit filed with the I-485 */
   parallelTo?: string;
-  /** Comes much later, from a date the timeline cannot know (the I-751, two
-   * years after entry): shown with its current duration, never dated */
-  detached?: boolean;
 }
 
 export type StageSpec =
@@ -101,6 +98,29 @@ export type StageSpec =
 
 /** What a path's page asks the visitor for, besides where their case is */
 export type PathInput = "consulate" | "office" | "bulletin";
+
+/** A page of this site or an official one a case's note ends by pointing
+ * to: "See I-751 processing times." */
+export interface CaseLink {
+  href: string;
+  /** Lowercase unless it starts with a name: "consulate interview queues" */
+  text: string;
+}
+
+/** A branch or an exception on a path, which its page lists as a chip
+ * under "Special cases:" (Bence: a branch is not a step, and an exception
+ * is not a step for everyone). The note is plain text, so that it can be
+ * tested with the rest of this module; the page sets it. */
+export interface PathCase {
+  /** The chip: "Married under 2 years" */
+  label: string;
+  /** The note's sentences, as one paragraph */
+  note: string;
+  /** A USCIS form whose current range the note adds, as a sentence after
+   * `note`: "USCIS most likely decides it in 6–11 months." (caseNote) */
+  form?: { form: string; category: string };
+  links?: CaseLink[];
+}
 
 export interface PathSpec {
   slug: PathSlug;
@@ -116,6 +136,9 @@ export interface PathSpec {
    * per-office category the comparison is of (null: all categories) */
   officeForm?: { form: string; category: string | null };
   stages: StageSpec[];
+  /** The page's "Special cases:" chips, in their order; none for a path
+   * with no branch */
+  cases: PathCase[];
 }
 
 const I130_FILED: Milestone = {
@@ -139,20 +162,26 @@ const I485_APPROVED: Milestone = {
   dateLabel: "When it was approved",
 };
 
-const I751_NOTE =
-  "If you were married for less than 2 years when you got your green card, it is valid for 2 years. File the I-751 in the 90 days before it expires.";
+/** The I-751, for the paths that can end in a 2-year green card: a case,
+ * not a step, since it comes two years after a date the timeline cannot
+ * know, and not for everyone (Bence chose the chip over the detached step
+ * it replaced) */
+const I751_CASE: PathCase = {
+  label: "Married under 2 years",
+  note: "Your green card is valid for 2 years. File the I-751 in the 90 days before it expires.",
+  form: { form: "I-751", category: "all" },
+  links: [{ href: "/uscis/i-751", text: "I-751 processing times" }],
+};
 
-/** The I-751, as the paths that can end in a 2-year green card list it */
-const I751_STAGE: StageSpec = {
-  kind: "uscis",
-  id: "i-751",
-  form: "I-751",
-  category: "all",
-  name: "Later: removing the conditions (I-751)",
-  what: I751_NOTE,
-  href: "/uscis/i-751",
-  hrefText: "I-751 processing times",
-  detached: true,
+/** The consular route of the preference categories, whose pages list the
+ * I-485 as the step after the priority date */
+const ABROAD_CASE: PathCase = {
+  label: "Living abroad",
+  note: "Outside the US, once your priority date is current, your case goes to the National Visa Center and then to an interview at your consulate.",
+  links: [
+    { href: "/nvc", text: "NVC wait times" },
+    { href: "/consulates", text: "consulate interview queues" },
+  ],
 };
 
 const EAD_STAGE: StageSpec = {
@@ -187,7 +216,7 @@ export const PATHS: PathSpec[] = [
       "Spouse visa timeline (CR-1, IR-1): I-130, NVC and interview waits",
     description:
       "How long each step takes right now for a spouse, parent or child of a US citizen immigrating through a US consulate: the I-130 at USCIS, the National Visa Center, and the interview queue at your consulate, as dates.",
-    who: "IR-1, CR-1, IR-2 and IR-5 visas, through a US embassy or consulate.",
+    who: "IR-1, CR-1, IR-2 and IR-5 visas.",
     inputs: ["consulate", "office"],
     officeForm: { form: "I-130", category: "immediate-relative" },
     stages: [
@@ -266,8 +295,8 @@ export const PATHS: PathSpec[] = [
         what: "If the visa is approved, your passport comes back with it within weeks. Pay the USCIS immigrant fee; the green card comes by mail after you enter the US.",
         href: null,
       },
-      I751_STAGE,
     ],
+    cases: [I751_CASE],
   },
   {
     slug: "spouse-in-us",
@@ -276,7 +305,7 @@ export const PATHS: PathSpec[] = [
       "Marriage green card timeline in the US: I-130, I-485, work permit waits",
     description:
       "How long each step takes right now for the spouse of a US citizen getting a green card without leaving the US: the I-485 with the I-130, the work permit and the travel document, as dates.",
-    who: "A green card without leaving the US (adjustment of status). If you entered without inspection, talk to a lawyer first.",
+    who: "Adjustment of status (I-485).",
     inputs: ["office"],
     officeForm: { form: "I-485", category: "family" },
     stages: [
@@ -301,7 +330,14 @@ export const PATHS: PathSpec[] = [
         what: "USCIS mails the card within weeks. If you were married for less than 2 years when it was approved, it is valid for 2 years.",
         href: null,
       },
-      I751_STAGE,
+    ],
+    cases: [
+      {
+        // where the lawyer warning of this path's who line moved
+        label: "Entered without inspection",
+        note: "If you entered the US without inspection, talk to an immigration lawyer before you file: adjustment of status may not be open to you.",
+      },
+      I751_CASE,
     ],
   },
   {
@@ -311,7 +347,7 @@ export const PATHS: PathSpec[] = [
       "K-1 fiancé(e) visa timeline: I-129F, interview and green card waits",
     description:
       "How long each step takes right now for the fiancé(e) of a US citizen: the I-129F at USCIS, the K-1 interview, and the I-485 green card application after the wedding, as dates.",
-    who: "Coming to the US on a K-1 visa to marry within 90 days, then getting a green card there.",
+    who: "K-1 visa, then a green card in the US.",
     inputs: ["office"],
     officeForm: { form: "I-485", category: "family" },
     stages: [
@@ -387,9 +423,11 @@ export const PATHS: PathSpec[] = [
       },
       EAD_STAGE,
       AP_STAGE,
+    ],
+    cases: [
       {
-        ...I751_STAGE,
-        what: "Most K-1 couples get a green card valid for 2 years. File the I-751 in the 90 days before it expires.",
+        ...I751_CASE,
+        note: "Most K-1 couples get a 2-year green card. File the I-751 in the 90 days before it expires.",
       },
     ],
   },
@@ -431,6 +469,7 @@ export const PATHS: PathSpec[] = [
         href: null,
       },
     ],
+    cases: [],
   },
   {
     slug: "employment",
@@ -439,7 +478,7 @@ export const PATHS: PathSpec[] = [
       "Employment green card timeline (EB-1, EB-2, EB-3): I-140, priority date and I-485",
     description:
       "How long each step takes right now for an employment-based green card: the I-140 at USCIS, your priority date in the Visa Bulletin, and the I-485 with the work permit and travel document, as dates.",
-    who: "EB-1, EB-2 and EB-3, sponsored by an employer or self-petitioned.",
+    who: "EB-1, EB-2 and EB-3.",
     inputs: ["bulletin", "office"],
     officeForm: { form: "I-485", category: "employment" },
     stages: [
@@ -499,14 +538,17 @@ export const PATHS: PathSpec[] = [
       },
       EAD_STAGE,
       AP_STAGE,
+    ],
+    cases: [
       {
-        kind: "note",
-        id: "abroad",
-        name: "Abroad: NVC and the interview at your consulate",
-        what: "Outside the US, your case goes to the National Visa Center and then to an interview at your consulate.",
-        href: "/nvc",
-        hrefText: "NVC wait times",
+        label: "EB-1: no PERM",
+        note: "EB-1 cases and national interest waivers skip the PERM: the I-140 is the first step.",
       },
+      {
+        label: "Premium processing",
+        note: "For an extra fee, USCIS decides the I-140 within 15 business days (45 for some, such as national interest waivers). The range counts premium and regular cases together: without it, expect the later end.",
+      },
+      ABROAD_CASE,
     ],
   },
   {
@@ -517,7 +559,7 @@ export const PATHS: PathSpec[] = [
       "Family preference green card timeline (F1 to F4): I-130, priority date and interview",
     description:
       "How long each step takes right now in the family preference categories F1, F2A, F2B, F3 and F4: the I-130 at USCIS, your priority date in the Visa Bulletin, and the steps after it.",
-    who: "The family preference categories: unmarried adult children of US citizens (F1), spouses and children of green card holders (F2A and F2B), married children of US citizens (F3) and siblings of US citizens (F4).",
+    who: "F1, F2A, F2B, F3 and F4.",
     inputs: ["bulletin"],
     stages: [
       {
@@ -542,14 +584,6 @@ export const PATHS: PathSpec[] = [
         hrefText: "Visa Bulletin dates",
       },
       {
-        kind: "note",
-        id: "abroad",
-        name: "Abroad: NVC and the interview at your consulate",
-        what: "NVC asks for your fees and documents once the Visa Bulletin lets you, then your consulate schedules the interview.",
-        href: "/nvc",
-        hrefText: "NVC wait times",
-      },
-      {
         kind: "uscis",
         id: "i-485",
         form: "I-485",
@@ -562,6 +596,7 @@ export const PATHS: PathSpec[] = [
         end: I485_APPROVED,
       },
     ],
+    cases: [ABROAD_CASE],
   },
   {
     slug: "temporary",
@@ -570,7 +605,7 @@ export const PATHS: PathSpec[] = [
       "Work visa timeline (H-1B, L-1, O-1): the I-129 petition and the consulate",
     description:
       "How long the I-129 petition takes right now for H, L, O, P, Q and R work visas, as dates, and where to find the appointment wait at your consulate.",
-    who: "B, F, J, H, L, O and other nonimmigrant visas.",
+    who: "B, F, J, H, L, O and other visas.",
     inputs: [],
     stages: [
       {
@@ -602,6 +637,7 @@ export const PATHS: PathSpec[] = [
         hrefText: "Global Visa Wait Times",
       },
     ],
+    cases: [],
   },
 ];
 
@@ -612,13 +648,28 @@ export function pathBySlug(slug: string): PathSpec | undefined {
 /** The milestones a path's page lists, in the order of its steps */
 export function pathMilestones(path: PathSpec): Milestone[] {
   return path.stages.flatMap((stage) =>
-    stage.parallelTo !== undefined || stage.detached === true
+    stage.parallelTo !== undefined
       ? []
       : [
           ...(stage.start === undefined ? [] : [stage.start]),
           ...(stage.end === undefined ? [] : [stage.end]),
         ],
   );
+}
+
+/** The USCIS forms a path's page gives a range for, with their categories:
+ * those of its USCIS steps, and the one a case's note adds (the I-751) */
+export function pathForms(
+  path: PathSpec,
+): { form: string; category: string }[] {
+  return [
+    ...path.stages.flatMap((stage) =>
+      stage.kind === "uscis"
+        ? [{ form: stage.form, category: stage.category }]
+        : [],
+    ),
+    ...path.cases.flatMap(({ form }) => (form === undefined ? [] : [form])),
+  ];
 }
 
 // The data a path page needs, assembled by api/timeline.ts
@@ -1715,9 +1766,7 @@ export function estimateTimeline(
   // the days the visitor's month can stand for
   const span = month === null ? null : monthSpan(month, today);
   // which stage the milestone belongs to, and whether it starts or ends it
-  const main = path.stages.filter(
-    (stage) => stage.parallelTo === undefined && stage.detached !== true,
-  );
+  const main = path.stages.filter((stage) => stage.parallelTo === undefined);
   let reported: { index: number; at: "start" | "end" } | null = null;
   if (span !== null && inputs.milestone !== "")
     main.forEach((stage, index) => {
@@ -1775,21 +1824,18 @@ export function estimateTimeline(
     previousEnd = status === "done" ? null : result.end;
   });
   for (const stage of path.stages) {
-    if (stage.parallelTo !== undefined) {
-      const sibling = results.get(stage.parallelTo);
-      const result = estimateStage(
+    if (stage.parallelTo === undefined) continue;
+    const sibling = results.get(stage.parallelTo);
+    results.set(
+      stage.id,
+      estimateStage(
         stage,
         sibling?.start ?? null,
         sibling?.status ?? "ahead",
         context,
         priorityMonth,
-      );
-      results.set(stage.id, result);
-    } else if (stage.detached === true)
-      results.set(
-        stage.id,
-        estimateStage(stage, null, "ahead", context, priorityMonth),
-      );
+      ),
+    );
   }
   const stages = path.stages.map(
     (stage) => results.get(stage.id) as StageResult,
@@ -1838,17 +1884,27 @@ function estimateStage(
 }
 
 /** The one line the home page shows for a path: what its first dated step
- * takes right now, from the same data */
+ * takes right now, from the same data. "Most likely" is said once, on the
+ * first figure, and the labels take no colon (Bence: one line per path on a
+ * phone). */
 export function pathSummary(path: PathSpec, data: TimelineData): string {
   const { stages } = estimateTimeline(path, data, EMPTY_INPUTS, null);
   const parts: string[] = [];
+  // whether the next figure is the line's first
+  let first = true;
+  const figure = (label: string, days: Days) => {
+    const part = `${label} ${first ? "most likely " : ""}${formatDuration(
+      days,
+    )}`;
+    first = false;
+    return part;
+  };
   for (const { spec, days } of stages) {
-    if (spec.parallelTo !== undefined || spec.detached === true) continue;
+    if (spec.parallelTo !== undefined) continue;
     let part: string | null = null;
-    if (spec.kind === "uscis" && days !== null)
-      part = `${spec.form}: most likely ${formatDuration(days)}`;
+    if (spec.kind === "uscis" && days !== null) part = figure(spec.form, days);
     else if (spec.kind === "nvc-review" && days !== null)
-      part = `NVC: ${formatDuration(days)}`;
+      part = figure("NVC", days);
     else if (spec.kind === "interview")
       part = "the interview queue at your consulate";
     else if (spec.kind === "priority-date")
@@ -1864,4 +1920,22 @@ export function pathSummary(path: PathSpec, data: TimelineData): string {
       ? `${parts.slice(0, -1).join(", ")}, then ${parts[parts.length - 1]}`
       : parts.join("");
   return `${line.charAt(0).toUpperCase()}${line.slice(1)}.`;
+}
+
+/** A case's note with its figure filled in: its sentences, then how long
+ * USCIS most likely takes to decide the form it names, by the form's range
+ * (the one its own step would show), when the data has one */
+export function caseNote(pathCase: PathCase, data: TimelineData): string {
+  const { note, form } = pathCase;
+  const range =
+    form === undefined
+      ? undefined
+      : data.ranges[`${form.form}/${form.category}`];
+  if (range === undefined || range.suppressed !== null || range.priorityDate)
+    return note;
+  const days = {
+    low: monthsToDays(range.q[1]),
+    high: monthsToDays(range.q[3]),
+  };
+  return `${note} USCIS most likely decides it in ${formatDuration(days)}.`;
 }
