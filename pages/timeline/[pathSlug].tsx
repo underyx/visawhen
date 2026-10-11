@@ -19,9 +19,14 @@ import MonthInput from "../../components/MonthInput";
 import MoreDetails from "../../components/MoreDetails";
 import { ChipRow, NoteChip } from "../../components/NoteChip";
 import { PolicyNews } from "../../components/PolicyBanner";
+import { NotShown, Stat, Stats } from "../../components/Stats";
 import { breadcrumbList } from "../../components/structuredData";
-import { formatBulletinMonth } from "../../components/visaBulletin";
+import {
+  formatBulletinMonth,
+  formatCutoff,
+} from "../../components/visaBulletin";
 import type {
+  BulletinCell,
   PathCase,
   PathSlug,
   PathSpec,
@@ -38,6 +43,7 @@ import {
   formatDuration,
   inputsFromHash,
   inputsToHash,
+  movementStat,
   pathBySlug,
   pathMilestones,
   PATHS,
@@ -108,24 +114,29 @@ function stampLabel({ spec }: StageResult): string {
   }
 }
 
+type Total = NonNullable<TimelineResult["total"]>;
+
+/** The estimate the stamp shows, or null when there is nothing to foretell:
+ * no step can be timed, or the last timed step should be over by now and
+ * its own line says what to do */
+function stampTotal(
+  { total }: TimelineResult,
+  today: string | null,
+): Total | null {
+  if (total === null) return null;
+  if (total.end !== null && today !== null && total.end.high <= today)
+    return null;
+  return total;
+}
+
 function Stamp({
-  result,
+  total,
   reported,
-  today,
 }: {
-  result: TimelineResult;
+  total: Total;
   /** Whether the visitor said where their case is */
   reported: boolean;
-  today: string | null;
 }) {
-  const { total } = result;
-  // nothing to foretell when the last counted step should be over by now:
-  // its own line says what to do
-  if (
-    total === null ||
-    (total.end !== null && today !== null && total.end.high <= today)
-  )
-    return null;
   return (
     <div className={stampClasses.estimate}>
       <div className={stampClasses.stamp}>
@@ -140,6 +151,42 @@ function Stamp({
         )}
       </div>
     </div>
+  );
+}
+
+/** The chosen line's cutoffs in the newest Visa Bulletin, in the stamp's
+ * place. A path whose next step is the priority date has no stamp: the site
+ * gives no arrival date for a priority date, because the line moves
+ * unevenly (priorityDateStage), so without this a visitor who has chosen
+ * their category and country would see no figure above the form. The boxes
+ * say where the line stands and how it moved, not when the visitor's date
+ * comes; the priority-date step below says what the two dates mean. */
+function CutoffStrip({ cell }: { cell: BulletinCell }) {
+  const movement = movementStat(cell);
+  // one box per row on a phone: family lines often move two or three years
+  // in a year, and "+2 years and 10 months" takes four lines in a third of
+  // the width
+  return (
+    <Stats columns={3} phoneColumns={1}>
+      <Stat
+        label="Final Action Date"
+        value={formatCutoff(cell.final)}
+        line={cell.finalChange?.text ?? null}
+        lineColor={cell.finalChange?.color}
+      />
+      <Stat
+        label="Date for Filing"
+        value={formatCutoff(cell.filing)}
+        line={cell.filingChange?.text ?? null}
+        lineColor={cell.filingChange?.color}
+      />
+      <Stat
+        label="Moved in 12 months"
+        value={movement.value ?? <NotShown>{movement.notShown}</NotShown>}
+        line={movement.line}
+        lineColor={movement.lineColor}
+      />
+    </Stats>
   );
 }
 
@@ -350,6 +397,11 @@ export default function TimelinePage({ slug, data, year }: Props) {
     [path, data, inputs, today],
   );
   const reported = result.stages.some(({ status }) => status !== "ahead");
+  const stamped = stampTotal(result, today);
+  // the Visa Bulletin line the visitor chose, on a path that asks for one
+  const cell = path.inputs.includes("bulletin")
+    ? data.bulletin?.cells[inputs.category]?.[inputs.area]
+    : undefined;
   const office = data.offices?.find((option) => option.slug === inputs.office);
   const officeFormSlug = path.officeForm?.form.toLowerCase();
   const canonicalUrl = `https://visawhen.com/timeline/${slug}`;
@@ -405,7 +457,11 @@ export default function TimelinePage({ slug, data, year }: Props) {
           a phone it was under 3-6 inputs, and off the first screen once a
           date was picked. "If you start today" says the inputs under it
           refine it. */}
-      <Stamp result={result} reported={reported} today={today} />
+      {stamped !== null ? (
+        <Stamp total={stamped} reported={reported} />
+      ) : (
+        cell !== undefined && <CutoffStrip cell={cell} />
+      )}
       <form
         className={classes.inputs}
         onSubmit={(event) => event.preventDefault()}
