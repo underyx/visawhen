@@ -1,32 +1,28 @@
-import { Accordion, Anchor, Chip, Group, Text } from "@mantine/core";
+import { Anchor, Group, Popover, Stack, Text } from "@mantine/core";
 import Link from "next/link";
-import React, { useId, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { InfoIcon } from "./icons";
 import classes from "./NvcAudience.module.css";
 
-// Who NVC's times are for, by case, as one element with three parts to
-// open. On a phone the parts are the rows of one slip, like the policy
-// notices' row above it; from sm up they are chips in a row, and the picked
-// one's line shows under them. Every part's title names a group of
-// visitors, short enough for one line of a phone's row and for the three
-// chips to share a row (measured in the site's font at 360px and 1280px),
-// and its line says what the times mean for them.
+// Who NVC's times are for, as two rows of chips: the cases they are for,
+// each a button that opens a note on what the times mean for that case,
+// and the cases they are not for, as plain pills. The note is between a
+// tooltip and a dialog (Bence's ask): a mouse opens it by hovering, a tap
+// or a click opens it until a tap or click elsewhere, and it holds a link.
 
-interface Part {
-  key: string;
-  title: string;
-  line: React.ReactNode;
+/** How long a note stays open after the mouse leaves its chip, so that it
+ * can be moved onto the note itself */
+const LEAVE_MS = 150;
+
+interface Note {
+  label: string;
+  note: React.ReactNode;
 }
 
-const PARTS: Part[] = [
+const FOR: Note[] = [
   {
-    key: "other",
-    title: "K visas, DV, SIV and adoptions",
-    line: "These times do not apply to fiancé(e) visas, diversity visas, special immigrant visas or adoptions.",
-  },
-  {
-    key: "relatives",
-    title: "Spouse, parent or child of a US citizen",
-    line: (
+    label: "Spouse, parent or child of a US citizen",
+    note: (
       <>
         NVC usually takes weeks.{" "}
         <Anchor component={Link} href="/consulates">
@@ -37,9 +33,8 @@ const PARTS: Part[] = [
     ),
   },
   {
-    key: "preference",
-    title: "Family and employment preference",
-    line: (
+    label: "Family and employment preference",
+    note: (
       <>
         Your priority date is usually your longest wait, often years. NVC asks
         for your documents once the{" "}
@@ -53,55 +48,84 @@ const PARTS: Part[] = [
   },
 ];
 
-export default function NvcAudience() {
-  const [picked, setPicked] = useState("");
-  const chipName = useId();
-  const labelId = useId();
-  const part = PARTS.find(({ key }) => key === picked);
+const NOT_FOR = ["K visas", "DV", "SIV", "Adoptions"];
+
+/** A chip that opens its note on hover (a mouse) or on a tap or click */
+function NoteChip({ label, note }: Note) {
+  // pinned: opened by a tap or click, until one elsewhere; hovered: by the
+  // mouse, until it leaves the chip and the note
+  const [pinned, setPinned] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const leaving = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const opened = pinned || hovered;
+  const close = () => {
+    setPinned(false);
+    setHovered(false);
+  };
+  // A finger's tap also fires pointerenter, and no pointerleave until the
+  // next tap elsewhere, so only a mouse hovers.
+  const enter = (event: React.PointerEvent) => {
+    if (event.pointerType !== "mouse") return;
+    clearTimeout(leaving.current);
+    setHovered(true);
+  };
+  const leave = (event: React.PointerEvent) => {
+    if (event.pointerType !== "mouse") return;
+    leaving.current = setTimeout(() => setHovered(false), LEAVE_MS);
+  };
+  useEffect(() => () => clearTimeout(leaving.current), []);
   return (
-    <>
-      {/* order={2}: the rows are sections of the page, beside the queues'
-          headings, not parts of the policy notices' row above them */}
-      <Accordion
-        multiple
-        variant="contained"
-        order={2}
-        className={classes.phone}
-        classNames={{ item: classes.item, label: classes.label }}
-      >
-        {PARTS.map(({ key, title, line }) => (
-          <Accordion.Item key={key} value={key}>
-            <Accordion.Control>
-              <Text span size="sm">
-                {title}
-              </Text>
-            </Accordion.Control>
-            <Accordion.Panel>
-              <Text size="sm">{line}</Text>
-            </Accordion.Panel>
-          </Accordion.Item>
+    // withinPortal false: the note follows its chip in the page, so that
+    // the Tab key reaches the link in it
+    <Popover
+      opened={opened}
+      onDismiss={close}
+      position="bottom-start"
+      withArrow
+      shadow="md"
+      withinPortal={false}
+      classNames={{ dropdown: classes.note }}
+    >
+      <Popover.Target>
+        <button
+          type="button"
+          className={classes.chip}
+          onClick={() => (opened ? close() : setPinned(true))}
+          onPointerEnter={enter}
+          onPointerLeave={leave}
+        >
+          {label}
+          <InfoIcon className={classes.icon} />
+        </button>
+      </Popover.Target>
+      <Popover.Dropdown onPointerEnter={enter} onPointerLeave={leave}>
+        <Text size="sm">{note}</Text>
+      </Popover.Dropdown>
+    </Popover>
+  );
+}
+
+export default function NvcAudience() {
+  return (
+    <Stack gap="xs">
+      <Group gap="xs">
+        <Text size="sm" fw={600} span>
+          For:
+        </Text>
+        {FOR.map((entry) => (
+          <NoteChip key={entry.label} {...entry} />
         ))}
-      </Accordion>
-      <div className={classes.desktop}>
-        {/* The lead and the chips flow as one row, wrapping together */}
-        <Chip.Group multiple={false} value={picked} onChange={setPicked}>
-          <Group gap="xs" role="radiogroup" aria-labelledby={labelId}>
-            <Text size="sm" fw={600} span id={labelId}>
-              Your case:
-            </Text>
-            {PARTS.map(({ key, title }) => (
-              <Chip key={key} value={key} variant="outline" name={chipName}>
-                {title}
-              </Chip>
-            ))}
-          </Group>
-        </Chip.Group>
-        {part !== undefined && (
-          <Text size="sm" mt="xs">
-            {part.line}
-          </Text>
-        )}
-      </div>
-    </>
+      </Group>
+      <Group gap="xs">
+        <Text size="sm" fw={600} span>
+          Not for:
+        </Text>
+        {NOT_FOR.map((label) => (
+          <span key={label} className={classes.pill}>
+            {label}
+          </span>
+        ))}
+      </Group>
+    </Stack>
   );
 }

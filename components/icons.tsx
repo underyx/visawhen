@@ -58,6 +58,17 @@ export function HourglassIcon(props: IconProps) {
   );
 }
 
+/** On a chip that opens a note */
+export function InfoIcon(props: IconProps) {
+  return (
+    <StrokeIcon strokeWidth={2} {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5" />
+      <path d="M12 8h.01" />
+    </StrokeIcon>
+  );
+}
+
 export function SearchIcon(props: IconProps) {
   return (
     <StrokeIcon {...props}>
