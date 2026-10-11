@@ -178,20 +178,23 @@ export default function UscisIndex({
           your field office.
         </Text>
       </Stack>
-      <TextInput
-        size="lg"
-        label="Find your form"
-        leftSection={<SearchIcon />}
-        type="search"
-        placeholder="e.g. I-485 or work permit"
-        onChange={setTerm}
-      />
-      <SearchStatus
-        term={term}
-        count={matchCount}
-        noun={["form", "forms"]}
-        hint="Try a form number such as I-130, or words such as green card, work permit or citizenship."
-      />
+      {/* one block: a Stack would pay its gap around the empty live region */}
+      <div>
+        <TextInput
+          size="lg"
+          label="Find your form"
+          leftSection={<SearchIcon />}
+          type="search"
+          placeholder="e.g. I-485 or work permit"
+          onChange={setTerm}
+        />
+        <SearchStatus
+          term={term}
+          count={matchCount}
+          noun={["form", "forms"]}
+          hint="Try a form number such as I-130, or words such as green card, work permit or citizenship."
+        />
+      </div>
       <Text size="sm" c="dimmed">
         The range next to a form is how long a decision will most likely take if
         you file today, going by USCIS&rsquo;s median for {latestLabel}; for a

@@ -843,20 +843,23 @@ export default function UscisForm({
             </Anchor>
             .
           </Text>
-          <TextInput
-            size="lg"
-            label="Find your field office"
-            leftSection={<SearchIcon />}
-            type="search"
-            placeholder="e.g. San Francisco or CA"
-            onChange={setTerm}
-          />
-          <SearchStatus
-            term={term}
-            count={filteredOffices.length}
-            noun={["office", "offices"]}
-            hint="Try the city or the state, such as Houston, Texas or TX."
-          />
+          {/* one block: a Stack would pay its gap around the empty live region */}
+          <div>
+            <TextInput
+              size="lg"
+              label="Find your field office"
+              leftSection={<SearchIcon />}
+              type="search"
+              placeholder="e.g. San Francisco or CA"
+              onChange={setTerm}
+            />
+            <SearchStatus
+              term={term}
+              count={filteredOffices.length}
+              noun={["office", "offices"]}
+              hint="Try the city or the state, such as Houston, Texas or TX."
+            />
+          </div>
           <Text size="sm" c="dimmed">
             {`Next to each office is how many ${
               officeCategory === null ? form : `${form} (${officeCategory})`

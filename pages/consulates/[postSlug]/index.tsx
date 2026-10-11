@@ -385,20 +385,23 @@ export default function ConsulateSelect({
         }
       />
       <Title order={2}>Visa classes at {postName}</Title>
-      <TextInput
-        size="lg"
-        label="Find your visa class"
-        leftSection={<SearchIcon />}
-        type="search"
-        placeholder="e.g. CR1 or spouse"
-        onChange={setTerm}
-      />
-      <SearchStatus
-        term={term}
-        count={filteredVisas.length}
-        noun={["visa class", "visa classes"]}
-        hint="Try a class code such as CR1, or a word such as spouse."
-      />
+      {/* one block: a Stack would pay its gap around the empty live region */}
+      <div>
+        <TextInput
+          size="lg"
+          label="Find your visa class"
+          leftSection={<SearchIcon />}
+          type="search"
+          placeholder="e.g. CR1 or spouse"
+          onChange={setTerm}
+        />
+        <SearchStatus
+          term={term}
+          count={filteredVisas.length}
+          noun={["visa class", "visa classes"]}
+          hint="Try a class code such as CR1, or a word such as spouse."
+        />
+      </div>
       <Text size="sm" c="dimmed">
         Badges: average visas issued per month, {formatMonth(recentWindow.from)}{" "}
         to {formatMonth(recentWindow.to)}.

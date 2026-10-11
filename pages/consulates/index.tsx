@@ -131,20 +131,23 @@ export default function ConsulateSelect({
         scheduling immigrant visa interviews for, and how many visas of each
         class it issues.
       </Text>
-      <TextInput
-        size="lg"
-        label="Find your embassy or consulate"
-        leftSection={<SearchIcon />}
-        type="search"
-        placeholder="e.g. Manila or Philippines"
-        onChange={setTerm}
-      />
-      <SearchStatus
-        term={term}
-        count={filteredPosts.length}
-        noun={["embassy or consulate", "embassies or consulates"]}
-        hint="Try the city or the country, such as Manila or Philippines."
-      />
+      {/* one block: a Stack would pay its gap around the empty live region */}
+      <div>
+        <TextInput
+          size="lg"
+          label="Find your embassy or consulate"
+          leftSection={<SearchIcon />}
+          type="search"
+          placeholder="e.g. Manila or Philippines"
+          onChange={setTerm}
+        />
+        <SearchStatus
+          term={term}
+          count={filteredPosts.length}
+          noun={["embassy or consulate", "embassies or consulates"]}
+          hint="Try the city or the country, such as Manila or Philippines."
+        />
+      </div>
       <Text size="sm" c="dimmed">
         Interview months: the State Department&rsquo;s{" "}
         <Anchor href={ivScheduleSource} target="_blank" rel="noopener">
