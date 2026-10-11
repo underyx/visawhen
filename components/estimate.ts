@@ -447,8 +447,8 @@ export function clearingSuppressed(point: QuarterPoint): string | null {
 }
 
 /** The points with no time to clear the backlog for the quarters where
- * clearingSuppressed says it would mislead, so the charts, the cards and the
- * highlight all leave the same quarters out. */
+ * clearingSuppressed says it would mislead, so the charts and the cards
+ * leave the same quarters out. */
 export function withoutMisleadingClearing(
   points: QuarterPoint[],
 ): QuarterPoint[] {
