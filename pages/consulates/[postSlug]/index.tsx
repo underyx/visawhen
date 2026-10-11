@@ -37,6 +37,7 @@ import {
   summarizeInactivity,
   summarizeIvPostElsewhere,
 } from "../../../components/consulates";
+import ConsulateAudience from "../../../components/ConsulateAudience";
 import IvScheduleCard, {
   describeRelativeQueue,
   listsPostAsCurrent,
@@ -48,6 +49,7 @@ import { breadcrumbList } from "../../../components/structuredData";
 import {
   hasEnded,
   issuanceSuspensionFor,
+  overridesUpdate,
   scheduleOverrideFor,
 } from "../../../components/policy";
 import {
@@ -239,6 +241,11 @@ export default function ConsulateSelect({
   })
     ? issuanceSuspensionFor(consulate.country, today)
     : null;
+  // The card shows its suspension slip only while no pause overrides the
+  // months (IvScheduleCard); the "Dual nationals" chip goes with the slip.
+  const overridden =
+    scheduleOverride !== null &&
+    overridesUpdate(scheduleOverride, ivScheduleAsOf, today);
   const recentToolIssued = countToolClassIssuances(recentIssuances);
   const issuedDescription = `How many visas ${postName} issued every month ${
     availableVisaClasses.length === 1
@@ -400,10 +407,18 @@ export default function ConsulateSelect({
               }
         }
       />
-      {/* The news comes after the months, as on /nvc: two thirds of visits
-          are phones, where the notices pushed the months below the fold
-          (Bence) */}
-      <PolicyNews consulate={consulate} />
+      {/* The news and who the months are for come after the months, as on
+          /nvc: two thirds of visits are phones, where the notices pushed
+          the months below the fold (Bence) */}
+      <Stack gap="xs">
+        <PolicyNews consulate={consulate} />
+        <ConsulateAudience
+          postSlug={postSlug}
+          postName={postName}
+          hasK1Page={availableVisaClassesSet.has("k1")}
+          suspended={suspension !== null && !overridden}
+        />
+      </Stack>
       <Title order={2}>Visa classes at {postName}</Title>
       {/* one block: a Stack would pay its gap around the empty live region */}
       <div>
