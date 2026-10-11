@@ -18,9 +18,7 @@ export default function PageWrapper({ children }: React.PropsWithChildren) {
               <Text size="sm" maw="62ch">
                 VisaWhen is an independent project, not affiliated with USCIS,
                 the State Department or any other government agency, and nothing
-                on it is legal advice. Its numbers come from the agencies&rsquo;
-                own published data; each page names its source and how recent it
-                is.{" "}
+                on it is legal advice.{" "}
                 <Anchor component={Link} href="/about">
                   Where the data comes from
                 </Anchor>
