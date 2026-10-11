@@ -182,6 +182,11 @@ export const CHARTS = {
 } as const;
 export type ChartKey = keyof typeof CHARTS;
 
+/** What a priority date is, in one place for the index's glossary and the
+ * area pages, so that the two never drift */
+export const PRIORITY_DATE_DEFINITION =
+  "Your priority date is usually the day USCIS received your I-130 or I-140 petition, or, when you needed a labor certification, the day it was filed. It is on your I-797 notice.";
+
 /** The newest bulletin's month, "2026-10" */
 export function newestMonth(data: VisaBulletinData): string {
   return Object.keys(data.bulletins).sort().reverse()[0];

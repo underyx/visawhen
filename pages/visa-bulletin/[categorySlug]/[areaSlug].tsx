@@ -42,6 +42,7 @@ import {
   Movement,
   newestMonth,
   pagePath,
+  PRIORITY_DATE_DEFINITION,
   Series,
 } from "../../../components/visaBulletin";
 import { daysBetween, useToday } from "../../../components/Freshness";
@@ -384,9 +385,7 @@ export default function VisaBulletinPage({
           </CutoffBox>
         </SimpleGrid>
         <Text size="xs" c="dimmed">
-          Your priority date is usually the day USCIS received your I-130 or
-          I-140 petition, or, when you needed a labor certification, the day it
-          was filed. It is on your I-797 notice. Source:{" "}
+          {PRIORITY_DATE_DEFINITION} Source:{" "}
           <Anchor href={bulletinUrl} target="_blank" rel="noopener">
             the {formatBulletinMonth(month)} Visa Bulletin
           </Anchor>

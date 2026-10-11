@@ -28,6 +28,7 @@ import {
   formatCutoff,
   newestMonth,
   pagePath,
+  PRIORITY_DATE_DEFINITION,
 } from "../../components/visaBulletin";
 
 interface Props {
@@ -185,11 +186,7 @@ export default function VisaBulletinIndex({
           citizenship) to see how fast its line has moved.
         </Text>
         <MoreDetails label="What is my priority date?">
-          <Text size="sm">
-            Your priority date is usually the day USCIS received your I-130 or
-            I-140 petition, or, when you needed a labor certification, the day
-            it was filed. It is on your I-797 notice.
-          </Text>
+          <Text size="sm">{PRIORITY_DATE_DEFINITION}</Text>
         </MoreDetails>
       </Stack>
       <Stack gap="sm">
