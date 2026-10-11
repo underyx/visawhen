@@ -940,6 +940,8 @@ export interface StageResult {
   /** Whether the warning is our own reading of the newest numbers, for
    * now (a stall, a sharp drop, old data), not about the visitor's case */
   news: boolean;
+  /** With `news`, the chip that opens the warning: "NVC has stalled" */
+  warningLabel: string | null;
   /** The input the step needs before it can say anything */
   needs: PathInput | null;
 }
@@ -994,6 +996,7 @@ function uscisStage(
     basis: [] as string[],
     warning: null,
     news: false,
+    warningLabel: null,
     needs: null,
   };
   const range = data.ranges[`${spec.form}/${spec.category}`];
@@ -1057,8 +1060,10 @@ function uscisStage(
     );
   let warning: string | null = null;
   let news = false;
+  let warningLabel: string | null = null;
   if (range.shock && range.shockRatio !== null) {
     news = true;
+    warningLabel = "USCIS deciding fewer cases";
     warning = `USCIS decided ${Math.round(
       (1 - range.shockRatio) * 100,
     )}% fewer of these cases in ${
@@ -1073,6 +1078,7 @@ function uscisStage(
       basis,
       warning,
       news,
+      warningLabel,
       headline: `Most likely ${formatDuration(days)} ${afterText(spec)}`,
     };
   let end = shiftMonths(start, range.q[1], range.q[3]);
@@ -1084,6 +1090,7 @@ function uscisStage(
     if (today > outer.high) {
       headline = "Longer than 9 in 10 cases";
       news = false;
+      warningLabel = null;
       warning = `Nine in ten cases were decided by ${formatShortDate(
         outer.high,
       )}. You can ask USCIS about a case outside its normal processing time: its processing times tool says from which date.`;
@@ -1092,6 +1099,7 @@ function uscisStage(
     } else if (today > end.high) {
       headline = `Most likely by ${formatShortDate(outer.high)}`;
       news = false;
+      warningLabel = null;
       warning = `Your case has taken longer than most: the likely range ended ${formatShortDate(
         end.high,
       )}.`;
@@ -1115,6 +1123,7 @@ function uscisStage(
     basis,
     warning,
     news,
+    warningLabel,
     headline,
   };
 }
@@ -1155,6 +1164,7 @@ function nvcCreationStage(
     basis: [] as string[],
     warning: null,
     news: false,
+    warningLabel: null,
     needs: null,
   };
   if (data.nvc === null) return { ...base, headline: "No NVC data." };
@@ -1177,13 +1187,18 @@ function nvcCreationStage(
       "USCIS usually takes a few weeks after the approval to send the case on, which no published timeframe covers, so this counts up to a month for it.",
     );
   let warning: string | null = null;
-  if (today !== null && daysBetween(date, today) > NVC_MAX_AGE_DAYS)
+  let warningLabel: string | null = null;
+  if (today !== null && daysBetween(date, today) > NVC_MAX_AGE_DAYS) {
     warning = `Our newest NVC reading is from ${formatDate(
       date,
     )}, so it may be out of date.`;
+    warningLabel = "Our data may be old";
+  }
   const stall = getStall(data.nvc.creation);
-  if (stall !== null)
+  if (stall !== null) {
     warning = `NVC’s case creation has almost stopped moving, so this may take longer than ${days} days.`;
+    warningLabel = "NVC has stalled";
+  }
   let news = warning !== null;
   if (start === null)
     return {
@@ -1192,6 +1207,7 @@ function nvcCreationStage(
       basis,
       warning,
       news,
+      warningLabel,
       headline: `Most likely ${formatDuration(duration)} ${afterText(spec)}`,
     };
   let end = shift(start, duration);
@@ -1200,6 +1216,7 @@ function nvcCreationStage(
     if (today > end.high) {
       headline = "This is taking longer than usual";
       news = false;
+      warningLabel = null;
       warning = `On ${formatDate(
         date,
       )}, NVC was taking ${days} days to create cases, and yours has waited ${daysBetween(
@@ -1209,7 +1226,16 @@ function nvcCreationStage(
       end = { low: today, high: today };
     } else end = fromToday(end, today);
   }
-  return { ...base, end, days: duration, basis, warning, news, headline };
+  return {
+    ...base,
+    end,
+    days: duration,
+    basis,
+    warning,
+    news,
+    warningLabel,
+    headline,
+  };
 }
 
 function yourStepStage(
@@ -1230,6 +1256,7 @@ function yourStepStage(
     basis: [],
     warning: null,
     news: false,
+    warningLabel: null,
     needs: null,
   };
 }
@@ -1256,6 +1283,7 @@ function nvcReviewStage(
     basis: [] as string[],
     warning: null,
     news: false,
+    warningLabel: null,
     needs: null,
   };
   if (data.nvc === null) return { ...base, headline: "No NVC data." };
@@ -1274,14 +1302,19 @@ function nvcReviewStage(
     "If NVC asks you to correct a document, your case goes back in line when you submit it again.",
   ];
   let warning: string | null = null;
+  let warningLabel: string | null = null;
   const stale = today !== null && daysBetween(date, today) > NVC_MAX_AGE_DAYS;
-  if (stale)
+  if (stale) {
     warning = `Our newest NVC reading is from ${formatDate(
       date,
     )}, so it may be out of date.`;
+    warningLabel = "Our data may be old";
+  }
   const stall = getStall(series);
-  if (stall !== null)
+  if (stall !== null) {
     warning = `NVC’s document review has almost stopped moving: anything submitted now may take longer than ${days} days.`;
+    warningLabel = "NVC has stalled";
+  }
   const news = warning !== null;
   if (start === null)
     return {
@@ -1290,6 +1323,7 @@ function nvcReviewStage(
       basis,
       warning,
       news,
+      warningLabel,
       headline: `Most likely ${formatDuration(duration)} ${afterText(spec)}`,
     };
   // the visitor's own submission month: the /nvc page's range for its
@@ -1382,7 +1416,16 @@ function nvcReviewStage(
       end = { low: today, high: today };
     } else end = fromToday(end, today);
   }
-  return { ...base, end, days: duration, basis, warning, news, headline };
+  return {
+    ...base,
+    end,
+    days: duration,
+    basis,
+    warning,
+    news,
+    warningLabel,
+    headline,
+  };
 }
 
 /** How far back the interview estimate measures the pace of a post's
@@ -1477,6 +1520,7 @@ function interviewStage(
     basis: [] as string[],
     warning: null,
     news: false,
+    warningLabel: null,
     needs: null,
   };
   const post = data.posts?.find(({ slug }) => slug === inputs.post);
@@ -1496,7 +1540,10 @@ function interviewStage(
     return {
       ...base,
       headline: "No estimate while visa services are disrupted",
+      // the notice's own chip label, "Visa services paused"
       warning: `${override.title}: ${override.summary} See ${post.name}’s page.`,
+      news: true,
+      warningLabel: override.label,
     };
   if (month === null)
     return {
@@ -1621,10 +1668,12 @@ function interviewStage(
       ? "The month this consulate is scheduling has not moved forward in the last year. The estimate takes the queue as it is now; it could take much longer."
       : null;
   let news = warning !== null;
+  let warningLabel = news ? "Queue not moving" : null;
   if (status === "current" && today !== null) {
     if (today > end.high) {
       headline = "NVC should be reaching your case about now";
       news = false;
+      warningLabel = null;
       warning = `By this consulate’s queue, NVC would have reached a case completed ${formatSince(
         start,
       )} by ${formatShortDate(end.high)}. Watch for NVC’s email, and check ${
@@ -1633,7 +1682,16 @@ function interviewStage(
       end = { low: today, high: today };
     } else end = fromToday(end, today);
   }
-  return { ...base, end, days, basis, headline, warning, news };
+  return {
+    ...base,
+    end,
+    days,
+    basis,
+    headline,
+    warning,
+    news,
+    warningLabel,
+  };
 }
 
 /** "moved forward 4 months", "did not move", "moved back 3 months" */
@@ -1662,6 +1720,7 @@ function priorityDateStage(
     basis: [] as string[],
     warning: null,
     news: false,
+    warningLabel: null,
     needs: null,
   };
   const bulletin = data.bulletin;
@@ -1753,6 +1812,7 @@ function noteStage(
     basis: [],
     warning: null,
     news: false,
+    warningLabel: null,
     needs: null,
   };
 }

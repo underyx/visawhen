@@ -330,8 +330,9 @@ describe("estimateTimeline", () => {
       plain(i130.warning),
       "Nine in ten cases were decided by May 1, 2026. You can ask USCIS about a case outside its normal processing time: its processing times tool says from which date.",
     );
-    // about this case, not news about the numbers
+    // about this case, not news about the numbers: no chip
     assert.equal(i130.news, false);
+    assert.equal(i130.warningLabel, null);
     assert.deepEqual(i130.end, { low: TODAY, high: TODAY });
     assert.deepEqual(stage(SPOUSE_ABROAD, inputs, "nvc-creation").start, {
       low: TODAY,
@@ -451,13 +452,45 @@ describe("estimateTimeline", () => {
       "interview",
     );
     assert.match(interview.warning ?? "", /has not moved forward/);
-    // our reading of the numbers, for now: shown as temporary news
+    // our reading of the numbers, for now: a warning chip
     assert.equal(interview.news, true);
+    assert.equal(interview.warningLabel, "Queue not moving");
     // the queue as it is only: 22 months from each end of the month
     assert.deepEqual(interview.end, {
       low: addMonths("2026-09-01", 22),
       high: addMonths("2026-09-30", 22),
     });
+  });
+
+  it("labels the chip of an old NVC reading and of USCIS deciding fewer cases", () => {
+    // five weeks after the newest reading
+    const { stages } = estimateTimeline(
+      SPOUSE_ABROAD,
+      DATA,
+      EMPTY_INPUTS,
+      "2026-11-10",
+    );
+    const creation = stages.find(({ spec }) => spec.id === "nvc-creation");
+    assert.equal(creation?.news, true);
+    assert.equal(creation?.warningLabel, "Our data may be old");
+    assert.match(creation?.warning ?? "", /may be out of date/);
+    const fewer: TimelineData = {
+      ...DATA,
+      ranges: {
+        "I-130/immediate-relative": range(
+          "immediate-relative",
+          "Immediate Relative",
+          13,
+          [8, 11, 13, 22, 30],
+          { shock: true, shockRatio: 0.6 },
+        ),
+      },
+    };
+    const i130 = estimateTimeline(SPOUSE_ABROAD, fewer, EMPTY_INPUTS, TODAY)
+      .stages[0];
+    assert.equal(i130.news, true);
+    assert.equal(i130.warningLabel, "USCIS deciding fewer cases");
+    assert.match(i130.warning ?? "", /^USCIS decided 40% fewer/);
   });
 
   it("gives no arrival date for a priority date, and reads it from the I-130", () => {

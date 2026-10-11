@@ -1,6 +1,7 @@
 import {
   Alert,
   Anchor,
+  Box,
   Button,
   NativeSelect,
   Stack,
@@ -13,11 +14,10 @@ import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
 import { getTimelineData } from "../../api/timeline";
 import { formatDate, useToday } from "../../components/Freshness";
-import { ChevronLeftIcon } from "../../components/icons";
+import { ChevronLeftIcon, WarningIcon } from "../../components/icons";
 import MonthInput from "../../components/MonthInput";
 import MoreDetails from "../../components/MoreDetails";
 import { ChipRow, NoteChip } from "../../components/NoteChip";
-import TemporaryNotice from "../../components/TemporaryNotice";
 import { breadcrumbList } from "../../components/structuredData";
 import { formatBulletinMonth } from "../../components/visaBulletin";
 import type {
@@ -152,7 +152,7 @@ function StepBody({
   /** A step filed alongside another: smaller */
   side?: boolean;
 }) {
-  const { spec, status, headline, warning, news, basis } = result;
+  const { spec, status, headline, warning, news, warningLabel, basis } = result;
   return (
     <>
       {status === "done" ? (
@@ -166,10 +166,23 @@ function StepBody({
           </Text>
         )
       )}
+      {/* Our own reading of the numbers (a stall, old data) is a warning
+          chip that opens the text, as /nvc's "stalled" chip is: the
+          headline already carries the figure it qualifies. A warning
+          about the visitor's own case stays open. */}
       {status !== "done" &&
         warning !== null &&
-        (news ? (
-          <TemporaryNotice mt="xs">{warning}</TemporaryNotice>
+        (news && warningLabel !== null ? (
+          <Box mt="xs">
+            <NoteChip
+              label={warningLabel}
+              icon={<WarningIcon />}
+              tone="warning"
+              title={warningLabel}
+            >
+              <Text size="sm">{warning}</Text>
+            </NoteChip>
+          </Box>
         ) : (
           <Alert color="yellow" role="note" mt="xs">
             {warning}
