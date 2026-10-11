@@ -1,4 +1,5 @@
 import policyData from "../data/policy.json";
+import { AREAS, CATEGORIES, pagePath } from "./visaBulletin";
 
 // The policy notices shown on the consulate and NVC pages, from
 // data/policy.json. Delays now come mostly from policy (posts that paused or
@@ -121,9 +122,23 @@ export interface PolicyEntry {
 /** Every entry in the file, in its order */
 export const POLICY_ENTRIES = policyData.entries as PolicyEntry[];
 
-/** The pages other than the consulate pages that show notices, the only
- * values `scope.pages` may take (the build checks it, see api/policy.ts) */
-export const POLICY_PAGES = ["/nvc", "/uscis/i-485"];
+/** The pages other than the consulate pages that show a news row, the only
+ * values `scope.pages` may take (the build checks it, see api/policy.ts).
+ * The timeline paths are spelled out: timeline.ts imports this module. */
+export const POLICY_PAGES = [
+  "/nvc",
+  "/uscis/i-485",
+  "/timeline/spouse-abroad",
+  "/timeline/spouse-in-us",
+  "/timeline/fiance",
+  "/timeline/citizenship",
+  "/timeline/employment",
+  "/timeline/other-family",
+  "/timeline/temporary",
+  ...CATEGORIES.flatMap((category) =>
+    AREAS.map((area) => pagePath(category, area)),
+  ),
+];
 
 /** A consulate page an entry may be shown on: a post's own page, or one of
  * its visa class pages */

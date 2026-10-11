@@ -67,8 +67,17 @@ describe("problemsWith", () => {
     assert.deepEqual(problemsWith({ ...valid, suspendsIssuance: true }), [
       "suspendsIssuance must be true or false, and true only with scope.countries",
     ]);
+    assert.deepEqual(
+      problemsWith({
+        ...valid,
+        scope: {
+          pages: ["/timeline/spouse-abroad", "/visa-bulletin/eb-2/india"],
+        },
+      }),
+      [],
+    );
     assert.deepEqual(problemsWith({ ...valid, scope: { pages: ["/about"] } }), [
-      "scope.pages may only name pages that show notices: /nvc, /uscis/i-485",
+      "scope.pages may only name pages that show a news row (POLICY_PAGES in components/policy.ts)",
     ]);
     assert.deepEqual(
       problemsWith({

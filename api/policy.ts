@@ -114,9 +114,7 @@ export function problemsWith(entry: Record<string, unknown>): string[] {
       scope.pages === undefined ||
         (Array.isArray(scope.pages) &&
           scope.pages.every((page) => POLICY_PAGES.includes(page))),
-      `scope.pages may only name pages that show notices: ${POLICY_PAGES.join(
-        ", ",
-      )}`,
+      "scope.pages may only name pages that show a news row (POLICY_PAGES in components/policy.ts)",
     ],
     [
       scope.immigrantVisasOnly === undefined ||
