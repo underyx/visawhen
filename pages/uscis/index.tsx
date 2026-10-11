@@ -190,7 +190,7 @@ export default function UscisIndex({
           term={term}
           count={matchCount}
           noun={["form", "forms"]}
-          hint="Try a form number such as I-130, or words such as green card, work permit or citizenship."
+          hint="Try a form number, such as I-130, or words such as green card or work permit."
         />
       </div>
       <Text size="xs" c="dimmed">
@@ -206,16 +206,15 @@ export default function UscisIndex({
         .
       </Text>
       {searchesDol && (
-        <Text>
-          PERM labor certification and prevailing wage determinations are
-          decided by the Department of Labor, not USCIS, and are not covered
-          here: see{" "}
+        <Text size="sm">
+          PERM and prevailing wage decisions are the Department of
+          Labor&rsquo;s, not USCIS&rsquo;s: see{" "}
           <Anchor
             href={DOL_PROCESSING_TIMES_URL}
             target="_blank"
             rel="noopener"
           >
-            the Department of Labor&rsquo;s processing times
+            its processing times
           </Anchor>
           . After PERM, the employer files the I-140 with USCIS.
         </Text>
