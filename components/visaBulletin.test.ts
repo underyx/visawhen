@@ -4,6 +4,7 @@ import type { VisaBulletinData } from "../api/visaBulletin";
 import {
   addMonthsToMonth,
   areaBySlug,
+  bornInText,
   categoryBySlug,
   chartAreas,
   formatBulletinMonth,
@@ -12,9 +13,11 @@ import {
   getMovement,
   getSeries,
   isDate,
+  latestChange,
   monthsBetweenDates,
   newestMonth,
   pagePath,
+  type Series,
 } from "./visaBulletin";
 
 const data: VisaBulletinData = {
@@ -62,6 +65,28 @@ describe("the categories and areas", () => {
       ["all", "india", "mexico"],
     );
   });
+  it("say where a page's people were born", () => {
+    const all = areaBySlug("other-countries");
+    const india = areaBySlug("india");
+    assert.ok(all !== undefined && india !== undefined);
+    const areas = chartAreas({
+      F4: { all: "C", china: "C", india: "C", mexico: "C", philippines: "C" },
+    });
+    assert.equal(bornInText(india, areas), "born in India");
+    assert.equal(
+      bornInText(all, areas),
+      "born outside China, India, Mexico, and the Philippines",
+    );
+    assert.equal(
+      bornInText(all, chartAreas({ F1: { all: "C", mexico: "C" } })),
+      "born outside Mexico",
+    );
+    // a chart that lists no other area
+    assert.equal(
+      bornInText(all, chartAreas({ F1: { all: "C" } })),
+      "born in any country not listed separately",
+    );
+  });
 });
 
 describe("the series of a category in an area", () => {
@@ -93,6 +118,78 @@ describe("the series of a category in an area", () => {
       getMovement(getSeries(data, "finalAction", "EB-2", "india"), 2)?.months,
       null,
     );
+  });
+
+  it("says how the newest cutoff compares with the one before", () => {
+    const change = (series: Series) => latestChange(series);
+    assert.deepEqual(change(getSeries(data, "finalAction", "F1", "all")), {
+      text: "+4 months since Sep",
+      color: "teal.9",
+    });
+    assert.deepEqual(
+      change([
+        ["2026-09", "2024-09-01"],
+        ["2026-10", "2024-05-15"],
+      ]),
+      { text: "−4 months since Sep", color: "red.9" },
+    );
+    assert.deepEqual(
+      change([
+        ["2025-12", "2016-01-01"],
+        ["2026-01", "2017-03-01"],
+      ]),
+      { text: "+1 year and 2 months since Dec", color: "teal.9" },
+    );
+    assert.deepEqual(change(getSeries(data, "finalAction", "F1", "mexico")), {
+      text: "same as in Sep",
+      color: "dimmed",
+    });
+    // a move too small for a whole month is given in days
+    assert.deepEqual(
+      change([
+        ["2026-09", "2001-04-08"],
+        ["2026-10", "2001-04-22"],
+      ]),
+      { text: "+14 days since Sep", color: "teal.9" },
+    );
+    assert.deepEqual(
+      change([
+        ["2026-09", "2001-04-08"],
+        ["2026-10", "2001-04-07"],
+      ]),
+      { text: "−1 day since Sep", color: "red.9" },
+    );
+  });
+
+  it("says what a cutoff was when either is current or unavailable", () => {
+    // the bulletin before is two months back, so it is named with its year
+    assert.deepEqual(
+      latestChange(getSeries(data, "finalAction", "EB-2", "india")),
+      { text: "was Jan 1, 2013 in Aug 2026", color: "dimmed" },
+    );
+    assert.deepEqual(
+      latestChange([
+        ["2026-09", "C"],
+        ["2026-10", "2025-01-01"],
+      ]),
+      { text: "was current in Sep", color: "dimmed" },
+    );
+    assert.deepEqual(
+      latestChange([
+        ["2026-09", "U"],
+        ["2026-10", "C"],
+      ]),
+      { text: "was unavailable in Sep", color: "dimmed" },
+    );
+    assert.deepEqual(
+      latestChange(getSeries(data, "finalAction", "EB-2", "all")),
+      {
+        text: "same as in Aug 2026",
+        color: "dimmed",
+      },
+    );
+    assert.equal(latestChange([["2026-10", "C"]]), null);
+    assert.equal(latestChange([]), null);
   });
 });
 

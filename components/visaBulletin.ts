@@ -3,7 +3,7 @@ import type {
   Cutoff,
   VisaBulletinData,
 } from "../api/visaBulletin";
-import { daysBetween } from "./dates";
+import { daysBetween, formatMonthYear } from "./dates";
 
 // The Visa Bulletin pages' categories and chargeability areas, their names in
 // plain English, and the arithmetic on cutoff dates. The keys are the ones
@@ -61,7 +61,7 @@ export const CATEGORIES: Category[] = [
     key: "EB-1",
     slug: "eb-1",
     name: "EB-1",
-    who: "Priority workers: people with extraordinary ability, outstanding professors and researchers, and some managers of international companies",
+    who: "People with extraordinary ability, outstanding professors and researchers, and some multinational managers",
     kind: "employment",
   },
   {
@@ -89,7 +89,7 @@ export const CATEGORIES: Category[] = [
     key: "EB-4",
     slug: "eb-4",
     name: "EB-4",
-    who: "Special immigrants, such as special immigrant juveniles and some employees of the US government abroad",
+    who: "Special immigrants, such as special immigrant juveniles and some US government employees abroad",
     kind: "employment",
   },
   {
@@ -138,6 +138,9 @@ export interface Area {
   name: string;
   /** For people "born in the Philippines" */
   bornIn: string;
+  /** The area in a list of places, "the Philippines" (bornInText); none for
+   * the area of every other country */
+  place?: string;
 }
 
 export const AREAS: Area[] = [
@@ -152,26 +155,42 @@ export const AREAS: Area[] = [
     slug: "china",
     name: "China",
     bornIn: "born in mainland China",
+    place: "China",
   },
-  { key: "india", slug: "india", name: "India", bornIn: "born in India" },
-  { key: "mexico", slug: "mexico", name: "Mexico", bornIn: "born in Mexico" },
+  {
+    key: "india",
+    slug: "india",
+    name: "India",
+    bornIn: "born in India",
+    place: "India",
+  },
+  {
+    key: "mexico",
+    slug: "mexico",
+    name: "Mexico",
+    bornIn: "born in Mexico",
+    place: "Mexico",
+  },
   {
     key: "philippines",
     slug: "philippines",
     name: "Philippines",
     bornIn: "born in the Philippines",
+    place: "the Philippines",
   },
   {
     key: "el-salvador-guatemala-honduras",
     slug: "el-salvador-guatemala-honduras",
     name: "El Salvador, Guatemala and Honduras",
     bornIn: "born in El Salvador, Guatemala or Honduras",
+    place: "El Salvador, Guatemala or Honduras",
   },
   {
     key: "vietnam",
     slug: "vietnam",
     name: "Vietnam",
     bornIn: "born in Vietnam",
+    place: "Vietnam",
   },
 ];
 
@@ -196,6 +215,20 @@ export function newestMonth(data: VisaBulletinData): string {
 export function chartAreas(chart: BulletinChart): Area[] {
   const keys = new Set(Object.values(chart).flatMap(Object.keys));
   return AREAS.filter(({ key }) => keys.has(key));
+}
+
+/** For people "born in India", or, on the page of every other country,
+ * "born outside China, India, Mexico and the Philippines": the places the
+ * chart lists separately (chartAreas), so that the words follow the chart
+ * when State adds or drops one. The area's own words stay for a chart that
+ * lists no other area. */
+export function bornInText(area: Area, areas: Area[]): string {
+  if (area.key !== "all") return area.bornIn;
+  const places = areas.flatMap(({ place }) =>
+    place === undefined ? [] : [place],
+  );
+  if (places.length === 0) return area.bornIn;
+  return `born outside ${new Intl.ListFormat("en-US").format(places)}`;
 }
 
 /** A category's or an area's page path segment */
@@ -273,6 +306,10 @@ const monthFormatter = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
   timeZone: "UTC",
 });
+const shortMonthFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  timeZone: "UTC",
+});
 const cutoffFormatter = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
   timeZone: "UTC",
@@ -314,4 +351,46 @@ export function getMovement(series: Series, back: number): Movement | null {
         ? monthsBetweenDates(from[1], to[1])
         : null,
   };
+}
+
+/** The change line under a cutoff figure (Stat): its text and its Mantine
+ * colour. A date moves forward or back: the line says "+1 month since Sep" or
+ * "−3 months since Sep", or "same as in Sep". A move of under half a month
+ * would round to no months, so it is given in days. When either cutoff is
+ * "C" or "U" the line says what it was then, "was current in Sep" or "was
+ * Jan 1, 2025 in Sep". Null when the series has only one bulletin.
+ *
+ * Forward is good news for those waiting, so a move forward is teal and one
+ * back red: the opposite of NVC's days (pages/nvc.tsx), where a longer time
+ * is red. Neither is a mistake. */
+export function latestChange(
+  series: Series,
+): { text: string; color: string } | null {
+  if (series.length < 2) return null;
+  const [previousMonth, previous] = series[series.length - 2];
+  const [month, cutoff] = series[series.length - 1];
+  // The month alone when it is the one before, as it nearly always is, and
+  // with its year when bulletins in between left the category out.
+  const since =
+    addMonthsToMonth(month, -1) === previousMonth
+      ? shortMonthFormatter.format(new Date(monthStart(previousMonth)))
+      : formatMonthYear(monthStart(previousMonth));
+  if (cutoff === previous)
+    return { text: `same as in ${since}`, color: "dimmed" };
+  if (isDate(cutoff) && isDate(previous)) {
+    const days = daysBetween(previous, cutoff);
+    const months = monthsBetweenDates(previous, cutoff);
+    const amount =
+      months === 0
+        ? `${Math.abs(days)} ${Math.abs(days) === 1 ? "day" : "days"}`
+        : formatMonths(months);
+    return {
+      text: `${days > 0 ? "+" : "−"}${amount} since ${since}`,
+      color: days > 0 ? "teal.9" : "red.9",
+    };
+  }
+  const was = isDate(previous)
+    ? formatCutoff(previous)
+    : formatCutoff(previous).toLowerCase();
+  return { text: `was ${was} in ${since}`, color: "dimmed" };
 }
