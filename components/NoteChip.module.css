@@ -23,6 +23,18 @@
   background-color: var(--mantine-color-ink-0);
 }
 
+/* A warning chip is highlighted, as a yellow notice is (the Alert theme),
+ * and darkens a little when hovered or open, as the plain chips do. */
+.chip[data-tone="warning"] {
+  background-color: var(--vw-highlight);
+}
+
+.chip[data-tone="warning"]:hover,
+.chip[data-tone="warning"][data-expanded],
+.chip[data-tone="warning"][aria-expanded="true"] {
+  background-color: color-mix(in srgb, var(--vw-highlight), var(--vw-ink) 10%);
+}
+
 /* The label's box ends at its capitals and its baseline, so that centring
  * it centres the text as the eye sees it, the same in every browser that
  * knows text-box (Chrome 133, Safari 18.2); the others centre the font's

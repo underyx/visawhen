@@ -1,4 +1,4 @@
-import { CloseButton, Group, Popover, Text } from "@mantine/core";
+import { CloseButton, Group, Popover, Stack, Text } from "@mantine/core";
 import { useClickOutside, useMediaQuery } from "@mantine/hooks";
 import React, { useEffect, useId, useRef, useState } from "react";
 import classes from "./NoteChip.module.css";
@@ -21,11 +21,26 @@ const OUTSIDE_EVENTS = ["click"];
 /** The phone layout, below Mantine's sm breakpoint (48em) */
 const PHONE = "(max-width: 47.99em)";
 
+interface NoteChipProps {
+  /** The chip's text */
+  label: string;
+  /** The note's heading, when the label is not one: "+6 days" opens
+   * "Document review has stalled". Without it the phone panel is headed by
+   * the label, and the note from sm up has no heading. */
+  title?: string;
+  /** "warning": the chip is highlighted, as a yellow notice is, for a
+   * figure that means bad news, such as the change of a queue that has
+   * stalled */
+  tone?: "warning";
+}
+
 /** A chip that opens its note on hover (a mouse) or on a tap or click */
 export function NoteChip({
   label,
+  title,
+  tone,
   children,
-}: React.PropsWithChildren<{ label: string }>) {
+}: React.PropsWithChildren<NoteChipProps>) {
   // pinned: opened by a tap or click, until one elsewhere; hovered: by the
   // mouse, until it leaves the chip and the note
   const [pinned, setPinned] = useState(false);
@@ -65,6 +80,7 @@ export function NoteChip({
       ref={setChipNode}
       type="button"
       className={classes.chip}
+      data-tone={tone}
       onClick={() => (opened ? close() : setPinned(true))}
       onPointerEnter={enter}
       onPointerLeave={leave}
@@ -103,7 +119,7 @@ export function NoteChip({
               className={classes.sheetHead}
             >
               <Text id={`${id}-title`} fw={700}>
-                {label}
+                {title ?? label}
               </Text>
               <CloseButton aria-label="Close" onClick={close} />
             </Group>
@@ -128,7 +144,14 @@ export function NoteChip({
     >
       <Popover.Target>{chip}</Popover.Target>
       <Popover.Dropdown onPointerEnter={enter} onPointerLeave={leave}>
-        {children}
+        {title === undefined ? (
+          children
+        ) : (
+          <Stack gap="xs">
+            <Text fw={700}>{title}</Text>
+            {children}
+          </Stack>
+        )}
       </Popover.Dropdown>
     </Popover>
   );
