@@ -23,10 +23,12 @@ set do not fail. A post that Discord refuses fails the run: the data is
 committed by then, so the site is still built and deployed, and the red run
 says the webhook needs attention. The URL is never printed.
 
-The role to ping comes from DISCORD_NVC_ROLE_ID, a GitHub Actions variable
-holding the role's numeric ID (Discord: Settings, Advanced, Developer Mode;
-then Server Settings, Roles, the role's menu, Copy Role ID). A webhook cannot
-name a role, only mention it by ID. Without it, nobody is pinged.
+The role to ping is the "nvc-watch" entry of DISCORD_ROLES, a GitHub Actions
+variable holding a JSON object of role names to numeric role IDs, such as
+{"nvc-watch": "1558910798469013635", "n400-watch": "..."} (Discord: Settings,
+Advanced, Developer Mode; then Server Settings, Roles, the role's menu, Copy
+Role ID). A webhook cannot name a role, only mention it by ID. Without the
+variable or the entry, nobody is pinged, with a warning.
 """
 
 from __future__ import annotations
@@ -50,7 +52,8 @@ Reading = tuple[str, int]
 
 DATA_PATH = Path(os.environ.get("NVC_DATA_PATH", "data.json"))
 WEBHOOK_ENV = "DISCORD_NVC_WEBHOOK_URL"
-ROLE_ENV = "DISCORD_NVC_ROLE_ID"
+ROLES_ENV = "DISCORD_ROLES"
+ROLE_NAME = "nvc-watch"
 # In angle brackets so that Discord adds no preview card under the message
 PAGE_URL = "https://visawhen.com/nvc"
 TIMEOUT = 30
@@ -139,6 +142,29 @@ def describe(new: Reading | None, old: Reading | None) -> str:
     return f"{circle} {old[1]} -> {days} {unit}"
 
 
+def role_to_ping(roles_json: str) -> str | None:
+    """The ID of the ROLE_NAME role in the DISCORD_ROLES JSON object, or None
+    (with a warning when the variable is set but unusable)."""
+    if not roles_json.strip():
+        print(f"::warning::{ROLES_ENV} is not set, so no role is pinged")
+        return None
+    try:
+        roles = json.loads(roles_json)
+    except ValueError:
+        print(f"::warning::{ROLES_ENV} is not valid JSON, so no role is pinged")
+        return None
+    role_id = roles.get(ROLE_NAME) if isinstance(roles, dict) else None
+    if isinstance(role_id, int):
+        role_id = str(role_id)
+    if not isinstance(role_id, str) or not role_id.isdigit():
+        print(
+            f'::warning::{ROLES_ENV} has no "{ROLE_NAME}" entry with a role ID (a number as a string), '
+            "so no role is pinged"
+        )
+        return None
+    return role_id
+
+
 def build_message(before: Data, after: Data, role_id: str | None) -> str | None:
     """The message, or None when no series has a newer reading."""
     changes = changed_series(before, after)
@@ -202,10 +228,7 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    role_id: str | None = os.environ.get(ROLE_ENV, "").strip() or None
-    if role_id is not None and not role_id.isdigit():
-        print(f"::warning::{ROLE_ENV} is not a role ID (a number), so no role is pinged")
-        role_id = None
+    role_id = role_to_ping(os.environ.get(ROLES_ENV, ""))
 
     before = load_before(args.before)
     after = load_data(DATA_PATH)
