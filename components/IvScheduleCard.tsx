@@ -266,11 +266,12 @@ interface Props {
   schedule: IvSchedule | null;
   /** The tool's address (iv_schedule.json's "source") */
   source: string;
-  /** The category to show first; the other two follow it */
+  /** On a visa class's page, the one category to show: the other two
+   * months are for other visitors. The post's own page shows all three. */
   first?: IvCategory;
-  /** Shown instead of the categories, for visa classes the tool does not
-   * cover */
-  note?: string;
+  /** On a visa class's page, the class's name for the lead sentence,
+   * "CR1/IR1" */
+  visaClassName?: string;
   /** The notice, shown above the card, under which the tool's months are no
    * queue at this post, such as a pause of visa services there
    * (scheduleOverrideFor() in policy.ts). Until it ends, the card says so in
@@ -396,14 +397,16 @@ export function SuspensionNote({
 
 /** Which month of documentarily complete cases NVC is scheduling interviews
  * for at a post, from State's IV Scheduling Status Tool: the months as
- * boxes, then the slips that qualify them, then what the month means. */
+ * boxes, then the slips that qualify them, then what the month means. Only
+ * for the classes the tool covers: a class page it does not cover says so
+ * in a line under its own figures (CLASS_NOTES), with the slips. */
 export default function IvScheduleCard({
   postName,
   asOf,
   schedule,
   source,
   first,
-  note,
+  visaClassName,
   scheduleOverride,
   suspension,
   recentIssued,
@@ -430,32 +433,7 @@ export default function IvScheduleCard({
     suspension !== undefined &&
     showsSuspension({ schedule, inactive, elsewhere });
 
-  if (note !== undefined)
-    return (
-      <Paper withBorder p="md">
-        <Stack gap="sm">
-          <Title order={2} size="h3">
-            Interview scheduling at {postName}
-          </Title>
-          {elsewhere !== undefined && (
-            <ElsewhereNote postName={postName} elsewhere={elsewhere} />
-          )}
-          {suspended && suspension !== undefined && (
-            <SuspensionNote
-              postName={postName}
-              suspension={suspension}
-              classPage
-            />
-          )}
-          <Text>{note}</Text>
-        </Stack>
-      </Paper>
-    );
-
-  const categories =
-    first === undefined
-      ? IV_CATEGORIES
-      : [first, ...IV_CATEGORIES.filter((category) => category !== first)];
+  const categories = first === undefined ? IV_CATEGORIES : [first];
   // One line instead of three identical ones, as at the many posts State
   // lists as current in every category
   const wholePost =
@@ -585,8 +563,9 @@ export default function IvScheduleCard({
           <>
             {/* "most": State's wording, which the month can move back on */}
             <Text>
-              NVC is scheduling most interviews for cases that became{" "}
-              <em>documentarily complete</em> in:
+              NVC is scheduling most{" "}
+              {visaClassName !== undefined && `${visaClassName} `}interviews for
+              cases that became <em>documentarily complete</em> in:
             </Text>
             <Stats columns={lines.length} phoneColumns={1}>
               {lines.map(({ label, cutoff, previous }) => (

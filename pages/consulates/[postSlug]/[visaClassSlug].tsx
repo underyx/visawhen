@@ -33,7 +33,11 @@ import {
   IvSchedule,
   NVC_NONIMMIGRANT_CLASSES,
 } from "../../../components/consulates";
-import IvScheduleCard from "../../../components/IvScheduleCard";
+import IvScheduleCard, {
+  ElsewhereNote,
+  showsSuspension,
+  SuspensionNote,
+} from "../../../components/IvScheduleCard";
 import { PolicyNews, PolicyNotices } from "../../../components/PolicyBanner";
 import { breadcrumbList } from "../../../components/structuredData";
 import {
@@ -391,9 +395,10 @@ export default function ConsulateStats({
   // numbers, and the sitemap leaves them out (next-sitemap.config.js).
   // Visitors still reach them from the post's page.
   const noindex = recent.last12 === 0 && recent.prev12 === 0;
-  // The interview queue for the classes State's scheduling tool covers, and
-  // a note for the other classes that go through NVC (the other immigrant
-  // classes and the K visas); other nonimmigrant classes get neither.
+  // The interview card for the classes State's scheduling tool covers, and
+  // a line under the figures for the other classes that go through NVC (the
+  // other immigrant classes and the K visas); other nonimmigrant classes get
+  // neither.
   const ivCategory = IV_CATEGORY_BY_CLASS[visaClassSlug];
   const classNote = CLASS_NOTES[visaClassSlug];
   const today = useToday();
@@ -403,10 +408,24 @@ export default function ConsulateStats({
     country,
     nonimmigrant: visaType === "NIV",
   };
-  // Only on immigrant classes: the K visas, which also show the card, are
+  const elsewhere = IV_POSTS_ELSEWHERE[postSlug];
+  // Only on immigrant classes: the K visas, which also go through NVC, are
   // nonimmigrant visas, which some suspensions do not cover.
   const suspension =
-    visaType === "IV" ? issuanceSuspensionFor(country, today) : null;
+    visaType === "IV" && country !== null
+      ? issuanceSuspensionFor(country, today)
+      : null;
+  const suspensionProps =
+    suspension === null || country === null
+      ? undefined
+      : {
+          entry: suspension,
+          country,
+          applicants:
+            CLASS_APPLICANT_COUNTRIES[postSlug]?.[visaClassSlug] === undefined
+              ? "immigrant visa"
+              : visaClassName,
+        };
 
   return (
     <Stack>
@@ -483,14 +502,14 @@ export default function ConsulateStats({
           visaType === "IV" || NVC_NONIMMIGRANT_CLASSES.includes(visaClassSlug)
         }
       />
-      {(ivCategory !== undefined || classNote !== undefined) && (
+      {ivCategory !== undefined && (
         <IvScheduleCard
           postName={postName}
           asOf={ivScheduleAsOf}
           schedule={ivSchedule}
           source={ivScheduleSource}
           first={ivCategory}
-          note={classNote}
+          visaClassName={visaClassName}
           scheduleOverride={
             scheduleOverrideFor(postSlug, ivScheduleAsOf, today) ?? undefined
           }
@@ -499,21 +518,9 @@ export default function ConsulateStats({
             from: recent.from,
             to: recent.to,
           }}
-          elsewhere={IV_POSTS_ELSEWHERE[postSlug]}
+          elsewhere={elsewhere}
           inactive={inactivity !== null}
-          suspension={
-            suspension === null || country === null
-              ? undefined
-              : {
-                  entry: suspension,
-                  country,
-                  applicants:
-                    CLASS_APPLICANT_COUNTRIES[postSlug]?.[visaClassSlug] ===
-                    undefined
-                      ? "immigrant visa"
-                      : visaClassName,
-                }
-          }
+          suspension={suspensionProps}
         />
       )}
       <Text>{summary}</Text>
@@ -523,6 +530,26 @@ export default function ConsulateStats({
         {formatLongMonth(recent.to)}, so it cannot show what has changed since
         then, such as pauses that started or ended later.
       </Text>
+      {/* A class the tool does not cover says so in one line, with the
+          slips the card would have shown (Bence: the figures first, no card
+          for a note that the months do not apply) */}
+      {classNote !== undefined && <Text size="sm">{classNote}</Text>}
+      {classNote !== undefined && elsewhere !== undefined && (
+        <ElsewhereNote postName={postName} elsewhere={elsewhere} />
+      )}
+      {classNote !== undefined &&
+        suspensionProps !== undefined &&
+        showsSuspension({
+          schedule: ivSchedule,
+          inactive: inactivity !== null,
+          elsewhere,
+        }) && (
+          <SuspensionNote
+            postName={postName}
+            suspension={suspensionProps}
+            classPage
+          />
+        )}
       {/* The news comes after the figures, as on /nvc (Bence) */}
       <PolicyNews
         consulate={consulate}
