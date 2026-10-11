@@ -1,6 +1,7 @@
-import { Anchor, Stack, Table, Text, Title } from "@mantine/core";
+import { Anchor, Box, Stack, Table, Text, Title } from "@mantine/core";
 import { GetStaticProps } from "next";
 import Head from "next/head";
+import Link from "next/link";
 import React from "react";
 import {
   getIvScheduleAsOf,
@@ -11,7 +12,7 @@ import { getData as getNvcData } from "../api/nvc";
 import { getData as getUscisData, newestQuarter } from "../api/uscis";
 import { getData as getVisaBulletinData } from "../api/visaBulletin";
 import { formatLongMonth } from "../components/consulates";
-import { formatDate } from "../components/Freshness";
+import { formatShortDate } from "../components/Freshness";
 import {
   DOL_PROCESSING_TIMES_URL,
   GLOBAL_VISA_WAIT_TIMES_URL,
@@ -84,48 +85,59 @@ export default function About({
   policyChecked,
   visaBulletinMonth,
 }: Props) {
+  // The first column stays in view while the rest scrolls on a phone, at
+  // 11rem, so each row goes by its section's name, linked to it; the
+  // Source column's link text carries the detail. Short cells and short
+  // dates keep the narrow columns to a line or two.
   const rows: {
-    what: string;
+    data: string;
+    /** The section the row's numbers are in, or null for the notices */
+    href: string | null;
     source: React.ReactNode;
     schedule: string;
     newest: string;
   }[] = [
     {
-      what: "USCIS applications received, decided and pending, and USCIS's median processing times",
+      data: "USCIS processing times",
+      href: "/uscis",
       source: (
         <Source href={USCIS_DATA_URL}>
           USCIS&rsquo;s quarterly reports, per form and per office
         </Source>
       ),
-      schedule: "Quarterly, a few months after each quarter ends",
+      schedule: "Quarterly, a few months late",
       newest: uscisQuarter,
     },
     {
-      what: "National Visa Center timeframes",
+      data: "NVC wait times",
+      href: "/nvc",
       source: <Source href={NVC_TIMEFRAMES_URL}>NVC Timeframes page</Source>,
       schedule: "Weekly",
-      newest: formatDate(nvcDate),
+      newest: formatShortDate(nvcDate),
     },
     {
-      what: "Which month of cases each consulate is scheduling for immigrant visa interviews",
+      data: "Consulate interview months",
+      href: "/consulates",
       source: (
         <Source href={ivScheduleSource}>
           State Department IV Scheduling Status Tool
         </Source>
       ),
       schedule: "About monthly",
-      newest: formatDate(ivScheduleAsOf),
+      newest: formatShortDate(ivScheduleAsOf),
     },
     {
-      what: "Priority date cutoffs for the family and employment preference categories",
+      data: "Visa Bulletin cutoffs",
+      href: "/visa-bulletin",
       source: (
         <Source href={VISA_BULLETIN_URL}>State Department Visa Bulletin</Source>
       ),
-      schedule: "Monthly, around the middle of the month before",
+      schedule: "Monthly, before the month starts",
       newest: `${formatBulletinMonth(visaBulletinMonth)} bulletin`,
     },
     {
-      what: "Visas issued per consulate and visa class",
+      data: "Visas issued per consulate",
+      href: "/consulates",
       source: (
         <>
           State Department monthly{" "}
@@ -134,14 +146,15 @@ export default function About({
           issuance statistics
         </>
       ),
-      schedule: "Monthly, several months late and often in batches",
+      schedule: "Monthly, months late",
       newest: formatLongMonth(issuancesTo),
     },
     {
-      what: "Notices of pauses and suspensions of visa processing",
+      data: "Policy notices",
+      href: null,
       source: "State Department notices and news reports, each linked",
-      schedule: "Checked by hand, about weekly",
-      newest: `Last checked ${formatDate(policyChecked)}`,
+      schedule: "Checked about weekly",
+      newest: `Checked ${formatShortDate(policyChecked)}`,
     },
   ];
 
@@ -155,36 +168,38 @@ export default function About({
         <meta property="og:description" content={DESCRIPTION} />
         <meta property="og:url" content="https://visawhen.com/about" />
       </Head>
-      <Title order={1}>{TITLE}</Title>
-      <Text>
-        VisaWhen is an independent project, not affiliated with USCIS, the State
-        Department or any other government agency. Nothing on it is legal
-        advice: its numbers describe how the agencies have been processing cases
-        in general, not what will happen to yours. What the agencies tell you
-        about your own case always takes precedence.
-      </Text>
-      <Title order={2}>Sources and how recent they are</Title>
-      <Text>
-        Scheduled scripts check each source every day and publish new data when
-        there is some. When a source cannot be reached, the newest data we have
-        stays up, with its date. Every page says how recent its numbers are, and
-        the NVC, interview-scheduling, Visa Bulletin and policy sections warn
-        when theirs are older than the source&rsquo;s usual schedule.
-      </Text>
-      <Table.ScrollContainer minWidth={640}>
+      {/* The table comes first: its Newest column is the page's figures.
+          The footer already says the site is independent and not legal
+          advice, so the text under the table says only what that means
+          for a visitor's own case. */}
+      <Box>
+        <Title order={1}>{TITLE}</Title>
+        <Text size="lg">
+          Each source, how often it updates, and the newest data here.
+        </Text>
+      </Box>
+      <Table.ScrollContainer minWidth={640} className="vw-sticky-column">
         <Table striped withTableBorder>
           <Table.Thead>
             <Table.Tr>
-              <Table.Th>What</Table.Th>
+              <Table.Th>Data</Table.Th>
               <Table.Th>Source</Table.Th>
-              <Table.Th>The source updates</Table.Th>
-              <Table.Th>Newest data here</Table.Th>
+              <Table.Th>Updates</Table.Th>
+              <Table.Th>Newest</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {rows.map(({ what, source, schedule, newest }) => (
-              <Table.Tr key={what}>
-                <Table.Td>{what}</Table.Td>
+            {rows.map(({ data, href, source, schedule, newest }) => (
+              <Table.Tr key={data}>
+                <Table.Td>
+                  {href === null ? (
+                    data
+                  ) : (
+                    <Anchor component={Link} href={href}>
+                      {data}
+                    </Anchor>
+                  )}
+                </Table.Td>
                 <Table.Td>{source}</Table.Td>
                 <Table.Td>{schedule}</Table.Td>
                 <Table.Td>{newest}</Table.Td>
@@ -194,23 +209,24 @@ export default function About({
         </Table>
       </Table.ScrollContainer>
       <Text>
-        The data is stored in the{" "}
-        <Source href="https://github.com/underyx/visawhen">
-          site&rsquo;s GitHub repository
-        </Source>
-        , along with the code that collects it.
+        The numbers say how the agencies handle cases in general, not what will
+        happen to yours. What they tell you about your own case comes first.
       </Text>
-      <Title order={2}>Not covered</Title>
-      <Text>
-        Prevailing wage determinations and PERM labor certifications are decided
-        by the Department of Labor; see{" "}
+      <Text size="sm">
+        Not covered: PERM and prevailing wage decisions are the Department of
+        Labor&rsquo;s: see{" "}
         <Source href={DOL_PROCESSING_TIMES_URL}>its processing times</Source>.
-        Appointment waits for visitor, student and other nonimmigrant visas are
-        in the State Department&rsquo;s{" "}
+        Appointment waits for visitor, student and other temporary visas are in
+        the State Department&rsquo;s{" "}
         <Source href={GLOBAL_VISA_WAIT_TIMES_URL}>
           Global Visa Wait Times
         </Source>
         .
+      </Text>
+      <Text size="xs" c="dimmed">
+        We check each source every day. When one cannot be reached, its newest
+        data stays up, with its date. The data and the code that collects it are
+        on <Source href="https://github.com/underyx/visawhen">GitHub</Source>.
       </Text>
     </Stack>
   );
