@@ -77,6 +77,44 @@ function sortItems(posts: Post[], recentMap: Map<string, number>): Post[] {
   ]);
 }
 
+interface RateBadgeProps {
+  /** Visas the post issued in the last 12 months of the data */
+  issuances: number;
+  /** The newest month it issued any in, when that is before those 12
+   * months (Props.lastIssued) */
+  lastIssued: string | undefined;
+}
+
+/** The badge at a row's right: the post's visas per month, or "none" with
+ * the month it last issued any as a small line under it. One badge saying
+ * "none since Sep 2024" was wide enough to wrap a long post name onto three
+ * lines on a phone; the /uscis rows put their category under the badge the
+ * same way. */
+function RateBadge({ issuances, lastIssued }: RateBadgeProps) {
+  const badge = (text: string) => (
+    <Badge
+      size="lg"
+      radius="sm"
+      variant="outline"
+      color="gray"
+      tt="none"
+      fw={500}
+    >
+      {text}
+    </Badge>
+  );
+  if (issuances > 0) return badge(formatMonthlyRate(issuances / 12));
+  if (lastIssued === undefined) return badge("none issued");
+  return (
+    <Stack gap={2} align="flex-end">
+      {badge("none")}
+      <Text size="xs" c="dimmed" ta="right">
+        since {formatMonth(lastIssued)}
+      </Text>
+    </Stack>
+  );
+}
+
 export default function ConsulateSelect({
   posts,
   recentIssuances,
@@ -149,20 +187,10 @@ export default function ConsulateSelect({
               href={`/consulates/${postSlug}`}
               hardNavigation
               rightSection={
-                <Badge
-                  size="lg"
-                  radius="sm"
-                  variant="outline"
-                  color="gray"
-                  tt="none"
-                  fw={500}
-                >
-                  {(recentMap.get(postSlug) ?? 0) > 0
-                    ? formatMonthlyRate((recentMap.get(postSlug) ?? 0) / 12)
-                    : postSlug in lastIssued
-                    ? `none since ${formatMonth(lastIssued[postSlug])}`
-                    : "none issued"}
-                </Badge>
+                <RateBadge
+                  issuances={recentMap.get(postSlug) ?? 0}
+                  lastIssued={lastIssued[postSlug]}
+                />
               }
               label={
                 <>
