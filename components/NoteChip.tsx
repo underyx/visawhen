@@ -1,6 +1,5 @@
 import { Group, Popover, Text } from "@mantine/core";
 import React, { useEffect, useRef, useState } from "react";
-import { InfoIcon } from "./icons";
 import classes from "./NoteChip.module.css";
 
 // A row of chips that each open a note (the NVC page's recent news and
@@ -60,7 +59,6 @@ export function NoteChip({
           onPointerLeave={leave}
         >
           {label}
-          <InfoIcon className={classes.icon} />
         </button>
       </Popover.Target>
       <Popover.Dropdown onPointerEnter={enter} onPointerLeave={leave}>

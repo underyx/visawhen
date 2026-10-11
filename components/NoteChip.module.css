@@ -1,7 +1,7 @@
 /* A chip that opens a note (NoteChip): a pill drawn as a button, an ink
- * outline with the violet of the site's links on its icon. The text is the
- * chips' size, xs, and the padding is tight, so that a row of them holds
- * as many as it can on a 360px phone. */
+ * outline and no icon (Bence found one needless). The text is the chips'
+ * size, xs, and the padding is tight, so that a row of them holds as many
+ * as it can on a 360px phone. */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -21,11 +21,6 @@
 .chip:hover,
 .chip[data-expanded] {
   background-color: var(--mantine-color-ink-0);
-}
-
-.icon {
-  flex: none;
-  color: var(--vw-stamp);
 }
 
 /* The note: a card under its chip, no wider than a phone's screen */

@@ -3,6 +3,7 @@ import {
   Alert,
   Anchor,
   Badge,
+  Divider,
   Group,
   Stack,
   Text,
@@ -39,14 +40,18 @@ function hasExpired(entry: PolicyEntry, today: string | null): boolean {
 }
 
 /** An entry's summary, with its body, sources and the day it was last
- * checked behind "Details". Its status and end date stay in view, as badges,
- * since they change what the summary means. */
+ * checked behind "Details", or, with `open`, under a rule: in a note that
+ * opened from a chip, the visitor has already asked for the entry. Its
+ * status and end date stay in view, as badges, since they change what the
+ * summary means. */
 function EntryDetails({
   entry,
   today,
+  open = false,
 }: {
   entry: PolicyEntry;
   today: string | null;
+  open?: boolean;
 }) {
   const unchecked =
     today !== null &&
@@ -85,44 +90,86 @@ function EntryDetails({
         </Group>
       )}
       <Text size="sm">{entry.summary}</Text>
-      <MoreDetails>
-        {/* A blank line in the body starts a new paragraph. */}
-        {entry.body.split("\n\n").map((paragraph) => (
-          <Text key={paragraph} size="sm">
-            {paragraph}
-          </Text>
-        ))}
-        <Text size="sm">
-          {entry.sources.length === 1 ? "Source" : "Sources"}:{" "}
-          {entry.sources.map((source, index) => (
-            <React.Fragment key={source.url}>
-              {index > 0 && "; "}
-              <Anchor
-                href={source.url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {source.label}
-              </Anchor>
-            </React.Fragment>
+      {open ? (
+        <>
+          <Divider />
+          {/* A blank line in the body starts a new paragraph. */}
+          {entry.body.split("\n\n").map((paragraph) => (
+            <Text key={paragraph} size="sm">
+              {paragraph}
+            </Text>
           ))}
-          .
-        </Text>
-        <Text size="sm">
-          Last checked {formatShortDate(entry.lastChecked)}
-          {unchecked ? (
-            <>
-              ;{" "}
-              <Text span inherit fw={700}>
-                this may be out of date
-              </Text>
-              .
-            </>
-          ) : (
-            "."
-          )}
-        </Text>
-      </MoreDetails>
+          <Text size="sm">
+            {entry.sources.length === 1 ? "Source" : "Sources"}:{" "}
+            {entry.sources.map((source, index) => (
+              <React.Fragment key={source.url}>
+                {index > 0 && "; "}
+                <Anchor
+                  href={source.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {source.label}
+                </Anchor>
+              </React.Fragment>
+            ))}
+            .
+          </Text>
+          <Text size="sm">
+            Last checked {formatShortDate(entry.lastChecked)}
+            {unchecked ? (
+              <>
+                ;{" "}
+                <Text span inherit fw={700}>
+                  this may be out of date
+                </Text>
+                .
+              </>
+            ) : (
+              "."
+            )}
+          </Text>
+        </>
+      ) : (
+        <MoreDetails>
+          {/* A blank line in the body starts a new paragraph. */}
+          {entry.body.split("\n\n").map((paragraph) => (
+            <Text key={paragraph} size="sm">
+              {paragraph}
+            </Text>
+          ))}
+          <Text size="sm">
+            {entry.sources.length === 1 ? "Source" : "Sources"}:{" "}
+            {entry.sources.map((source, index) => (
+              <React.Fragment key={source.url}>
+                {index > 0 && "; "}
+                <Anchor
+                  href={source.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {source.label}
+                </Anchor>
+              </React.Fragment>
+            ))}
+            .
+          </Text>
+          <Text size="sm">
+            Last checked {formatShortDate(entry.lastChecked)}
+            {unchecked ? (
+              <>
+                ;{" "}
+                <Text span inherit fw={700}>
+                  this may be out of date
+                </Text>
+                .
+              </>
+            ) : (
+              "."
+            )}
+          </Text>
+        </MoreDetails>
+      )}
     </Stack>
   );
 }
@@ -195,7 +242,7 @@ export default function PolicyBanner({
         <ChipRow lead="Recent news:">
           {shown.map((entry) => (
             <NoteChip key={entry.id} label={entry.label}>
-              <EntryDetails entry={entry} today={today} />
+              <EntryDetails entry={entry} today={today} open />
             </NoteChip>
           ))}
         </ChipRow>
