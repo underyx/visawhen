@@ -190,7 +190,7 @@ const EAD_STAGE: StageSpec = {
   form: "I-765",
   category: "adjustment-of-status",
   name: "Work permit (I-765)",
-  what: "Usually filed with the I-485, at no extra fee. You can work once it is approved.",
+  what: "You can work once it is approved.",
   href: "/uscis/i-765",
   hrefText: "I-765 processing times",
   parallelTo: "i-485",
@@ -202,7 +202,7 @@ const AP_STAGE: StageSpec = {
   form: "I-131",
   category: "advance-parole",
   name: "Travel document (I-131)",
-  what: "Usually filed with the I-485. Leaving the US before it is approved can cancel your I-485, unless you hold H or L status.",
+  what: "Leaving the US before it is approved can cancel your I-485, unless you hold H or L status.",
   href: "/uscis/i-131",
   hrefText: "I-131 processing times",
   parallelTo: "i-485",
@@ -254,7 +254,7 @@ export const PATHS: PathSpec[] = [
         kind: "your-step",
         id: "documents",
         name: "You pay the fees and submit your documents",
-        what: "You pay the fees, fill in the DS-260 and upload your documents on CEAC.",
+        what: "Fill in the DS-260 and upload your documents on CEAC.",
         href: null,
         end: {
           id: "documents-submitted",
@@ -292,7 +292,7 @@ export const PATHS: PathSpec[] = [
         kind: "note",
         id: "visa",
         name: "Visa and travel",
-        what: "If the visa is approved, your passport comes back with it within weeks. Pay the USCIS immigrant fee; the green card comes by mail after you enter the US.",
+        what: "Your passport comes back with the visa within weeks. Pay the USCIS immigrant fee; the green card comes by mail after you enter the US.",
         href: null,
       },
     ],
@@ -486,7 +486,7 @@ export const PATHS: PathSpec[] = [
         kind: "note",
         id: "perm",
         name: "PERM labor certification",
-        what: "For most EB-2 and EB-3 cases, your employer first gets a prevailing wage and a PERM labor certification from the Department of Labor.",
+        what: "Your employer first gets a prevailing wage and a PERM labor certification from the Department of Labor.",
         href: DOL_PROCESSING_TIMES_URL,
         hrefText: "Department of Labor processing times",
         end: {
@@ -501,7 +501,7 @@ export const PATHS: PathSpec[] = [
         form: "I-140",
         category: "all",
         name: "USCIS decides the I-140 petition",
-        what: "Your employer, or you, files Form I-140. Premium processing, for an extra fee, gets a decision within 15 business days (45 for some).",
+        what: "Your employer, or you, files Form I-140.",
         href: "/uscis/i-140",
         hrefText: "I-140 processing times",
         start: {
@@ -520,7 +520,7 @@ export const PATHS: PathSpec[] = [
         id: "priority-date",
         categories: "employment",
         name: "Your priority date becomes current",
-        what: "Green cards are limited by category and country of birth, so people wait in line by their priority date: the day the PERM was filed, or the I-140 if there was no PERM.",
+        what: "You wait in line by your priority date: the day the PERM was filed, or the I-140 if there was no PERM.",
         href: "/visa-bulletin",
         hrefText: "Visa Bulletin dates",
       },
@@ -579,7 +579,7 @@ export const PATHS: PathSpec[] = [
         id: "priority-date",
         categories: "family",
         name: "Your priority date becomes current",
-        what: "Green cards are limited by category and country of birth, so people wait in line by their priority date, often for years.",
+        what: "You wait in line by your priority date, often for years.",
         href: "/visa-bulletin",
         hrefText: "Visa Bulletin dates",
       },
@@ -957,9 +957,12 @@ interface Context {
   today: string | null;
 }
 
-/** "most likely 11–22 months after you file" */
+/** "most likely 11–22 months after you file": a step the visitor files,
+ * or one filed with it (the work permit with the I-485) */
 function afterText(spec: StageSpec): string {
-  return spec.start !== undefined ? "after you file" : "after the step before";
+  return spec.start !== undefined || spec.parallelTo !== undefined
+    ? "after you file"
+    : "after the step before";
 }
 
 /** "Most likely Nov 2027 – Dec 2028", or for a step under way whose range
@@ -1003,9 +1006,9 @@ function uscisStage(
   if (range.priorityDate)
     return {
       ...base,
-      headline: `USCIS’s median for the ones it decided was ${formatMedian(
+      headline: `USCIS’s median: ${formatMedian(
         range.median,
-      )}.`,
+      )}, once your date is current`,
       basis: [
         PRIORITY_DATE_TEXT[spec.form]?.[spec.category]?.(
           formatMedian(range.median),
@@ -1079,19 +1082,19 @@ function uscisStage(
   // range, the next step counts from today, the soonest it can start
   if (status === "current" && today !== null) {
     if (today > outer.high) {
-      headline = `This is taking longer than 9 in 10 cases did`;
+      headline = "Longer than 9 in 10 cases";
       news = false;
-      warning = `Your case has waited longer than 9 in 10 cases did (${formatDateRange(
-        outer,
-      )}). You can ask USCIS about a case that is outside its normal processing time: its processing times tool says from which date.`;
+      warning = `Nine in ten cases were decided by ${formatShortDate(
+        outer.high,
+      )}. You can ask USCIS about a case outside its normal processing time: its processing times tool says from which date.`;
       end = { low: today, high: today };
       outer = end;
     } else if (today > end.high) {
       headline = `Most likely by ${formatShortDate(outer.high)}`;
       news = false;
-      warning = `Your case has already taken longer than most (the most likely range ended ${formatShortDate(
+      warning = `Your case has taken longer than most: the likely range ended ${formatShortDate(
         end.high,
-      )}). It could still take until ${formatShortDate(outer.high)}.`;
+      )}.`;
       end = { low: today, high: outer.high };
       outer = end;
     } else {
@@ -1222,7 +1225,8 @@ function yourStepStage(
     outer: null,
     days: { low: 0, high: 0 },
     outerDays: null,
-    headline: "As soon as you submit them",
+    // nothing to foretell: the step is the visitor's own
+    headline: "",
     basis: [],
     warning: null,
     news: false,
@@ -1307,9 +1311,9 @@ function nvcReviewStage(
         headline: "Most likely reviewed already",
         warning: `On ${formatDate(
           date,
-        )}, NVC was already reviewing documents submitted on ${formatDate(
+        )}, NVC was reviewing documents submitted on ${formatDate(
           reached,
-        )}, so it has most likely reviewed yours. Check CEAC for its message.`,
+        )}, after yours. Check CEAC for its message.`,
       };
     // a month NVC is partway through reads from the front of its queue
     const first = reviewRange(

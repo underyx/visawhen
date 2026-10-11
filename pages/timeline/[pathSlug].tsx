@@ -180,11 +180,8 @@ function StepBody({
           {spec.what}
           {spec.href !== null && spec.hrefText !== undefined && (
             <>
-              {" "}
-              <To href={spec.href}>
-                {spec.hrefText.charAt(0).toUpperCase() + spec.hrefText.slice(1)}
-              </To>
-              .
+              {" See "}
+              <To href={spec.href}>{spec.hrefText}</To>.
             </>
           )}
         </Text>

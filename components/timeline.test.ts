@@ -84,6 +84,12 @@ const DATA: TimelineData = {
     "I-485/family": range("family", "Family", 7, [4, 6, 7, 12, 18]),
     "I-129F/all": range("all", "I-129F", 9, [5, 7, 9, 11, 14]),
     "I-751/all": range("all", "I-751", 8, [4, 6, 8, 11, 16]),
+    "I-765/adjustment-of-status": range(
+      "adjustment-of-status",
+      "Adjustment of Status",
+      5,
+      [2, 4, 5, 6, 8],
+    ),
   },
   nvc: {
     creation: weekly([20, 27, 24]),
@@ -318,8 +324,12 @@ describe("estimateTimeline", () => {
     const inputs = { milestone: "i-130-filed", date: "2023-10" };
     const i130 = stage(SPOUSE_ABROAD, inputs, "i-130");
     assert.equal(i130.status, "current");
-    assert.equal(i130.headline, "This is taking longer than 9 in 10 cases did");
-    assert.match(i130.warning ?? "", /longer than 9 in 10 cases/);
+    assert.equal(i130.headline, "Longer than 9 in 10 cases");
+    // 30 months from the last day of October 2023
+    assert.equal(
+      plain(i130.warning),
+      "Nine in ten cases were decided by May 1, 2026. You can ask USCIS about a case outside its normal processing time: its processing times tool says from which date.",
+    );
     // about this case, not news about the numbers
     assert.equal(i130.news, false);
     assert.deepEqual(i130.end, { low: TODAY, high: TODAY });
@@ -359,6 +369,17 @@ describe("estimateTimeline", () => {
       "i-765",
     );
     assert.deepEqual(ead.start, i485.start);
+  });
+
+  it("says a side step is 'after you file', a gated step its median, and the visitor's own nothing", () => {
+    const { stages } = estimateTimeline(FIANCE, DATA, EMPTY_INPUTS, null);
+    const ead = stages.find(({ spec }) => spec.id === "i-765");
+    assert.equal(plain(ead?.headline), "Most likely 4–6 months after you file");
+    assert.equal(
+      stage(OTHER_FAMILY, {}, "i-130").headline,
+      "USCIS’s median: 43.3 months, once your date is current",
+    );
+    assert.equal(stage(SPOUSE_ABROAD, {}, "documents").headline, "");
   });
 
   it("asks for the consulate before estimating the interview", () => {
