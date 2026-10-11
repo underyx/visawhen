@@ -19,6 +19,7 @@ import MoreDetails from "../components/MoreDetails";
 import { NoteChip } from "../components/NoteChip";
 import NvcAudience from "../components/NvcAudience";
 import PolicyBanner from "../components/PolicyBanner";
+import { WarningIcon } from "../components/icons";
 import { Stat, Stats } from "../components/Stats";
 import TemporaryNotice from "../components/TemporaryNotice";
 import {
@@ -98,9 +99,9 @@ interface QueueStatProps {
 /** One queue's newest time, as a box, with how it changed since the reading
  * before under it: a longer time is bad news for those waiting, so it is in
  * red, and a shorter one in green. While the queue has stalled (getStall),
- * the time only grows with the stall, so the change is a chip in warning
- * colours that opens a note on what the stall means (Bence's design: the
- * notice it replaced restated the change). */
+ * a chip in warning colours after the change opens a note on what the
+ * stall means (Bence's design: the notice it replaced restated the change,
+ * which itself stays plain text). */
 function QueueStat({ label, series, latestDate, at, now }: QueueStatProps) {
   const [date, days] = latest(series);
   const change = latestChange(series);
@@ -112,14 +113,21 @@ function QueueStat({ label, series, latestDate, at, now }: QueueStatProps) {
     const since = formatMonthDay(change.previous[0]);
     if (change.days === 0) line = `same as on ${since}`;
     else {
-      const grew = `${change.days > 0 ? "+" : "−"}${formatDays(
+      const changed = `${change.days > 0 ? "+" : "−"}${formatDays(
         Math.abs(change.days),
-      )}`;
-      if (stall !== null && change.days > 0)
-        line = (
+      )} since ${since}`;
+      lineColor = change.days > 0 ? "red.9" : "teal.9";
+      // While the queue has stalled, the change is only how much older the
+      // queue got: a chip after it opens a note on what that means.
+      line =
+        stall === null ? (
+          changed
+        ) : (
           <>
+            {changed}{" "}
             <NoteChip
-              label={grew}
+              label="stalled"
+              icon={<WarningIcon />}
               title={`${label} has stalled`}
               tone="warning"
             >
@@ -129,14 +137,9 @@ function QueueStat({ label, series, latestDate, at, now }: QueueStatProps) {
                 longer than {formatDays(days)}, and the wait grows every week
                 this goes on.
               </Text>
-            </NoteChip>{" "}
-            since {since}
+            </NoteChip>
           </>
         );
-      else {
-        line = `${grew} since ${since}`;
-        lineColor = change.days > 0 ? "red.9" : "teal.9";
-      }
     }
   }
   return (

@@ -24,19 +24,21 @@ const PHONE = "(max-width: 47.99em)";
 interface NoteChipProps {
   /** The chip's text */
   label: string;
-  /** The note's heading, when the label is not one: "+6 days" opens
+  /** An icon before the text, such as a warning sign */
+  icon?: React.ReactNode;
+  /** The note's heading, when the label alone is not one: "Stalled" opens
    * "Document review has stalled". Without it the phone panel is headed by
    * the label, and the note from sm up has no heading. */
   title?: string;
-  /** "warning": the chip is highlighted, as a yellow notice is, for a
-   * figure that means bad news, such as the change of a queue that has
-   * stalled */
+  /** "warning": the chip is highlighted, as a yellow notice is, for bad
+   * news, such as a queue that has stalled */
   tone?: "warning";
 }
 
 /** A chip that opens its note on hover (a mouse) or on a tap or click */
 export function NoteChip({
   label,
+  icon,
   title,
   tone,
   children,
@@ -93,6 +95,7 @@ export function NoteChip({
           }
         : {})}
     >
+      {icon}
       {/* The label's box is trimmed to its capitals and baseline (text-box),
           so that the text sits centred in the pill in every browser */}
       <span className={classes.label}>{label}</span>

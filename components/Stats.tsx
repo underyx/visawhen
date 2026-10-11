@@ -28,8 +28,8 @@ export interface StatProps {
   label: string;
   /** A string is set big (StatValue); anything else is placed as it is */
   value: React.ReactNode;
-  /** The line under the value: text, or text with a chip in it (NoteChip),
-   * such as a change that opens a note on what it means */
+  /** The line under the value: text, or text with a chip after it
+   * (NoteChip), such as a change with a note on what it means */
   line: React.ReactNode;
   /** A Mantine colour for the line: "dimmed", "teal.9", "red.9" */
   lineColor?: string;
