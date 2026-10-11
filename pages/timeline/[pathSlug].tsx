@@ -18,6 +18,7 @@ import { ChevronLeftIcon, WarningIcon } from "../../components/icons";
 import MonthInput from "../../components/MonthInput";
 import MoreDetails from "../../components/MoreDetails";
 import { ChipRow, NoteChip } from "../../components/NoteChip";
+import { PolicyNews } from "../../components/PolicyBanner";
 import { breadcrumbList } from "../../components/structuredData";
 import { formatBulletinMonth } from "../../components/visaBulletin";
 import type {
@@ -250,24 +251,24 @@ function Step({
   );
 }
 
-/** The office page's verdict on the chosen office, in a sentence */
+/** The office page's verdict on the chosen office, as one claim under the
+ * office list: the method and the reasons for no verdict are on the
+ * office's page, one tap away */
 function officeVerdict(
   office: NonNullable<TimelineData["offices"]>[number],
   form: string,
-  quarter: string | null,
 ): string {
   const base =
     form === "N-400" ? "the country as a whole" : "all field offices together";
-  const pace = quarter === null ? "" : ` over the four quarters to ${quarter}`;
   switch (office.verdict) {
     case "longer":
-      return `${office.name}’s backlog would take clearly longer to clear than that of ${base}, at its pace${pace}. Plan for the later end of each USCIS range.`;
+      return `${office.name}’s backlog would take clearly longer to clear than ${base}’s: plan for the later end of each range.`;
     case "shorter":
-      return `${office.name}’s backlog would take clearly less time to clear than that of ${base}, at its pace${pace}. Your wait may be at the earlier end of each USCIS range.`;
+      return `${office.name}’s backlog would take clearly less time to clear than ${base}’s: your wait may be at the earlier end of each range.`;
     case "close":
-      return `${office.name}’s backlog would take about as long to clear as that of ${base}, at its pace${pace}: not clearly longer or shorter.`;
+      return `${office.name}’s backlog would take about as long to clear as ${base}’s.`;
     default:
-      return `No verdict on ${office.name} right now: in its newest quarter, cases moved in or out, it decided too few, or it approves almost none of them.`;
+      return `No verdict on ${office.name} this quarter.`;
   }
 }
 
@@ -400,6 +401,11 @@ export default function TimelinePage({ slug, data, year }: Props) {
         <Title order={1}>{path.title}</Title>
         <Text size="lg">{path.who}</Text>
       </Stack>
+      {/* The stamp comes before the form (numbers first, as on /nvc): on
+          a phone it was under 3-6 inputs, and off the first screen once a
+          date was picked. "If you start today" says the inputs under it
+          refine it. */}
+      <Stamp result={result} reported={reported} today={today} />
       <form
         className={classes.inputs}
         onSubmit={(event) => event.preventDefault()}
@@ -407,7 +413,6 @@ export default function TimelinePage({ slug, data, year }: Props) {
         <NativeSelect
           className={classes.wide}
           label="Where is your case?"
-          description="Your answers are kept only in this page’s link, so you can bookmark it."
           value={inputs.milestone}
           onChange={(event) =>
             set({ milestone: event.currentTarget.value, date: "" })
@@ -468,7 +473,7 @@ export default function TimelinePage({ slug, data, year }: Props) {
               ]}
             />
             <MonthInput
-              label="Your priority date, if you have one"
+              label="Your priority date"
               value={inputs.priorityDate}
               onChange={(priorityDate) => set({ priorityDate })}
               today={today}
@@ -477,8 +482,10 @@ export default function TimelinePage({ slug, data, year }: Props) {
           </>
         )}
         {path.inputs.includes("office") && data.offices !== null && (
+          // the office page's verdict on the chosen office sits under the
+          // list, as its description
           <NativeSelect
-            label="Your USCIS field office, if you know it"
+            label="Your USCIS field office"
             value={inputs.office}
             onChange={(event) => set({ office: event.currentTarget.value })}
             data={[
@@ -488,22 +495,31 @@ export default function TimelinePage({ slug, data, year }: Props) {
                 label: name,
               })),
             ]}
+            inputWrapperOrder={["label", "input", "description"]}
+            description={
+              office !== undefined &&
+              path.officeForm !== undefined && (
+                <>
+                  {officeVerdict(office, path.officeForm.form)}{" "}
+                  <To href={`/uscis/${officeFormSlug}/${office.slug}`}>
+                    See the office’s numbers
+                  </To>
+                  .
+                </>
+              )
+            }
           />
         )}
-        {office !== undefined && path.officeForm !== undefined && (
-          <Text size="sm" className={classes.wide}>
-            {officeVerdict(office, path.officeForm.form, data.officeQuarter)}{" "}
-            <To href={`/uscis/${officeFormSlug}/${office.slug}`}>
-              See the office’s numbers
-            </To>
-            .
-          </Text>
-        )}
+        {/* The answers live in the page's address (Bence's ask in PR
+            #444): one line keeps that findable. */}
+        <Text size="xs" c="dimmed" className={classes.wide}>
+          Bookmark this page to keep your answers.
+        </Text>
       </form>
       <Stack gap="xs" className={classes.rows}>
+        <PolicyNews page={`/timeline/${slug}`} />
         <TimelineCases cases={path.cases} data={data} />
       </Stack>
-      <Stamp result={result} reported={reported} today={today} />
       <ol className={classes.steps}>
         {mainSteps.map((stage) => (
           <Step
