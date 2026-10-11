@@ -736,8 +736,6 @@ export interface TimelineData {
   ivAsOf: string | null;
   /** The field offices of the path's office form, if any */
   offices: OfficeOption[] | null;
-  /** The quarter the office comparison is of */
-  officeQuarter: string | null;
   bulletin: BulletinOptions | null;
 }
 
@@ -1550,8 +1548,9 @@ function interviewStage(
     return {
       ...base,
       headline: "No estimate while visa services are disrupted",
-      // the notice's own chip label, "Visa services paused"
-      warning: `${override.title}: ${override.summary} See ${post.name}’s page.`,
+      // The chip carries the notice's own label, "Visa services paused",
+      // which heads the note too: the note itself is the summary alone.
+      warning: `${override.summary} See ${post.name}’s page.`,
       news: true,
       warningLabel: override.label,
     };

@@ -130,7 +130,6 @@ const DATA: TimelineData = {
   ],
   ivAsOf: "2026-10-07",
   offices: null,
-  officeQuarter: null,
   bulletin: {
     month: "2026-10",
     categories: [

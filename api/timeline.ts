@@ -2,7 +2,6 @@ import type { Form, Period, UscisData } from "./uscis";
 import {
   getActiveOffices,
   getData as getUscisData,
-  latestQuarter,
   newestQuarter,
 } from "./uscis";
 import type { NvcSeries } from "./nvc";
@@ -253,7 +252,6 @@ export async function getPathSummaryData(
     posts: null,
     ivAsOf: null,
     offices: null,
-    officeQuarter: null,
     bulletin: null,
   };
 }
@@ -269,11 +267,6 @@ export async function getTimelineData(path: PathSpec): Promise<TimelineData> {
     path.officeForm === undefined
       ? undefined
       : uscis.forms.find(({ form }) => form === path.officeForm?.form);
-  const officeQuarter =
-    officeForm === undefined ? null : latestQuarter(officeForm.officeTotals);
-  const officePeriod = uscis.periods.find(
-    ({ quarter }) => quarter === officeQuarter,
-  );
   const priorityDate = path.stages.find(
     (stage) => stage.kind === "priority-date",
   );
@@ -289,8 +282,6 @@ export async function getTimelineData(path: PathSpec): Promise<TimelineData> {
       officeForm === undefined || path.officeForm === undefined
         ? null
         : officeOptions(uscis.periods, officeForm, path.officeForm.category),
-    officeQuarter:
-      officePeriod === undefined ? null : quarterLabel(officePeriod),
     bulletin:
       priorityDate !== undefined && priorityDate.kind === "priority-date"
         ? await bulletinOptions(priorityDate.categories)

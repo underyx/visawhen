@@ -53,8 +53,9 @@ import stampClasses from "../../components/UscisStats.module.css";
 
 // A path's timeline: its steps in order, each with when it will most likely
 // land, from where the visitor says their case is. What the visitor enters
-// stays in this page's memory: it goes in no address, no cookie and no
-// analytics (see TimelineInputs in components/timeline.ts).
+// lives only in the page's address, after the #, so that a filled-in
+// timeline can be bookmarked: no cookie and no analytics (see
+// TimelineInputs in components/timeline.ts).
 
 interface Props {
   slug: PathSlug;
