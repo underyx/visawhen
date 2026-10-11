@@ -74,7 +74,6 @@ import { breadcrumbList } from "../../../components/structuredData";
 import { ListRow, ListRows } from "../../../components/ListRow";
 import { rankPlace } from "../../../components/search";
 import SearchStatus from "../../../components/SearchStatus";
-import TemporaryNotice from "../../../components/TemporaryNotice";
 
 interface OfficeSummary {
   slug: string;
@@ -442,10 +441,6 @@ export default function UscisForm({
         }${
           headline.premium ? ", premium and regular processing together" : ""
         }.`;
-  const shocked = ranges.filter(
-    ({ shock, shockRatio, priorityDate, suppressed }) =>
-      shock && shockRatio !== null && !priorityDate && suppressed === null,
-  );
   const premium = PREMIUM_PROCESSING[form];
   const canonicalUrl = `https://visawhen.com/uscis/${slug}`;
   const sourceName = "All USCIS Application and Petition Form Types";
@@ -674,34 +669,6 @@ export default function UscisForm({
             </Table>
           </Table.ScrollContainer>
           {premium !== undefined && <Alert color="blue">{premium.note}</Alert>}
-          {shocked.length > 0 && (
-            <TemporaryNotice>
-              <Stack gap="xs">
-                <Text inherit>
-                  USCIS is deciding fewer of these cases than usual:{" "}
-                  {new Intl.ListFormat("en-US").format(
-                    shocked.map(
-                      ({ name, shockRatio }) =>
-                        `${Math.round(
-                          (1 - (shockRatio ?? 1)) * 100,
-                        )}% fewer ${name} cases`,
-                    ),
-                  )}{" "}
-                  in {newest.label} than{" "}
-                  {shocked.length === 1 ? "its average" : "their averages"} over
-                  the four quarters before. Plan for the later end of the range.
-                </Text>
-                <MoreDetails>
-                  <Text size="sm">
-                    We make the range wider when this happens. But in past
-                    slowdowns like this, the typical wait fell inside the
-                    could-be range only about 2 times in 3, not 8 times in 10 as
-                    usual.
-                  </Text>
-                </MoreDetails>
-              </Stack>
-            </TemporaryNotice>
-          )}
         </Stack>
       )}
       <Stack gap="sm">
@@ -739,10 +706,8 @@ export default function UscisForm({
               : "cases USCIS cannot decide yet"}
             .
           </Text>
-          <MoreDetails label="How the range and the chart are worked out">
+          <MoreDetails label="How to read the chart">
             <Text size="sm">
-              {hasRange &&
-                "The range starts from USCIS's own median processing time for your category and widens it by how far real waits have landed from that median in past quarters. "}
               {clearingGaps &&
                 "The chart shows no time to clear the backlog for quarters in which USCIS decided fewer than 100, too few to divide by. "}
               {view.processingTimeSeries.length === 0

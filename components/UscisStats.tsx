@@ -2,6 +2,9 @@ import { Stack, Text } from "@mantine/core";
 import React from "react";
 import { CategoryRange, formatMedian, formatRangeMonths } from "./estimate";
 import { addMonths, formatMonthRange, useToday } from "./Freshness";
+import { WarningIcon } from "./icons";
+import MoreDetails from "./MoreDetails";
+import { NoteChip } from "./NoteChip";
 import { NotShown, Stat, StatProps, Stats } from "./Stats";
 import {
   approvalRatesComparable,
@@ -169,8 +172,10 @@ export default function UscisStats({
       {headline !== null && (
         <div className={classes.estimate}>
           <div className={classes.stamp}>
+            {/* no category in the label: the picked radio names it, and with
+                it the label wrapped to two lines on a phone */}
             <div className={classes.stampLabel}>
-              {`If you file today (${headline.name}), most likely`}
+              If you file today, most likely
             </div>
             <div className={classes.stampRange}>
               <RangeText low={headline.q[1]} high={headline.q[3]} />
@@ -180,13 +185,37 @@ export default function UscisStats({
             </div>
           </div>
           <Stack gap={6} className={classes.aside}>
-            <Text size="sm">
-              {`Based on USCIS's median time of ${formatMedian(
-                headline.median,
-              )} (${
-                medianLabel ?? current.label
-              } data) and on how much real waits differed from it in the past.`}
-            </Text>
+            <MoreDetails label="How we worked this out">
+              <Text size="sm">
+                {`The range starts from USCIS's median of ${formatMedian(
+                  headline.median,
+                )} for ${
+                  medianLabel ?? current.label
+                } and widens it by how far real waits landed from the median in past quarters. In past quarters, the typical wait fell in the most likely range about half the time, and in the could-be range 8 times in 10.`}
+                {headline.shock &&
+                  " We make the range wider when USCIS decides far fewer cases than usual. But in past slowdowns like this, the typical wait fell inside the could-be range only about 2 times in 3."}
+              </Text>
+            </MoreDetails>
+            {headline.shock && headline.shockRatio !== null && (
+              // A warning chip at the figure it qualifies, as /nvc's "stalled"
+              // chip is (Bence's design): a phone visitor reads the stamp and
+              // leaves, so the caveat that it understates cannot sit lower.
+              <div>
+                <NoteChip
+                  label="USCIS deciding fewer cases"
+                  icon={<WarningIcon />}
+                  tone="warning"
+                  title="USCIS is deciding fewer of these cases"
+                >
+                  <Text size="sm">
+                    USCIS decided {Math.round((1 - headline.shockRatio) * 100)}%
+                    fewer {headline.name} cases in{" "}
+                    {medianLabel ?? current.label} than its average over the
+                    four quarters before. Plan for the later end of the range.
+                  </Text>
+                </NoteChip>
+              </div>
+            )}
             {headline.premium && (
               <Text size="sm" c="dimmed">
                 Premium and regular processing together: with premium
@@ -216,9 +245,20 @@ export default function UscisStats({
               ? "includes cases moved or routed here"
               : moved === "out"
               ? "after USCIS moved cases away"
-              : trend !== null
-              ? `${trend} vs. previous ${period}`
-              : null
+              : trend === null ||
+                previous?.waitMonths === null ||
+                previous?.waitMonths === undefined
+              ? null
+              : trend === "rising"
+              ? `up from ${formatMonths(previous.waitMonths)}`
+              : trend === "easing"
+              ? `down from ${formatMonths(previous.waitMonths)}`
+              : formatMonths(previous.waitMonths) ===
+                formatMonths(current.waitMonths)
+              ? `same as the ${period} before`
+              : `about the same as the ${period} before (${formatMonths(
+                  previous.waitMonths,
+                )})`
           }
           lineColor="dimmed"
         />
