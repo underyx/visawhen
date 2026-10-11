@@ -16,6 +16,7 @@ function entry(fields: Partial<PolicyEntry> & { id: string }): PolicyEntry {
   return {
     status: "official",
     title: fields.id,
+    label: fields.id,
     summary: "A summary.",
     body: "The body.",
     scope: {},

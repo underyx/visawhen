@@ -1,131 +1,95 @@
-import { Anchor, Group, Popover, Stack, Text } from "@mantine/core";
+import { Anchor, Stack, Text } from "@mantine/core";
 import Link from "next/link";
-import React, { useEffect, useRef, useState } from "react";
-import { InfoIcon } from "./icons";
-import classes from "./NvcAudience.module.css";
+import React from "react";
+import { ChipRow, NoteChip } from "./NoteChip";
 
-// Who NVC's times are for, as two rows of chips: the cases they are for,
-// each a button that opens a note on what the times mean for that case,
-// and the cases they are not for, as plain pills. The note is between a
-// tooltip and a dialog (Bence's ask): a mouse opens it by hovering, a tap
-// or a click opens it until a tap or click elsewhere, and it holds a link.
+// Who NVC's times are for: a chip for each kind of case, which opens a note
+// on what the times mean for it, or that they do not apply to it. The order
+// (the family-based cases, then employment, then the rest) packs the chips
+// into three lines of a 360px phone, after "Special cases:".
 
-/** How long a note stays open after the mouse leaves its chip, so that it
- * can be moved onto the note itself */
-const LEAVE_MS = 150;
-
-interface Note {
+interface Case {
   label: string;
   note: React.ReactNode;
 }
 
-const FOR: Note[] = [
+const VISA_BULLETIN = (
+  <>
+    Your priority date is usually your longest wait, often years. NVC asks for
+    your documents once the{" "}
+    <Anchor component={Link} href="/visa-bulletin">
+      Visa Bulletin
+    </Anchor>
+    &rsquo;s Dates for Filing chart passes it, and you get an interview once the
+    Final Action Dates chart does.
+  </>
+);
+
+const CASES: Case[] = [
   {
-    label: "Spouse, parent or child of a US citizen",
+    label: "Family visas",
     note: (
-      <>
-        NVC usually takes weeks.{" "}
-        <Anchor component={Link} href="/consulates">
-          The interview queue at your consulate
-        </Anchor>{" "}
-        is usually your longest wait.
-      </>
+      <Stack gap="xs">
+        <Text size="sm">
+          <Text span inherit fw={700}>
+            Spouses, parents and children of US citizens:
+          </Text>{" "}
+          NVC usually takes weeks.{" "}
+          <Anchor component={Link} href="/consulates">
+            The interview queue at your consulate
+          </Anchor>{" "}
+          is usually your longest wait.
+        </Text>
+        <Text size="sm">
+          <Text span inherit fw={700}>
+            Other relatives:
+          </Text>{" "}
+          {VISA_BULLETIN}
+        </Text>
+      </Stack>
     ),
   },
   {
-    label: "Family and employment preference",
+    label: "K visas",
     note: (
-      <>
-        Your priority date is usually your longest wait, often years. NVC asks
-        for your documents once the{" "}
-        <Anchor component={Link} href="/visa-bulletin">
-          Visa Bulletin
-        </Anchor>
-        &rsquo;s Dates for Filing chart passes it, and you get an interview once
-        the Final Action Dates chart does.
-      </>
+      <Text size="sm">
+        These times do not apply to K (fiancé(e)) visas. NVC only passes your
+        approved petition on to the consulate.
+      </Text>
     ),
+  },
+  { label: "Employment visas", note: <Text size="sm">{VISA_BULLETIN}</Text> },
+  {
+    label: "Diversity visas",
+    note: (
+      <Text size="sm">
+        These times do not apply to diversity visas. The Kentucky Consular
+        Center handles DV cases, not NVC.
+      </Text>
+    ),
+  },
+  {
+    label: "Special immigrant visas",
+    note: (
+      <Text size="sm">
+        These times do not apply to special immigrant visas.
+      </Text>
+    ),
+  },
+  {
+    label: "Adoptions",
+    note: <Text size="sm">These times do not apply to adoptions.</Text>,
   },
 ];
 
-const NOT_FOR = ["K visas", "DV", "SIV", "Adoptions"];
-
-/** A chip that opens its note on hover (a mouse) or on a tap or click */
-function NoteChip({ label, note }: Note) {
-  // pinned: opened by a tap or click, until one elsewhere; hovered: by the
-  // mouse, until it leaves the chip and the note
-  const [pinned, setPinned] = useState(false);
-  const [hovered, setHovered] = useState(false);
-  const leaving = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const opened = pinned || hovered;
-  const close = () => {
-    setPinned(false);
-    setHovered(false);
-  };
-  // A finger's tap also fires pointerenter, and no pointerleave until the
-  // next tap elsewhere, so only a mouse hovers.
-  const enter = (event: React.PointerEvent) => {
-    if (event.pointerType !== "mouse") return;
-    clearTimeout(leaving.current);
-    setHovered(true);
-  };
-  const leave = (event: React.PointerEvent) => {
-    if (event.pointerType !== "mouse") return;
-    leaving.current = setTimeout(() => setHovered(false), LEAVE_MS);
-  };
-  useEffect(() => () => clearTimeout(leaving.current), []);
-  return (
-    // withinPortal false: the note follows its chip in the page, so that
-    // the Tab key reaches the link in it
-    <Popover
-      opened={opened}
-      onDismiss={close}
-      position="bottom-start"
-      withArrow
-      shadow="md"
-      withinPortal={false}
-      classNames={{ dropdown: classes.note }}
-    >
-      <Popover.Target>
-        <button
-          type="button"
-          className={classes.chip}
-          onClick={() => (opened ? close() : setPinned(true))}
-          onPointerEnter={enter}
-          onPointerLeave={leave}
-        >
-          {label}
-          <InfoIcon className={classes.icon} />
-        </button>
-      </Popover.Target>
-      <Popover.Dropdown onPointerEnter={enter} onPointerLeave={leave}>
-        <Text size="sm">{note}</Text>
-      </Popover.Dropdown>
-    </Popover>
-  );
-}
-
 export default function NvcAudience() {
   return (
-    <Stack gap="xs">
-      <Group gap="xs">
-        <Text size="sm" fw={600} span>
-          For:
-        </Text>
-        {FOR.map((entry) => (
-          <NoteChip key={entry.label} {...entry} />
-        ))}
-      </Group>
-      <Group gap="xs">
-        <Text size="sm" fw={600} span>
-          Not for:
-        </Text>
-        {NOT_FOR.map((label) => (
-          <span key={label} className={classes.pill}>
-            {label}
-          </span>
-        ))}
-      </Group>
-    </Stack>
+    <ChipRow lead="Special cases:">
+      {CASES.map(({ label, note }) => (
+        <NoteChip key={label} label={label}>
+          {note}
+        </NoteChip>
+      ))}
+    </ChipRow>
   );
 }

@@ -8,6 +8,7 @@ const valid = {
   id: "an-entry",
   status: "official",
   title: "A title",
+  label: "A label",
   summary: "A summary.",
   body: "The body.",
   scope: { posts: ["juba"] },

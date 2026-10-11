@@ -13,6 +13,7 @@ import React from "react";
 import { daysBetween, formatShortDate, useToday } from "./Freshness";
 import classes from "./PolicyBanner.module.css";
 import MoreDetails from "./MoreDetails";
+import { ChipRow, NoteChip } from "./NoteChip";
 import {
   ConsulatePage,
   hasEnded,
@@ -143,23 +144,25 @@ interface OtherPageProps {
 }
 
 type Props = (ConsulatePageProps | OtherPageProps) & {
-  /** Whether to list every entry collapsed, the ones marked `expanded`
-   * too: for a page whose own numbers can be read without them, such as
-   * /nvc, where the notices are about the interview that comes after NVC,
-   * and the numbers come first */
-  collapseAll?: boolean;
+  /** Whether to show every entry, the ones marked `expanded` too, as a chip
+   * in a "Recent news:" row that opens the entry as a note: for a page whose
+   * own numbers can be read without them, such as /nvc, where the notices
+   * are about the interview that comes after NVC, and the numbers come
+   * first */
+  chips?: boolean;
 };
 
 /** The policies that affect a page's visas, from data/policy.json: those
  * about the page in particular (its post, the nationality of most of its
  * applicants or its visa class) or marked `expanded` open, and the rest,
  * such as those about every post, in one collapsed section that lists their
- * titles, so that thousands of pages do not open with the same banners. */
+ * titles, so that thousands of pages do not open with the same banners; or,
+ * with `chips`, all of them as a row of chips. */
 export default function PolicyBanner({
   consulate,
   immigrant,
   page,
-  collapseAll = false,
+  chips = false,
 }: Props) {
   // The prerendered page is served for weeks, so which entries have started,
   // have expired or have gone unchecked too long is decided on the client
@@ -171,7 +174,7 @@ export default function PolicyBanner({
   // The entries about the page in particular, such as a suspension for most
   // of its applicants' nationality, come before the ones expanded
   // everywhere.
-  const expandedEntries = collapseAll
+  const expandedEntries = chips
     ? []
     : sortBy(
         shown.filter((entry) =>
@@ -185,6 +188,19 @@ export default function PolicyBanner({
   const otherEntries = shown.filter(
     (entry) => !expandedEntries.includes(entry),
   );
+
+  if (chips)
+    return (
+      shown.length > 0 && (
+        <ChipRow lead="Recent news:">
+          {shown.map((entry) => (
+            <NoteChip key={entry.id} label={entry.label}>
+              <EntryDetails entry={entry} today={today} />
+            </NoteChip>
+          ))}
+        </ChipRow>
+      )
+    );
 
   return (
     <>

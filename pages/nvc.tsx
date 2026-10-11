@@ -463,8 +463,8 @@ export default function NvcBacklog({ data }: Props) {
         </Stats>
         {!reviewStale && <ReviewEstimate today={today} series={data.review} />}
       </Stack>
-      <Stack gap="sm">
-        <PolicyBanner page="/nvc" collapseAll />
+      <Stack gap="xs">
+        <PolicyBanner page="/nvc" chips />
         <NvcAudience />
       </Stack>
       <Stack gap="sm">
