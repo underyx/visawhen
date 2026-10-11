@@ -42,13 +42,10 @@ import {
   ALL_CATEGORIES,
   approximately,
   cleanData,
-  formatChange,
   formatCount,
   formViews,
   FormView,
-  highlight,
   LEADING_OFFICE_CATEGORY,
-  MIN_CHANGE_BASE,
   officeCategoryName,
   officeCategoryPoints,
   officeCategoryWho,
@@ -350,18 +347,6 @@ export default function UscisForm({
     formMonths === null
       ? null
       : formMonths.points[formMonths.points.length - 1];
-  const monthBefore =
-    formMonths === null
-      ? null
-      : formMonths.points[formMonths.points.length - 2];
-  const newestMonthChange =
-    newestMonth === null
-      ? null
-      : formatChange(
-          monthBefore?.pending,
-          newestMonth.pending,
-          MIN_CHANGE_BASE,
-        );
   // the newest quarter of the form, which a category may have no numbers for
   const totalPoints = views[views.length - 1].points;
   const newest = totalPoints[totalPoints.length - 1];
@@ -493,7 +478,7 @@ export default function UscisForm({
           {/* overflowWrap: a title such as the I-899's
               "Determination/Reasonable" is one word wider than a phone */}
           <Text size="lg" style={{ overflowWrap: "anywhere" }}>
-            {title}
+            {title}. Newest: {statsCurrent.label}.
           </Text>
         </Box>
         {views.length > 1 && (
@@ -516,7 +501,6 @@ export default function UscisForm({
             </Group>
           </Chip.Group>
         )}
-        <Text>Latest USCIS data: {(newestMonth ?? statsCurrent).label}.</Text>
         <UscisStats
           points={statsPoints}
           headline={viewRange}
@@ -524,28 +508,10 @@ export default function UscisForm({
           period={statsPeriod}
           medianLabel={current.label}
         />
-        <Text>
-          <strong>What changed:</strong>{" "}
-          {highlight(
-            statsPoints,
-            "USCIS",
-            `${viewWho} applications`,
-            null,
-            statsPeriod,
-          )}
-        </Text>
         {newestMonth !== null && (
-          <Text>
-            {`For all ${form} categories together, there are newer numbers: at the end of ${
-              newestMonth.label
-            }, ${formatCount(newestMonth.pending)} were pending${
-              newestMonthChange === null || monthBefore === null
-                ? ""
-                : ` (${newestMonthChange} since ${monthBefore.label})`
-            }, and USCIS decided ${formatCount(
-              newestMonth.completions,
-            )} that month. `}
-            <Anchor href={`#${MONTHS_ID}`}>See them month by month</Anchor>.
+          <Text size="sm" c="dimmed">
+            All categories together have newer numbers, to {newestMonth.label}:{" "}
+            <Anchor href={`#${MONTHS_ID}`}>see them month by month</Anchor>.
           </Text>
         )}
         {hasRows && (
