@@ -1,15 +1,25 @@
-import { Group, Popover, Text } from "@mantine/core";
-import React, { useEffect, useRef, useState } from "react";
+import { CloseButton, Group, Popover, Text } from "@mantine/core";
+import { useClickOutside, useMediaQuery } from "@mantine/hooks";
+import React, { useEffect, useId, useRef, useState } from "react";
 import classes from "./NoteChip.module.css";
 
 // A row of chips that each open a note (the NVC page's recent news and
-// special cases). The note is between a tooltip and a dialog (Bence's ask):
-// a mouse opens it by hovering, a tap or a click opens it until a tap or
-// click elsewhere or Escape, and it can hold links and a "Details" toggle.
+// special cases). From sm up the note is between a tooltip and a dialog
+// (Bence's ask): a mouse opens it by hovering, a click opens it until a
+// click elsewhere or Escape, and it can hold links. On a phone it is a
+// panel across the bottom of the screen with a close button, which stays
+// while the page scrolls behind it, so a long note can be read.
 
 /** How long a note stays open after the mouse leaves its chip, so that it
  * can be moved onto the note itself */
 const LEAVE_MS = 150;
+
+/** A click outside closes the note; a touch or mouse-down does not, so
+ * that scrolling the page leaves it open */
+const OUTSIDE_EVENTS = ["click"];
+
+/** The phone layout, below Mantine's sm breakpoint (48em) */
+const PHONE = "(max-width: 47.99em)";
 
 /** A chip that opens its note on hover (a mouse) or on a tap or click */
 export function NoteChip({
@@ -21,6 +31,8 @@ export function NoteChip({
   const [pinned, setPinned] = useState(false);
   const [hovered, setHovered] = useState(false);
   const leaving = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const phone = useMediaQuery(PHONE, false);
+  const id = useId();
   const opened = pinned || hovered;
   const close = () => {
     setPinned(false);
@@ -38,6 +50,69 @@ export function NoteChip({
     leaving.current = setTimeout(() => setHovered(false), LEAVE_MS);
   };
   useEffect(() => () => clearTimeout(leaving.current), []);
+  const onKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "Escape") close();
+  };
+  // The chip is among the nodes a click may land on without closing the
+  // panel: the tap that opens it reaches the document after the panel has
+  // appeared, and would close it again.
+  const [chipNode, setChipNode] = useState<HTMLButtonElement | null>(null);
+  const [sheetNode, setSheetNode] = useState<HTMLDivElement | null>(null);
+  useClickOutside(close, OUTSIDE_EVENTS, [sheetNode, chipNode]);
+
+  const chip = (
+    <button
+      ref={setChipNode}
+      type="button"
+      className={classes.chip}
+      onClick={() => (opened ? close() : setPinned(true))}
+      onPointerEnter={enter}
+      onPointerLeave={leave}
+      onKeyDown={onKeyDown}
+      {...(phone
+        ? {
+            "aria-haspopup": "dialog" as const,
+            "aria-expanded": opened,
+            "aria-controls": opened ? id : undefined,
+          }
+        : {})}
+    >
+      {/* The label's box is trimmed to its capitals and baseline (text-box),
+          so that the text sits centred in the pill in every browser */}
+      <span className={classes.label}>{label}</span>
+    </button>
+  );
+
+  if (phone)
+    return (
+      <>
+        {chip}
+        {opened && (
+          <div
+            ref={setSheetNode}
+            id={id}
+            role="dialog"
+            aria-labelledby={`${id}-title`}
+            className={classes.sheet}
+            onKeyDown={onKeyDown}
+          >
+            <Group
+              justify="space-between"
+              align="flex-start"
+              wrap="nowrap"
+              className={classes.sheetHead}
+            >
+              <Text id={`${id}-title`} fw={700}>
+                {label}
+              </Text>
+              <CloseButton aria-label="Close" onClick={close} />
+            </Group>
+            {children}
+          </div>
+        )}
+      </>
+    );
+
   return (
     // withinPortal false: the note follows its chip in the page, so that
     // the Tab key reaches what is in it
@@ -48,19 +123,10 @@ export function NoteChip({
       withArrow
       shadow="md"
       withinPortal={false}
+      clickOutsideEvents={OUTSIDE_EVENTS}
       classNames={{ dropdown: classes.note }}
     >
-      <Popover.Target>
-        <button
-          type="button"
-          className={classes.chip}
-          onClick={() => (opened ? close() : setPinned(true))}
-          onPointerEnter={enter}
-          onPointerLeave={leave}
-        >
-          {label}
-        </button>
-      </Popover.Target>
+      <Popover.Target>{chip}</Popover.Target>
       <Popover.Dropdown onPointerEnter={enter} onPointerLeave={leave}>
         {children}
       </Popover.Dropdown>
@@ -76,7 +142,7 @@ export function ChipRow({
   children,
 }: React.PropsWithChildren<{ lead: string }>) {
   return (
-    <Group gap="xs">
+    <Group gap={8}>
       <Text size="xs" fw={700} span>
         {lead}
       </Text>
