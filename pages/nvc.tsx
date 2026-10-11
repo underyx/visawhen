@@ -473,16 +473,16 @@ export default function NvcBacklog({ data }: Props) {
       </Stack>
       <Stack gap="sm">
         <PolicyBanner page="/nvc" collapseAll />
+        {/* Who the times are for, by case: every heading names a group of
+            visitors, and every line says what the times mean for them. */}
         <Alert role="note" color="gray">
           <Stack gap="sm">
             <div>
               <Text inherit fw={700}>
-                These times do not apply to
-              </Text>
-              <Text inherit>
                 K (fiancé(e)) visas, diversity visas, special immigrant visas
-                and adoptions.
+                and adoptions
               </Text>
+              <Text inherit>These times do not apply to you.</Text>
             </div>
             <div>
               <Text inherit fw={700}>
@@ -493,7 +493,7 @@ export default function NvcBacklog({ data }: Props) {
                 <Anchor component={Link} href="/consulates">
                   The interview queue at your consulate
                 </Anchor>{" "}
-                is usually the longest wait.
+                is usually your longest wait.
               </Text>
             </div>
             <div>
@@ -501,8 +501,8 @@ export default function NvcBacklog({ data }: Props) {
                 Family and employment preference categories
               </Text>
               <Text inherit>
-                Your priority date is usually the longest wait, often years. NVC
-                asks for your documents once the{" "}
+                Your priority date is usually your longest wait, often years.
+                NVC asks for your documents once the{" "}
                 <Anchor component={Link} href="/visa-bulletin">
                   Visa Bulletin
                 </Anchor>
