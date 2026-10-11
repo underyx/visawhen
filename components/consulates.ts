@@ -498,16 +498,14 @@ export const IV_CATEGORY_BY_CLASS: Partial<Record<string, IvCategory>> =
     ),
   );
 
-const FIANCE_NOTE =
-  "The State Department publishes no interview-scheduling data for fiancé(e) visas.";
-const K3_NOTE =
-  "The State Department publishes no interview-scheduling data for K-3 and K-4 visas.";
-const DV_NOTE = "Diversity visas are not covered by State’s scheduling tool.";
+// One short sentence each, for a line under a class page's issuance boxes.
+const K_NOTE = "State publishes no interview-scheduling data for K visas.";
+const DV_NOTE = "State’s scheduling tool does not cover diversity visas.";
 
 // The tool's page lists the visa categories it covers: immediate relatives,
 // family preference, and EB-1, EB-2, EB-3 and EB-5. These are not among them.
 function notListedNote(cases: string): string {
-  return `State’s interview-scheduling tool does not list ${cases} among the categories it covers.`;
+  return `State’s scheduling tool does not list ${cases}.`;
 }
 const ADOPTION_NOTE = notListedNote("adoption cases");
 const WIDOW_NOTE = notListedNote(
@@ -525,10 +523,10 @@ const U_VISA_FAMILY_NOTE = notListedNote("family members of U visa holders");
  * Scheduling Status Tool: the immigrant classes it does not cover, and the K
  * visas, which are nonimmigrant visas but go through NVC too */
 export const CLASS_NOTES: Partial<Record<string, string>> = {
-  k1: FIANCE_NOTE,
-  k2: FIANCE_NOTE,
-  k3: K3_NOTE,
-  k4: K3_NOTE,
+  k1: K_NOTE,
+  k2: K_NOTE,
+  k3: K_NOTE,
+  k4: K_NOTE,
   dv: DV_NOTE,
   ir3: ADOPTION_NOTE,
   ir4: ADOPTION_NOTE,
