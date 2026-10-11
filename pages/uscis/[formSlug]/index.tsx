@@ -1,6 +1,5 @@
 import { ChevronLeftIcon, SearchIcon } from "../../../components/icons";
 import {
-  Alert,
   Anchor,
   Badge,
   Box,
@@ -36,7 +35,6 @@ import {
   headlineRange,
   PREMIUM_PROCESSING,
   PRIORITY_DATE_CUTOFFS,
-  PRIORITY_DATE_TEXT,
   withoutMisleadingClearing,
 } from "../../../components/estimate";
 import { RELATED_FORMS } from "../../../components/relatedForms";
@@ -62,6 +60,7 @@ import {
   toPoints,
 } from "../../../components/uscis";
 import { OutcomesChart, WaitChart } from "../../../components/UscisChart";
+import UscisCases, { uscisCases } from "../../../components/UscisCases";
 import UscisStats, { RangeText } from "../../../components/UscisStats";
 import UscisMonths, { MONTHS_ID } from "../../../components/UscisMonths";
 import {
@@ -69,6 +68,7 @@ import {
   MonthlyNumbers,
 } from "../../../components/monthlyNumbers";
 import MoreDetails from "../../../components/MoreDetails";
+import { policiesFor } from "../../../components/policy";
 import { PolicyNews } from "../../../components/PolicyBanner";
 import { breadcrumbList } from "../../../components/structuredData";
 import { ListRow, ListRows } from "../../../components/ListRow";
@@ -145,10 +145,10 @@ interface Props {
 }
 
 /** What to know about a form's approval rate, where USCIS's counts are not
- * what the words suggest. */
+ * what the words suggest: the note of the "Approval rate" chip. */
 const APPROVAL_NOTES: Record<string, string> = {
   "I-589":
-    "About the approval rate: it is the share of USCIS's own decisions that granted asylum, not the share of applicants who get asylum in the end. When an asylum office does not grant asylum to someone without legal status, it usually sends the case to an immigration court, and USCIS does not say if it counts these as denials.",
+    "The approval rate is the share of USCIS's own decisions that granted asylum, not the share of applicants who get asylum in the end. When an asylum office does not grant asylum to someone without legal status, it usually sends the case to an immigration court, and USCIS does not say if it counts these as denials.",
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -445,16 +445,21 @@ export default function UscisForm({
   const canonicalUrl = `https://visawhen.com/uscis/${slug}`;
   const sourceName = "All USCIS Application and Petition Form Types";
   const viewWho = who(form, view, views);
-  const otherNames = views.slice(0, -1).map(({ name }) => name);
-  const whoText = isTotal
-    ? `${
-        otherNames.length === 2 ? "Both" : `All ${otherNames.length}`
-      } categories together: ${new Intl.ListFormat("en-US").format(
-        otherNames,
-      )}. Their queues move at different speeds, so this is nobody's own queue: pick your category to see yours.`
-    : officeCategoryWho(view.key) ??
-      variants.find(({ key }) => key === view.key)?.title ??
-      null;
+  const cases = uscisCases({
+    views: views.map(({ key, name }) => ({
+      name,
+      who: officeCategoryWho(key),
+    })),
+    form,
+    ranges,
+    premium,
+    approvalNote: APPROVAL_NOTES[form],
+  });
+  // The rows' Stack goes only where a row can show: the news row decides
+  // on the client, by today's date, so the file's entries for the page
+  // stand in for it (an empty Stack would still take the gap around it).
+  const hasRows =
+    cases.length > 0 || policiesFor({ page: `/uscis/${slug}` }).length > 0;
 
   return (
     <Stack gap="xl">
@@ -491,33 +496,25 @@ export default function UscisForm({
             {title}
           </Text>
         </Box>
-        <PolicyNews page={`/uscis/${slug}`} />
         {views.length > 1 && (
-          <Stack gap={6}>
-            <Chip.Group
-              multiple={false}
-              value={view.key}
-              onChange={(key) => setSelected(key)}
-            >
-              <Group gap="xs" role="radiogroup" aria-label="Category">
-                {views.map(({ key, name: viewName }) => (
-                  <Chip
-                    key={key}
-                    value={key}
-                    variant="outline"
-                    name={categoryInputName}
-                  >
-                    {viewName}
-                  </Chip>
-                ))}
-              </Group>
-            </Chip.Group>
-            {whoText !== null && (
-              <Text size="sm" c="dimmed">
-                {whoText}
-              </Text>
-            )}
-          </Stack>
+          <Chip.Group
+            multiple={false}
+            value={view.key}
+            onChange={(key) => setSelected(key)}
+          >
+            <Group gap="xs" role="radiogroup" aria-label="Category">
+              {views.map(({ key, name: viewName }) => (
+                <Chip
+                  key={key}
+                  value={key}
+                  variant="outline"
+                  name={categoryInputName}
+                >
+                  {viewName}
+                </Chip>
+              ))}
+            </Group>
+          </Chip.Group>
         )}
         <Text>Latest USCIS data: {(newestMonth ?? statsCurrent).label}.</Text>
         <UscisStats
@@ -551,10 +548,11 @@ export default function UscisForm({
             <Anchor href={`#${MONTHS_ID}`}>See them month by month</Anchor>.
           </Text>
         )}
-        {APPROVAL_NOTES[form] !== undefined && (
-          <Text size="sm" c="dimmed">
-            {APPROVAL_NOTES[form]}
-          </Text>
+        {hasRows && (
+          <Stack gap="xs">
+            <PolicyNews page={`/uscis/${slug}`} />
+            <UscisCases cases={cases} />
+          </Stack>
         )}
         {related !== undefined && (
           <Text>
@@ -615,10 +613,7 @@ export default function UscisForm({
                     <Table.Td>{range.name}</Table.Td>
                     {range.priorityDate ? (
                       <Table.Td colSpan={2}>
-                        {PRIORITY_DATE_TEXT[form]?.[range.key]?.(
-                          formatMedian(range.median),
-                        ) ?? "Depends on your priority date:"}{" "}
-                        see{" "}
+                        Depends on your priority date: see{" "}
                         <Anchor
                           component={Link}
                           href={
@@ -655,20 +650,12 @@ export default function UscisForm({
                         </Table.Td>
                       </>
                     )}
-                    <Table.Td ta="right">
-                      {formatMedian(range.median)}
-                      {range.priorityDate && (
-                        <Text size="sm" c="dimmed">
-                          for those decided in {newest.label}
-                        </Text>
-                      )}
-                    </Table.Td>
+                    <Table.Td ta="right">{formatMedian(range.median)}</Table.Td>
                   </Table.Tr>
                 ))}
               </Table.Tbody>
             </Table>
           </Table.ScrollContainer>
-          {premium !== undefined && <Alert color="blue">{premium.note}</Alert>}
         </Stack>
       )}
       <Stack gap="sm">
