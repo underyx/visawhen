@@ -36,7 +36,6 @@ import {
 } from "../../../components/estimate";
 import {
   ALL_CATEGORIES,
-  CHART_QUARTERS,
   approximately,
   ChartBreak,
   cleanData,
@@ -513,14 +512,6 @@ export default function UscisOffice({
     ];
   });
 
-  // The quarters of routed filings the chart shows at first, the only ones
-  // the text under it names, as for its dashed lines (the Vermont Service
-  // Center's I-485s were routed in Jan-Mar 2017, before the chart's six
-  // years); older ones keep their mark in the chart's tooltip.
-  const routedShown = points
-    .slice(-CHART_QUARTERS)
-    .filter(({ quarter }) => view.routed.includes(quarter));
-
   // The description is of the view the page opens with, which is what
   // search engines and visitors without JavaScript see.
   const opening =
@@ -798,19 +789,6 @@ export default function UscisOffice({
       )}
       <Stack gap="sm">
         <Title order={2}>What happened to the applications</Title>
-        <Text>
-          The bars are the {who(form, view)} decisions {officePhrase} made each
-          quarter, approved in blue and denied in red. The amber line is its
-          backlog: how many applications were still waiting at the end of that
-          quarter, most of them filed in earlier ones. The dashed line is how
-          many came in
-          {routedShown.length > 0
-            ? `, which in ${new Intl.ListFormat("en-US").format(
-                routedShown.map(({ label }) => label),
-              )} includes new filings USCIS routed here from elsewhere rather than filed with the office`
-            : ""}
-          .
-        </Text>
         <OutcomesChart
           points={points}
           subject={who(form, view)}

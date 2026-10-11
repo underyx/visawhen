@@ -680,6 +680,17 @@ describe("the median lines of a chart", () => {
         text: "From Jul–Sep 2025, USCIS gives the I-765 numbers by category; before, it gave them only for all categories together.",
       },
     ]);
+    // a category whose quarters before the split are the per-office
+    // report's national totals says so
+    assert.equal(
+      medianBreaks(
+        points.map((point, index) =>
+          index < 2 ? { ...point, fromOfficeReport: true } : point,
+        ),
+        i765,
+      )[0].text,
+      "From Jul–Sep 2025, USCIS gives the I-765 numbers by category; before, it gave them only for all categories together, so a category's earlier quarters are the totals of all its offices.",
+    );
     const n400 = form("N-400", {
       "2025-Q1": [
         variant("civilian", { processingTime: 5 }),

@@ -820,12 +820,25 @@ export function medianBreaks(
       before[0].key === "all" &&
       now.length > 1 &&
       now.every(({ key }) => key !== "all")
-    )
+    ) {
+      // A category's quarters before the split come from the per-office
+      // report's national totals (categoryCounts); this note is the only
+      // text under the chart that says so.
+      const fromOffices = points
+        .slice(0, index)
+        .some(({ fromOfficeReport }) => fromOfficeReport);
       breaks.push({
         quarter: point.quarter,
         label: "split by category",
-        text: `From ${point.label}, USCIS gives the ${form.form} numbers by category; before, it gave them only for all categories together.`,
+        text: `From ${point.label}, USCIS gives the ${
+          form.form
+        } numbers by category; before, it gave them only for all categories together${
+          fromOffices
+            ? ", so a category's earlier quarters are the totals of all its offices"
+            : ""
+        }.`,
       });
+    }
   });
   // runs of quarters in which every category's median was the same figure
   const same = points.map((point) => {
