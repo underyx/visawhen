@@ -28,8 +28,9 @@ export interface StatProps {
   label: string;
   /** A string is set big (StatValue); anything else is placed as it is */
   value: React.ReactNode;
-  /** The line under the value */
-  line: string | null;
+  /** The line under the value: text, or text with a chip after it
+   * (NoteChip), such as a change with a note on what it means */
+  line: React.ReactNode;
   /** A Mantine colour for the line: "dimmed", "teal.9", "red.9" */
   lineColor?: string;
 }
@@ -39,7 +40,8 @@ export function Stat({ label, value, line, lineColor = "dimmed" }: StatProps) {
     <div className={classes.box}>
       <Text className={classes.boxLabel}>{label}</Text>
       {typeof value === "string" ? <StatValue>{value}</StatValue> : value}
-      <Text size="xs" c={lineColor}>
+      {/* a div: a chip's note opens inside the line */}
+      <Text size="xs" c={lineColor} component="div">
         {line ?? NO_LINE}
       </Text>
     </div>

@@ -1,12 +1,13 @@
 import { GetStaticProps } from "next";
 import Head from "next/head";
 import { getData, NvcData, NvcSeries } from "../api/nvc";
-import React, { useState } from "react";
+import React from "react";
 import NvcChart from "../components/NvcChart";
 import { jsonLdScriptProps } from "react-schemaorg";
 import { Dataset } from "schema-dts";
-import { Anchor, Box, Stack, Text, TextInput, Title } from "@mantine/core";
+import { Anchor, Box, Stack, Text, Title } from "@mantine/core";
 import {
+  addDays,
   daysBetween,
   formatDate,
   formatDateRange,
@@ -15,8 +16,10 @@ import {
   useToday,
 } from "../components/Freshness";
 import MoreDetails from "../components/MoreDetails";
+import { NoteChip } from "../components/NoteChip";
 import NvcAudience from "../components/NvcAudience";
 import PolicyBanner from "../components/PolicyBanner";
+import { WarningIcon } from "../components/icons";
 import { Stat, Stats } from "../components/Stats";
 import TemporaryNotice from "../components/TemporaryNotice";
 import {
@@ -32,9 +35,9 @@ import { CREATOR, LICENSE_URL } from "../components/structuredData";
 import stampClasses from "../components/UscisStats.module.css";
 
 // The page leads with NVC's three times as figures, then the stamp: when
-// NVC will most likely review documents submitted today, or on the date the
-// visitor gives. The notices and who the times are for come after the
-// numbers, and each queue's chart after those.
+// NVC will most likely review documents submitted today. The notices and
+// who the times are for come after the numbers, and each queue's chart
+// after those.
 
 interface Props {
   data: NvcData;
@@ -86,25 +89,57 @@ interface QueueStatProps {
   series: NvcSeries;
   /** The newest date of any series: a box whose own is older says so */
   latestDate: string;
+  /** The queue's submissions, for the note on a stall, as what NVC stays
+   * at, "documents submitted", and as the subject of what the ones made
+   * now will take, "Documents submitted now" */
+  at: string;
+  now: string;
 }
 
 /** One queue's newest time, as a box, with how it changed since the reading
  * before under it: a longer time is bad news for those waiting, so it is in
- * red, and a shorter one in green. */
-function QueueStat({ label, series, latestDate }: QueueStatProps) {
+ * red, and a shorter one in green. While the queue has stalled (getStall),
+ * a chip in warning colours after the change opens a note on what the
+ * stall means (Bence's design: the notice it replaced restated the change,
+ * which itself stays plain text). */
+function QueueStat({ label, series, latestDate, at, now }: QueueStatProps) {
   const [date, days] = latest(series);
   const change = latestChange(series);
-  let line: string | null = null;
+  const stall = getStall(series);
+  let line: React.ReactNode = null;
   let lineColor = "dimmed";
   if (date !== latestDate) line = `as of ${formatShortDate(date)}`;
   else if (change !== null) {
     const since = formatMonthDay(change.previous[0]);
     if (change.days === 0) line = `same as on ${since}`;
     else {
-      line = `${change.days > 0 ? "+" : "−"}${formatDays(
+      const changed = `${change.days > 0 ? "+" : "−"}${formatDays(
         Math.abs(change.days),
       )} since ${since}`;
       lineColor = change.days > 0 ? "red.9" : "teal.9";
+      // While the queue has stalled, the change is only how much older the
+      // queue got: a chip after it opens a note on what that means.
+      line =
+        stall === null ? (
+          changed
+        ) : (
+          <>
+            {changed}{" "}
+            <NoteChip
+              label="stalled"
+              icon={<WarningIcon />}
+              title={`${label} has stalled`}
+              tone="warning"
+            >
+              <Text size="sm">
+                Since {formatMonthDay(stall.from[0])}, NVC has not moved past{" "}
+                {at} around {formatMonthDay(front(stall.to))}. {now} will take
+                longer than {formatDays(days)}, and the wait grows every week
+                this goes on.
+              </Text>
+            </NoteChip>
+          </>
+        );
     }
   }
   return (
@@ -147,31 +182,6 @@ function SeriesAgeNotice({
         today&rsquo;s time on NVC&rsquo;s website
       </Anchor>
       .
-    </TemporaryNotice>
-  );
-}
-
-/** Says that a queue has stalled, when it has (getStall). */
-function StallNotice({ series, what }: { series: NvcSeries; what: string }) {
-  const stall = getStall(series);
-  if (stall === null) return null;
-  const [, lastDays] = latest(series);
-  return (
-    <TemporaryNotice>
-      <Stack gap="xs">
-        <Text inherit>
-          NVC&rsquo;s {what} has almost stopped moving. Anything you submit now
-          may take longer than {lastDays} days.
-        </Text>
-        <MoreDetails>
-          <Text size="sm">
-            On {formatDate(stall.from[0])}, NVC had reached those submitted on{" "}
-            {formatDate(front(stall.from))}. On {formatDate(stall.to[0])}, it
-            had reached those submitted on {formatDate(front(stall.to))}. While
-            it stays stuck, the wait grows every week.
-          </Text>
-        </MoreDetails>
-      </Stack>
     </TemporaryNotice>
   );
 }
@@ -243,44 +253,42 @@ interface ReviewEstimateProps {
 }
 
 /** The stamp: when NVC will most likely review documents submitted today,
- * or on the date the visitor enters, as a range (reviewRange), with the
- * date field and what the range rests on beside it. While the queue has
- * stalled there is no pace to go by, so the notice stands where the stamp
- * would, unless the visitor's date is one NVC has already reached. Until
- * the page knows today's date, the stamp gives the range as days. For a
- * past date this uses what NVC has said since, rather than the review time
- * it showed that day, which after weeks without readings can be far off. */
+ * as a range (reviewRange), with what the range rests on beside it. While
+ * the queue has stalled there is no pace to go by, so the stamp gives only
+ * the day the current wait would end, "or later"; the chip in the box
+ * above says what the stall means. Until the page knows today's date, the
+ * stamp gives the range as days, so that the prerendered page has one. */
 function ReviewEstimate({ today, series }: ReviewEstimateProps) {
-  const [submitted, setSubmitted] = useState("");
   const newest = latest(series);
-  const [reviewDate] = newest;
-  // the newest submission date NVC had reached on the newest reading
-  const reached = front(newest);
+  const [reviewDate, reviewDays] = newest;
   const stall = getStall(series);
-  const valid =
-    today !== null &&
-    /^\d{4}-\d{2}-\d{2}$/.test(submitted) &&
-    submitted <= today;
-  // The submission date the stamp is for. The reading's own date stands in
-  // for today until the page knows it.
-  const from = valid ? submitted : today ?? reviewDate;
+  // The reading's own date stands in for today until the page knows it.
+  const from = today ?? reviewDate;
 
   // the stamp's big line, or null for no stamp
   let value: string | null = null;
-  // why the stamp says "By now", beside it
-  let note: React.ReactNode = null;
-  // the range whose basis goes under "How we worked this out"
+  // what the stamp rests on, under "How we worked this out"
+  let basis: React.ReactNode = null;
+  // the range, once the page knows today; a gap in its data is said beside
+  // the stamp
   let range: ReviewRange | null = null;
-  if (valid && from <= reached) {
-    value = "By now";
-    note = (
+  if (stall !== null) {
+    // The current wait is the least the documents can take while NVC stays
+    // put, and it grows every week NVC does.
+    value =
+      today === null
+        ? `in more than ${reviewDays} days`
+        : `${formatShortDate(addDays(from, reviewDays))} or later`;
+    basis = (
       <>
-        On {formatDate(reviewDate)}, NVC was already reviewing documents
-        submitted on {formatDate(reached)}, so it has most likely reviewed
-        yours. Check <CeacLink /> for its message.
+        NVC&rsquo;s newest review time was {reviewDays} days, on{" "}
+        {formatDate(reviewDate)}. But since {formatDate(stall.from[0])} it has
+        not moved past documents submitted around {formatDate(front(stall.to))},
+        so there is no pace to go by. Documents submitted today will take at
+        least those {reviewDays} days.
       </>
     );
-  } else if (stall === null) {
+  } else {
     // never null while the front moves
     const estimate = reviewRange(series, from);
     if (estimate !== null) {
@@ -289,16 +297,9 @@ function ReviewEstimate({ today, series }: ReviewEstimateProps) {
         const high = daysBetween(from, estimate.upper);
         value =
           low === high ? `in about ${low} days` : `in ${low}–${high} days`;
-      } else if (estimate.upper < today) {
-        value = "By now";
-        note = (
-          <>
-            At the pace NVC showed up to {formatDate(reviewDate)}, it has most
-            likely reviewed documents submitted on {formatDate(from)} by now.
-          </>
-        );
       } else {
         range = estimate;
+        basis = <RangeBasis range={estimate} />;
         // The range can start before today, by when NVC may or may not have
         // reached documents submitted a while ago: no bound shown is before
         // today.
@@ -311,48 +312,31 @@ function ReviewEstimate({ today, series }: ReviewEstimateProps) {
   }
 
   return (
-    <Stack gap="sm">
-      {stall !== null && <StallNotice series={series} what="document review" />}
-      <div className={stampClasses.estimate}>
-        {value !== null && (
-          <div className={stampClasses.stamp}>
-            <div className={stampClasses.stampLabel}>
-              NVC review done most likely:
-            </div>
-            <div className={stampClasses.stampRange}>{value}</div>
-            <div className={stampClasses.stampFoot}>
-              {valid
-                ? `for documents submitted ${formatShortDate(from)}`
-                : "for documents submitted today"}
-            </div>
+    <div className={stampClasses.estimate}>
+      {value !== null && (
+        <div className={stampClasses.stamp}>
+          <div className={stampClasses.stampLabel}>
+            NVC review done most likely:
           </div>
-        )}
+          <div className={stampClasses.stampRange}>{value}</div>
+          <div className={stampClasses.stampFoot}>
+            for documents submitted today
+          </div>
+        </div>
+      )}
+      {basis !== null && (
         <Stack gap="xs" className={stampClasses.aside}>
-          <TextInput
-            type="date"
-            label="Already submitted? Enter the date"
-            description="If NVC asked you to correct a document, use the date you sent the correction."
-            max={today ?? undefined}
-            value={submitted}
-            onChange={(event) => setSubmitted(event.currentTarget.value)}
-            styles={{ wrapper: { maxWidth: "16rem" } }}
-          />
-          {note !== null && <Text size="sm">{note}</Text>}
           {range !== null && range.gap !== null && (
             <Text size="sm">
               This range is less exact than usual, because some data is missing.
             </Text>
           )}
-          {range !== null && (
-            <MoreDetails label="How we worked this out">
-              <Text size="sm">
-                <RangeBasis range={range} />
-              </Text>
-            </MoreDetails>
-          )}
+          <MoreDetails label="How we worked this out">
+            <Text size="sm">{basis}</Text>
+          </MoreDetails>
         </Stack>
-      </div>
-    </Stack>
+      )}
+    </div>
   );
 }
 
@@ -449,16 +433,22 @@ export default function NvcBacklog({ data }: Props) {
             label="Document review"
             series={data.review}
             latestDate={latestDate}
+            at="documents submitted"
+            now="Documents submitted now"
           />
           <QueueStat
             label="Case creation"
             series={data.creation}
             latestDate={latestDate}
+            at="cases that USCIS sent"
+            now="Cases that USCIS sends now"
           />
           <QueueStat
             label="Inquiry response"
             series={data.inquiry}
             latestDate={latestDate}
+            at="inquiries sent"
+            now="Inquiries sent now"
           />
         </Stats>
         {!reviewStale && <ReviewEstimate today={today} series={data.review} />}
@@ -480,7 +470,6 @@ export default function NvcBacklog({ data }: Props) {
           today={today}
           pageStale={stale}
         />
-        {/* the stall notice stands with the stamp, above */}
         <NvcChart id="review" series={data.review} />
       </Stack>
       <Stack gap="sm">
@@ -515,7 +504,6 @@ export default function NvcBacklog({ data }: Props) {
           today={today}
           pageStale={stale}
         />
-        <StallNotice series={data.creation} what="case creation" />
         <NvcChart id="creation" series={data.creation} />
       </Stack>
       <Stack gap="sm">
@@ -538,7 +526,6 @@ export default function NvcBacklog({ data }: Props) {
           today={today}
           pageStale={stale}
         />
-        <StallNotice series={data.inquiry} what="inquiry response" />
         <NvcChart id="inquiry" series={data.inquiry} />
       </Stack>
     </Stack>

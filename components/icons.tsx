@@ -58,6 +58,16 @@ export function HourglassIcon(props: IconProps) {
   );
 }
 
+/** For a chip that warns of something, such as a queue that has stalled */
+export function WarningIcon(props: IconProps) {
+  return (
+    <StrokeIcon {...props}>
+      <path d="M12 3.5 2.5 20h19z" />
+      <path d="M12 9.5v4.5M12 17.5h.01" />
+    </StrokeIcon>
+  );
+}
+
 export function SearchIcon(props: IconProps) {
   return (
     <StrokeIcon {...props}>
