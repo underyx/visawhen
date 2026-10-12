@@ -72,6 +72,25 @@ export function readings(series: NvcSeries): Reading[] {
   return Object.entries(series);
 }
 
+/** A stretch of weeks with no readings: the readings on either side of it */
+export interface Gap {
+  from: Reading;
+  to: Reading;
+}
+
+/** The stretches of a series with no readings for more than
+ * MAX_UPDATE_GAP_DAYS, oldest first. NVC updates its page every week, so
+ * these are the weeks when VisaWhen was not recording its numbers (its
+ * scraper had stalled); a single missed week or two is not one. */
+export function gaps(series: NvcSeries): Gap[] {
+  const all = readings(series);
+  return all.flatMap((to, index) =>
+    index > 0 && daysBetween(all[index - 1][0], to[0]) > MAX_UPDATE_GAP_DAYS
+      ? [{ from: all[index - 1], to }]
+      : [],
+  );
+}
+
 /** The newest reading of a series */
 export function latest(series: NvcSeries): Reading {
   const all = readings(series);
