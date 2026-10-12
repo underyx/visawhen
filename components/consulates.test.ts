@@ -15,6 +15,7 @@ import {
   ivMonthBadge,
   IV_POSTS_ELSEWHERE,
   monthsBehind,
+  previousLine,
   summarizeInactivity,
   summarizeIvPostElsewhere,
 } from "./consulates";
@@ -51,6 +52,42 @@ describe("formatting", () => {
     // N/A in the tool, and a post the tool does not list
     assert.equal(ivMonthBadge("2026-09-23", null), "no month");
     assert.equal(ivMonthBadge("2026-09-23", undefined), "no month");
+  });
+});
+
+describe("previousLine", () => {
+  const previous = { asOf: "2026-09-23", cutoff: "2026-01" };
+
+  it("signs a move of the month and colours it by direction", () => {
+    assert.deepEqual(previousLine("2026-02", false, previous), {
+      text: "+1 month since Sep 23",
+      color: "teal.9",
+    });
+    assert.deepEqual(previousLine("2025-12", false, previous), {
+      text: "−1 month since Sep 23",
+      color: "red.9",
+    });
+    assert.deepEqual(previousLine("2027-03", false, previous), {
+      text: "+1 year and 2 months since Sep 23",
+      color: "teal.9",
+    });
+  });
+  it("says when the month stayed", () => {
+    assert.deepEqual(previousLine("2026-01", false, previous), {
+      text: "same as on Sep 23",
+      color: "dimmed",
+    });
+  });
+  it("says when the cases were current before", () => {
+    const wasCurrent = { asOf: "2026-09-23", cutoff: "2026-09" };
+    assert.deepEqual(previousLine("2026-02", false, wasCurrent), {
+      text: "was current on Sep 23",
+      color: "red.9",
+    });
+    assert.equal(previousLine("2026-10", true, wasCurrent), null);
+  });
+  it("is nothing without a previous month", () => {
+    assert.equal(previousLine("2026-02", false, null), null);
   });
 });
 

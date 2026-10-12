@@ -449,7 +449,6 @@ export default function ConsulateStats({
     suspension === null || country === null
       ? undefined
       : {
-          entry: suspension,
           country,
           applicants:
             CLASS_APPLICANT_COUNTRIES[postSlug]?.[visaClassSlug] === undefined

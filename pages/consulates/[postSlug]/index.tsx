@@ -401,7 +401,6 @@ export default function ConsulateSelect({
           suspension === null || consulate.country === null
             ? undefined
             : {
-                entry: suspension,
                 country: consulate.country,
                 applicants: "immigrant visa",
               }

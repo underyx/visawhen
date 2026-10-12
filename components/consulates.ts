@@ -1,4 +1,6 @@
 import type { PostActivity } from "../api/consulates";
+import { formatMonthDay, signedChange } from "./dates";
+import { formatMonths } from "./visaBulletin";
 
 // Whole numbers up to 999, then thousands with up to one decimal: "462",
 // "1.5K", "57.8K".
@@ -587,6 +589,35 @@ export function formatIvMonth(month: string): string {
  * "Feb 2026". */
 export function formatShortIvMonth(month: string): string {
   return formatMonth(`${month}-01T00:00:00.000Z`);
+}
+
+/** A category's month in State's update before the newest: the update's
+ * date, "2026-04-02", and the month, "2025-12" */
+export interface PreviousMonth {
+  asOf: string;
+  cutoff: string;
+}
+
+/** What the update before said, as the line under an interview card box's
+ * month: "+2 months since Sep 23", "same as on Sep 23", "was current on Sep
+ * 23"; null when there was no previous month, or both are current. Signs
+ * and colours: signedChange in dates.ts. */
+export function previousLine(
+  cutoff: string,
+  current: boolean,
+  previous: PreviousMonth | null,
+): { text: string; color: string } | null {
+  if (previous === null) return null;
+  const since = formatMonthDay(previous.asOf);
+  const previousCurrent = monthsBehind(previous.asOf, previous.cutoff) <= 0;
+  // A fall from current is a move back, so red, but has no months to sign.
+  if (previousCurrent)
+    return current ? null : { text: `was current on ${since}`, color: "red.9" };
+  // Positive when the month moved forward: monthsBehind counts the months
+  // from its second argument to its first.
+  const moved = monthsBehind(cutoff, previous.cutoff);
+  if (moved === 0) return { text: `same as on ${since}`, color: "dimmed" };
+  return signedChange(moved, `${formatMonths(moved)} since ${since}`);
 }
 
 /** A post's interview month for its row in the consulate list: "Current"

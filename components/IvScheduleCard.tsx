@@ -13,13 +13,10 @@ import {
   IvPostElsewhere,
   IvSchedule,
   monthsBehind,
+  PreviousMonth,
+  previousLine,
 } from "./consulates";
-import {
-  daysBetween,
-  formatMonthDay,
-  formatShortDate,
-  useToday,
-} from "./Freshness";
+import { daysBetween, formatShortDate, useToday } from "./Freshness";
 import { AFRICA_HUBS_URL, EMBASSIES_URL, IV_POSTS_URL } from "./links";
 import MoreDetails from "./MoreDetails";
 import { hasEnded, overridesUpdate, PolicyEntry } from "./policy";
@@ -46,13 +43,6 @@ interface QueueSentence {
   after: string;
   /** Whether State lists the category as current: the month of its update */
   current: boolean;
-}
-
-/** A category's month in State's update before the newest: the update's
- * date, "2026-04-02", and the month, "2025-12" */
-interface PreviousMonth {
-  asOf: string;
-  cutoff: string;
 }
 
 /** What the update before said, as a sentence of its own: " In the previous
@@ -191,39 +181,6 @@ export function describeRelativeQueue(
   }`;
 }
 
-/** "2 months", "1 month" */
-function formatMonths(months: number): string {
-  return `${months} ${months === 1 ? "month" : "months"}`;
-}
-
-/** What the update before said, as the line under a box's month: "same as
- * on Sep 23", "+2 months since Sep 23", "was current on Sep 23"; null when
- * there was no previous month, or both are current. The month moving
- * forward, to a later month, is good news for those waiting, so it is
- * green, and moving back is red. That is the opposite of /nvc's days, where
- * + is more waiting and so red: do not "fix" one to match the other. */
-function previousLine(
-  cutoff: string,
-  current: boolean,
-  previous: PreviousMonth | null,
-): { text: string; color: string } | null {
-  if (previous === null) return null;
-  const since = formatMonthDay(previous.asOf);
-  const previousCurrent = monthsBehind(previous.asOf, previous.cutoff) <= 0;
-  if (previousCurrent)
-    return current ? null : { text: `was current on ${since}`, color: "red.9" };
-  // positive when the month moved forward: monthsBehind counts the months
-  // from its second date to its first
-  const moved = monthsBehind(cutoff, previous.cutoff);
-  if (moved === 0) return { text: `same as on ${since}`, color: "dimmed" };
-  return {
-    text: `${moved > 0 ? "+" : "−"}${formatMonths(
-      Math.abs(moved),
-    )} since ${since}`,
-    color: moved > 0 ? "teal.9" : "red.9",
-  };
-}
-
 interface BoxProps {
   label: string;
   asOf: string;
@@ -279,13 +236,13 @@ interface Props {
    * keep its <title> and meta description from calling the post current or
    * naming the tool's month. */
   scheduleOverride?: PolicyEntry;
-  /** The notice that suspends visas for the nationals of the country most
-   * of the page's applicants are nationals of (issuanceSuspensionFor() in
-   * policy.ts), with that country, "Cuba", and who the applicants are,
+  /** Where a notice suspends visas for the nationals of the country most of
+   * the page's applicants are nationals of (issuanceSuspensionFor() in
+   * policy.ts): that country, "Cuba", and who the applicants are,
    * "immigrant visa" or a class, "SQ". The card says under its months that
    * most applicants are affected, since NVC keeps scheduling their
    * interviews. */
-  suspension?: { entry: PolicyEntry; country: string; applicants: string };
+  suspension?: { country: string; applicants: string };
   /** How many family and employment immigrant visas, the classes the tool
    * covers, the post issued in the last 12 months of State's monthly
    * figures, from `from` to `to` ("2025-03-01T00:00:00.000Z"). Where that is
