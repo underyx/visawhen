@@ -22,7 +22,7 @@ export interface Case {
 }
 
 /** A category of the page, for the chip on who is in each */
-export interface CaseView {
+interface CaseView {
   /** "Immediate Relative", or "All categories" */
   name: string;
   /** Who is in the category, from the reports' footnotes

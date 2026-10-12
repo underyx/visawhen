@@ -19,12 +19,6 @@
   grid-column: 1 / -1;
 }
 
-/* The chip rows under the form (the policy news and the path's special
- * cases): a path with neither leaves no gap behind */
-.rows:empty {
-  display: none;
-}
-
 .steps {
   list-style: none;
   counter-reset: step;

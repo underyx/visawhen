@@ -1,4 +1,4 @@
-export interface RelatedLink {
+interface RelatedLink {
   href: string;
   text: string;
 }

@@ -65,7 +65,6 @@ import {
   MonthlyNumbers,
 } from "../../../components/monthlyNumbers";
 import MoreDetails from "../../../components/MoreDetails";
-import { policiesFor } from "../../../components/policy";
 import { PolicyNews } from "../../../components/PolicyBanner";
 import { breadcrumbList } from "../../../components/structuredData";
 import { ListRow, ListRows } from "../../../components/ListRow";
@@ -435,11 +434,6 @@ export default function UscisForm({
     premium,
     approvalNote: APPROVAL_NOTES[form],
   });
-  // The rows' Stack goes only where a row can show: the news row decides
-  // on the client, by today's date, so the file's entries for the page
-  // stand in for it (an empty Stack would still take the gap around it).
-  const hasRows =
-    cases.length > 0 || policiesFor({ page: `/uscis/${slug}` }).length > 0;
 
   return (
     <Stack gap="xl">
@@ -509,12 +503,10 @@ export default function UscisForm({
             <Anchor href={`#${MONTHS_ID}`}>see them month by month</Anchor>.
           </Text>
         )}
-        {hasRows && (
-          <Stack gap="xs">
-            <PolicyNews page={`/uscis/${slug}`} />
-            <UscisCases cases={cases} />
-          </Stack>
-        )}
+        <Stack gap="xs" className="vw-rows">
+          <PolicyNews page={`/uscis/${slug}`} />
+          <UscisCases cases={cases} />
+        </Stack>
         {related !== undefined && (
           <Text>
             {related.next !== undefined && (

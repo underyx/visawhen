@@ -62,7 +62,6 @@ import { OutcomesChart, WaitChart } from "../../../components/UscisChart";
 import UscisCases, { uscisCases } from "../../../components/UscisCases";
 import UscisStats, { RangeText } from "../../../components/UscisStats";
 import MoreDetails from "../../../components/MoreDetails";
-import { policiesFor } from "../../../components/policy";
 import { PolicyNews } from "../../../components/PolicyBanner";
 import { breadcrumbList } from "../../../components/structuredData";
 import TemporaryNotice from "../../../components/TemporaryNotice";
@@ -601,12 +600,6 @@ export default function UscisOffice({
     ),
     rarelyApproved: view.rarelyApproved,
   });
-  // The rows' Stack goes only where a row can show: the news row decides
-  // on the client, by today's date, so the file's entries for the form's
-  // page stand in for it (an empty Stack would still take the gap around
-  // it).
-  const hasRows =
-    cases.length > 0 || policiesFor({ page: `/uscis/${formSlug}` }).length > 0;
 
   return (
     <Stack gap="xl">
@@ -682,12 +675,10 @@ export default function UscisOffice({
           rarelyApproved={view.rarelyApproved}
         />
         {comparison !== null && <Text>{comparison}</Text>}
-        {hasRows && (
-          <Stack gap="xs">
-            <PolicyNews page={`/uscis/${formSlug}`} />
-            <UscisCases cases={cases} />
-          </Stack>
-        )}
+        <Stack gap="xs" className="vw-rows">
+          <PolicyNews page={`/uscis/${formSlug}`} />
+          <UscisCases cases={cases} />
+        </Stack>
         {/* The national range comes after the office's own figures, which
             the page is for; the warning that it may understate the wait
             stays an open slip under it */}

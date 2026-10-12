@@ -100,6 +100,13 @@ a.mantine-Anchor-root:hover {
   }
 }
 
+/* A Stack of chip rows (the news row and the special cases) whose rows all
+ * render nothing: the news row decides on the client, by today's date, and
+ * an empty Stack would still take the page's gap around it. */
+.vw-rows:empty {
+  display: none;
+}
+
 /* A notice is a slip on the page: a rule of ink down its left edge. The
  * yellow and orange ones are also highlighted (see the Alert theme). */
 .mantine-Alert-root {

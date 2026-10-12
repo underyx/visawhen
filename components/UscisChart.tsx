@@ -161,8 +161,6 @@ function formatCountTick(value: number): string {
   return numeral(value).format("0.[0]a");
 }
 
-/** The sentences under a chart on its breaks and marked points: those of the
- * breaks within the points, and what a diamond means when there is one. */
 /** What a chart's dashed lines and diamonds mean, one note each */
 function noteTexts(
   points: QuarterPoint[],
@@ -182,6 +180,8 @@ function noteTexts(
   ];
 }
 
+/** The sentences under a chart on its breaks and marked points: those of the
+ * breaks within the points, and what a diamond means when there is one. */
 function Notes({
   points,
   breaks,

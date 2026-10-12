@@ -573,7 +573,7 @@ export default function TimelinePage({ slug, data, year }: Props) {
           Bookmark this page to keep your answers.
         </Text>
       </form>
-      <Stack gap="xs" className={classes.rows}>
+      <Stack gap="xs" className="vw-rows">
         <PolicyNews page={`/timeline/${slug}`} />
         <TimelineCases cases={path.cases} data={data} />
       </Stack>
