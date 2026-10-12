@@ -10,6 +10,7 @@ import {
   formatMonthRange,
   formatMonthYear,
   formatShortDate,
+  signedChange,
 } from "./dates";
 
 /** A string with its non-breaking spaces made plain, for comparing */
@@ -79,5 +80,22 @@ describe("formatting", () => {
       "Apr – Sep 2027",
     );
     assert.equal(formatMonthRange("2027-04-01", "2027-04-30"), "Apr 2027");
+  });
+});
+
+describe("signedChange", () => {
+  it("signs forward teal and back red, with a real minus sign", () => {
+    assert.deepEqual(signedChange(2, "2 months"), {
+      text: "+2 months",
+      color: "teal.9",
+    });
+    assert.deepEqual(signedChange(-3, "3 months"), {
+      text: "\u22123 months",
+      color: "red.9",
+    });
+    assert.deepEqual(signedChange(0, "0 months"), {
+      text: "0 months",
+      color: "dimmed",
+    });
   });
 });

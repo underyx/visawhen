@@ -108,3 +108,22 @@ export function formatMonthRange(from: string, to: string): string {
     return `${monthOnlyFormatter.format(new Date(from))} – ${end}`;
   return `${start} – ${end}`;
 }
+
+/** A change in a cutoff date or an interview month, as the line under a
+ * figure (Stat): the signed text and its Mantine colour. A month or a date
+ * moving forward (later) is good news for those waiting, so "+2 months" is
+ * teal and "−3 months" red, with a real minus sign; no change is dimmed and
+ * unsigned. NVC's days are the opposite, since a longer time is worse
+ * (pages/nvc.tsx): neither is a mistake, so do not "fix" one to match the
+ * other. `amount` gives only the direction; `text` is the size without a
+ * sign, "2 months". */
+export function signedChange(
+  amount: number,
+  text: string,
+): { text: string; color: string } {
+  if (amount === 0) return { text, color: "dimmed" };
+  return {
+    text: `${amount > 0 ? "+" : "−"}${text}`,
+    color: amount > 0 ? "teal.9" : "red.9",
+  };
+}
