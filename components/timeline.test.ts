@@ -900,6 +900,24 @@ describe("cases", () => {
     assert.match(plain(caseNote(FIANCE.cases[0], DATA)), /6–11 months\.$/);
   });
 
+  it("leaves the figure out of a note when its range shows none", () => {
+    const [i751] = SPOUSE_ABROAD.cases;
+    const bare =
+      "Your green card is valid for 2 years. File the I-751 in the 90 days before it expires.";
+    const withRange = (fields: Partial<CategoryRange>) => ({
+      ...DATA,
+      ranges: {
+        ...DATA.ranges,
+        "I-751/all": { ...DATA.ranges["I-751/all"], ...fields },
+      },
+    });
+    assert.equal(
+      caseNote(i751, withRange({ suppressed: "too few decisions" })),
+      bare,
+    );
+    assert.equal(caseNote(i751, withRange({ priorityDate: true })), bare);
+  });
+
   it("names the I-751 among the forms a page needs ranges for", () => {
     assert.deepEqual(pathForms(SPOUSE_ABROAD), [
       { form: "I-130", category: "immediate-relative" },
