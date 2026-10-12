@@ -37,6 +37,10 @@ const OUTSIDE_EVENTS = ["click"];
 /** The phone layout, below Mantine's sm breakpoint (48em) */
 const PHONE = "(max-width: 47.99em)";
 
+/** Sent on the document when a note opens, with its id: every other open
+ * note closes, so that a pinned note and a hovered one never overlap */
+const OPEN_EVENT = "vw-note-open";
+
 interface NoteChipProps {
   /** The chip's text */
   label: string;
@@ -83,6 +87,20 @@ export function NoteChip({
     leaving.current = setTimeout(() => setHovered(false), LEAVE_MS);
   };
   useEffect(() => () => clearTimeout(leaving.current), []);
+  useEffect(() => {
+    if (opened)
+      document.dispatchEvent(new CustomEvent(OPEN_EVENT, { detail: id }));
+  }, [opened, id]);
+  useEffect(() => {
+    const onOpen = (event: Event) => {
+      if ((event as CustomEvent<string>).detail === id) return;
+      clearTimeout(leaving.current);
+      setPinned(false);
+      setHovered(false);
+    };
+    document.addEventListener(OPEN_EVENT, onOpen);
+    return () => document.removeEventListener(OPEN_EVENT, onOpen);
+  }, [id]);
   const onKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === "Escape") close();
   };
@@ -150,7 +168,9 @@ export function NoteChip({
 
   return (
     // withinPortal false: the note follows its chip in the page, so that
-    // the Tab key reaches what is in it
+    // the Tab key reaches what is in it. hideDetached false: Mantine hides
+    // a note whose chip has scrolled out of view, and a long news note
+    // could then never be read to its end, nor its links reached with Tab.
     <Popover
       opened={opened}
       onDismiss={close}
@@ -158,19 +178,30 @@ export function NoteChip({
       withArrow
       shadow="md"
       withinPortal={false}
+      hideDetached={false}
       clickOutsideEvents={OUTSIDE_EVENTS}
       classNames={{ dropdown: classes.note }}
     >
       <Popover.Target>{chip}</Popover.Target>
-      <Popover.Dropdown onPointerEnter={enter} onPointerLeave={leave}>
-        {title === undefined ? (
-          children
-        ) : (
-          <Stack gap="xs">
-            <Text fw={700}>{title}</Text>
-            {children}
-          </Stack>
-        )}
+      {/* A titled note is named by its title, not by its chip's label:
+          "Document review has stalled", not "stalled" */}
+      <Popover.Dropdown
+        onPointerEnter={enter}
+        onPointerLeave={leave}
+        aria-labelledby={title === undefined ? undefined : `${id}-title`}
+      >
+        <div className={classes.noteBody}>
+          {title === undefined ? (
+            children
+          ) : (
+            <Stack gap="xs">
+              <Text id={`${id}-title`} fw={700}>
+                {title}
+              </Text>
+              {children}
+            </Stack>
+          )}
+        </div>
       </Popover.Dropdown>
     </Popover>
   );
