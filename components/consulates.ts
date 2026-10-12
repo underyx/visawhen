@@ -620,15 +620,41 @@ export function previousLine(
   return signedChange(moved, `${formatMonths(moved)} since ${since}`);
 }
 
-/** A post's interview month for its row in the consulate list: "Current"
- * when the tool's month is the update's own month or later, as the post
- * pages read the tool, else the month, "Mar 2026"; "no month" where the
- * tool lists the post with N/A (null) or does not list it at all
- * (undefined). */
-export function ivMonthBadge(
-  asOf: string,
-  month: string | null | undefined,
-): string {
-  if (month === null || month === undefined) return "no month";
-  return monthsBehind(asOf, month) <= 0 ? "Current" : formatShortIvMonth(month);
+/** What a post's row in the consulate list shows at its right: a badge, and
+ * under it a small line, the post's visas per month ("rate") or "few
+ * immigrant visas" ("few"). The badge must agree with what the post's own
+ * page leads with: "See notice" where a notice means the tool's months are
+ * no queue (`overridden`: scheduleOverrideFor() in policy.ts, decided as the
+ * page decides its title); "Not listed" where the tool does not list the
+ * post (`month` undefined); "No month given" where it lists it with N/A
+ * (null), as the card says; else the post's month for spouses, children and
+ * parents of US citizens, "Mar 2026", or "Current" for the update's own
+ * month or later. A current post that issued fewer than FEW_IMMIGRANT_VISAS
+ * of the tool's classes in the last 12 months of the data (`toolIssued`,
+ * countToolClassIssuances) has that as its page's title, so here its
+ * "Current" is quiet and its line says why. */
+export function postListBadge({
+  asOf,
+  month,
+  overridden,
+  toolIssued,
+}: {
+  /** The date of State's newest update, "2026-10-07" */
+  asOf: string;
+  month: string | null | undefined;
+  overridden: boolean;
+  toolIssued: number;
+}): { badge: string; quiet: boolean; line: "rate" | "few" } {
+  const plain = (badge: string) => ({
+    badge,
+    quiet: false,
+    line: "rate" as const,
+  });
+  if (overridden) return plain("See notice");
+  if (month === undefined) return plain("Not listed");
+  if (month === null) return plain("No month given");
+  if (monthsBehind(asOf, month) > 0) return plain(formatShortIvMonth(month));
+  if (toolIssued < FEW_IMMIGRANT_VISAS)
+    return { badge: "Current", quiet: true, line: "few" };
+  return plain("Current");
 }

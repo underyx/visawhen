@@ -1,11 +1,13 @@
 import { readFile } from "fs/promises";
+import { groupBy, mapValues } from "lodash";
 import { join } from "path";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
-import type {
-  IvCategory,
-  IvSchedule,
-  IvScheduleLine,
+import {
+  countToolClassIssuances,
+  type IvCategory,
+  type IvSchedule,
+  type IvScheduleLine,
 } from "../components/consulates";
 
 const dataDir = join(process.cwd(), "data");
@@ -230,6 +232,29 @@ export async function getRecentIssuancesByClass(
     postSlug,
     from,
   );
+}
+
+/** Each post's family and employment immigrant visas, the classes State's
+ * IV Scheduling Status Tool covers, issued in the last 12 months of the
+ * data, by post slug: the count each post's own page uses (see
+ * countToolClassIssuances). */
+export async function getRecentToolIssuancesByPost(): Promise<
+  Record<string, number>
+> {
+  const db = await openDb();
+  const { from } = await getStoredRecentWindow();
+  const rows = await db.all<
+    { postSlug: string; visaClassSlug: string; issuances: number }[]
+  >(
+    `
+    SELECT "Post Slug" AS postSlug, "Visa Class Slug" AS visaClassSlug, SUM("Issuances") AS issuances
+    FROM backlogs
+    WHERE "Month" >= ?
+    GROUP BY 1, 2
+  `,
+    from,
+  );
+  return mapValues(groupBy(rows, "postSlug"), countToolClassIssuances);
 }
 
 export interface PostActivity {
