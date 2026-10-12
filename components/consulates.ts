@@ -501,13 +501,15 @@ export const IV_CATEGORY_BY_CLASS: Partial<Record<string, IvCategory>> =
   );
 
 // One short sentence each, for a line under a class page's issuance boxes.
-const K_NOTE = "State publishes no interview-scheduling data for K visas.";
-const DV_NOTE = "State’s scheduling tool does not cover diversity visas.";
+const K_NOTE =
+  "The State Department publishes no interview-scheduling data for K visas.";
+const DV_NOTE =
+  "The State Department’s scheduling tool does not cover diversity visas.";
 
 // The tool's page lists the visa categories it covers: immediate relatives,
 // family preference, and EB-1, EB-2, EB-3 and EB-5. These are not among them.
 function notListedNote(cases: string): string {
-  return `State’s scheduling tool does not list ${cases}.`;
+  return `The State Department’s scheduling tool does not list ${cases}.`;
 }
 const ADOPTION_NOTE = notListedNote("adoption cases");
 const WIDOW_NOTE = notListedNote(

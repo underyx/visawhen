@@ -254,7 +254,7 @@ function noneLine(
   };
 }
 
-/** The visas a month for the "A month" box, to the list badges' precision:
+/** The visas a month for the "Per month" box, to the list badges' precision:
  * "124", "0.4" */
 function formatRate(rate: number): string {
   return rate < 9.95 ? rate.toFixed(1) : formatCount(rate);
@@ -569,7 +569,7 @@ export default function ConsulateStats({
         />
         {recent.last12 > 0 && (
           <Stat
-            label="A month"
+            label="Per month"
             value={formatRate(recent.last12 / 12)}
             line={null}
           />

@@ -5,11 +5,12 @@ import { ChipRow, NoteChip } from "./NoteChip";
 
 // Who a post's interview months are for: a chip for each kind of case the
 // months do not cover, or that needs more, which opens a note saying so.
-// Only on a post's own page: each class page is one case. Four chips pack
-// into three lines of a 360px phone after "Special cases:", and the "Dual
-// nationals" exception comes first, only while the page says that most of
-// the post's applicants' visas are suspended. Family preference and
-// employment share a chip: as two, the row took a fourth line.
+// Only on a post's own page: each class page is one case. After "Special
+// cases:", the four chips, or five with the "Dual nationals" exception
+// first (only while the page says that most of the post's applicants' visas
+// are suspended), pack into two lines (60px) of a 360px phone. Family
+// preference and employment share the short "Priority date" chip: under a
+// label naming both, the five chips took three lines.
 
 interface Props {
   /** "london" */
@@ -39,18 +40,20 @@ export default function ConsulateAudience({
           </Text>
         </NoteChip>
       )}
-      <NoteChip label="Family preference and employment">
+      <NoteChip label="Priority date">
         <Text size="sm">
-          You also need a current priority date in the{" "}
+          Family preference (F1&ndash;F4) and employment (EB) cases also need a
+          current priority date in the{" "}
           <Anchor component={Link} href="/visa-bulletin">
             Visa Bulletin
           </Anchor>{" "}
-          before NVC schedules your interview.
+          before NVC schedules the interview.
         </Text>
       </NoteChip>
       <NoteChip label="K visas">
         <Text size="sm">
-          State publishes no interview-scheduling data for K visas.
+          The State Department publishes no interview-scheduling data for K
+          visas.
           {hasK1Page && (
             <>
               {" "}
@@ -67,14 +70,15 @@ export default function ConsulateAudience({
       </NoteChip>
       <NoteChip label="Diversity visas">
         <Text size="sm">
-          State&rsquo;s scheduling tool does not cover diversity visas.
+          The State Department&rsquo;s scheduling tool does not cover diversity
+          visas.
         </Text>
       </NoteChip>
       <NoteChip label="Other classes">
         <Text size="sm">
           Adoptions, widows and widowers, VAWA self-petitioners, returning
-          residents, special immigrants and Amerasians are not in State&rsquo;s
-          tool.
+          residents, special immigrants and Amerasians are not in the State
+          Department&rsquo;s tool.
         </Text>
       </NoteChip>
     </ChipRow>

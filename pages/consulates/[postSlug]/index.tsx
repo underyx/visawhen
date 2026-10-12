@@ -445,7 +445,7 @@ export default function ConsulateSelect({
         />
       </div>
       <Text size="xs" c="dimmed">
-        Badges: visas issued a month, {formatMonth(recentWindow.from)} &ndash;{" "}
+        Badges: visas issued per month, {formatMonth(recentWindow.from)} &ndash;{" "}
         {formatMonth(recentWindow.to)}.
       </Text>
       {issuedVisas.length > 0 && (
