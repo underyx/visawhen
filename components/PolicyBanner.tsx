@@ -118,7 +118,7 @@ function EntryDetails({
           <EntryBody entry={entry} />
         </>
       ) : (
-        <MoreDetails>
+        <MoreDetails name={`Details: ${entry.title}`}>
           <EntryBody entry={entry} />
         </MoreDetails>
       )}

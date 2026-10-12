@@ -285,7 +285,9 @@ export function ElsewhereNote({
           ))}
           , not {postName}.
         </Text>
-        <MoreDetails>
+        <MoreDetails
+          name={`Details: where applicants from ${country} are sent`}
+        >
           <Text size="sm">
             Its{" "}
             <Anchor

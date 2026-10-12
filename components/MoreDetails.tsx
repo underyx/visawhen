@@ -9,8 +9,16 @@ import React from "react";
 
 export default function MoreDetails({
   label = "Details",
+  name,
   children,
-}: React.PropsWithChildren<{ label?: string }>) {
+}: React.PropsWithChildren<{
+  label?: string;
+  /** The toggle's name for screen readers, where several on one page share
+   * the visible label: "Details: Visa services paused at this embassy". It
+   * starts with the label, so a visitor who says the label to voice control
+   * still finds it. */
+  name?: string;
+}>) {
   return (
     <details>
       <Text
@@ -18,6 +26,7 @@ export default function MoreDetails({
         size="sm"
         fw={600}
         style={{ cursor: "pointer" }}
+        aria-label={name}
       >
         {label}
       </Text>
