@@ -31,6 +31,7 @@ import {
   formatMonth,
   formatMonthlyRate,
   formatShortIvMonth,
+  IV_CATEGORIES,
   IV_POSTS_ELSEWHERE,
   IvSchedule,
   monthsBehind,
@@ -246,6 +247,12 @@ export default function ConsulateSelect({
   const overridden =
     scheduleOverride !== null &&
     overridesUpdate(scheduleOverride, ivScheduleAsOf, today);
+  // Whether the card shows months, which the subtitle dates: decided on the
+  // override as the title is, so the two never disagree.
+  const showsMonths =
+    scheduleOverride === null &&
+    ivSchedule !== null &&
+    IV_CATEGORIES.some((category) => ivSchedule[category] !== null);
   const recentToolIssued = countToolClassIssuances(recentIssuances);
   const issuedDescription = `How many visas ${postName} issued every month ${
     availableVisaClasses.length === 1
@@ -363,16 +370,17 @@ export default function ConsulateSelect({
         <Title order={1}>{postName}</Title>
         {/* The country alone: its other names (POST_COUNTRIES) are for the
             list's search box. The data's date goes here, not in the card
-            (Bence: numbers first, the date once). */}
+            (Bence: numbers first, the date once), and only while the card
+            shows months. */}
         <Text size="lg">
           {consulate.country !== null && `${consulate.country}. `}
-          {ivSchedule === null ? (
-            <>Visas issued, in the State Department&rsquo;s own figures.</>
-          ) : (
+          {showsMonths ? (
             <>
               Interview months from the State Department&rsquo;s update of{" "}
               {formatDate(ivScheduleAsOf)}.
             </>
+          ) : (
+            <>Visas issued, in the State Department&rsquo;s own figures.</>
           )}
         </Text>
       </Box>
