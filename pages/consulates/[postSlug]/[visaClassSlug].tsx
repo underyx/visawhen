@@ -33,9 +33,15 @@ import {
   IvSchedule,
   NVC_NONIMMIGRANT_CLASSES,
 } from "../../../components/consulates";
-import IvScheduleCard from "../../../components/IvScheduleCard";
-import PolicyBanner from "../../../components/PolicyBanner";
+import IvScheduleCard, {
+  ElsewhereNote,
+  showsSuspension,
+  SuspensionNote,
+} from "../../../components/IvScheduleCard";
+import { PolicyNews, PolicyNotices } from "../../../components/PolicyBanner";
+import { Stat, Stats } from "../../../components/Stats";
 import { breadcrumbList } from "../../../components/structuredData";
+import TemporaryNotice from "../../../components/TemporaryNotice";
 import {
   issuanceSuspensionFor,
   scheduleOverrideFor,
@@ -196,20 +202,62 @@ const MIN_COMPARABLE = 50;
 /** Changes within this many percent count as about the same. */
 const SAME_PERCENT = 10;
 
-/** How the last 12 months compare with the 12 before: "up 143% from the 12
- * months before", "about the same as the year before", "compared with 3 in
- * the 12 months before". */
-function comparison(last12: number, prev12: number, period: string): string {
-  if (prev12 === 0) return `compared with none in ${period}`;
+/** How the last 12 months compare with the 12 before, as the line under
+ * the visas-issued box: "up 143% from the year before" in green, "down 44%
+ * from the year before" in red, "about the same as the year before",
+ * "compared with 3 the year before" where a percentage would be noise. */
+function comparison(
+  last12: number,
+  prev12: number,
+): { text: string; color: string } {
+  if (prev12 === 0) return { text: "none the year before", color: "dimmed" };
   if (prev12 < MIN_COMPARABLE)
-    return `compared with ${formatCount(prev12)} in ${period}`;
+    return {
+      text: `compared with ${formatCount(prev12)} the year before`,
+      color: "dimmed",
+    };
   const percent = Math.round((last12 / prev12 - 1) * 100);
-  if (Math.abs(percent) <= SAME_PERCENT) return `about the same as ${period}`;
-  if (percent > 0) return `up ${formatCount(percent)}% from ${period}`;
+  if (Math.abs(percent) <= SAME_PERCENT)
+    return { text: "about the same as the year before", color: "dimmed" };
+  if (percent > 0)
+    return {
+      text: `up ${formatCount(percent)}% from the year before`,
+      color: "teal.9",
+    };
   // Only reached when some were issued, so it never went down all the way.
-  return percent <= -100
-    ? `down more than 99% from ${period}`
-    : `down ${formatCount(-percent)}% from ${period}`;
+  return {
+    text:
+      percent <= -100
+        ? "down more than 99% from the year before"
+        : `down ${formatCount(-percent)}% from the year before`,
+    color: "red.9",
+  };
+}
+
+/** The line under a visas-issued box that says 0: what was issued instead,
+ * "2 the year before" (in red where that was a real number), "none since
+ * Mar 2019", or "none in the data" */
+function noneLine(
+  prev12: number,
+  lastIssuedMonth: string | null,
+): { text: string; color: string } {
+  if (prev12 > 0)
+    return {
+      text: `${formatCount(prev12)} the year before`,
+      color: prev12 >= MIN_COMPARABLE ? "red.9" : "dimmed",
+    };
+  if (lastIssuedMonth === null)
+    return { text: "none in the data", color: "dimmed" };
+  return {
+    text: `none since ${formatMonth(lastIssuedMonth)}`,
+    color: "dimmed",
+  };
+}
+
+/** The visas a month for the "Per month" box, to the list badges' precision:
+ * "124", "0.4" */
+function formatRate(rate: number): string {
+  return rate < 9.95 ? rate.toFixed(1) : formatCount(rate);
 }
 
 function visas(count: number): string {
@@ -256,10 +304,13 @@ function newestMonths(to: string, short: boolean): string {
 
 /** When the newest RECENT_MONTHS months fall far below the months before
  * them, which the 12-month figures hide, a sentence that says so for the
- * page ("But it issued only 1 in January and February 2026, against about
- * 139 a month from March to December 2025.") and one for the meta
- * description; otherwise null. */
-function describeDrop({ from, to, newest, rest }: Recent): {
+ * page's slip under its boxes ("Havana issued only 1 in January and
+ * February 2026, against about 139 a month from March to December 2025.")
+ * and one for the meta description; otherwise null. */
+function describeDrop(
+  postName: string,
+  { from, to, newest, rest }: Recent,
+): {
   sentence: string;
   meta: string;
 } | null {
@@ -272,7 +323,7 @@ function describeDrop({ from, to, newest, rest }: Recent): {
     return null;
   const issued = newest === 0 ? "none" : `only ${formatCount(newest)}`;
   return {
-    sentence: `But it issued ${issued} in ${newestMonths(
+    sentence: `${postName} issued ${issued} in ${newestMonths(
       to,
       false,
     )}, against about ${formatCount(restRate)} a month from ${monthPair(
@@ -287,7 +338,9 @@ function describeDrop({ from, to, newest, rest }: Recent): {
   };
 }
 
-/** The paragraph on the page, and the start of its meta description */
+/** The start of the page's meta description: "London issued 1,484 CR1/IR1
+ * visas (Spouse of U.S. citizen) from Mar 2025 to Feb 2026, about the same
+ * as the year before." */
 function summarize(
   recent: Recent,
   firstMonth: string,
@@ -295,60 +348,34 @@ function summarize(
   postName: string,
   visaClassName: string,
   visaClassDescription: string | null,
-): { summary: string; metaSummary: string } {
+): string {
   const { last12, prev12, from, to } = recent;
   const range = `from ${formatMonth(from)} to ${formatMonth(to)}`;
   const described =
     visaClassDescription === null ? "" : ` (${visaClassDescription})`;
 
   if (last12 > 0) {
-    const issued = `${formatCount(last12)} ${visaClassName} ${visas(last12)}`;
-    const monthly =
-      last12 >= 12 ? `, about ${formatCount(last12 / 12)} a month` : "";
-    const drop = describeDrop(recent);
-    return {
-      summary: `From ${formatMonth(from)} to ${formatMonth(
-        to,
-      )}, ${postName} issued ${issued}${monthly}, ${comparison(
-        last12,
-        prev12,
-        "the 12 months before",
-      )}.${drop === null ? "" : ` ${drop.sentence}`}`,
-      metaSummary: `${postName} issued ${issued}${described} ${range}, ${comparison(
-        last12,
-        prev12,
-        "the year before",
-      )}.${drop === null ? "" : ` ${drop.meta}`}`,
-    };
+    const drop = describeDrop(postName, recent);
+    return `${postName} issued ${formatCount(last12)} ${visaClassName} ${visas(
+      last12,
+    )}${described} ${range}, ${comparison(last12, prev12).text}.${
+      drop === null ? "" : ` ${drop.meta}`
+    }`;
   }
 
   if (prev12 > 0)
-    return {
-      summary: `${postName} issued no ${visaClassName} visas ${range} (${formatCount(
-        prev12,
-      )} in the 12 months before).`,
-      metaSummary: `${postName} issued no ${visaClassName} visas${described} ${range}, compared with ${formatCount(
-        prev12,
-      )} in the year before.`,
-    };
+    return `${postName} issued no ${visaClassName} visas${described} ${range}, compared with ${formatCount(
+      prev12,
+    )} in the year before.`;
 
   if (lastIssuedMonth === null)
-    return {
-      summary: `${postName} issued no ${visaClassName} visas from ${formatLongMonth(
-        firstMonth,
-      )}, when this data starts, to ${formatLongMonth(to)}.`,
-      metaSummary: `${postName} issued no ${visaClassName} visas${described} from ${formatMonth(
-        firstMonth,
-      )} to ${formatMonth(to)}.`,
-    };
+    return `${postName} issued no ${visaClassName} visas${described} from ${formatMonth(
+      firstMonth,
+    )} to ${formatMonth(to)}.`;
 
-  const twoYears = `in the two years to ${formatLongMonth(to)}`;
-  return {
-    summary: `${postName} issued no ${visaClassName} visas ${twoYears}. The last month it issued any was ${formatLongMonth(
-      lastIssuedMonth,
-    )}.`,
-    metaSummary: `${postName} issued no ${visaClassName} visas${described} ${twoYears}.`,
-  };
+  return `${postName} issued no ${visaClassName} visas${described} in the two years to ${formatLongMonth(
+    to,
+  )}.`;
 }
 
 export default function ConsulateStats({
@@ -370,7 +397,7 @@ export default function ConsulateStats({
   country,
 }: Props) {
   const firstMonth = issuances[0].month;
-  const { summary, metaSummary } = summarize(
+  const metaSummary = summarize(
     recent,
     firstMonth,
     lastIssuedMonth,
@@ -378,6 +405,13 @@ export default function ConsulateStats({
     visaClassName,
     visaClassDescription,
   );
+  // The visas-issued box's line, and the drop in the newest months that
+  // the 12-month figures hide, if there is one
+  const issuedLine =
+    recent.last12 > 0
+      ? comparison(recent.last12, recent.prev12)
+      : noneLine(recent.prev12, lastIssuedMonth);
+  const drop = recent.last12 > 0 ? describeDrop(postName, recent) : null;
   const title = `${postName} ${visaClassName} visas issued, through ${formatMonth(
     recent.to,
   )}`;
@@ -391,9 +425,10 @@ export default function ConsulateStats({
   // numbers, and the sitemap leaves them out (next-sitemap.config.js).
   // Visitors still reach them from the post's page.
   const noindex = recent.last12 === 0 && recent.prev12 === 0;
-  // The interview queue for the classes State's scheduling tool covers, and
-  // a note for the other classes that go through NVC (the other immigrant
-  // classes and the K visas); other nonimmigrant classes get neither.
+  // The interview card for the classes State's scheduling tool covers, and
+  // a line under the figures for the other classes that go through NVC (the
+  // other immigrant classes and the K visas); other nonimmigrant classes get
+  // neither.
   const ivCategory = IV_CATEGORY_BY_CLASS[visaClassSlug];
   const classNote = CLASS_NOTES[visaClassSlug];
   const today = useToday();
@@ -403,9 +438,23 @@ export default function ConsulateStats({
     country,
     nonimmigrant: visaType === "NIV",
   };
-  // Only on immigrant classes: the K visas, which also show the card, are
+  const elsewhere = IV_POSTS_ELSEWHERE[postSlug];
+  // Only on immigrant classes: the K visas, which also go through NVC, are
   // nonimmigrant visas, which some suspensions do not cover.
-  const suspension = visaType === "IV" ? issuanceSuspensionFor(country) : null;
+  const suspension =
+    visaType === "IV" && country !== null
+      ? issuanceSuspensionFor(country, today)
+      : null;
+  const suspensionProps =
+    suspension === null || country === null
+      ? undefined
+      : {
+          country,
+          applicants:
+            CLASS_APPLICANT_COUNTRIES[postSlug]?.[visaClassSlug] === undefined
+              ? "immigrant visa"
+              : visaClassName,
+        };
 
   return (
     <Stack>
@@ -476,20 +525,20 @@ export default function ConsulateStats({
           {inactivity}
         </Alert>
       )}
-      <PolicyBanner
+      <PolicyNotices
         consulate={consulate}
         immigrant={
           visaType === "IV" || NVC_NONIMMIGRANT_CLASSES.includes(visaClassSlug)
         }
       />
-      {(ivCategory !== undefined || classNote !== undefined) && (
+      {ivCategory !== undefined && (
         <IvScheduleCard
           postName={postName}
           asOf={ivScheduleAsOf}
           schedule={ivSchedule}
           source={ivScheduleSource}
           first={ivCategory}
-          note={classNote}
+          visaClassName={visaClassName}
           scheduleOverride={
             scheduleOverrideFor(postSlug, ivScheduleAsOf, today) ?? undefined
           }
@@ -498,30 +547,65 @@ export default function ConsulateStats({
             from: recent.from,
             to: recent.to,
           }}
-          elsewhere={IV_POSTS_ELSEWHERE[postSlug]}
+          elsewhere={elsewhere}
           inactive={inactivity !== null}
-          suspension={
-            suspension === null || country === null
-              ? undefined
-              : {
-                  entry: suspension,
-                  country,
-                  applicants:
-                    CLASS_APPLICANT_COUNTRIES[postSlug]?.[visaClassSlug] ===
-                    undefined
-                      ? "immigrant visa"
-                      : visaClassName,
-                }
-          }
+          suspension={suspensionProps}
         />
       )}
-      <Text>{summary}</Text>
-      <Text size="sm" c="dimmed">
-        This counts visas issued, which shows how busy the post is, not how long
-        you will wait. The State Department data here ends in{" "}
-        {formatLongMonth(recent.to)}, so it cannot show what has changed since
-        then, such as pauses that started or ended later.
+      {/* The class's own figures as boxes (Bence: numbers first; on a K
+          page this is the first number), with a month's rate beside the
+          year's count while there is one */}
+      <Stats
+        columns={recent.last12 > 0 ? 2 : 1}
+        phoneColumns={recent.last12 > 0 ? 2 : 1}
+      >
+        <Stat
+          label={`Visas issued, ${formatMonth(recent.from)} – ${formatMonth(
+            recent.to,
+          )}`}
+          value={formatCount(recent.last12)}
+          line={issuedLine.text}
+          lineColor={issuedLine.color}
+        />
+        {recent.last12 > 0 && (
+          <Stat
+            label="Per month"
+            value={formatRate(recent.last12 / 12)}
+            line={null}
+          />
+        )}
+      </Stats>
+      {drop !== null && <TemporaryNotice>{drop.sentence}</TemporaryNotice>}
+      {/* A class the tool does not cover says so in one line, with the
+          slips the card would have shown (Bence: the figures first, no card
+          for a note that the months do not apply) */}
+      {classNote !== undefined && <Text size="sm">{classNote}</Text>}
+      <Text size="xs" c="dimmed">
+        Visas issued show how busy the post is, not how long you will wait.
       </Text>
+      {classNote !== undefined && elsewhere !== undefined && (
+        <ElsewhereNote postName={postName} elsewhere={elsewhere} />
+      )}
+      {classNote !== undefined &&
+        suspensionProps !== undefined &&
+        showsSuspension({
+          schedule: ivSchedule,
+          inactive: inactivity !== null,
+          elsewhere,
+        }) && (
+          <SuspensionNote
+            postName={postName}
+            suspension={suspensionProps}
+            classPage
+          />
+        )}
+      {/* The news comes after the figures, as on /nvc (Bence) */}
+      <PolicyNews
+        consulate={consulate}
+        immigrant={
+          visaType === "IV" || NVC_NONIMMIGRANT_CLASSES.includes(visaClassSlug)
+        }
+      />
       <ConsulateChart
         issuances={issuances}
         visaType={visaType}

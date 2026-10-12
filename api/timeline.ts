@@ -2,7 +2,6 @@ import type { Form, Period, UscisData } from "./uscis";
 import {
   getActiveOffices,
   getData as getUscisData,
-  latestQuarter,
   newestQuarter,
 } from "./uscis";
 import type { NvcSeries } from "./nvc";
@@ -35,6 +34,7 @@ import {
 import {
   AREAS,
   CATEGORIES,
+  cutoffChange,
   getMovement,
   getSeries,
   newestMonth,
@@ -47,6 +47,7 @@ import type {
   PostQueue,
   TimelineData,
 } from "../components/timeline";
+import { pathForms } from "../components/timeline";
 
 // The data a timeline page is built with, at build time: only what its
 // path's steps need, from the same files and by the same rules as the
@@ -169,9 +170,19 @@ async function bulletinOptions(
       const series = getSeries(data, "finalAction", category.key, area.key);
       const final = newest.finalAction[category.key]?.[area.key];
       if (final === undefined || series.length === 0) continue;
+      // a line the Dates for Filing chart leaves out takes its Final Action
+      // Date, which has no change of its own to show under it
+      const filing = newest.datesForFiling[category.key]?.[area.key];
       cells[category.key][area.key] = {
         final,
-        filing: newest.datesForFiling[category.key]?.[area.key] ?? final,
+        filing: filing ?? final,
+        finalChange: cutoffChange(series),
+        filingChange:
+          filing === undefined
+            ? null
+            : cutoffChange(
+                getSeries(data, "datesForFiling", category.key, area.key),
+              ),
         year: getMovement(series, 12),
         fiveYears: getMovement(series, 60),
       };
@@ -203,17 +214,15 @@ function getUscis(): Promise<UscisData> {
   return uscisPromise;
 }
 
-/** The ranges of the USCIS steps of a path, by "form/category" */
+/** The ranges of the USCIS forms a path's page shows (its steps' and its
+ * cases'), by "form/category" */
 function pathRanges(uscis: UscisData, path: PathSpec): TimelineData["ranges"] {
   const ranges: TimelineData["ranges"] = {};
-  for (const stage of path.stages) {
-    if (stage.kind !== "uscis") continue;
-    const form = uscis.forms.find((candidate) => candidate.form === stage.form);
+  for (const { form: formName, category } of pathForms(path)) {
+    const form = uscis.forms.find((candidate) => candidate.form === formName);
     if (form === undefined) continue;
-    const range = categoryRanges(form).find(
-      ({ key }) => key === stage.category,
-    );
-    if (range !== undefined) ranges[`${stage.form}/${stage.category}`] = range;
+    const range = categoryRanges(form).find(({ key }) => key === category);
+    if (range !== undefined) ranges[`${formName}/${category}`] = range;
   }
   return ranges;
 }
@@ -243,7 +252,6 @@ export async function getPathSummaryData(
     posts: null,
     ivAsOf: null,
     offices: null,
-    officeQuarter: null,
     bulletin: null,
   };
 }
@@ -259,11 +267,6 @@ export async function getTimelineData(path: PathSpec): Promise<TimelineData> {
     path.officeForm === undefined
       ? undefined
       : uscis.forms.find(({ form }) => form === path.officeForm?.form);
-  const officeQuarter =
-    officeForm === undefined ? null : latestQuarter(officeForm.officeTotals);
-  const officePeriod = uscis.periods.find(
-    ({ quarter }) => quarter === officeQuarter,
-  );
   const priorityDate = path.stages.find(
     (stage) => stage.kind === "priority-date",
   );
@@ -279,8 +282,6 @@ export async function getTimelineData(path: PathSpec): Promise<TimelineData> {
       officeForm === undefined || path.officeForm === undefined
         ? null
         : officeOptions(uscis.periods, officeForm, path.officeForm.category),
-    officeQuarter:
-      officePeriod === undefined ? null : quarterLabel(officePeriod),
     bulletin:
       priorityDate !== undefined && priorityDate.kind === "priority-date"
         ? await bulletinOptions(priorityDate.categories)

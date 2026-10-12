@@ -194,15 +194,9 @@ export default function NvcChart({ id, series }: Props) {
         )}
       </Plot>
       <figcaption>
-        Source: <a href={NVC_TIMEFRAMES_URL}>NVC Timeframes page</a>
-        .<br />
-        The weekly readings are stored in a{" "}
-        <a href="https://github.com/underyx/visawhen/blob/main/data/nvc/data.json">
-          JSON file on GitHub
-        </a>
-        . Breaks in the line are stretches of several weeks with no readings;
-        where a week or two is missing, the line joins the readings on either
-        side.
+        Source: <a href={NVC_TIMEFRAMES_URL}>NVC Timeframes page</a>. Breaks in
+        the line are stretches of several weeks with no readings; where a week
+        or two is missing, the line joins the readings on either side.
       </figcaption>
     </Paper>
   );

@@ -19,7 +19,6 @@ import {
   formatPercent,
   formatPointChange,
   formViews,
-  highlight,
   lastMedianLabel,
   medianBreaks,
   officeCategoryCounts,
@@ -461,111 +460,6 @@ describe("stalled and comparable quarters", () => {
   });
 });
 
-describe("highlight", () => {
-  const before = point({
-    quarter: "Jan–Mar 2026",
-    pending: 1000,
-    received: 350,
-    approved: 300,
-    flow: "consistent",
-  });
-  const now = point({
-    quarter: "Apr–Jun 2026",
-    pending: 1120,
-    received: 350,
-    approved: 300,
-    flow: "consistent",
-  });
-
-  it("says how the pile and the time to clear it changed", () => {
-    assert.equal(
-      highlight([before, now], "USCIS", "I-130 applications"),
-      "The pile of pending I-130 applications at USCIS grew 12% to 1,120 in Apr–Jun 2026. At that quarter's pace of decisions, clearing it would take 11 months, up from 10 months.",
-    );
-    assert.equal(
-      highlight(
-        [before, { ...now, pending: 1000, waitMonths: 10 }],
-        "USCIS",
-        "I-130 applications",
-      ),
-      "The pile of pending I-130 applications at USCIS stayed at 1,000 in Apr–Jun 2026. At that quarter's pace of decisions, clearing it would take 10 months, the same as the quarter before.",
-    );
-    assert.equal(
-      highlight([before, now], "USCIS", "I-130 applications", null, "month"),
-      "The pile of pending I-130 applications at USCIS grew 12% to 1,120 in Apr–Jun 2026. At that month's pace of decisions, clearing it would take 11 months, up from 10 months.",
-    );
-  });
-
-  it("says when USCIS moved cases, and when the change is unexplained", () => {
-    assert.equal(
-      highlight(
-        [before, now],
-        "the Baltimore office",
-        "I-130 applications",
-        "in",
-      ),
-      "The pile of pending I-130 applications at the Baltimore office grew 12% to 1,120 in Apr–Jun 2026 as USCIS moved or routed cases here from elsewhere. At that quarter's pace of decisions, clearing it, cases moved or routed in included, would take 11 months; the quarter before is not comparable.",
-    );
-    assert.equal(
-      highlight(
-        [before, { ...now, flow: "inconsistent" }],
-        "USCIS",
-        "I-130 applications",
-      ),
-      "The count of pending I-130 applications at USCIS went from 1,000 to 1,120 in Apr–Jun 2026 (+12%), but that quarter's filings minus its decisions come to +50, which doesn't account for the change, so we don't read it as USCIS catching up or falling behind. At that quarter's pace of decisions, clearing it would take 11 months.",
-    );
-  });
-
-  it("gives the counts themselves for a small pile, and the first quarter alone", () => {
-    assert.equal(
-      highlight(
-        [
-          point({ quarter: "Q1", pending: 15, approved: 300 }),
-          point({ quarter: "Q2", pending: 129, approved: 300 }),
-        ],
-        "Christiansted",
-        "I-130 applications",
-      ),
-      "The pile of pending I-130 applications at Christiansted went from 15 to 129 in Q2. At that quarter's pace of decisions, clearing it would take 1.3 months, up from 0.1 months.",
-    );
-    assert.equal(
-      highlight(
-        [point({ quarter: "Q1", pending: 1000, approved: 300 })],
-        "USCIS",
-        "I-130 applications",
-      ),
-      "The pile of pending I-130 applications at USCIS stood at 1,000 in Q1. At that quarter's pace of decisions, clearing it would take 10 months.",
-    );
-    assert.equal(highlight([], "USCIS", "I-130 applications"), "");
-  });
-
-  it("falls back to the decisions when there is no pending count", () => {
-    assert.equal(
-      highlight(
-        [
-          point({
-            quarter: "Q1",
-            pending: null,
-            approved: 300,
-            approximate: true,
-          }),
-        ],
-        "USCIS",
-        "I-130 applications",
-      ),
-      "USCIS decided about 300 I-130 applications in Q1; it did not publish how many were pending.",
-    );
-    assert.equal(
-      highlight(
-        [point({ quarter: "Q1", pending: null, approved: 300 })],
-        "the Boston office",
-        "N-400 applications",
-      ),
-      "USCIS decided 300 N-400 applications at the Boston office in Q1; it did not publish how many were pending.",
-    );
-  });
-});
-
 describe("category names", () => {
   it("come from the row's title, or the pages' own names", () => {
     const i130 = { form: "I-130", title: "Petition for Alien Relative" };
@@ -680,6 +574,17 @@ describe("the median lines of a chart", () => {
         text: "From Jul–Sep 2025, USCIS gives the I-765 numbers by category; before, it gave them only for all categories together.",
       },
     ]);
+    // a category whose quarters before the split are the per-office
+    // report's national totals says so
+    assert.equal(
+      medianBreaks(
+        points.map((point, index) =>
+          index < 2 ? { ...point, fromOfficeReport: true } : point,
+        ),
+        i765,
+      )[0].text,
+      "From Jul–Sep 2025, USCIS gives the I-765 numbers by category; before, it gave them only for all categories together. A category’s earlier quarters here are added up from USCIS’s report by office.",
+    );
     const n400 = form("N-400", {
       "2025-Q1": [
         variant("civilian", { processingTime: 5 }),

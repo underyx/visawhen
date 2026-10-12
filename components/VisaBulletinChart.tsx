@@ -33,8 +33,6 @@ import {
 interface Props {
   /** The category's cutoffs in the area, per chart */
   series: Record<ChartKey, Series>;
-  /** The data file on GitHub */
-  dataUrl: string;
   /** What the chart is of, for screen readers: "F4, Philippines" */
   label: string;
 }
@@ -108,7 +106,7 @@ function describe(label: string, series: Series): string {
   )}. Final Action Dates in the last 6 bulletins: ${recent}.`;
 }
 
-export default function VisaBulletinChart({ series, dataUrl, label }: Props) {
+export default function VisaBulletinChart({ series, label }: Props) {
   const [boxRef, width] = useChartWidth();
   // every bulletin at first, which fits: about 12 a year since October 2015
   const [range, setRange] = useState(1);
@@ -248,10 +246,8 @@ export default function VisaBulletinChart({ series, dataUrl, label }: Props) {
       </Plot>
       <figcaption>
         Source: the State Department&rsquo;s{" "}
-        <a href={VISA_BULLETIN_URL}>monthly Visa Bulletins</a>. Each line shows
-        the cutoff date in each month&rsquo;s bulletin. There is a gap where the
-        category was current (no cutoff) or unavailable. All the bulletins since
-        October 2015 are in a <a href={dataUrl}>JSON file on GitHub</a>.
+        <a href={VISA_BULLETIN_URL}>monthly Visa Bulletins</a>. A gap is a month
+        the category was current or unavailable.
       </figcaption>
     </Paper>
   );

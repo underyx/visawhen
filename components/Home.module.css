@@ -1,5 +1,7 @@
+/* No padding above: the H1 sits where every other page's does under the
+ * header, so that the first path's figures come as high as they can */
 .hero {
-  padding-block: var(--mantine-spacing-lg) var(--mantine-spacing-md);
+  padding-block: 0 var(--mantine-spacing-md);
   max-width: 44rem;
 }
 

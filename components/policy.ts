@@ -1,12 +1,17 @@
 import policyData from "../data/policy.json";
+import { daysBetween } from "./dates";
+import { AREAS, CATEGORIES, pagePath } from "./visaBulletin";
 
-// The policy notices shown on the consulate and NVC pages, from
-// data/policy.json. Delays now come mostly from policy (posts that paused or
+// The policy notices shown on the consulate pages and on the pages
+// POLICY_PAGES lists, from data/policy.json. Delays now come mostly from policy (posts that paused or
 // moved their visa services, nationalities whose visas are suspended), and
 // the scheduling and issuance data cannot be read without them. Each entry is
 // written by hand from its sources and re-checked about weekly; the pages say
-// when it was last checked, and drop it 60 days after it ends (see
-// PolicyBanner.tsx).
+// when it was last checked, drop it 60 days after it ends, and drop a live
+// one once nobody has re-checked it for UNCHECKED_DAYS (isUnchecked). A consulate
+// page shows the few entries its interview card cannot be read without open,
+// above the card, and every other entry as a chip in a "Recent news:" row
+// (see PolicyBanner.tsx).
 //
 // The pages look their entries up while rendering instead of taking them as
 // props, so the file ships in the pages' scripts (a chunk the consulate pages
@@ -24,18 +29,19 @@ export interface PolicySource {
 
 /** Which pages an entry shows on */
 export interface PolicyScope {
-  /** Post slugs, "kampala": shown expanded on the post's own pages */
+  /** Post slugs, "kampala": shown open, above the interview card, on the
+   * post's own pages */
   posts?: string[];
   /** Countries, as the consulate pages name them without the part in
    * parentheses ("Cuba", "Burma", "Côte d'Ivoire"; see applicantCountry() in
    * consulates.ts): the entry is about their nationals, who make up most of
-   * the immigrant visa applicants at the posts in them, and it is shown
-   * expanded on those posts' pages (on their visa class pages, only for the
-   * classes `countryVisas` says it covers). List only countries the site has a post
-   * in: the build warns about the others. */
+   * the immigrant visa applicants at the posts in them, and it comes first in
+   * the news row on those posts' pages (on their visa class pages, only for
+   * the classes `countryVisas` says it covers). List only countries the site
+   * has a post in: the build warns about the others. */
   countries?: string[];
-  /** Shown, collapsed with the other site-wide entries, on every post's page
-   * and its visa class pages */
+  /** Shown on every post's page and its visa class pages: as a chip in the
+   * news row, or open above the interview card when it `overridesSchedule` */
   allConsulatePages?: boolean;
   /** Post slugs, "budapest", whose pages an `allConsulatePages` entry is not
    * shown on, such as posts a worldwide pause is reported not to apply to */
@@ -44,14 +50,16 @@ export interface PolicyScope {
    * classes only for some of them: which classes, per group of those
    * countries. A country in no group is covered for every class. On a visa
    * class page the class does not cover, the entry is not about the page's
-   * country (see namesPost): it is shown collapsed there, if at all. A
-   * post's own page covers every class, so it is about it there. */
+   * country (see namesPost): if it is shown there at all, it does not come
+   * first in the news row. A post's own page covers every class, so it is
+   * about it there. */
   countryVisas?: CountryVisas[];
   /** Visa class slugs, "dv": of the consulate pages the rest of the scope
-   * names, the entry is shown, expanded, only on these classes' pages, and
-   * not on a post's own page, which covers every class */
+   * names, the entry is shown only on these classes' pages, first in their
+   * news row, and not on a post's own page, which covers every class */
   visaClasses?: string[];
-  /** Other pages by path, "/nvc", where it is shown collapsed too */
+  /** Other pages by path, "/nvc", whose news row shows it too (one of
+   * POLICY_PAGES) */
   pages?: string[];
   /** About immigrant visas only: not shown on the pages of nonimmigrant visa
    * classes that do not go through NVC (a post's own page covers every
@@ -87,11 +95,11 @@ export interface PolicyEntry {
    * new paragraph. */
   body: string;
   scope: PolicyScope;
-  /** Whether it is shown expanded on every page it is shown on but the
-   * nonimmigrant classes' (the K visas' among them), rather than collapsed
-   * with the other site-wide entries: for an entry without which the
-   * interview-scheduling card cannot be read anywhere, such as a worldwide
-   * pause of immigrant visa interviews */
+  /** Whether its chip comes first in a consulate page's "Recent news:" row,
+   * after the entries that name the page: for an entry every post's
+   * visitors should read before the rest, such as a worldwide delay of
+   * immigrant visa interviews. The other pages' rows keep the file's order.
+   * (Open above the interview card is a matter of scope: see staysOpen.) */
   expanded?: boolean;
   /** Whether State's IV Scheduling Status Tool month is no queue at the
    * entry's posts while it lasts, e.g. because they schedule no interviews.
@@ -116,9 +124,23 @@ export interface PolicyEntry {
 /** Every entry in the file, in its order */
 export const POLICY_ENTRIES = policyData.entries as PolicyEntry[];
 
-/** The pages other than the consulate pages that show notices, the only
- * values `scope.pages` may take (the build checks it, see api/policy.ts) */
-export const POLICY_PAGES = ["/nvc", "/uscis/i-485"];
+/** The pages other than the consulate pages that show a news row, the only
+ * values `scope.pages` may take (the build checks it, see api/policy.ts).
+ * The timeline paths are spelled out: timeline.ts imports this module. */
+export const POLICY_PAGES = [
+  "/nvc",
+  "/uscis/i-485",
+  "/timeline/spouse-abroad",
+  "/timeline/spouse-in-us",
+  "/timeline/fiance",
+  "/timeline/citizenship",
+  "/timeline/employment",
+  "/timeline/other-family",
+  "/timeline/temporary",
+  ...CATEGORIES.flatMap((category) =>
+    AREAS.map((area) => pagePath(category, area)),
+  ),
+];
 
 /** A consulate page an entry may be shown on: a post's own page, or one of
  * its visa class pages */
@@ -194,15 +216,17 @@ function appliesToPage(entry: PolicyEntry, page: ConsulatePage): boolean {
   );
 }
 
-/** Whether an entry is about a consulate page in particular, and so is shown
- * expanded on it: one that names its post, the country its applicants are
- * nationals of or its visa class, or that is `expanded`, unless the page is
- * a nonimmigrant class's. Entries that reach a page otherwise are shown
- * collapsed. */
-export function isAboutPage(entry: PolicyEntry, page: ConsulatePage): boolean {
+/** Whether an entry that is shown on a consulate page stays open above its
+ * interview card, rather than being a chip in the news row under it: one
+ * that names the page's post, or that overrides State's schedule at every
+ * post, since the card cannot be read without either (IvScheduleCard names
+ * the overriding one: "See … above"). An entry about the applicants'
+ * nationality is a chip: the card itself says that most applicants' visas
+ * are suspended. */
+export function staysOpen(entry: PolicyEntry, page: ConsulatePage): boolean {
   return (
-    (entry.expanded === true && page.nonimmigrant !== true) ||
-    namesPage(entry, page)
+    (entry.scope.posts?.includes(page.postSlug) ?? false) ||
+    (entry.overridesSchedule === true && coversAllPosts(entry, page.postSlug))
   );
 }
 
@@ -242,9 +266,11 @@ export function policiesFor(
  * the country most of a page's immigrant visa applicants are nationals of,
  * if one does:
  * one that has started and not ended by the day it was last checked, which
- * the prerendered page can say (see hasStarted and hasEnded). */
+ * the prerendered page can say (see hasStarted and hasEnded), and that
+ * someone has re-checked lately by `today`, on the client (isUnchecked). */
 export function issuanceSuspensionFor(
   country: string | null,
+  today: string | null = null,
   entries: PolicyEntry[] = POLICY_ENTRIES,
 ): PolicyEntry | null {
   if (country === null) return null;
@@ -255,7 +281,8 @@ export function issuanceSuspensionFor(
         (entry.scope.countries?.includes(country) ?? false) &&
         (countryVisasFor(entry, country)?.immigrant ?? true) &&
         hasStarted(entry, null) &&
-        !hasEnded(entry, null),
+        !hasEnded(entry, null) &&
+        !isUnchecked(entry, today),
     ) ?? null
   );
 }
@@ -281,6 +308,26 @@ export function hasEnded(entry: PolicyEntry, today: string | null): boolean {
   );
 }
 
+/** An entry nobody has re-checked against its sources for this many days is
+ * dropped from the site, and applied nowhere, until someone checks it again
+ * (Bence): a notice that may be out of date is worse than none, and the
+ * weekly re-check keeps the live ones under it. The build warns a week
+ * ahead (see api/policy.ts). */
+export const UNCHECKED_DAYS = 29;
+
+/** Whether an entry has gone unchecked too long (UNCHECKED_DAYS) by `today`,
+ * which only the client knows: the prerendered page, served for weeks,
+ * cannot tell, so it keeps every entry and the client drops the stale ones.
+ * An entry that has ended cannot go out of date (its end is a fact), so it
+ * stays until 60 days after its end, as the pages keep ended entries. */
+export function isUnchecked(entry: PolicyEntry, today: string | null): boolean {
+  return (
+    today !== null &&
+    !hasEnded(entry, today) &&
+    daysBetween(entry.lastChecked, today) >= UNCHECKED_DAYS
+  );
+}
+
 /** Whether State's tool update of `asOf` still has to be ignored under an
  * entry: while the entry applies (on the client, until `today` reaches its
  * end), and after it ends for as long as the newest update predates the end,
@@ -298,7 +345,8 @@ export function overridesUpdate(
  * several apply (Juba is both paused and moved to a hub), the one that lasts
  * longest wins, so the card does not start showing a queue when the shorter
  * one ends. An entry counts from its start, by `today` on the client and by
- * the day it was last checked while prerendering (`today` null). The
+ * the day it was last checked while prerendering (`today` null), and not
+ * once nobody has re-checked it for UNCHECKED_DAYS, by `today`. The
  * prerendered page cannot know today's date, so an entry due to end later
  * counts there; IvScheduleCard re-checks that on the client. */
 export function scheduleOverrideFor(
@@ -316,6 +364,7 @@ export function scheduleOverrideFor(
           (coversAllPosts(entry, postSlug) ||
             (entry.scope.posts?.includes(postSlug) ?? false)) &&
           hasStarted(entry, today) &&
+          !isUnchecked(entry, today) &&
           overridesUpdate(entry, asOf, null),
       )
       .sort((a, b) => lastsUntil(b).localeCompare(lastsUntil(a)))[0] ?? null

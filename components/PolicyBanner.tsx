@@ -1,5 +1,4 @@
 import {
-  Accordion,
   Alert,
   Anchor,
   Badge,
@@ -7,28 +6,32 @@ import {
   Group,
   Stack,
   Text,
-  Title,
 } from "@mantine/core";
 import { sortBy } from "lodash";
 import React from "react";
 import { daysBetween, formatShortDate, useToday } from "./Freshness";
-import classes from "./PolicyBanner.module.css";
 import MoreDetails from "./MoreDetails";
 import { ChipRow, NoteChip } from "./NoteChip";
 import {
   ConsulatePage,
   hasEnded,
   hasStarted,
-  isAboutPage,
+  isUnchecked,
   namesPage,
   PolicyEntry,
   policiesFor,
+  staysOpen,
 } from "./policy";
+
+// The policy entries of data/policy.json on a page, in two parts, so that a
+// consulate page can keep its own notices above the interview card and the
+// news row below it: PolicyNotices, the few entries without which the card
+// cannot be read, open; and PolicyNews, every other entry as a chip in a
+// "Recent news:" row that opens it as a note, as /nvc has had since Bence
+// chose that over a collapsed accordion (the numbers come first).
 
 /** How long an entry stays up after it ends */
 const SHOW_ENDED_DAYS = 60;
-/** An entry last checked longer ago than this says it may be out of date. */
-const MAX_UNCHECKED_DAYS = 30;
 
 /** Whether an entry ended so long ago that it is no longer shown: by today
  * on the client, and by the day it was last checked while prerendering. */
@@ -36,6 +39,33 @@ function hasExpired(entry: PolicyEntry, today: string | null): boolean {
   return (
     entry.end !== null &&
     daysBetween(entry.end, today ?? entry.lastChecked) > SHOW_ENDED_DAYS
+  );
+}
+
+/** An entry's body, its sources and the day it was last checked */
+function EntryBody({ entry }: { entry: PolicyEntry }) {
+  return (
+    <>
+      {/* A blank line in the body starts a new paragraph. */}
+      {entry.body.split("\n\n").map((paragraph) => (
+        <Text key={paragraph} size="sm">
+          {paragraph}
+        </Text>
+      ))}
+      <Text size="sm">
+        {entry.sources.length === 1 ? "Source" : "Sources"}:{" "}
+        {entry.sources.map((source, index) => (
+          <React.Fragment key={source.url}>
+            {index > 0 && "; "}
+            <Anchor href={source.url} target="_blank" rel="noopener noreferrer">
+              {source.label}
+            </Anchor>
+          </React.Fragment>
+        ))}
+        .
+      </Text>
+      <Text size="sm">Last checked {formatShortDate(entry.lastChecked)}.</Text>
+    </>
   );
 }
 
@@ -53,9 +83,6 @@ function EntryDetails({
   today: string | null;
   open?: boolean;
 }) {
-  const unchecked =
-    today !== null &&
-    daysBetween(entry.lastChecked, today) > MAX_UNCHECKED_DAYS;
   // The badges wrap instead of cutting their text short on narrow screens,
   // their lines starting on the left like the text under them.
   const badgeProps = {
@@ -69,7 +96,7 @@ function EntryDetails({
   // violet, which is 7.1:1 on the highlighter yellow of an official notice.
   return (
     <Stack gap="xs">
-      {(entry.status === "reported" || entry.end !== null || unchecked) && (
+      {(entry.status === "reported" || entry.end !== null) && (
         <Group gap="xs">
           {entry.status === "reported" && (
             <Badge {...badgeProps} variant="filled" color="ink">
@@ -82,92 +109,17 @@ function EntryDetails({
               {formatShortDate(entry.end)}
             </Badge>
           )}
-          {unchecked && (
-            <Badge {...badgeProps} variant="default">
-              May be out of date
-            </Badge>
-          )}
         </Group>
       )}
       <Text size="sm">{entry.summary}</Text>
       {open ? (
         <>
           <Divider />
-          {/* A blank line in the body starts a new paragraph. */}
-          {entry.body.split("\n\n").map((paragraph) => (
-            <Text key={paragraph} size="sm">
-              {paragraph}
-            </Text>
-          ))}
-          <Text size="sm">
-            {entry.sources.length === 1 ? "Source" : "Sources"}:{" "}
-            {entry.sources.map((source, index) => (
-              <React.Fragment key={source.url}>
-                {index > 0 && "; "}
-                <Anchor
-                  href={source.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {source.label}
-                </Anchor>
-              </React.Fragment>
-            ))}
-            .
-          </Text>
-          <Text size="sm">
-            Last checked {formatShortDate(entry.lastChecked)}
-            {unchecked ? (
-              <>
-                ;{" "}
-                <Text span inherit fw={700}>
-                  this may be out of date
-                </Text>
-                .
-              </>
-            ) : (
-              "."
-            )}
-          </Text>
+          <EntryBody entry={entry} />
         </>
       ) : (
-        <MoreDetails>
-          {/* A blank line in the body starts a new paragraph. */}
-          {entry.body.split("\n\n").map((paragraph) => (
-            <Text key={paragraph} size="sm">
-              {paragraph}
-            </Text>
-          ))}
-          <Text size="sm">
-            {entry.sources.length === 1 ? "Source" : "Sources"}:{" "}
-            {entry.sources.map((source, index) => (
-              <React.Fragment key={source.url}>
-                {index > 0 && "; "}
-                <Anchor
-                  href={source.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {source.label}
-                </Anchor>
-              </React.Fragment>
-            ))}
-            .
-          </Text>
-          <Text size="sm">
-            Last checked {formatShortDate(entry.lastChecked)}
-            {unchecked ? (
-              <>
-                ;{" "}
-                <Text span inherit fw={700}>
-                  this may be out of date
-                </Text>
-                .
-              </>
-            ) : (
-              "."
-            )}
-          </Text>
+        <MoreDetails name={`Details: ${entry.title}`}>
+          <EntryBody entry={entry} />
         </MoreDetails>
       )}
     </Stack>
@@ -190,68 +142,33 @@ interface OtherPageProps {
   immigrant?: undefined;
 }
 
-type Props = (ConsulatePageProps | OtherPageProps) & {
-  /** Whether to show every entry, the ones marked `expanded` too, as a chip
-   * in a "Recent news:" row that opens the entry as a note: for a page whose
-   * own numbers can be read without them, such as /nvc, where the notices
-   * are about the interview that comes after NVC, and the numbers come
-   * first */
-  chips?: boolean;
-};
+type Props = ConsulatePageProps | OtherPageProps;
 
-/** The policies that affect a page's visas, from data/policy.json: those
- * about the page in particular (its post, the nationality of most of its
- * applicants or its visa class) or marked `expanded` open, and the rest,
- * such as those about every post, in one collapsed section that lists their
- * titles, so that thousands of pages do not open with the same banners; or,
- * with `chips`, all of them as a row of chips. */
-export default function PolicyBanner({
-  consulate,
-  immigrant,
-  page,
-  chips = false,
-}: Props) {
+/** The entries a page shows now, and today's date, which decides it. */
+function useShownEntries({ consulate, immigrant, page }: Props) {
   // The prerendered page is served for weeks, so which entries have started,
   // have expired or have gone unchecked too long is decided on the client
   // only.
   const today = useToday();
   const shown = policiesFor({ consulate, page, immigrant }).filter(
-    (entry) => hasStarted(entry, today) && !hasExpired(entry, today),
+    (entry) =>
+      hasStarted(entry, today) &&
+      !hasExpired(entry, today) &&
+      !isUnchecked(entry, today),
   );
-  // The entries about the page in particular, such as a suspension for most
-  // of its applicants' nationality, come before the ones expanded
-  // everywhere.
-  const expandedEntries = chips
-    ? []
-    : sortBy(
-        shown.filter((entry) =>
-          consulate === undefined
-            ? entry.expanded === true
-            : isAboutPage(entry, consulate),
-        ),
-        (entry) =>
-          consulate !== undefined && namesPage(entry, consulate) ? 0 : 1,
-      );
-  const otherEntries = shown.filter(
-    (entry) => !expandedEntries.includes(entry),
-  );
+  return { today, shown };
+}
 
-  if (chips)
-    return (
-      shown.length > 0 && (
-        <ChipRow lead="Recent news:">
-          {shown.map((entry) => (
-            <NoteChip key={entry.id} label={entry.label}>
-              <EntryDetails entry={entry} today={today} open />
-            </NoteChip>
-          ))}
-        </ChipRow>
-      )
-    );
-
+/** The notices a consulate page's interview card cannot be read without
+ * (staysOpen), open, above the card: a pause at the post itself, or a pause
+ * at every post. The other pages have none: their news row says it all. */
+export function PolicyNotices(props: ConsulatePageProps) {
+  const { today, shown } = useShownEntries(props);
+  const notices = shown.filter((entry) => staysOpen(entry, props.consulate));
+  if (notices.length === 0) return null;
   return (
     <>
-      {expandedEntries.map((entry) => (
+      {notices.map((entry) => (
         // role="region", labelled by the title: a standing notice, which
         // screen readers should not announce on load as they do Mantine's
         // default role="alert"
@@ -265,42 +182,35 @@ export default function PolicyBanner({
           <EntryDetails entry={entry} today={today} />
         </Alert>
       ))}
-      {otherEntries.length > 0 && (
-        // keepMounted={false}: the collapsed entries stay out of the HTML of
-        // every page until someone opens them.
-        <Accordion
-          variant="contained"
-          order={2}
-          keepMounted={false}
-          classNames={{ item: classes.item, label: classes.label }}
-        >
-          <Accordion.Item value="policies">
-            {/* The titles are listed under the label, so that what the
-            entries are about shows without opening them, set like a
-            notice's title and text. Spans: the control is a button. */}
-            <Accordion.Control>
-              <Text span display="block" size="sm" fw={700}>
-                {`Policy changes that may affect your visa (${otherEntries.length})`}
-              </Text>
-              <Text span display="block" size="sm">
-                {otherEntries.map((entry) => entry.title).join("; ")}
-              </Text>
-            </Accordion.Control>
-            <Accordion.Panel>
-              <Stack gap="lg">
-                {otherEntries.map((entry) => (
-                  <Stack key={entry.id} gap="xs">
-                    <Title order={3} size="h5">
-                      {entry.title}
-                    </Title>
-                    <EntryDetails entry={entry} today={today} />
-                  </Stack>
-                ))}
-              </Stack>
-            </Accordion.Panel>
-          </Accordion.Item>
-        </Accordion>
-      )}
     </>
+  );
+}
+
+/** The page's other entries, each a chip labelled by `entry.label` in a
+ * "Recent news:" row, which opens the entry as a note, or nothing when
+ * there is none. On a consulate page the entries that name the page (its
+ * post, the country of most of its applicants or its visa class) come
+ * first, then the `expanded` ones, then the rest; on any other page the
+ * row keeps the file's order. */
+export function PolicyNews(props: Props) {
+  const { today, shown } = useShownEntries(props);
+  const { consulate } = props;
+  const news =
+    consulate === undefined
+      ? shown
+      : sortBy(
+          shown.filter((entry) => !staysOpen(entry, consulate)),
+          (entry) =>
+            namesPage(entry, consulate) ? 0 : entry.expanded === true ? 1 : 2,
+        );
+  if (news.length === 0) return null;
+  return (
+    <ChipRow lead="Recent news:">
+      {news.map((entry) => (
+        <NoteChip key={entry.id} label={entry.label}>
+          <EntryDetails entry={entry} today={today} open />
+        </NoteChip>
+      ))}
+    </ChipRow>
   );
 }

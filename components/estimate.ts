@@ -122,23 +122,22 @@ export const PRIORITY_DATE_CUTOFFS: Record<string, string> = {
   employment: "/visa-bulletin#employment",
 };
 
-/** What the "If you file today" table says instead of a range for a
- * priority-date category, per form and category, given USCIS's median for
- * those it decided (formatMedian). USCIS does decide many of these each
- * quarter (7,951 I-130 preference petitions approved and 8,883 denied in
- * Apr-Jun 2026), so the text must not say they wait unapproved; the point
- * is that USCIS's decision is not the end of the wait. */
-export const PRIORITY_DATE_TEXT: Record<
-  string,
-  Record<string, (median: string) => string>
-> = {
+/** What a priority-date category's wait is, per form and category of
+ * PRIORITY_DATE_CATEGORIES, for the timeline's USCIS step (uscisStage in
+ * timeline.ts, under its headline with the median) and the "Priority date"
+ * chip of the USCIS pages (uscisCases in UscisCases.tsx). USCIS does decide
+ * many of these each quarter (7,951 I-130 preference petitions approved and
+ * 8,883 denied in Apr-Jun 2026), so the text must not say they wait
+ * unapproved; the point is that USCIS's decision is not the end of the
+ * wait. */
+export const PRIORITY_DATE_TEXT: Record<string, Record<string, string>> = {
   "I-130": {
-    "all-other-relative": (median) =>
-      `USCIS's median for the ones it decided was ${median}, but approval is only the first step: when your relative can immigrate depends on the priority date:`,
+    "all-other-relative":
+      "USCIS’s approval is only the first step. When your relative can immigrate depends on the priority date.",
   },
   "I-485": {
-    employment: (median) =>
-      `USCIS's median for the ones it decided was ${median}, but it can approve one only once the priority date is current, so how long yours takes depends on your priority date:`,
+    employment:
+      "USCIS can approve the I-485 only once your priority date is current, so your wait depends on it. USCIS’s median counts only cases whose dates were already current.",
   },
 };
 
@@ -447,8 +446,8 @@ export function clearingSuppressed(point: QuarterPoint): string | null {
 }
 
 /** The points with no time to clear the backlog for the quarters where
- * clearingSuppressed says it would mislead, so the charts, the cards and the
- * highlight all leave the same quarters out. */
+ * clearingSuppressed says it would mislead, so the charts and the cards
+ * leave the same quarters out. */
 export function withoutMisleadingClearing(
   points: QuarterPoint[],
 ): QuarterPoint[] {

@@ -1,4 +1,11 @@
-import { CloseButton, Group, Popover, Stack, Text } from "@mantine/core";
+import {
+  CloseButton,
+  getDefaultZIndex,
+  Group,
+  Popover,
+  Stack,
+  Text,
+} from "@mantine/core";
 import { useClickOutside, useMediaQuery } from "@mantine/hooks";
 import React, { useEffect, useId, useRef, useState } from "react";
 import classes from "./NoteChip.module.css";
@@ -9,6 +16,22 @@ import classes from "./NoteChip.module.css";
 // click elsewhere or Escape, and it can hold links. On a phone it is a
 // panel across the bottom of the screen with a close button, which stays
 // while the page scrolls behind it, so a long note can be read.
+//
+// The site's conventions for chips and notes (Bence's, from the pass that
+// moved the pages' asides into chips):
+// - A plain chip, for a piece of news or a special case, has no icon.
+// - A warning about our own reading of the numbers (a queue that has
+//   stalled, USCIS deciding fewer cases, old data, an interview month not
+//   moving) is a chip with tone="warning", icon={<WarningIcon />} and a
+//   title, as /nvc's "stalled" chip is. It carries a TemporaryNotice's
+//   meaning without its hourglass; TemporaryNotice stays for open slips
+//   that qualify a figure they sit under.
+// - A row's lead is "Recent news:" or "Special cases:", and nothing else.
+//   The rows go in a <Stack gap="xs">, news first.
+// - A note's content is <Text size="sm">, or a Stack of them with gap
+//   "xs". A note never holds a MoreDetails toggle: the visitor has already
+//   asked for it, so details go under a <Divider />. MoreDetails stays for
+//   toggles in the page body.
 
 /** How long a note stays open after the mouse leaves its chip, so that it
  * can be moved onto the note itself */
@@ -20,6 +43,10 @@ const OUTSIDE_EVENTS = ["click"];
 
 /** The phone layout, below Mantine's sm breakpoint (48em) */
 const PHONE = "(max-width: 47.99em)";
+
+/** Sent on the document when a note opens, with its id: every other open
+ * note closes, so that a pinned note and a hovered one never overlap */
+const OPEN_EVENT = "vw-note-open";
 
 interface NoteChipProps {
   /** The chip's text */
@@ -67,6 +94,20 @@ export function NoteChip({
     leaving.current = setTimeout(() => setHovered(false), LEAVE_MS);
   };
   useEffect(() => () => clearTimeout(leaving.current), []);
+  useEffect(() => {
+    if (opened)
+      document.dispatchEvent(new CustomEvent(OPEN_EVENT, { detail: id }));
+  }, [opened, id]);
+  useEffect(() => {
+    const onOpen = (event: Event) => {
+      if ((event as CustomEvent<string>).detail === id) return;
+      clearTimeout(leaving.current);
+      setPinned(false);
+      setHovered(false);
+    };
+    document.addEventListener(OPEN_EVENT, onOpen);
+    return () => document.removeEventListener(OPEN_EVENT, onOpen);
+  }, [id]);
   const onKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === "Escape") close();
   };
@@ -83,7 +124,13 @@ export function NoteChip({
       type="button"
       className={classes.chip}
       data-tone={tone}
-      onClick={() => (opened ? close() : setPinned(true))}
+      // A click pins a note that hovering opened, so that it stays when the
+      // mouse goes to read it, and closes only a pinned one.
+      onClick={() => {
+        clearTimeout(leaving.current);
+        if (pinned) close();
+        else setPinned(true);
+      }}
       onPointerEnter={enter}
       onPointerLeave={leave}
       onKeyDown={onKeyDown}
@@ -134,7 +181,11 @@ export function NoteChip({
 
   return (
     // withinPortal false: the note follows its chip in the page, so that
-    // the Tab key reaches what is in it
+    // the Tab key reaches what is in it. hideDetached false: Mantine hides
+    // a note whose chip has scrolled out of view, and a long news note
+    // could then never be read to its end, nor its links reached with Tab.
+    // zIndex just under the header's: a pinned note that scrolls up with the
+    // page goes under the site header, not over it.
     <Popover
       opened={opened}
       onDismiss={close}
@@ -142,19 +193,31 @@ export function NoteChip({
       withArrow
       shadow="md"
       withinPortal={false}
+      hideDetached={false}
+      zIndex={getDefaultZIndex("app") - 1}
       clickOutsideEvents={OUTSIDE_EVENTS}
       classNames={{ dropdown: classes.note }}
     >
       <Popover.Target>{chip}</Popover.Target>
-      <Popover.Dropdown onPointerEnter={enter} onPointerLeave={leave}>
-        {title === undefined ? (
-          children
-        ) : (
-          <Stack gap="xs">
-            <Text fw={700}>{title}</Text>
-            {children}
-          </Stack>
-        )}
+      {/* A titled note is named by its title, not by its chip's label:
+          "Document review has stalled", not "stalled" */}
+      <Popover.Dropdown
+        onPointerEnter={enter}
+        onPointerLeave={leave}
+        aria-labelledby={title === undefined ? undefined : `${id}-title`}
+      >
+        <div className={classes.noteBody}>
+          {title === undefined ? (
+            children
+          ) : (
+            <Stack gap="xs">
+              <Text id={`${id}-title`} fw={700}>
+                {title}
+              </Text>
+              {children}
+            </Stack>
+          )}
+        </div>
       </Popover.Dropdown>
     </Popover>
   );

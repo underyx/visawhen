@@ -136,7 +136,7 @@
       "scope": {
         "allConsulatePages": true,
         "exceptPosts": ["budapest", "krakow", "warsaw"],
-        "pages": ["/nvc"],
+        "pages": ["/nvc", "/timeline/spouse-abroad", "/timeline/other-family"],
         "immigrantVisasOnly": true
       },
       "expanded": true,
@@ -263,7 +263,7 @@
             "nonimmigrantClasses": []
           }
         ],
-        "pages": ["/nvc"]
+        "pages": ["/nvc", "/timeline/spouse-abroad", "/timeline/other-family"]
       },
       "suspendsIssuance": true,
       "start": "2026-01-01",
@@ -323,11 +323,15 @@
     {
       "id": "india-eb-2-limit-fy2026",
       "status": "official",
-      "title": "No EB-2 visas for India until October 1",
-      "label": "No EB-2 for India",
-      "summary": "This year's EB-2 visas for India are all used up, so embassies and consulates may not issue them until October 1, 2026, when the yearly limits start again.",
-      "body": "The State Department has issued all the EB-2 immigrant visas available in fiscal year 2026 (October 2025 to September 2026) to applicants chargeable to India, which in most cases means people born in India. So embassies and consulates may not issue these visas for the rest of the fiscal year. The annual limits reset on October 1, 2026, when they may start issuing them again to qualified applicants.",
-      "scope": { "countries": ["India"], "visaClasses": ["eb-2"] },
+      "title": "The limit on EB-2 visas for India has ended",
+      "label": "India EB-2 limit ended",
+      "summary": "From May 22 to September 30, 2026, embassies and consulates could not issue EB-2 visas to people born in India, because that year’s visas were used up. The yearly limits started again on October 1, 2026.",
+      "body": "By May 22, 2026, the State Department had issued all the EB-2 immigrant visas available in fiscal year 2026 (October 2025 to September 2026) to applicants chargeable to India, which in most cases means people born in India. So embassies and consulates could not issue these visas for the rest of that fiscal year. The annual limits reset on October 1, 2026.",
+      "scope": {
+        "countries": ["India"],
+        "visaClasses": ["eb-2"],
+        "pages": ["/visa-bulletin/eb-2/india"]
+      },
       "start": "2026-05-22",
       "end": "2026-10-01",
       "sources": [
@@ -341,11 +345,15 @@
     {
       "id": "india-eb-5-unreserved-limit-fy2026",
       "status": "official",
-      "title": "No unreserved EB-5 visas for India until October 1",
-      "label": "No unreserved EB-5 for India",
-      "summary": "This year's unreserved EB-5 visas for India are all used up, so embassies and consulates may not issue them until October 1, 2026. This does not include the rural, high-unemployment and infrastructure EB-5 visas.",
-      "body": "As of June 5, 2026, the State Department has issued all the unreserved EB-5 immigrant visas available in fiscal year 2026 (October 2025 to September 2026) to applicants chargeable to India, which in most cases means people born in India. These are the C5, T5, I5, R5, RU and NU categories. It does not include the rural, high-unemployment and infrastructure set-asides, which this page also counts. Embassies and consulates may not issue visas in these categories for the rest of the fiscal year. The annual limits reset on October 1, 2026, when they may start issuing them again to qualified applicants.",
-      "scope": { "countries": ["India"], "visaClasses": ["eb-5"] },
+      "title": "The limit on unreserved EB-5 visas for India has ended",
+      "label": "India EB-5 limit ended",
+      "summary": "From June 5 to September 30, 2026, embassies and consulates could not issue unreserved EB-5 visas to people born in India, because that year’s visas were used up. The rural, high-unemployment and infrastructure EB-5 visas were not affected.",
+      "body": "As of June 5, 2026, the State Department had issued all the unreserved EB-5 immigrant visas available in fiscal year 2026 (October 2025 to September 2026) to applicants chargeable to India, which in most cases means people born in India. These are the C5, T5, I5, R5, RU and NU categories. It did not include the rural, high-unemployment and infrastructure set-asides, which this page also counts. Embassies and consulates could not issue visas in these categories for the rest of that fiscal year. The annual limits reset on October 1, 2026.",
+      "scope": {
+        "countries": ["India"],
+        "visaClasses": ["eb-5"],
+        "pages": ["/visa-bulletin/eb-5-unreserved/india"]
+      },
       "start": "2026-06-05",
       "end": "2026-10-01",
       "sources": [
@@ -364,7 +372,13 @@
       "summary": "For green card applications (Form I-485) filed from September 18, 2026, USCIS can look at more kinds of public benefits that you get from that date. If you or your family get public benefits, talk to an immigration lawyer before you file.",
       "body": "DHS has rescinded (cancelled) its 2022 public charge rule. USCIS's new guidance applies to every Form I-485 postmarked or filed online on or after September 18, 2026. For those applications, USCIS can consider any means-tested public benefits (benefits that depend on your income) received on or after that date. For benefits received before that date, it can consider only public cash assistance for income maintenance and long-term institutionalization at government expense.\n\nApplications filed from December 23, 2022 to September 17, 2026 are decided under the 2022 rule.\n\nStates and cities have sued to stop the new rule. It is in effect while the lawsuits go on.\n\nIf you or your family receive public benefits, talk to an immigration lawyer or accredited representative before filing.",
       "scope": {
-        "pages": ["/uscis/i-485"]
+        "pages": [
+          "/uscis/i-485",
+          "/timeline/spouse-in-us",
+          "/timeline/fiance",
+          "/timeline/employment",
+          "/timeline/other-family"
+        ]
       },
       "expanded": true,
       "start": "2026-09-18",

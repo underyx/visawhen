@@ -1,4 +1,6 @@
 import type { PostActivity } from "../api/consulates";
+import { formatMonthDay, signedChange } from "./dates";
+import { formatMonths } from "./visaBulletin";
 
 // Whole numbers up to 999, then thousands with up to one decimal: "462",
 // "1.5K", "57.8K".
@@ -371,7 +373,7 @@ export const IV_POSTS_ELSEWHERE: Partial<Record<string, IvPostElsewhere>> = {
 /** "Nassau", "Kuala Lumpur and Singapore", "Warsaw, Almaty (IR-5 only),
  * and Tashkent (IR-5 only)"; without `withCases`, only the posts named for
  * every case, "Warsaw" (all of them if none is) */
-function elsewhereNames(
+export function elsewhereNames(
   { posts }: IvPostElsewhere,
   withCases: boolean,
 ): string {
@@ -498,16 +500,16 @@ export const IV_CATEGORY_BY_CLASS: Partial<Record<string, IvCategory>> =
     ),
   );
 
-const FIANCE_NOTE =
-  "The State Department publishes no interview-scheduling data for fiancé(e) visas.";
-const K3_NOTE =
-  "The State Department publishes no interview-scheduling data for K-3 and K-4 visas.";
-const DV_NOTE = "Diversity visas are not covered by State’s scheduling tool.";
+// One short sentence each, for a line under a class page's issuance boxes.
+const K_NOTE =
+  "The State Department publishes no interview-scheduling data for K visas.";
+const DV_NOTE =
+  "The State Department’s scheduling tool does not cover diversity visas.";
 
 // The tool's page lists the visa categories it covers: immediate relatives,
 // family preference, and EB-1, EB-2, EB-3 and EB-5. These are not among them.
 function notListedNote(cases: string): string {
-  return `State’s interview-scheduling tool does not list ${cases} among the categories it covers.`;
+  return `The State Department’s scheduling tool does not list ${cases}.`;
 }
 const ADOPTION_NOTE = notListedNote("adoption cases");
 const WIDOW_NOTE = notListedNote(
@@ -525,10 +527,10 @@ const U_VISA_FAMILY_NOTE = notListedNote("family members of U visa holders");
  * Scheduling Status Tool: the immigrant classes it does not cover, and the K
  * visas, which are nonimmigrant visas but go through NVC too */
 export const CLASS_NOTES: Partial<Record<string, string>> = {
-  k1: FIANCE_NOTE,
-  k2: FIANCE_NOTE,
-  k3: K3_NOTE,
-  k4: K3_NOTE,
+  k1: K_NOTE,
+  k2: K_NOTE,
+  k3: K_NOTE,
+  k4: K_NOTE,
   dv: DV_NOTE,
   ir3: ADOPTION_NOTE,
   ir4: ADOPTION_NOTE,
@@ -589,4 +591,72 @@ export function formatIvMonth(month: string): string {
  * "Feb 2026". */
 export function formatShortIvMonth(month: string): string {
   return formatMonth(`${month}-01T00:00:00.000Z`);
+}
+
+/** A category's month in State's update before the newest: the update's
+ * date, "2026-04-02", and the month, "2025-12" */
+export interface PreviousMonth {
+  asOf: string;
+  cutoff: string;
+}
+
+/** What the update before said, as the line under an interview card box's
+ * month: "+2 months since Sep 23", "same as on Sep 23", "was current on Sep
+ * 23"; null when there was no previous month, or both are current. Signs
+ * and colours: signedChange in dates.ts. */
+export function previousLine(
+  cutoff: string,
+  current: boolean,
+  previous: PreviousMonth | null,
+): { text: string; color: string } | null {
+  if (previous === null) return null;
+  const since = formatMonthDay(previous.asOf);
+  const previousCurrent = monthsBehind(previous.asOf, previous.cutoff) <= 0;
+  // A fall from current is a move back, so red, but has no months to sign.
+  if (previousCurrent)
+    return current ? null : { text: `was current on ${since}`, color: "red.9" };
+  // Positive when the month moved forward: monthsBehind counts the months
+  // from its second argument to its first.
+  const moved = monthsBehind(cutoff, previous.cutoff);
+  if (moved === 0) return { text: `same as on ${since}`, color: "dimmed" };
+  return signedChange(moved, `${formatMonths(moved)} since ${since}`);
+}
+
+/** What a post's row in the consulate list shows at its right: a badge, and
+ * under it a small line, the post's visas per month ("rate") or "few
+ * immigrant visas" ("few"). The badge must agree with what the post's own
+ * page leads with: "Notice" where a notice means the tool's months are
+ * no queue (`overridden`: scheduleOverrideFor() in policy.ts, decided as the
+ * page decides its title); "Not listed" where the tool does not list the
+ * post (`month` undefined); "No month given" where it lists it with N/A
+ * (null), as the card says; else the post's month for spouses, children and
+ * parents of US citizens, "Mar 2026", or "Current" for the update's own
+ * month or later. A current post that issued fewer than FEW_IMMIGRANT_VISAS
+ * of the tool's classes in the last 12 months of the data (`toolIssued`,
+ * countToolClassIssuances) has that as its page's title, so here its
+ * "Current" is quiet and its line says why. */
+export function postListBadge({
+  asOf,
+  month,
+  overridden,
+  toolIssued,
+}: {
+  /** The date of State's newest update, "2026-10-07" */
+  asOf: string;
+  month: string | null | undefined;
+  overridden: boolean;
+  toolIssued: number;
+}): { badge: string; quiet: boolean; line: "rate" | "few" } {
+  const plain = (badge: string) => ({
+    badge,
+    quiet: false,
+    line: "rate" as const,
+  });
+  if (overridden) return plain("Notice");
+  if (month === undefined) return plain("Not listed");
+  if (month === null) return plain("No month given");
+  if (monthsBehind(asOf, month) > 0) return plain(formatShortIvMonth(month));
+  if (toolIssued < FEW_IMMIGRANT_VISAS)
+    return { badge: "Current", quiet: true, line: "few" };
+  return plain("Current");
 }

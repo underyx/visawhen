@@ -538,145 +538,6 @@ export function backlogTrend(
   return "steady";
 }
 
-/** A signed count: "+1,234" / "−567". */
-function formatSigned(count: number): string {
-  return `${count >= 0 ? "+" : "−"}${formatCount(Math.abs(count))}`;
-}
-
-/** The summary of what changed since the point before, shown under the
- * cards. `moved` says the pending count jumped because USCIS moved cases
- * between offices ("in" or "out"), so the sentences do not read like the
- * office fell behind or caught up; a pending count whose change filings and
- * decisions do not explain (pendingChangeReliable) is not read as either.
- * `what` is plural: "I-130 (Immediate Relative) applications". `period` is
- * what each point covers: a quarter, or for the monthly numbers
- * (monthPoints), a month. */
-export function highlight(
-  points: QuarterPoint[],
-  subject: string,
-  what: string,
-  moved: "in" | "out" | null = null,
-  period: Span = "quarter",
-): string {
-  const current = points[points.length - 1];
-  const previous = points[points.length - 2];
-  if (current === undefined) return "";
-  const sentences: string[] = [];
-  // As on the card, no percentage from a pile below MIN_CHANGE_BASE:
-  // Christiansted's I-130s went from 15 to 129, "grew 760%"
-  const pendingChange = formatChange(
-    previous?.pending,
-    current.pending,
-    MIN_CHANGE_BASE,
-  );
-  const previousPending = previous?.pending ?? null;
-  const reliable = pendingChangeReliable(current);
-  const movedText =
-    moved === "in"
-      ? " as USCIS moved or routed cases here from elsewhere"
-      : moved === "out"
-      ? " as USCIS moved cases to other offices"
-      : "";
-  // no trend in the time to clear against a quarter of almost no decisions
-  const comparable = reliable && !stalled(points, points.length - 2);
-  if (current.pending !== null) {
-    const grew = pendingChange?.startsWith("+") ?? false;
-    if (
-      !reliable &&
-      moved === null &&
-      previousPending !== null &&
-      previousPending !== 0 &&
-      current.received !== null &&
-      current.completions !== null
-    )
-      sentences.push(
-        `The count of pending ${what} at ${subject} went from ${formatCount(
-          previousPending,
-        )} to ${formatCount(current.pending)} in ${current.label}${
-          pendingChange === null ? "" : ` (${pendingChange})`
-        }, but that ${period}'s filings minus its decisions come to ${formatSigned(
-          current.received - current.completions,
-        )}, which doesn't account for the change, so we don't read it as USCIS catching up or falling behind.`,
-      );
-    else if (
-      pendingChange === null &&
-      previousPending !== null &&
-      previousPending !== current.pending
-    )
-      // too few to give as a percentage: the counts themselves
-      sentences.push(
-        `The pile of pending ${what} at ${subject} went from ${formatCount(
-          previousPending,
-        )} to ${formatCount(current.pending)} in ${current.label}${movedText}.`,
-      );
-    else
-      sentences.push(
-        `The pile of pending ${what} at ${subject} ${
-          pendingChange === null
-            ? "stood at"
-            : pendingChange === "unchanged"
-            ? "stayed at"
-            : grew
-            ? `grew ${pendingChange.slice(1)} to`
-            : `shrank ${pendingChange.slice(1)} to`
-        } ${formatCount(current.pending)} in ${current.label}${movedText}.`,
-      );
-  }
-  if (current.waitMonths !== null) {
-    const clearing = `${current.approximate ? "about " : ""}${formatMonths(
-      current.waitMonths,
-    )}`;
-    if (moved !== null)
-      sentences.push(
-        `At that ${period}'s pace of decisions, clearing it, ${
-          moved === "in"
-            ? "cases moved or routed in included"
-            : "without the cases moved out"
-        }, would take ${clearing}; the ${period} before is not comparable.`,
-      );
-    else {
-      const trend = comparable
-        ? backlogTrend(previous?.waitMonths, current.waitMonths)
-        : null;
-      const previousWait =
-        previous?.waitMonths === null || previous?.waitMonths === undefined
-          ? ""
-          : trend === "rising"
-          ? `, up from ${formatMonths(previous.waitMonths)}`
-          : trend === "easing"
-          ? `, down from ${formatMonths(previous.waitMonths)}`
-          : trend === "steady"
-          ? formatMonths(previous.waitMonths) ===
-            formatMonths(current.waitMonths)
-            ? `, the same as the ${period} before`
-            : `, about the same as the ${period} before (${formatMonths(
-                previous.waitMonths,
-              )})`
-          : comparable &&
-            formatMonths(previous.waitMonths) ===
-              formatMonths(current.waitMonths)
-          ? `, as in the ${period} before`
-          : "";
-      sentences.push(
-        `At that ${period}'s pace of decisions, clearing it would take ${clearing}${previousWait}.`,
-      );
-    }
-  }
-  if (sentences.length === 0 && current.completions !== null)
-    sentences.push(
-      `USCIS decided ${current.approximate ? "about " : ""}${formatCount(
-        current.completions,
-      )} ${what}${subject === "USCIS" ? "" : ` at ${subject}`} in ${
-        current.label
-      }${
-        current.pending === null
-          ? "; it did not publish how many were pending"
-          : ""
-      }.`,
-    );
-  return sentences.join(" ");
-}
-
 /** One line of USCIS's median processing time on the wait chart. */
 export interface ProcessingTimeSeries {
   /** The category, the key into `processingTimes` */
@@ -820,12 +681,25 @@ export function medianBreaks(
       before[0].key === "all" &&
       now.length > 1 &&
       now.every(({ key }) => key !== "all")
-    )
+    ) {
+      // A category's quarters before the split come from the per-office
+      // report's national totals (categoryCounts); this note is the only
+      // text under the chart that says so.
+      const fromOffices = points
+        .slice(0, index)
+        .some(({ fromOfficeReport }) => fromOfficeReport);
       breaks.push({
         quarter: point.quarter,
         label: "split by category",
-        text: `From ${point.label}, USCIS gives the ${form.form} numbers by category; before, it gave them only for all categories together.`,
+        text: `From ${point.label}, USCIS gives the ${
+          form.form
+        } numbers by category; before, it gave them only for all categories together.${
+          fromOffices
+            ? " A category’s earlier quarters here are added up from USCIS’s report by office."
+            : ""
+        }`,
       });
+    }
   });
   // runs of quarters in which every category's median was the same figure
   const same = points.map((point) => {

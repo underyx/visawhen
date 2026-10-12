@@ -53,6 +53,16 @@
   color: var(--mantine-color-text);
 }
 
+/* A long note (some news notes are taller than a laptop's screen) scrolls
+ * inside itself, so that it can be read, and its links reached with Tab,
+ * with its chip still in view. The box inside scrolls, not the note: the
+ * note's arrow sits outside its edge and would be cut off. */
+.noteBody {
+  max-height: min(32rem, calc(100dvh - 8rem));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 /* The note on a phone: a panel across the bottom of the screen, which the
  * page scrolls behind; a long note scrolls inside it, under its title and
  * close button, which stay put. */

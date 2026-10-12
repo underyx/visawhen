@@ -1,8 +1,11 @@
 import policyData from "../data/policy.json";
+import { daysBetween } from "../components/dates";
 import {
+  hasEnded,
   POLICY_ENTRIES,
   POLICY_PAGES,
   type PolicyScope,
+  UNCHECKED_DAYS,
 } from "../components/policy";
 
 // Checks data/policy.json when the site is built, so that no page shows a
@@ -114,9 +117,7 @@ export function problemsWith(entry: Record<string, unknown>): string[] {
       scope.pages === undefined ||
         (Array.isArray(scope.pages) &&
           scope.pages.every((page) => POLICY_PAGES.includes(page))),
-      `scope.pages may only name pages that show notices: ${POLICY_PAGES.join(
-        ", ",
-      )}`,
+      "scope.pages may only name pages that show a news row (POLICY_PAGES in components/policy.ts)",
     ],
     [
       scope.immigrantVisasOnly === undefined ||
@@ -249,5 +250,26 @@ export function checkPolicies({
         .join(
           ", ",
         )}); keep it to ${MAX_OPEN_ENDED} or fewer, so that each is re-checked every week: set the end date of those that have ended, or remove those that no longer need a notice.`,
+    );
+
+  // The pages drop a live entry UNCHECKED_DAYS after its last check. This
+  // says so a week ahead in any build's log; data/freshness.py opens an
+  // issue from the same day, since the site builds only when the data or
+  // the code changes.
+  const today = new Date().toISOString().slice(0, 10);
+  const stale = POLICY_ENTRIES.filter(
+    (entry) =>
+      !hasEnded(entry, today) &&
+      daysBetween(entry.lastChecked, today) >= UNCHECKED_DAYS - 7,
+  );
+  if (stale.length > 0)
+    console.warn(
+      `data/policy.json has entries last checked ${
+        UNCHECKED_DAYS - 7
+      } or more days ago (${stale
+        .map((entry) => `${entry.id} on ${entry.lastChecked}`)
+        .join(
+          ", ",
+        )}); the pages drop an entry ${UNCHECKED_DAYS} days after its last check, so re-check these against their sources and set lastChecked.`,
     );
 }

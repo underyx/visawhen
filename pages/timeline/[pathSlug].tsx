@@ -1,6 +1,7 @@
 import {
   Alert,
   Anchor,
+  Box,
   Button,
   NativeSelect,
   Stack,
@@ -13,13 +14,20 @@ import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
 import { getTimelineData } from "../../api/timeline";
 import { formatDate, useToday } from "../../components/Freshness";
-import { ChevronLeftIcon } from "../../components/icons";
+import { ChevronLeftIcon, WarningIcon } from "../../components/icons";
 import MonthInput from "../../components/MonthInput";
 import MoreDetails from "../../components/MoreDetails";
-import TemporaryNotice from "../../components/TemporaryNotice";
+import { ChipRow, NoteChip } from "../../components/NoteChip";
+import { PolicyNews } from "../../components/PolicyBanner";
+import { NotShown, Stat, Stats } from "../../components/Stats";
 import { breadcrumbList } from "../../components/structuredData";
-import { formatBulletinMonth } from "../../components/visaBulletin";
+import {
+  formatBulletinMonth,
+  formatCutoff,
+} from "../../components/visaBulletin";
 import type {
+  BulletinCell,
+  PathCase,
   PathSlug,
   PathSpec,
   StageResult,
@@ -28,12 +36,14 @@ import type {
   TimelineResult,
 } from "../../components/timeline";
 import {
+  caseNote,
   EMPTY_INPUTS,
   estimateTimeline,
   formatDateRange,
   formatDuration,
   inputsFromHash,
   inputsToHash,
+  movementStat,
   pathBySlug,
   pathMilestones,
   PATHS,
@@ -43,8 +53,9 @@ import stampClasses from "../../components/UscisStats.module.css";
 
 // A path's timeline: its steps in order, each with when it will most likely
 // land, from where the visitor says their case is. What the visitor enters
-// stays in this page's memory: it goes in no address, no cookie and no
-// analytics (see TimelineInputs in components/timeline.ts).
+// lives only in the page's address, after the #, so that a filled-in
+// timeline can be bookmarked: no cookie and no analytics (see
+// TimelineInputs in components/timeline.ts).
 
 interface Props {
   slug: PathSlug;
@@ -104,24 +115,29 @@ function stampLabel({ spec }: StageResult): string {
   }
 }
 
+type Total = NonNullable<TimelineResult["total"]>;
+
+/** The estimate the stamp shows, or null when there is nothing to foretell:
+ * no step can be timed, or the last timed step should be over by now and
+ * its own line says what to do */
+function stampTotal(
+  { total }: TimelineResult,
+  today: string | null,
+): Total | null {
+  if (total === null) return null;
+  if (total.end !== null && today !== null && total.end.high <= today)
+    return null;
+  return total;
+}
+
 function Stamp({
-  result,
+  total,
   reported,
-  today,
 }: {
-  result: TimelineResult;
+  total: Total;
   /** Whether the visitor said where their case is */
   reported: boolean;
-  today: string | null;
 }) {
-  const { total } = result;
-  // nothing to foretell when the last counted step should be over by now:
-  // its own line says what to do
-  if (
-    total === null ||
-    (total.end !== null && today !== null && total.end.high <= today)
-  )
-    return null;
   return (
     <div className={stampClasses.estimate}>
       <div className={stampClasses.stamp}>
@@ -139,6 +155,42 @@ function Stamp({
   );
 }
 
+/** The chosen line's cutoffs in the newest Visa Bulletin, in the stamp's
+ * place. A path whose next step is the priority date has no stamp: the site
+ * gives no arrival date for a priority date, because the line moves
+ * unevenly (priorityDateStage), so without this a visitor who has chosen
+ * their category and country would see no figure above the form. The boxes
+ * say where the line stands and how it moved, not when the visitor's date
+ * comes; the priority-date step below says what the two dates mean. */
+function CutoffStrip({ cell }: { cell: BulletinCell }) {
+  const movement = movementStat(cell);
+  // one box per row on a phone: family lines often move two or three years
+  // in a year, and "+2 years and 10 months" takes four lines in a third of
+  // the width
+  return (
+    <Stats columns={3} phoneColumns={1}>
+      <Stat
+        label="Final Action Date"
+        value={formatCutoff(cell.final)}
+        line={cell.finalChange?.text ?? null}
+        lineColor={cell.finalChange?.color}
+      />
+      <Stat
+        label="Date for Filing"
+        value={formatCutoff(cell.filing)}
+        line={cell.filingChange?.text ?? null}
+        lineColor={cell.filingChange?.color}
+      />
+      <Stat
+        label="Final Action Date moved in 12 months"
+        value={movement.value ?? <NotShown>{movement.notShown}</NotShown>}
+        line={movement.line}
+        lineColor={movement.lineColor}
+      />
+    </Stats>
+  );
+}
+
 /** One step's text: its headline, warning, what happens and the numbers
  * behind it */
 function StepBody({
@@ -149,7 +201,7 @@ function StepBody({
   /** A step filed alongside another: smaller */
   side?: boolean;
 }) {
-  const { spec, status, headline, warning, news, basis } = result;
+  const { spec, status, headline, warning, news, warningLabel, basis } = result;
   return (
     <>
       {status === "done" ? (
@@ -163,11 +215,23 @@ function StepBody({
           </Text>
         )
       )}
+      {/* Our own reading of the numbers (a stall, old data) is a warning
+          chip that opens the text, as /nvc's "stalled" chip is: the
+          headline already carries the figure it qualifies. A warning
+          about the visitor's own case stays open. */}
       {status !== "done" &&
         warning !== null &&
-        spec.detached !== true &&
-        (news ? (
-          <TemporaryNotice mt="xs">{warning}</TemporaryNotice>
+        (news && warningLabel !== null ? (
+          <Box mt="xs">
+            <NoteChip
+              label={warningLabel}
+              icon={<WarningIcon />}
+              tone="warning"
+              title={warningLabel}
+            >
+              <Text size="sm">{warning}</Text>
+            </NoteChip>
+          </Box>
         ) : (
           <Alert color="yellow" role="note" mt="xs">
             {warning}
@@ -178,11 +242,8 @@ function StepBody({
           {spec.what}
           {spec.href !== null && spec.hrefText !== undefined && (
             <>
-              {" "}
-              <To href={spec.href}>
-                {spec.hrefText.charAt(0).toUpperCase() + spec.hrefText.slice(1)}
-              </To>
-              .
+              {" See "}
+              <To href={spec.href}>{spec.hrefText}</To>.
             </>
           )}
         </Text>
@@ -213,7 +274,6 @@ function Step({
     classes.step,
     status === "done" ? classes.done : "",
     status === "current" ? classes.current : "",
-    spec.detached === true ? classes.later : "",
   ]
     .filter((name) => name !== "")
     .join(" ");
@@ -239,25 +299,60 @@ function Step({
   );
 }
 
-/** The office page's verdict on the chosen office, in a sentence */
+/** The office page's verdict on the chosen office, as one claim under the
+ * office list: the method and the reasons for no verdict are on the
+ * office's page, one tap away */
 function officeVerdict(
   office: NonNullable<TimelineData["offices"]>[number],
   form: string,
-  quarter: string | null,
 ): string {
   const base =
     form === "N-400" ? "the country as a whole" : "all field offices together";
-  const pace = quarter === null ? "" : ` over the four quarters to ${quarter}`;
   switch (office.verdict) {
     case "longer":
-      return `${office.name}’s backlog would take clearly longer to clear than that of ${base}, at its pace${pace}. Plan for the later end of each USCIS range.`;
+      return `${office.name}’s backlog would take clearly longer to clear than ${base}’s: plan for the later end of each range.`;
     case "shorter":
-      return `${office.name}’s backlog would take clearly less time to clear than that of ${base}, at its pace${pace}. Your wait may be at the earlier end of each USCIS range.`;
+      return `${office.name}’s backlog would take clearly less time to clear than ${base}’s: your wait may be at the earlier end of each range.`;
     case "close":
-      return `${office.name}’s backlog would take about as long to clear as that of ${base}, at its pace${pace}: not clearly longer or shorter.`;
+      return `${office.name}’s backlog would take about as long to clear as ${base}’s.`;
     default:
-      return `No verdict on ${office.name} right now: in its newest quarter, cases moved in or out, it decided too few, or it approves almost none of them.`;
+      return `No verdict on ${office.name} this quarter.`;
   }
+}
+
+/** The path's branches and exceptions as a "Special cases:" row of chips,
+ * each opening its note (PathCase), or nothing for a path without one */
+function TimelineCases({
+  cases,
+  data,
+}: {
+  cases: PathCase[];
+  data: TimelineData;
+}) {
+  if (cases.length === 0) return null;
+  return (
+    <ChipRow lead="Special cases:">
+      {cases.map((pathCase) => (
+        <NoteChip key={pathCase.label} label={pathCase.label}>
+          <Text size="sm">
+            {caseNote(pathCase, data)}
+            {pathCase.links !== undefined && pathCase.links.length > 0 && (
+              <>
+                {" See "}
+                {pathCase.links.map(({ href, text }, index) => (
+                  <React.Fragment key={href}>
+                    {index > 0 && " and "}
+                    <To href={href}>{text}</To>
+                  </React.Fragment>
+                ))}
+                .
+              </>
+            )}
+          </Text>
+        </NoteChip>
+      ))}
+    </ChipRow>
+  );
 }
 
 export default function TimelinePage({ slug, data, year }: Props) {
@@ -303,6 +398,11 @@ export default function TimelinePage({ slug, data, year }: Props) {
     [path, data, inputs, today],
   );
   const reported = result.stages.some(({ status }) => status !== "ahead");
+  const stamped = stampTotal(result, today);
+  // the Visa Bulletin line the visitor chose, on a path that asks for one
+  const cell = path.inputs.includes("bulletin")
+    ? data.bulletin?.cells[inputs.category]?.[inputs.area]
+    : undefined;
   const office = data.offices?.find((option) => option.slug === inputs.office);
   const officeFormSlug = path.officeForm?.form.toLowerCase();
   const canonicalUrl = `https://visawhen.com/timeline/${slug}`;
@@ -354,6 +454,15 @@ export default function TimelinePage({ slug, data, year }: Props) {
         <Title order={1}>{path.title}</Title>
         <Text size="lg">{path.who}</Text>
       </Stack>
+      {/* The stamp comes before the form (numbers first, as on /nvc): on
+          a phone it was under 3-6 inputs, and off the first screen once a
+          date was picked. "If you start today" says the inputs under it
+          refine it. */}
+      {stamped !== null ? (
+        <Stamp total={stamped} reported={reported} />
+      ) : (
+        cell !== undefined && <CutoffStrip cell={cell} />
+      )}
       <form
         className={classes.inputs}
         onSubmit={(event) => event.preventDefault()}
@@ -361,7 +470,6 @@ export default function TimelinePage({ slug, data, year }: Props) {
         <NativeSelect
           className={classes.wide}
           label="Where is your case?"
-          description="Your answers are kept only in this page’s link, so you can bookmark it."
           value={inputs.milestone}
           onChange={(event) =>
             set({ milestone: event.currentTarget.value, date: "" })
@@ -422,7 +530,7 @@ export default function TimelinePage({ slug, data, year }: Props) {
               ]}
             />
             <MonthInput
-              label="Your priority date, if you have one"
+              label="Your priority date"
               value={inputs.priorityDate}
               onChange={(priorityDate) => set({ priorityDate })}
               today={today}
@@ -431,8 +539,10 @@ export default function TimelinePage({ slug, data, year }: Props) {
           </>
         )}
         {path.inputs.includes("office") && data.offices !== null && (
+          // the office page's verdict on the chosen office sits under the
+          // list, as its description
           <NativeSelect
-            label="Your USCIS field office, if you know it"
+            label="Your USCIS field office"
             value={inputs.office}
             onChange={(event) => set({ office: event.currentTarget.value })}
             data={[
@@ -442,19 +552,31 @@ export default function TimelinePage({ slug, data, year }: Props) {
                 label: name,
               })),
             ]}
+            inputWrapperOrder={["label", "input", "description"]}
+            description={
+              office !== undefined &&
+              path.officeForm !== undefined && (
+                <>
+                  {officeVerdict(office, path.officeForm.form)}{" "}
+                  <To href={`/uscis/${officeFormSlug}/${office.slug}`}>
+                    See the office’s numbers
+                  </To>
+                  .
+                </>
+              )
+            }
           />
         )}
-        {office !== undefined && path.officeForm !== undefined && (
-          <Text size="sm" className={classes.wide}>
-            {officeVerdict(office, path.officeForm.form, data.officeQuarter)}{" "}
-            <To href={`/uscis/${officeFormSlug}/${office.slug}`}>
-              See the office’s numbers
-            </To>
-            .
-          </Text>
-        )}
+        {/* The answers live in the page's address (Bence's ask in PR
+            #444): one line keeps that findable. */}
+        <Text size="xs" c="dimmed" className={classes.wide}>
+          Bookmark this page to keep your answers.
+        </Text>
       </form>
-      <Stamp result={result} reported={reported} today={today} />
+      <Stack gap="xs" className="vw-rows">
+        <PolicyNews page={`/timeline/${slug}`} />
+        <TimelineCases cases={path.cases} data={data} />
+      </Stack>
       <ol className={classes.steps}>
         {mainSteps.map((stage) => (
           <Step

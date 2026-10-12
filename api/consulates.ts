@@ -1,11 +1,13 @@
 import { readFile } from "fs/promises";
+import { groupBy, mapValues } from "lodash";
 import { join } from "path";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
-import type {
-  IvCategory,
-  IvSchedule,
-  IvScheduleLine,
+import {
+  countToolClassIssuances,
+  type IvCategory,
+  type IvSchedule,
+  type IvScheduleLine,
 } from "../components/consulates";
 
 const dataDir = join(process.cwd(), "data");
@@ -232,6 +234,29 @@ export async function getRecentIssuancesByClass(
   );
 }
 
+/** Each post's family and employment immigrant visas, the classes State's
+ * IV Scheduling Status Tool covers, issued in the last 12 months of the
+ * data, by post slug: the count each post's own page uses (see
+ * countToolClassIssuances). */
+export async function getRecentToolIssuancesByPost(): Promise<
+  Record<string, number>
+> {
+  const db = await openDb();
+  const { from } = await getStoredRecentWindow();
+  const rows = await db.all<
+    { postSlug: string; visaClassSlug: string; issuances: number }[]
+  >(
+    `
+    SELECT "Post Slug" AS postSlug, "Visa Class Slug" AS visaClassSlug, SUM("Issuances") AS issuances
+    FROM backlogs
+    WHERE "Month" >= ?
+    GROUP BY 1, 2
+  `,
+    from,
+  );
+  return mapValues(groupBy(rows, "postSlug"), countToolClassIssuances);
+}
+
 export interface PostActivity {
   /** The newest month in which the post issued any visa, or null if it never
    * did: "2019-02-01T00:00:00.000Z" */
@@ -358,11 +383,19 @@ export async function getIvScheduleSource(): Promise<string> {
   return (await readIvScheduleData()).source;
 }
 
-/** How many posts the newest update of State's IV Scheduling Status Tool
- * lists */
-export async function getIvSchedulePostCount(): Promise<number> {
+/** Every post in the newest update of State's IV Scheduling Status Tool,
+ * by slug, with its month for one of the tool's categories, "2026-02", or
+ * null where State gave N/A */
+export async function getIvScheduleMonths(
+  category: IvCategory = "relative",
+): Promise<Record<string, string | null>> {
   const { snapshots } = await readIvScheduleData();
-  return Object.keys(snapshots[await getIvScheduleAsOf()]).length;
+  return Object.fromEntries(
+    Object.entries(snapshots[await getIvScheduleAsOf()]).map(([slug, row]) => [
+      slug,
+      row[category],
+    ]),
+  );
 }
 
 /** A post's line in the update of State's IV Scheduling Status Tool of

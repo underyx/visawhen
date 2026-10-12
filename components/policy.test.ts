@@ -3,13 +3,14 @@ import { describe, it } from "node:test";
 import {
   hasEnded,
   hasStarted,
-  isAboutPage,
   issuanceSuspensionFor,
+  isUnchecked,
   namesPage,
   overridesUpdate,
   type PolicyEntry,
   policiesFor,
   scheduleOverrideFor,
+  staysOpen,
 } from "./policy";
 
 function entry(fields: Partial<PolicyEntry> & { id: string }): PolicyEntry {
@@ -188,31 +189,48 @@ describe("policiesFor", () => {
   });
 });
 
-describe("isAboutPage and namesPage", () => {
-  it("expand an entry that names the page, or is expanded, but not on a nonimmigrant class's page", () => {
+describe("namesPage", () => {
+  it("is true for an entry about the page's post, country or visa class", () => {
     const lagos = { postSlug: "lagos", country: "Nigeria" };
     assert.equal(namesPage(nigerians, lagos), true);
     assert.equal(namesPage(worldwide, lagos), false);
-    assert.equal(isAboutPage(worldwide, lagos), true);
+    assert.equal(namesPage(nvcOnly, lagos), false);
+    assert.equal(namesPage(dvOnly, { ...lagos, visaClassSlug: "dv" }), true);
+  });
+});
+
+describe("staysOpen", () => {
+  it("keeps open an entry that names the post, or pauses every post", () => {
+    const lagos = { postSlug: "lagos", country: "Nigeria" };
+    assert.equal(staysOpen(juba, { postSlug: "juba", country: null }), true);
+    assert.equal(staysOpen(juba, lagos), false);
+    assert.equal(staysOpen(worldwide, lagos), true);
     assert.equal(
-      isAboutPage(worldwide, {
-        ...lagos,
-        visaClassSlug: "h1b",
-        nonimmigrant: true,
-      }),
+      staysOpen(worldwide, { postSlug: "budapest", country: "Hungary" }),
       false,
     );
-    assert.equal(isAboutPage(nvcOnly, lagos), false);
-    assert.equal(namesPage(dvOnly, { ...lagos, visaClassSlug: "dv" }), true);
+  });
+
+  it("makes a chip of an entry about the applicants' nationality or every post", () => {
+    const lagos = { postSlug: "lagos", country: "Nigeria" };
+    assert.equal(staysOpen(nigerians, lagos), false);
+    assert.equal(staysOpen(nvcOnly, lagos), false);
+    assert.equal(staysOpen(dvOnly, { ...lagos, visaClassSlug: "dv" }), false);
   });
 });
 
 describe("issuanceSuspensionFor", () => {
   it("finds the entry that stops visas for the country's nationals", () => {
-    assert.equal(issuanceSuspensionFor("Nigeria", entries)?.id, "proclamation");
-    assert.equal(issuanceSuspensionFor("Cuba", entries)?.id, "proclamation");
-    assert.equal(issuanceSuspensionFor("Hungary", entries), null);
-    assert.equal(issuanceSuspensionFor(null, entries), null);
+    assert.equal(
+      issuanceSuspensionFor("Nigeria", null, entries)?.id,
+      "proclamation",
+    );
+    assert.equal(
+      issuanceSuspensionFor("Cuba", null, entries)?.id,
+      "proclamation",
+    );
+    assert.equal(issuanceSuspensionFor("Hungary", null, entries), null);
+    assert.equal(issuanceSuspensionFor(null, null, entries), null);
   });
   it("leaves out an entry that covers no immigrant visas for the country", () => {
     const nonimmigrantOnly = entry({
@@ -228,15 +246,42 @@ describe("issuanceSuspensionFor", () => {
         ],
       },
     });
-    assert.equal(issuanceSuspensionFor("Nigeria", [nonimmigrantOnly]), null);
     assert.equal(
-      issuanceSuspensionFor("Cuba", [nonimmigrantOnly])?.id,
+      issuanceSuspensionFor("Nigeria", null, [nonimmigrantOnly]),
+      null,
+    );
+    assert.equal(
+      issuanceSuspensionFor("Cuba", null, [nonimmigrantOnly])?.id,
       "proclamation",
     );
   });
   it("leaves out an entry that has ended by the time it was last checked", () => {
     const ended = entry({ ...nigerians, end: "2026-09-01" });
-    assert.equal(issuanceSuspensionFor("Nigeria", [ended]), null);
+    assert.equal(issuanceSuspensionFor("Nigeria", null, [ended]), null);
+  });
+  it("leaves out an entry nobody has re-checked for 29 days, on the client", () => {
+    assert.equal(
+      issuanceSuspensionFor("Nigeria", "2026-10-23", entries)?.id,
+      "proclamation",
+    );
+    assert.equal(issuanceSuspensionFor("Nigeria", "2026-10-24", entries), null);
+  });
+});
+
+describe("isUnchecked", () => {
+  it("is true 29 days after the last check, by today on the client only", () => {
+    assert.equal(isUnchecked(juba, null), false);
+    assert.equal(isUnchecked(juba, "2026-10-23"), false);
+    assert.equal(isUnchecked(juba, "2026-10-24"), true);
+  });
+
+  it("never drops an entry that has ended: its end is a fact", () => {
+    const ended = entry({ id: "india-limit", end: "2026-10-01" });
+    assert.equal(isUnchecked(ended, "2026-10-24"), false);
+    assert.equal(isUnchecked(ended, "2026-11-29"), false);
+    // one due to end later is still live, and goes unchecked as any other
+    const later = entry({ id: "later", end: "2026-12-01" });
+    assert.equal(isUnchecked(later, "2026-10-24"), true);
   });
 });
 
@@ -269,6 +314,16 @@ describe("scheduleOverrideFor", () => {
     assert.equal(
       scheduleOverrideFor("juba", "2026-06-15", null, entries)?.id,
       "juba-pause",
+    );
+  });
+  it("stops once nobody has re-checked the entry for 29 days", () => {
+    assert.equal(
+      scheduleOverrideFor("juba", "2026-09-23", "2026-10-23", entries)?.id,
+      "juba-pause",
+    );
+    assert.equal(
+      scheduleOverrideFor("juba", "2026-09-23", "2026-10-24", entries),
+      null,
     );
   });
   it("counts an entry from its start, by today on the client", () => {

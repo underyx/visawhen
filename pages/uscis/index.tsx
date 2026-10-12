@@ -2,6 +2,7 @@ import { SearchIcon } from "../../components/icons";
 import {
   Anchor,
   Badge,
+  Box,
   Group,
   Highlight,
   Stack,
@@ -169,34 +170,32 @@ export default function UscisIndex({
         <meta property="og:description" content={description} />
         <meta property="og:url" content="https://visawhen.com/uscis" />
       </Head>
-      <Stack gap="sm">
+      <Box>
         <Title order={1}>USCIS processing times by form</Title>
-        <Text>Latest USCIS data: {latestLabel}.</Text>
-        <Text>
-          Pick your form to see how fast USCIS is deciding it and what to expect
-          if you file today. For the N-400, I-130 and I-485, you can also pick
-          your field office.
+        <Text size="lg">
+          USCIS&rsquo;s own numbers, form by form. Newest: {latestLabel}.
         </Text>
-      </Stack>
-      <TextInput
-        size="lg"
-        label="Find your form"
-        leftSection={<SearchIcon />}
-        type="search"
-        placeholder="e.g. I-485 or work permit"
-        onChange={setTerm}
-      />
-      <SearchStatus
-        term={term}
-        count={matchCount}
-        noun={["form", "forms"]}
-        hint="Try a form number such as I-130, or words such as green card, work permit or citizenship."
-      />
-      <Text size="sm" c="dimmed">
-        The range next to a form is how long a decision will most likely take if
-        you file today, going by USCIS&rsquo;s median for {latestLabel}; for a
-        form with several categories, it is for the one named under it. For your
-        own case, also check USCIS&rsquo;s{" "}
+      </Box>
+      {/* one block: a Stack would pay its gap around the empty live region */}
+      <div>
+        <TextInput
+          size="lg"
+          label="Find your form"
+          leftSection={<SearchIcon />}
+          type="search"
+          placeholder="e.g. I-485 or work permit"
+          onChange={setTerm}
+        />
+        <SearchStatus
+          term={term}
+          count={matchCount}
+          noun={["form", "forms"]}
+          hint="Try a form number, such as I-130, or words such as green card or work permit."
+        />
+      </div>
+      <Text size="xs" c="dimmed">
+        Ranges: how long a decision will most likely take if you file today. For
+        your own case, also check USCIS&rsquo;s{" "}
         <Anchor
           href={USCIS_PROCESSING_TIMES_URL}
           target="_blank"
@@ -207,16 +206,15 @@ export default function UscisIndex({
         .
       </Text>
       {searchesDol && (
-        <Text>
-          PERM labor certification and prevailing wage determinations are
-          decided by the Department of Labor, not USCIS, and are not covered
-          here: see{" "}
+        <Text size="sm">
+          PERM and prevailing wage decisions are the Department of
+          Labor&rsquo;s, not USCIS&rsquo;s: see{" "}
           <Anchor
             href={DOL_PROCESSING_TIMES_URL}
             target="_blank"
             rel="noopener"
           >
-            the Department of Labor&rsquo;s processing times
+            its processing times
           </Anchor>
           . After PERM, the employer files the I-140 with USCIS.
         </Text>

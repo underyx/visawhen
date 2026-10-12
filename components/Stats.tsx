@@ -18,7 +18,7 @@ export function StatValue({ children }: React.PropsWithChildren) {
 /** A box's value when there is none to show, with why. */
 export function NotShown({ children }: React.PropsWithChildren) {
   return (
-    <Text fw={700} lh={1.3}>
+    <Text fw={700} lh={1.3} mt={2}>
       {children}
     </Text>
   );
@@ -39,7 +39,13 @@ export function Stat({ label, value, line, lineColor = "dimmed" }: StatProps) {
   return (
     <div className={classes.box}>
       <Text className={classes.boxLabel}>{label}</Text>
-      {typeof value === "string" ? <StatValue>{value}</StatValue> : value}
+      {/* one element, whatever the value is: the box's three parts take
+          the strip's three rows (Stats.module.css) */}
+      {typeof value === "string" ? (
+        <StatValue>{value}</StatValue>
+      ) : (
+        <div>{value}</div>
+      )}
       {/* a div: a chip's note opens inside the line */}
       <Text size="xs" c={lineColor} component="div">
         {line ?? NO_LINE}

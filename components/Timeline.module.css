@@ -93,13 +93,6 @@
   background: var(--vw-stamp);
 }
 
-/* A step that comes much later, from a date the page cannot know */
-.later::before {
-  content: "…";
-  border-style: dashed;
-  color: var(--mantine-color-dimmed);
-}
-
 .name {
   font-size: 1.25rem;
   line-height: 1.2;

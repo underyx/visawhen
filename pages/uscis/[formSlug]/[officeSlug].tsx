@@ -1,6 +1,7 @@
 import { ChevronLeftIcon } from "../../../components/icons";
 import {
   Anchor,
+  Box,
   Button,
   Chip,
   Group,
@@ -24,6 +25,7 @@ import {
   categoryRanges,
   CategoryRange,
   casesMovedQuarters,
+  CLEARING_COMPARISON_FACTOR,
   clearingSuppressed,
   compareClearing,
   formatRangeMonths,
@@ -36,13 +38,11 @@ import {
 } from "../../../components/estimate";
 import {
   ALL_CATEGORIES,
-  CHART_QUARTERS,
   approximately,
   ChartBreak,
   cleanData,
   formatCount,
   formatMonths,
-  highlight,
   isServiceCenter,
   NATIONAL_OFFICE_CATEGORIES,
   officeCategoryCounts,
@@ -59,9 +59,10 @@ import {
   toPoints,
 } from "../../../components/uscis";
 import { OutcomesChart, WaitChart } from "../../../components/UscisChart";
+import UscisCases, { uscisCases } from "../../../components/UscisCases";
 import UscisStats, { RangeText } from "../../../components/UscisStats";
 import MoreDetails from "../../../components/MoreDetails";
-import PolicyBanner from "../../../components/PolicyBanner";
+import { PolicyNews } from "../../../components/PolicyBanner";
 import { breadcrumbList } from "../../../components/structuredData";
 import TemporaryNotice from "../../../components/TemporaryNotice";
 
@@ -341,24 +342,16 @@ function who(form: string, view: CategoryView): string {
 }
 
 /** What USCIS's national numbers say a filer in the view's category can
- * expect, as the sentence the page leads with; nothing when the numbers say
+ * expect, under the office's own figures; nothing when the numbers say
  * nothing. */
-function NationalRange({
-  form,
-  view,
-  nationalLabel,
-}: {
-  form: string;
-  view: CategoryView;
-  nationalLabel: string;
-}) {
+function NationalRange({ form, view }: { form: string; view: CategoryView }) {
   const range = view.nationalRange;
   if (range === null) return null;
   const rangeWho = range.name === form ? form : `${form} (${range.name})`;
   if (range.priorityDate)
     return (
       <>
-        For {rangeWho} cases, the wait depends on the priority date: see{" "}
+        For {rangeWho} cases the wait depends on the priority date: see{" "}
         <Anchor
           component={Link}
           href={PRIORITY_DATE_CUTOFFS[range.key] ?? "/visa-bulletin"}
@@ -371,9 +364,10 @@ function NationalRange({
   if (range.suppressed !== null) return null;
   return (
     <>
-      Nationally, {rangeWho} filers can expect a decision in{" "}
-      <RangeText low={range.q[1]} high={range.q[3]} /> if they file today, going
-      by USCIS&rsquo;s median for {nationalLabel}.{" "}
+      {/* "decided in": RangeText gives months until the page knows today,
+          then the months the decision most likely falls in */}
+      Nationally, {rangeWho} cases filed today are most likely decided in{" "}
+      <RangeText low={range.q[1]} high={range.q[3]} />.{" "}
     </>
   );
 }
@@ -396,18 +390,20 @@ function RangeWarning({
   if (range === null || range.priorityDate || range.suppressed !== null)
     return null;
   const { caveat } = view;
-  const shock =
+  const fewer =
     range.shock && range.shockRatio !== null
-      ? `USCIS decided ${Math.round(
-          (1 - range.shockRatio) * 100,
-        )}% fewer of these cases in ${nationalLabel} than its average over the four quarters before.`
+      ? Math.round((1 - range.shockRatio) * 100)
       : null;
+  const shock =
+    fewer === null
+      ? null
+      : `USCIS decided ${fewer}% fewer of these cases in ${nationalLabel} than its average over the four quarters before.`;
   if (shock === null && caveat === null) return null;
   // The summary stays within two sentences; with both warnings, the numbers
   // of each go behind "Details".
   const summary =
     caveat === null
-      ? `${shock} Plan for the later end of the range.`
+      ? `USCIS decided ${fewer}% fewer of these cases in ${nationalLabel} than usual. Plan for the later end of the range.`
       : shock === null
       ? "The field offices have so many of these cases waiting that your case may take longer than this range."
       : "USCIS is deciding far fewer of these cases than usual, and the field offices have so many waiting that your case may take longer than this range.";
@@ -513,14 +509,6 @@ export default function UscisOffice({
     ];
   });
 
-  // The quarters of routed filings the chart shows at first, the only ones
-  // the text under it names, as for its dashed lines (the Vermont Service
-  // Center's I-485s were routed in Jan-Mar 2017, before the chart's six
-  // years); older ones keep their mark in the chart's tooltip.
-  const routedShown = points
-    .slice(-CHART_QUARTERS)
-    .filter(({ quarter }) => view.routed.includes(quarter));
-
   // The description is of the view the page opens with, which is what
   // search engines and visitors without JavaScript see.
   const opening =
@@ -577,34 +565,41 @@ export default function UscisOffice({
 
   // Four quarters' pace on both sides, and a verdict only beyond 1.5 times
   // (compareClearing): a single quarter's pace swings too much to call one
-  // office slower than the rest. The verdict alone: the months at a
-  // four-quarter pace read as a wait, and during a slowdown they are far
-  // shorter than the pile at the current pace (the cards).
+  // office slower than the rest. The verdict alone, in plain words: the
+  // months at a four-quarter pace read as a wait, and during a slowdown
+  // they are far shorter than the pile at the current pace (the cards).
+  const comparisonBase =
+    view.comparison?.base === "field offices"
+      ? "all field offices together"
+      : "the country as a whole";
   const comparison =
     backlogSuppressed !== null ||
     moved !== null ||
     view.rarelyApproved ||
     view.comparison === null
       ? null
-      : `Going by its average pace over the four quarters to ${
-          current.label
-        }, ${officePhrase}'s backlog${
-          isTotal ? "" : " of these cases"
-        } would take ${
+      : `Over the last four quarters, ${
+          isCenter ? "this center" : "this office"
+        } has cleared its pile${isTotal ? "" : " of these cases"} ${
           {
-            longer: "clearly longer to clear than",
-            shorter: "clearly less time to clear than",
-            close:
-              "about as long to clear as, not clearly longer or shorter than,",
+            longer: "clearly slower than",
+            shorter: "clearly faster than",
+            close: "about as fast as",
           }[compareClearing(view.comparison.office, view.comparison.national)]
-        } ${
-          view.comparison.base === "field offices"
-            ? "that of all field offices together"
-            : "that of the country as a whole"
-        }.`;
-  const whoText = isTotal ? null : officeCategoryWho(view.key);
-  // "The Vermont Service Center", "The Houston office"
-  const OfficePhrase = `T${officePhrase.slice(1)}`;
+        } ${comparisonBase}.`;
+  const cases = uscisCases({
+    views: views.map(({ key, name: viewName }) => ({
+      name: viewName,
+      who: officeCategoryWho(key),
+    })),
+    form,
+    // the categories' own national ranges: all categories together
+    // borrows the form's main one, which is never a priority-date category
+    ranges: views.flatMap(({ key, nationalRange }) =>
+      key === ALL_CATEGORIES || nationalRange === null ? [] : [nationalRange],
+    ),
+    rarelyApproved: view.rarelyApproved,
+  });
 
   return (
     <Stack gap="xl">
@@ -644,82 +639,60 @@ export default function UscisOffice({
         </Button>
       </Group>
       <Stack gap="sm">
-        <Title order={1}>
-          {form} processing at {fullName}
-        </Title>
-        <PolicyBanner page={`/uscis/${formSlug}`} />
+        <Box>
+          <Title order={1}>
+            {form} processing at {fullName}
+          </Title>
+          <Text size="lg">
+            USCIS&rsquo;s own quarterly numbers for this office. Newest:{" "}
+            {current.label}.
+          </Text>
+        </Box>
         {views.length > 1 && (
-          <Stack gap={6}>
-            <Chip.Group
-              multiple={false}
-              value={view.key}
-              onChange={(key) => setSelected(key)}
-            >
-              <Group gap="xs" role="radiogroup" aria-label="Category">
-                {views.map(({ key, name: viewName }) => (
-                  <Chip
-                    key={key}
-                    value={key}
-                    variant="outline"
-                    name={categoryInputName}
-                  >
-                    {viewName}
-                  </Chip>
-                ))}
-              </Group>
-            </Chip.Group>
-            <Text size="sm" c="dimmed">
-              {whoText ??
-                `All categories together: ${new Intl.ListFormat("en-US").format(
-                  views.slice(0, -1).map(({ name: viewName }) => viewName),
-                )}.`}
-            </Text>
-          </Stack>
+          <Chip.Group
+            multiple={false}
+            value={view.key}
+            onChange={(key) => setSelected(key)}
+          >
+            <Group gap="xs" role="radiogroup" aria-label="Category">
+              {views.map(({ key, name: viewName }) => (
+                <Chip
+                  key={key}
+                  value={key}
+                  variant="outline"
+                  name={categoryInputName}
+                >
+                  {viewName}
+                </Chip>
+              ))}
+            </Group>
+          </Chip.Group>
         )}
-        <Text>
-          USCIS does not publish processing times per office.{" "}
-          <NationalRange
-            form={form}
-            view={view}
-            nationalLabel={nationalLabel}
-          />
-          <Anchor component={Link} href={`/uscis/${formSlug}`}>
-            {view.nationalRange !== null && !view.nationalRange.priorityDate
-              ? `See the national ${form} range for each category`
-              : `See the national ${form} numbers`}
-          </Anchor>
-          .
-        </Text>
-        <RangeWarning form={form} view={view} nationalLabel={nationalLabel} />
-        <Text>Latest USCIS data: {current.label}.</Text>
         <UscisStats
           points={points}
           backlogSuppressed={backlogSuppressed}
           moved={moved}
           rarelyApproved={view.rarelyApproved}
         />
-        {view.rarelyApproved && (
-          <Text>
-            {`${OfficePhrase} approved ${formatCount(
-              current.approved,
-            )} of the ${formatCount(current.completions)} ${who(
-              form,
-              view,
-            )} cases it decided in ${
-              current.label
-            }. An office that almost never approves a kind of case is usually screening or holding it, and such cases are normally transferred to another office to be decided, so its approval rate and its pace say little about how long one takes.`}
-          </Text>
-        )}
+        {comparison !== null && <Text>{comparison}</Text>}
+        <Stack gap="xs" className="vw-rows">
+          <PolicyNews page={`/uscis/${formSlug}`} />
+          <UscisCases cases={cases} />
+        </Stack>
+        {/* The national range comes after the office's own figures, which
+            the page is for; the warning that it may understate the wait
+            stays an open slip under it */}
         <Text>
-          <strong>What changed:</strong>{" "}
-          {highlight(
-            points,
-            officePhrase,
-            `${who(form, view)} applications`,
-            moved,
-          )}
-          {comparison !== null && ` ${comparison}`}
+          USCIS publishes no times per office.{" "}
+          <NationalRange form={form} view={view} />
+          <Anchor component={Link} href={`/uscis/${formSlug}`}>
+            {view.nationalRange !== null && !view.nationalRange.priorityDate
+              ? "See the national ranges"
+              : `See the national ${form} numbers`}
+          </Anchor>
+          .
         </Text>
+        <RangeWarning form={form} view={view} nationalLabel={nationalLabel} />
       </Stack>
       {views.length > 1 && (
         <Stack gap="sm">
@@ -798,19 +771,6 @@ export default function UscisOffice({
       )}
       <Stack gap="sm">
         <Title order={2}>What happened to the applications</Title>
-        <Text>
-          The bars are the {who(form, view)} decisions {officePhrase} made each
-          quarter, approved in blue and denied in red. The amber line is its
-          backlog: how many applications were still waiting at the end of that
-          quarter, most of them filed in earlier ones. The dashed line is how
-          many came in
-          {routedShown.length > 0
-            ? `, which in ${new Intl.ListFormat("en-US").format(
-                routedShown.map(({ label }) => label),
-              )} includes new filings USCIS routed here from elsewhere rather than filed with the office`
-            : ""}
-          .
-        </Text>
         <OutcomesChart
           points={points}
           subject={who(form, view)}
@@ -832,7 +792,7 @@ export default function UscisOffice({
             : "cases USCIS cannot decide yet"}
           .
         </Text>
-        {(breaks.length > 0 || clearingGaps) && (
+        {(breaks.length > 0 || clearingGaps || comparison !== null) && (
           <MoreDetails label="How to read the chart">
             <Text size="sm">
               USCIS sometimes moves pending cases between offices.
@@ -846,6 +806,8 @@ export default function UscisOffice({
                 } quarters in which the office decided fewer than 100 ${
                   isTotal ? "cases" : "of these cases"
                 }.`}
+              {comparison !== null &&
+                ` The line under the boxes on the office’s pace compares the time to clear its pile at the pace of its last four quarters with the same for ${comparisonBase}; it says slower or faster only where one is more than ${CLEARING_COMPARISON_FACTOR} times the other.`}
             </Text>
           </MoreDetails>
         )}

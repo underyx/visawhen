@@ -17,7 +17,16 @@
   }
 }
 
+/* A box's caption, figure and line take the strip's rows (a subgrid), so
+ * that the figures in a row of boxes line up when one caption wraps to two
+ * lines and the others do not. A browser without subgrid stacks them as
+ * before. */
 .box {
+  display: grid;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+  row-gap: 0;
+  align-content: start;
   background: var(--mantine-color-body);
   padding: 10px 14px 12px;
 }

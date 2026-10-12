@@ -14,6 +14,8 @@ import {
   IV_CATEGORY_BY_CLASS,
   IV_POSTS_ELSEWHERE,
   monthsBehind,
+  postListBadge,
+  previousLine,
   summarizeInactivity,
   summarizeIvPostElsewhere,
 } from "./consulates";
@@ -40,6 +42,103 @@ describe("formatting", () => {
   it("counts the months a tool month is behind its update", () => {
     assert.equal(monthsBehind("2026-09-23", "2026-02"), 7);
     assert.equal(monthsBehind("2026-01-15", "2025-11"), 2);
+  });
+});
+
+describe("postListBadge", () => {
+  const row = {
+    asOf: "2026-09-23",
+    month: "2026-02" as string | null | undefined,
+    overridden: false,
+    toolIssued: 500,
+  };
+  const rate = (badge: string) => ({ badge, quiet: false, line: "rate" });
+
+  it("names the post's interview month, or current", () => {
+    assert.deepEqual(postListBadge(row), rate("Feb 2026"));
+    assert.deepEqual(
+      postListBadge({ ...row, month: "2026-08" }),
+      rate("Aug 2026"),
+    );
+    // the update's own month, and one past it, are current
+    assert.deepEqual(
+      postListBadge({ ...row, month: "2026-09" }),
+      rate("Current"),
+    );
+    assert.deepEqual(
+      postListBadge({ ...row, month: "2026-10" }),
+      rate("Current"),
+    );
+  });
+  it("tells a post the tool leaves out from one it gives N/A", () => {
+    assert.deepEqual(
+      postListBadge({ ...row, month: undefined }),
+      rate("Not listed"),
+    );
+    assert.deepEqual(
+      postListBadge({ ...row, month: null }),
+      rate("No month given"),
+    );
+  });
+  it("points to the notice wherever one overrides the month", () => {
+    for (const month of ["2026-02", "2026-09", null, undefined])
+      assert.deepEqual(
+        postListBadge({ ...row, month, overridden: true, toolIssued: 0 }),
+        rate("Notice"),
+      );
+  });
+  it("quiets a current post that issues few of the tool's visas", () => {
+    const current = { ...row, month: "2026-09" };
+    assert.deepEqual(postListBadge({ ...current, toolIssued: 49 }), {
+      badge: "Current",
+      quiet: true,
+      line: "few",
+    });
+    assert.deepEqual(
+      postListBadge({ ...current, toolIssued: 50 }),
+      rate("Current"),
+    );
+    // a month behind says something whatever the post issued
+    assert.deepEqual(
+      postListBadge({ ...row, toolIssued: 0 }),
+      rate("Feb 2026"),
+    );
+  });
+});
+
+describe("previousLine", () => {
+  const previous = { asOf: "2026-09-23", cutoff: "2026-01" };
+
+  it("signs a move of the month and colours it by direction", () => {
+    assert.deepEqual(previousLine("2026-02", false, previous), {
+      text: "+1 month since Sep 23",
+      color: "teal.9",
+    });
+    assert.deepEqual(previousLine("2025-12", false, previous), {
+      text: "−1 month since Sep 23",
+      color: "red.9",
+    });
+    assert.deepEqual(previousLine("2027-03", false, previous), {
+      text: "+1 year and 2 months since Sep 23",
+      color: "teal.9",
+    });
+  });
+  it("says when the month stayed", () => {
+    assert.deepEqual(previousLine("2026-01", false, previous), {
+      text: "same as on Sep 23",
+      color: "dimmed",
+    });
+  });
+  it("says when the cases were current before", () => {
+    const wasCurrent = { asOf: "2026-09-23", cutoff: "2026-09" };
+    assert.deepEqual(previousLine("2026-02", false, wasCurrent), {
+      text: "was current on Sep 23",
+      color: "red.9",
+    });
+    assert.equal(previousLine("2026-10", true, wasCurrent), null);
+  });
+  it("is nothing without a previous month", () => {
+    assert.equal(previousLine("2026-02", false, null), null);
   });
 });
 

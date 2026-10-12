@@ -31,26 +31,33 @@ import {
   formatMonth,
   formatMonthlyRate,
   formatShortIvMonth,
+  IV_CATEGORIES,
   IV_POSTS_ELSEWHERE,
   IvSchedule,
   monthsBehind,
   summarizeInactivity,
   summarizeIvPostElsewhere,
 } from "../../../components/consulates";
+import ConsulateAudience from "../../../components/ConsulateAudience";
 import IvScheduleCard, {
   describeRelativeQueue,
   listsPostAsCurrent,
   showsSuspension,
 } from "../../../components/IvScheduleCard";
 import { ListItem, ListRow, ListRows } from "../../../components/ListRow";
-import PolicyBanner from "../../../components/PolicyBanner";
+import { PolicyNews, PolicyNotices } from "../../../components/PolicyBanner";
 import { breadcrumbList } from "../../../components/structuredData";
 import {
   hasEnded,
   issuanceSuspensionFor,
+  overridesUpdate,
   scheduleOverrideFor,
 } from "../../../components/policy";
-import { formatShortDate, useToday } from "../../../components/Freshness";
+import {
+  formatDate,
+  formatShortDate,
+  useToday,
+} from "../../../components/Freshness";
 import { normalize } from "../../../components/search";
 import SearchStatus from "../../../components/SearchStatus";
 import { POST_COUNTRIES } from "../../../api/searchTerms";
@@ -233,8 +240,20 @@ export default function ConsulateSelect({
     inactive: inactivity !== null,
     elsewhere,
   })
-    ? issuanceSuspensionFor(consulate.country)
+    ? issuanceSuspensionFor(consulate.country, today)
     : null;
+  // The card shows its suspension slip only while no pause overrides the
+  // months (IvScheduleCard); the "Dual nationals" chip goes with the slip.
+  const overridden =
+    scheduleOverride !== null &&
+    overridesUpdate(scheduleOverride, ivScheduleAsOf, today);
+  // Whether the card shows months, which the subtitle dates: decided as the
+  // card decides (overridden), so the two never disagree. While prerendering
+  // overridden is scheduleOverride !== null, so the first render matches.
+  const showsMonths =
+    !overridden &&
+    ivSchedule !== null &&
+    IV_CATEGORIES.some((category) => ivSchedule[category] !== null);
   const recentToolIssued = countToolClassIssuances(recentIssuances);
   const issuedDescription = `How many visas ${postName} issued every month ${
     availableVisaClasses.length === 1
@@ -350,7 +369,21 @@ export default function ConsulateSelect({
       </Button>
       <Box>
         <Title order={1}>{postName}</Title>
-        {country !== null && <Text size="lg">{country}</Text>}
+        {/* The country alone: its other names (POST_COUNTRIES) are for the
+            list's search box. The data's date goes here, not in the card
+            (Bence: numbers first, the date once), and only while the card
+            shows months. */}
+        <Text size="lg">
+          {consulate.country !== null && `${consulate.country}. `}
+          {showsMonths ? (
+            <>
+              Interview months from the State Department&rsquo;s update of{" "}
+              {formatDate(ivScheduleAsOf)}.
+            </>
+          ) : (
+            <>Visas issued, in the State Department&rsquo;s own figures.</>
+          )}
+        </Text>
       </Box>
       {inactivity !== null && (
         // role="note": a standing statement, which screen readers should not
@@ -359,7 +392,7 @@ export default function ConsulateSelect({
           {inactivity}
         </Alert>
       )}
-      <PolicyBanner consulate={consulate} />
+      <PolicyNotices consulate={consulate} />
       <IvScheduleCard
         postName={postName}
         asOf={ivScheduleAsOf}
@@ -377,30 +410,44 @@ export default function ConsulateSelect({
           suspension === null || consulate.country === null
             ? undefined
             : {
-                entry: suspension,
                 country: consulate.country,
                 applicants: "immigrant visa",
               }
         }
       />
+      {/* The news and who the months are for come after the months, as on
+          /nvc: two thirds of visits are phones, where the notices pushed
+          the months below the fold (Bence) */}
+      <Stack gap="xs">
+        <PolicyNews consulate={consulate} />
+        <ConsulateAudience
+          postSlug={postSlug}
+          postName={postName}
+          hasK1Page={availableVisaClassesSet.has("k1")}
+          suspended={suspension !== null && !overridden}
+        />
+      </Stack>
       <Title order={2}>Visa classes at {postName}</Title>
-      <TextInput
-        size="lg"
-        label="Find your visa class"
-        leftSection={<SearchIcon />}
-        type="search"
-        placeholder="e.g. CR1 or spouse"
-        onChange={setTerm}
-      />
-      <SearchStatus
-        term={term}
-        count={filteredVisas.length}
-        noun={["visa class", "visa classes"]}
-        hint="Try a class code such as CR1, or a word such as spouse."
-      />
-      <Text size="sm" c="dimmed">
-        Badges: average visas issued per month, {formatMonth(recentWindow.from)}{" "}
-        to {formatMonth(recentWindow.to)}.
+      {/* one block: a Stack would pay its gap around the empty live region */}
+      <div>
+        <TextInput
+          size="lg"
+          label="Find your visa class"
+          leftSection={<SearchIcon />}
+          type="search"
+          placeholder="e.g. CR1 or spouse"
+          onChange={setTerm}
+        />
+        <SearchStatus
+          term={term}
+          count={filteredVisas.length}
+          noun={["visa class", "visa classes"]}
+          hint="Try a class code such as CR1, or a word such as spouse."
+        />
+      </div>
+      <Text size="xs" c="dimmed">
+        Badges: visas issued per month, {formatMonth(recentWindow.from)} &ndash;{" "}
+        {formatMonth(recentWindow.to)}.
       </Text>
       {issuedVisas.length > 0 && (
         <ListRows>

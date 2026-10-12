@@ -1,6 +1,6 @@
 import {
   Anchor,
-  List,
+  Box,
   SegmentedControl,
   Stack,
   Table,
@@ -28,7 +28,13 @@ import {
   formatCutoff,
   newestMonth,
   pagePath,
+  PRIORITY_DATE_DEFINITION,
 } from "../../components/visaBulletin";
+
+// The page is a chooser: the newest bulletin's two charts as tables, with
+// the switch between them right above, and what the dates mean behind one
+// toggle. The rows and columns say what a lesson on the categories and
+// the countries would.
 
 interface Props {
   /** The newest bulletin's month, "2026-10" */
@@ -170,64 +176,44 @@ export default function VisaBulletinIndex({
         />
       </Head>
       <Stack gap="sm">
-        <Title order={1}>{TITLE}</Title>
-        <Text>
-          In the family and employment preference categories, only a limited
-          number of green cards is given each year. People wait in line by their
-          priority date. Each month, the State Department&rsquo;s{" "}
-          <Anchor href={VISA_BULLETIN_URL} target="_blank" rel="noopener">
-            Visa Bulletin
-          </Anchor>{" "}
-          says how far the line has moved.
-        </Text>
-        <Text>
-          Pick your category and the country where you were born (not your
-          citizenship) to see how fast its line has moved.
-        </Text>
-        <MoreDetails label="What is my priority date?">
-          <Text size="sm">
-            Your priority date is usually the day USCIS received your I-130 or
-            I-140 petition, or, when you needed a labor certification, the day
-            it was filed. It is on your I-797 notice.
+        <Box>
+          <Title order={1}>{TITLE}</Title>
+          <Text size="lg">
+            The State Department&rsquo;s own monthly cutoff dates, by category
+            and country of birth (not citizenship). Newest:{" "}
+            {formatBulletinMonth(month)}.
           </Text>
-        </MoreDetails>
-      </Stack>
-      <Stack gap="sm">
-        <Title order={2} size="h3">
-          <Anchor href={bulletinUrl} target="_blank" rel="noopener">
-            {formatBulletinMonth(month)} Visa Bulletin
-          </Anchor>
-        </Title>
-        <SegmentedControl
-          value={chartKey}
-          onChange={(value) => setChartKey(value as ChartKey)}
-          data={(Object.keys(CHARTS) as ChartKey[]).map((key) => ({
-            value: key,
-            label: CHARTS[key],
-          }))}
-          style={{ alignSelf: "flex-start" }}
-        />
-        <List size="sm" spacing={4}>
-          {chartKey === "finalAction" ? (
-            <List.Item>
+        </Box>
+        <Stack gap="xs">
+          <SegmentedControl
+            value={chartKey}
+            onChange={(value) => setChartKey(value as ChartKey)}
+            data={(Object.keys(CHARTS) as ChartKey[]).map((key) => ({
+              value: key,
+              label: CHARTS[key],
+            }))}
+            style={{ alignSelf: "flex-start" }}
+          />
+          <MoreDetails label="What the dates mean">
+            <Text size="sm">
               Final Action Dates: you can get your visa or green card if your
               priority date is earlier than the date shown.
-            </List.Item>
-          ) : (
-            <List.Item>
+            </Text>
+            <Text size="sm">
               Dates for Filing: you can send your documents to the National Visa
               Center if your priority date is earlier than the date shown. In
               the US, USCIS says each month which chart decides when you can
               file Form I-485.
-            </List.Item>
-          )}
-          <List.Item>
-            Current: there is no line, whatever your priority date is.
-          </List.Item>
-          <List.Item>
-            Unavailable: no visas are left in the category this month.
-          </List.Item>
-        </List>
+            </Text>
+            <Text size="sm">
+              Current: there is no line, whatever your priority date is.
+            </Text>
+            <Text size="sm">
+              Unavailable: no visas are left in the category this month.
+            </Text>
+            <Text size="sm">{PRIORITY_DATE_DEFINITION}</Text>
+          </MoreDetails>
+        </Stack>
       </Stack>
       <CutoffTable
         id="family"
@@ -235,12 +221,21 @@ export default function VisaBulletinIndex({
         categories={CATEGORIES.filter(({ kind }) => kind === "family")}
         chart={chart}
       />
-      <CutoffTable
-        id="employment"
-        title="Employment"
-        categories={CATEGORIES.filter(({ kind }) => kind === "employment")}
-        chart={chart}
-      />
+      <Stack gap="sm">
+        <CutoffTable
+          id="employment"
+          title="Employment"
+          categories={CATEGORIES.filter(({ kind }) => kind === "employment")}
+          chart={chart}
+        />
+        <Text size="xs" c="dimmed">
+          Source: the{" "}
+          <Anchor href={bulletinUrl} target="_blank" rel="noopener">
+            {formatBulletinMonth(month)} Visa Bulletin
+          </Anchor>
+          .
+        </Text>
+      </Stack>
     </Stack>
   );
 }

@@ -18,7 +18,7 @@ import {
 import MoreDetails from "../components/MoreDetails";
 import { NoteChip } from "../components/NoteChip";
 import NvcAudience from "../components/NvcAudience";
-import PolicyBanner from "../components/PolicyBanner";
+import { PolicyNews } from "../components/PolicyBanner";
 import { WarningIcon } from "../components/icons";
 import { Stat, Stats } from "../components/Stats";
 import TemporaryNotice from "../components/TemporaryNotice";
@@ -454,7 +454,7 @@ export default function NvcBacklog({ data }: Props) {
         {!reviewStale && <ReviewEstimate today={today} series={data.review} />}
       </Stack>
       <Stack gap="xs">
-        <PolicyBanner page="/nvc" chips />
+        <PolicyNews page="/nvc" />
         <NvcAudience />
       </Stack>
       <Stack gap="sm">
