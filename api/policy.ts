@@ -1,6 +1,7 @@
 import policyData from "../data/policy.json";
 import { daysBetween } from "../components/dates";
 import {
+  hasEnded,
   POLICY_ENTRIES,
   POLICY_PAGES,
   type PolicyScope,
@@ -251,11 +252,15 @@ export function checkPolicies({
         )}); keep it to ${MAX_OPEN_ENDED} or fewer, so that each is re-checked every week: set the end date of those that have ended, or remove those that no longer need a notice.`,
     );
 
-  // The pages drop an entry UNCHECKED_DAYS after its last check; the site
-  // builds daily with the data, so this says so a week ahead.
+  // The pages drop a live entry UNCHECKED_DAYS after its last check. This
+  // says so a week ahead in any build's log; data/freshness.py opens an
+  // issue from the same day, since the site builds only when the data or
+  // the code changes.
   const today = new Date().toISOString().slice(0, 10);
   const stale = POLICY_ENTRIES.filter(
-    (entry) => daysBetween(entry.lastChecked, today) >= UNCHECKED_DAYS - 7,
+    (entry) =>
+      !hasEnded(entry, today) &&
+      daysBetween(entry.lastChecked, today) >= UNCHECKED_DAYS - 7,
   );
   if (stale.length > 0)
     console.warn(

@@ -323,10 +323,10 @@
     {
       "id": "india-eb-2-limit-fy2026",
       "status": "official",
-      "title": "No EB-2 visas for India until October 1",
+      "title": "The limit on EB-2 visas for India has ended",
       "label": "India EB-2 limit ended",
-      "summary": "This year's EB-2 visas for India are all used up, so embassies and consulates may not issue them until October 1, 2026, when the yearly limits start again.",
-      "body": "The State Department has issued all the EB-2 immigrant visas available in fiscal year 2026 (October 2025 to September 2026) to applicants chargeable to India, which in most cases means people born in India. So embassies and consulates may not issue these visas for the rest of the fiscal year. The annual limits reset on October 1, 2026, when they may start issuing them again to qualified applicants.",
+      "summary": "From May 22 to September 30, 2026, embassies and consulates could not issue EB-2 visas to people born in India, because that year's visas were used up. The yearly limits started again on October 1, 2026.",
+      "body": "By May 22, 2026, the State Department had issued all the EB-2 immigrant visas available in fiscal year 2026 (October 2025 to September 2026) to applicants chargeable to India, which in most cases means people born in India. So embassies and consulates could not issue these visas for the rest of that fiscal year. The annual limits reset on October 1, 2026.",
       "scope": {
         "countries": ["India"],
         "visaClasses": ["eb-2"],
@@ -345,10 +345,10 @@
     {
       "id": "india-eb-5-unreserved-limit-fy2026",
       "status": "official",
-      "title": "No unreserved EB-5 visas for India until October 1",
+      "title": "The limit on unreserved EB-5 visas for India has ended",
       "label": "India EB-5 limit ended",
-      "summary": "This year's unreserved EB-5 visas for India are all used up, so embassies and consulates may not issue them until October 1, 2026. This does not include the rural, high-unemployment and infrastructure EB-5 visas.",
-      "body": "As of June 5, 2026, the State Department has issued all the unreserved EB-5 immigrant visas available in fiscal year 2026 (October 2025 to September 2026) to applicants chargeable to India, which in most cases means people born in India. These are the C5, T5, I5, R5, RU and NU categories. It does not include the rural, high-unemployment and infrastructure set-asides, which this page also counts. Embassies and consulates may not issue visas in these categories for the rest of the fiscal year. The annual limits reset on October 1, 2026, when they may start issuing them again to qualified applicants.",
+      "summary": "From June 5 to September 30, 2026, embassies and consulates could not issue unreserved EB-5 visas to people born in India, because that year's visas were used up. The rural, high-unemployment and infrastructure EB-5 visas were not affected.",
+      "body": "As of June 5, 2026, the State Department had issued all the unreserved EB-5 immigrant visas available in fiscal year 2026 (October 2025 to September 2026) to applicants chargeable to India, which in most cases means people born in India. These are the C5, T5, I5, R5, RU and NU categories. It did not include the rural, high-unemployment and infrastructure set-asides, which this page also counts. Embassies and consulates could not issue visas in these categories for the rest of that fiscal year. The annual limits reset on October 1, 2026.",
       "scope": {
         "countries": ["India"],
         "visaClasses": ["eb-5"],

@@ -274,6 +274,15 @@ describe("isUnchecked", () => {
     assert.equal(isUnchecked(juba, "2026-10-23"), false);
     assert.equal(isUnchecked(juba, "2026-10-24"), true);
   });
+
+  it("never drops an entry that has ended: its end is a fact", () => {
+    const ended = entry({ id: "india-limit", end: "2026-10-01" });
+    assert.equal(isUnchecked(ended, "2026-10-24"), false);
+    assert.equal(isUnchecked(ended, "2026-11-29"), false);
+    // one due to end later is still live, and goes unchecked as any other
+    const later = entry({ id: "later", end: "2026-12-01" });
+    assert.equal(isUnchecked(later, "2026-10-24"), true);
+  });
 });
 
 describe("scheduleOverrideFor", () => {

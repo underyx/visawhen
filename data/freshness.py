@@ -28,6 +28,11 @@ newest date with how often the source publishes:
 * Consulate issuances (data/consulates/dump/backlogs.ndjson.gz): State
   publishes its monthly issuance statistics several months late, often in
   batches; stale 240 days after the end of the newest month.
+* Policy notices (data/policy.json): written by hand and re-checked weekly;
+  the pages drop a live entry 29 days after its last check
+  (UNCHECKED_DAYS in components/policy.ts), so the file counts as stale 22
+  days after the oldest check of an entry that has not ended, a week ahead,
+  as the build's warning does.
 
 With --github, a stale source gets an issue labelled "stale-data", titled
 "Stale data: <source>", whose text is updated on every run (an edit, which
@@ -216,6 +221,29 @@ def consulate_issuances() -> Freshness:
     )
 
 
+def policy_notices(today: date) -> Freshness:
+    entries = json.loads((DATA / "policy.json").read_text())["entries"]
+    # an entry that has ended stays on the pages without re-checks
+    live = [entry for entry in entries if entry["end"] is None or entry["end"] > today.isoformat()]
+    oldest = min((entry["lastChecked"] for entry in live), default=None)
+    return Freshness(
+        source="policy notices",
+        newest=oldest or "none open",
+        stale_from=date.fromisoformat(oldest) + timedelta(days=22) if oldest else date.max,
+        cadence=(
+            "The policy notices are re-checked against their sources weekly. The pages drop an entry that has not "
+            "ended 29 days after its last check (`UNCHECKED_DAYS` in `components/policy.ts`), so the file counts as "
+            "stale 22 days after its oldest such check: a week before the first notice disappears. The date above "
+            "is that oldest check."
+        ),
+        where=(
+            "Re-check each entry in `data/policy.json` against its sources and set its `lastChecked`, as the "
+            "README's policy section says. The weekly upkeep routine does this on Tuesdays; if it has not, it has "
+            "stopped running or failed."
+        ),
+    )
+
+
 CHECKS: list[Callable[[], Freshness]] = [nvc, iv_schedule, uscis_forms, uscis_monthly, visa_bulletin, consulate_issuances]
 
 
@@ -290,7 +318,7 @@ def main() -> int:
     today: date = args.today or datetime.now(UTC).date()
 
     results = []
-    for check in CHECKS:
+    for check in [*CHECKS, lambda: policy_notices(today)]:
         freshness = check()
         stale = today >= freshness.stale_from
         results.append((freshness, stale))

@@ -2,13 +2,13 @@ import policyData from "../data/policy.json";
 import { daysBetween } from "./dates";
 import { AREAS, CATEGORIES, pagePath } from "./visaBulletin";
 
-// The policy notices shown on the consulate and NVC pages, from
-// data/policy.json. Delays now come mostly from policy (posts that paused or
+// The policy notices shown on the consulate pages and on the pages
+// POLICY_PAGES lists, from data/policy.json. Delays now come mostly from policy (posts that paused or
 // moved their visa services, nationalities whose visas are suspended), and
 // the scheduling and issuance data cannot be read without them. Each entry is
 // written by hand from its sources and re-checked about weekly; the pages say
-// when it was last checked, drop it 60 days after it ends, and drop it once
-// nobody has re-checked it for UNCHECKED_DAYS (isUnchecked). A consulate
+// when it was last checked, drop it 60 days after it ends, and drop a live
+// one once nobody has re-checked it for UNCHECKED_DAYS (isUnchecked). A consulate
 // page shows the few entries its interview card cannot be read without open,
 // above the card, and every other entry as a chip in a "Recent news:" row
 // (see PolicyBanner.tsx).
@@ -316,10 +316,14 @@ export const UNCHECKED_DAYS = 29;
 
 /** Whether an entry has gone unchecked too long (UNCHECKED_DAYS) by `today`,
  * which only the client knows: the prerendered page, served for weeks,
- * cannot tell, so it keeps every entry and the client drops the stale ones. */
+ * cannot tell, so it keeps every entry and the client drops the stale ones.
+ * An entry that has ended cannot go out of date (its end is a fact), so it
+ * stays until 60 days after its end, as the pages keep ended entries. */
 export function isUnchecked(entry: PolicyEntry, today: string | null): boolean {
   return (
-    today !== null && daysBetween(entry.lastChecked, today) >= UNCHECKED_DAYS
+    today !== null &&
+    !hasEnded(entry, today) &&
+    daysBetween(entry.lastChecked, today) >= UNCHECKED_DAYS
   );
 }
 
