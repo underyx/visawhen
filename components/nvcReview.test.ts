@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import { addDays } from "./dates";
 import {
   front,
+  gaps,
   getStall,
   latest,
   latestChange,
@@ -49,6 +50,35 @@ describe("latestChange", () => {
       previous: ["2026-07-13", 33],
       days: 22,
     });
+  });
+});
+
+describe("gaps", () => {
+  it("is empty for weekly readings", () => {
+    assert.deepEqual(gaps(weekly("2026-01-05", [30, 33, 29])), []);
+  });
+
+  it("joins a missed week or two as if they were read", () => {
+    assert.deepEqual(
+      gaps({ "2026-01-05": 30, "2026-01-26": 33, "2026-02-02": 29 }),
+      [],
+    );
+  });
+
+  it("finds each stretch of weeks with no readings, oldest first", () => {
+    assert.deepEqual(
+      gaps({
+        "2024-08-26": 6,
+        "2024-10-21": 10,
+        "2024-10-28": 11,
+        "2024-11-04": 12,
+        "2025-01-13": 9,
+      }),
+      [
+        { from: ["2024-08-26", 6], to: ["2024-10-21", 10] },
+        { from: ["2024-11-04", 12], to: ["2025-01-13", 9] },
+      ],
+    );
   });
 });
 
