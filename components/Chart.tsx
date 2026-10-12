@@ -227,7 +227,11 @@ export function YAxis<T>({
   );
 }
 
-/** The x-axis: a baseline at `y` across the plot, with labels under it */
+/** The x-axis: a baseline at `y` across the plot, with labels under it.
+ * The labels are keyed by their place, not their text: over several years
+ * the same month's label repeats, and React leaves labels with a repeated
+ * key behind when the ticks change, as when a range button is pressed, so
+ * that two sets of labels overlapped. */
 export function XAxis({
   ticks,
   y,
@@ -241,8 +245,8 @@ export function XAxis({
   return (
     <g transform={`translate(0,${y})`}>
       <line className={classes.baseline} x1={0} x2={width} />
-      {ticks.map(({ x, label }) => (
-        <text key={label} x={Math.round(x)} y={18} textAnchor="middle">
+      {ticks.map(({ x, label }, index) => (
+        <text key={index} x={Math.round(x)} y={18} textAnchor="middle">
           {label}
         </text>
       ))}
