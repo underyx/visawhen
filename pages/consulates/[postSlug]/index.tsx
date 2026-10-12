@@ -247,10 +247,11 @@ export default function ConsulateSelect({
   const overridden =
     scheduleOverride !== null &&
     overridesUpdate(scheduleOverride, ivScheduleAsOf, today);
-  // Whether the card shows months, which the subtitle dates: decided on the
-  // override as the title is, so the two never disagree.
+  // Whether the card shows months, which the subtitle dates: decided as the
+  // card decides (overridden), so the two never disagree. While prerendering
+  // overridden is scheduleOverride !== null, so the first render matches.
   const showsMonths =
-    scheduleOverride === null &&
+    !overridden &&
     ivSchedule !== null &&
     IV_CATEGORIES.some((category) => ivSchedule[category] !== null);
   const recentToolIssued = countToolClassIssuances(recentIssuances);

@@ -133,7 +133,7 @@ export const PRIORITY_DATE_CUTOFFS: Record<string, string> = {
 export const PRIORITY_DATE_TEXT: Record<string, Record<string, string>> = {
   "I-130": {
     "all-other-relative":
-      "USCIS’s approval is only the first step: when your relative can immigrate depends on the priority date.",
+      "USCIS’s approval is only the first step. When your relative can immigrate depends on the priority date.",
   },
   "I-485": {
     employment:

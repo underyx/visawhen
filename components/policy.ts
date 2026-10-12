@@ -219,9 +219,10 @@ function appliesToPage(entry: PolicyEntry, page: ConsulatePage): boolean {
 /** Whether an entry that is shown on a consulate page stays open above its
  * interview card, rather than being a chip in the news row under it: one
  * that names the page's post, or that overrides State's schedule at every
- * post, since the card cannot be read without either (IvScheduleCard points
- * to "the notice above"). An entry about the applicants' nationality is a
- * chip: the card itself says that most applicants' visas are suspended. */
+ * post, since the card cannot be read without either (IvScheduleCard names
+ * the overriding one: "See … above"). An entry about the applicants'
+ * nationality is a chip: the card itself says that most applicants' visas
+ * are suspended. */
 export function staysOpen(entry: PolicyEntry, page: ConsulatePage): boolean {
   return (
     (entry.scope.posts?.includes(page.postSlug) ?? false) ||

@@ -72,9 +72,9 @@ function Source({ href, children }: React.PropsWithChildren<{ href: string }>) {
   );
 }
 
-const TITLE = "Where VisaWhen's data comes from";
+const TITLE = "Where VisaWhen’s data comes from";
 const DESCRIPTION =
-  "The official sources behind VisaWhen's numbers, how often each one updates, and how recent the data on the site is.";
+  "The official sources behind VisaWhen’s numbers, how often each one updates, and how recent the data on the site is.";
 
 export default function About({
   uscisQuarter,

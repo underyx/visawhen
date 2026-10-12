@@ -389,7 +389,7 @@ describe("estimateTimeline", () => {
     );
     assert.equal(
       i130.basis[0],
-      "USCIS’s approval is only the first step: when your relative can immigrate depends on the priority date.",
+      "USCIS’s approval is only the first step. When your relative can immigrate depends on the priority date.",
     );
     // an I-485 waits for the date before USCIS can decide it
     const employment = estimateTimeline(

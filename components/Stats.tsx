@@ -18,7 +18,7 @@ export function StatValue({ children }: React.PropsWithChildren) {
 /** A box's value when there is none to show, with why. */
 export function NotShown({ children }: React.PropsWithChildren) {
   return (
-    <Text fw={700} lh={1.3}>
+    <Text fw={700} lh={1.3} mt={2}>
       {children}
     </Text>
   );

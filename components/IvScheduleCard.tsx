@@ -476,7 +476,7 @@ export default function IvScheduleCard({
             {postName} is not in the State Department&rsquo;s interview
             scheduling tool.
             {overridden ? (
-              " See the notice above."
+              <> See &ldquo;{scheduleOverride.title}&rdquo; above.</>
             ) : (
               <>
                 {" "}
@@ -491,7 +491,7 @@ export default function IvScheduleCard({
             The State Department&rsquo;s tool lists {postName} but gives no
             month for any category (N/A).
             {overridden ? (
-              " See the notice above."
+              <> See &ldquo;{scheduleOverride.title}&rdquo; above.</>
             ) : (
               <>
                 {" "}
@@ -515,7 +515,7 @@ export default function IvScheduleCard({
                 update.
               </>
             ) : (
-              " while the notice above is in effect."
+              <>. See &ldquo;{scheduleOverride.title}&rdquo; above.</>
             )}
           </Text>
         ) : (

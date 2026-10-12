@@ -91,8 +91,15 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
   };
 };
 
-function sortItems(posts: Post[], recentMap: Map<string, number>): Post[] {
+/** The posts in State's interview update first, so that the first screen
+ * shows months, not "Not listed"; then the most visas a month first. */
+function sortItems(
+  posts: Post[],
+  recentMap: Map<string, number>,
+  ivMonths: Props["ivMonths"],
+): Post[] {
   return sortBy(posts, [
+    ({ postSlug }) => (ivMonths[postSlug] === undefined ? 1 : 0),
     ({ postSlug }) => -(recentMap.get(postSlug) ?? -1),
     "post",
   ]);
@@ -199,8 +206,9 @@ export default function ConsulateSelect({
         ),
       ),
       recentMap,
+      ivMonths,
     );
-  }, [recentMap, posts, term]);
+  }, [recentMap, ivMonths, posts, term]);
 
   const title = "US consulates: immigrant visa interview scheduling";
   const description = `Each U.S. embassy and consulate's interview month for spouses, children and parents of U.S. citizens, the month of documentarily complete cases NVC is scheduling immigrant visa interviews for, from the State Department's scheduling tool (updated ${formatShortDate(

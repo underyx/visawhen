@@ -1,4 +1,11 @@
-import { CloseButton, Group, Popover, Stack, Text } from "@mantine/core";
+import {
+  CloseButton,
+  getDefaultZIndex,
+  Group,
+  Popover,
+  Stack,
+  Text,
+} from "@mantine/core";
 import { useClickOutside, useMediaQuery } from "@mantine/hooks";
 import React, { useEffect, useId, useRef, useState } from "react";
 import classes from "./NoteChip.module.css";
@@ -117,7 +124,13 @@ export function NoteChip({
       type="button"
       className={classes.chip}
       data-tone={tone}
-      onClick={() => (opened ? close() : setPinned(true))}
+      // A click pins a note that hovering opened, so that it stays when the
+      // mouse goes to read it, and closes only a pinned one.
+      onClick={() => {
+        clearTimeout(leaving.current);
+        if (pinned) close();
+        else setPinned(true);
+      }}
       onPointerEnter={enter}
       onPointerLeave={leave}
       onKeyDown={onKeyDown}
@@ -171,6 +184,8 @@ export function NoteChip({
     // the Tab key reaches what is in it. hideDetached false: Mantine hides
     // a note whose chip has scrolled out of view, and a long news note
     // could then never be read to its end, nor its links reached with Tab.
+    // zIndex just under the header's: a pinned note that scrolls up with the
+    // page goes under the site header, not over it.
     <Popover
       opened={opened}
       onDismiss={close}
@@ -179,6 +194,7 @@ export function NoteChip({
       shadow="md"
       withinPortal={false}
       hideDetached={false}
+      zIndex={getDefaultZIndex("app") - 1}
       clickOutsideEvents={OUTSIDE_EVENTS}
       classNames={{ dropdown: classes.note }}
     >
