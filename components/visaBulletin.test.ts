@@ -76,11 +76,18 @@ describe("the categories and areas", () => {
     assert.equal(bornInText(india, areas), "born in India");
     assert.equal(
       bornInText(all, areas),
-      "born outside China, India, Mexico, and the Philippines",
+      "born outside China, India, Mexico and the Philippines",
     );
     assert.equal(
       bornInText(all, chartAreas({ F1: { all: "C", mexico: "C" } })),
       "born outside Mexico",
+    );
+    assert.equal(
+      bornInText(
+        all,
+        chartAreas({ F1: { all: "C", mexico: "C", philippines: "C" } }),
+      ),
+      "born outside Mexico and the Philippines",
     );
     // a chart that lists no other area
     assert.equal(

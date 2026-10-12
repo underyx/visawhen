@@ -365,7 +365,9 @@ function NationalRange({ form, view }: { form: string; view: CategoryView }) {
   if (range.suppressed !== null) return null;
   return (
     <>
-      Nationally, {rangeWho} filed today: most likely{" "}
+      {/* "decided in": RangeText gives months until the page knows today,
+          then the months the decision most likely falls in */}
+      Nationally, {rangeWho} cases filed today are most likely decided in{" "}
       <RangeText low={range.q[1]} high={range.q[3]} />.{" "}
     </>
   );
@@ -814,7 +816,7 @@ export default function UscisOffice({
                   isTotal ? "cases" : "of these cases"
                 }.`}
               {comparison !== null &&
-                ` The line under the boxes on the office's pace compares the time to clear its pile at the pace of its last four quarters with the same for ${comparisonBase}; it says slower or faster only where one is more than ${CLEARING_COMPARISON_FACTOR} times the other.`}
+                ` The line under the boxes on the office’s pace compares the time to clear its pile at the pace of its last four quarters with the same for ${comparisonBase}; it says slower or faster only where one is more than ${CLEARING_COMPARISON_FACTOR} times the other.`}
             </Text>
           </MoreDetails>
         )}

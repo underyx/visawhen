@@ -228,7 +228,13 @@ export function bornInText(area: Area, areas: Area[]): string {
     place === undefined ? [] : [place],
   );
   if (places.length === 0) return area.bornIn;
-  return `born outside ${new Intl.ListFormat("en-US").format(places)}`;
+  // joined by hand: Intl.ListFormat adds a comma before "and", which no
+  // other list on the site has
+  const list =
+    places.length === 1
+      ? places[0]
+      : `${places.slice(0, -1).join(", ")} and ${places[places.length - 1]}`;
+  return `born outside ${list}`;
 }
 
 /** A category's or an area's page path segment */

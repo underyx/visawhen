@@ -753,7 +753,7 @@ export function WaitChart({
       {captioned && (
         <figcaption>
           {processingTimeSeries.length > 0 &&
-            "USCIS's median is how long the cases it decided in the quarter had taken."}
+            "USCIS’s median is how long the cases it decided in the quarter had taken."}
           {ceiling !== null &&
             " A triangle marks a quarter far off the top of the scale, such as one in which USCIS decided almost nothing; hover over or tap it for its numbers."}
           <Notes points={points} breaks={breaks} suspects={suspects} />

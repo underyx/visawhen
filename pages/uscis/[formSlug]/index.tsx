@@ -145,7 +145,7 @@ interface Props {
  * what the words suggest: the note of the "Approval rate" chip. */
 const APPROVAL_NOTES: Record<string, string> = {
   "I-589":
-    "The approval rate is the share of USCIS's own decisions that granted asylum, not the share of applicants who get asylum in the end. When an asylum office does not grant asylum to someone without legal status, it usually sends the case to an immigration court, and USCIS does not say if it counts these as denials.",
+    "The approval rate is the share of USCIS’s own decisions that granted asylum, not the share of applicants who get asylum in the end. When an asylum office does not grant asylum to someone without legal status, it usually sends the case to an immigration court, and USCIS does not say if it counts these as denials.",
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -752,7 +752,7 @@ export default function UscisForm({
             />
           </div>
           <Text size="xs" c="dimmed">
-            {`Each office's ${
+            {`Each office’s ${
               officeCategory === null ? form : `${form} (${officeCategory})`
             } decisions in ${officeLabel ?? "the newest quarter"}, most first.${
               offices.some(({ category }) => category !== null)

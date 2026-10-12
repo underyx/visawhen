@@ -187,7 +187,7 @@ export default function UscisStats({
           <Stack gap={6} className={classes.aside}>
             <MoreDetails label="How we worked this out">
               <Text size="sm">
-                {`The range starts from USCIS's median of ${formatMedian(
+                {`The range starts from USCIS’s median of ${formatMedian(
                   headline.median,
                 )} for ${
                   medianLabel ?? current.label
@@ -256,9 +256,7 @@ export default function UscisStats({
               : formatMonths(previous.waitMonths) ===
                 formatMonths(current.waitMonths)
               ? `same as the ${period} before`
-              : `about the same as the ${period} before (${formatMonths(
-                  previous.waitMonths,
-                )})`
+              : `about the same (was ${formatMonths(previous.waitMonths)})`
           }
           lineColor="dimmed"
         />

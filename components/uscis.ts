@@ -693,11 +693,11 @@ export function medianBreaks(
         label: "split by category",
         text: `From ${point.label}, USCIS gives the ${
           form.form
-        } numbers by category; before, it gave them only for all categories together${
+        } numbers by category; before, it gave them only for all categories together.${
           fromOffices
-            ? ", so a category's earlier quarters are the totals of all its offices"
+            ? " A category’s earlier quarters here are added up from USCIS’s report by office."
             : ""
-        }.`,
+        }`,
       });
     }
   });

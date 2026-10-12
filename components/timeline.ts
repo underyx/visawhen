@@ -337,7 +337,7 @@ export const PATHS: PathSpec[] = [
       {
         // where the lawyer warning of this path's who line moved
         label: "Entered without inspection",
-        note: "If you entered the US without inspection, talk to an immigration lawyer before you file: adjustment of status may not be open to you.",
+        note: "If you entered the US without inspection (without passing a US border officer), talk to an immigration lawyer before you file: adjustment of status may not be open to you.",
       },
       I751_CASE,
     ],

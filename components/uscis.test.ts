@@ -583,7 +583,7 @@ describe("the median lines of a chart", () => {
         ),
         i765,
       )[0].text,
-      "From Jul–Sep 2025, USCIS gives the I-765 numbers by category; before, it gave them only for all categories together, so a category's earlier quarters are the totals of all its offices.",
+      "From Jul–Sep 2025, USCIS gives the I-765 numbers by category; before, it gave them only for all categories together. A category’s earlier quarters here are added up from USCIS’s report by office.",
     );
     const n400 = form("N-400", {
       "2025-Q1": [

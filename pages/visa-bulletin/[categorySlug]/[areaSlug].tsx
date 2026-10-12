@@ -138,8 +138,8 @@ function StaleNotice({ month }: { month: string }) {
   if (daysBetween(due, today) <= GRACE_DAYS) return null;
   return (
     <TemporaryNotice>
-      The State Department has probably published a newer bulletin than{" "}
-      {formatBulletinMonth(month)}&rsquo;s. See{" "}
+      The State Department has probably published a bulletin newer than{" "}
+      {formatBulletinMonth(month)}. See{" "}
       <Anchor
         href={VISA_BULLETIN_URL}
         target="_blank"
@@ -178,7 +178,7 @@ function CutoffStat({ label, series, month }: CutoffStatProps) {
 }
 
 const GET = "get your visa or green card";
-const SEND = "send your documents to NVC";
+const SEND = "send your documents to the National Visa Center (NVC)";
 
 /** What the two cutoffs mean for the reader, in one or two sentences, or
  * null when the bulletin gives neither */
@@ -209,7 +209,9 @@ function meaningSentence(
   if (filing === "C")
     sentences.push(`You can ${SEND} whatever your priority date is.`);
   else if (filing === "U")
-    sentences.push("No one can send their documents to NVC this month.");
+    sentences.push(
+      "No one can send their documents to the National Visa Center (NVC) this month.",
+    );
   else if (filing !== undefined)
     sentences.push(
       `Your priority date must be earlier than the Date for Filing to ${SEND}.`,

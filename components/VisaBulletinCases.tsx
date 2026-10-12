@@ -16,7 +16,7 @@ import type { Area } from "./visaBulletin";
 function spouseBornElsewhere(area: Area): string {
   if (area.key === "all")
     return "Your spouse and children can use this line too, even if they were born in China, India, Mexico or the Philippines, as long as they immigrate with you.";
-  return "If your spouse was born in a country with a shorter line, you can use that country's line, as long as your spouse immigrates with you. A child can use either parent's country.";
+  return "If your spouse was born in a country with a shorter line, you can use that country’s line, as long as your spouse immigrates with you. A child can use either parent’s country.";
 }
 
 export default function VisaBulletinCases({ area }: { area: Area }) {
@@ -25,7 +25,7 @@ export default function VisaBulletinCases({ area }: { area: Area }) {
       <NoteChip label="Applying in the US">
         <Text size="sm">
           If you are in the US and will file Form I-485, USCIS says each month
-          which of the two charts you must go by. See{" "}
+          which of the two charts you must use. See{" "}
           <Anchor
             href={ADJUSTMENT_FILING_CHARTS_URL}
             target="_blank"

@@ -76,7 +76,7 @@ export function uscisCases({
               </Text>
             ))}
           <Text size="sm">
-            All categories together is nobody&rsquo;s own queue: pick yours.
+            All categories together mixes every queue: pick your own category.
           </Text>
         </Stack>
       ),
