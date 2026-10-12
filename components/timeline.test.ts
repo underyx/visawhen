@@ -147,6 +147,7 @@ const DATA: TimelineData = {
             from: ["2025-10", "2007-11-15"],
             to: ["2026-10", "2008-05-15"],
             months: 6,
+            steady: false,
           },
           fiveYears: null,
         },
@@ -675,10 +676,16 @@ describe("movementStat", () => {
     year,
     fiveYears,
   });
-  const moved = (from: string, to: string, months: number | null) => ({
+  const moved = (
+    from: string,
+    to: string,
+    months: number | null,
+    steady = false,
+  ) => ({
     from: ["2025-10", from] as [string, string],
     to: ["2026-10", to] as [string, string],
     months,
+    steady,
   });
 
   it("signs the year's move, with a real minus sign", () => {
@@ -759,20 +766,49 @@ describe("movementStat", () => {
   });
 
   it("says what the cutoff was when either end is Current or Unavailable", () => {
+    // Current is the front of the line: a date now is a move back
     assert.deepEqual(movementStat(cell(moved("C", "2008-05-15", null))), {
+      value: null,
+      notShown: "was current",
+      line: "a year ago",
+      lineColor: "red.9",
+    });
+    assert.deepEqual(movementStat(cell(moved("U", "2008-05-15", null))), {
+      value: null,
+      notShown: "was unavailable",
+      line: "a year ago",
+      lineColor: "teal.9",
+    });
+    assert.deepEqual(movementStat(cell(moved("2024-06-01", "C", null))), {
+      value: null,
+      notShown: "was Jun 1, 2024",
+      line: "a year ago",
+      lineColor: "teal.9",
+    });
+    assert.equal(
+      movementStat(cell(moved("2024-06-01", "U", null))).lineColor,
+      "red.9",
+    );
+  });
+
+  it("says a line has been Current or Unavailable all year", () => {
+    assert.deepEqual(movementStat(cell(moved("C", "C", null, true))), {
+      value: null,
+      notShown: "Current all year",
+      line: null,
+      lineColor: "dimmed",
+    });
+    assert.equal(
+      movementStat(cell(moved("U", "U", null, true))).notShown,
+      "Unavailable all year",
+    );
+    // the same at both ends, with a date in between, is not all year
+    assert.deepEqual(movementStat(cell(moved("C", "C", null, false))), {
       value: null,
       notShown: "was current",
       line: "a year ago",
       lineColor: "dimmed",
     });
-    assert.equal(
-      movementStat(cell(moved("U", "2008-05-15", null))).notShown,
-      "was unavailable",
-    );
-    assert.equal(
-      movementStat(cell(moved("2024-06-01", "C", null))).notShown,
-      "was Jun 1, 2024",
-    );
   });
 });
 

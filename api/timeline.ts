@@ -34,9 +34,9 @@ import {
 import {
   AREAS,
   CATEGORIES,
+  cutoffChange,
   getMovement,
   getSeries,
-  latestChange,
   newestMonth,
 } from "../components/visaBulletin";
 import { daysBetween } from "../components/Freshness";
@@ -176,11 +176,11 @@ async function bulletinOptions(
       cells[category.key][area.key] = {
         final,
         filing: filing ?? final,
-        finalChange: latestChange(series),
+        finalChange: cutoffChange(series),
         filingChange:
           filing === undefined
             ? null
-            : latestChange(
+            : cutoffChange(
                 getSeries(data, "datesForFiling", category.key, area.key),
               ),
         year: getMovement(series, 12),

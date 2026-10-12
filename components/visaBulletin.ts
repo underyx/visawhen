@@ -3,7 +3,7 @@ import type {
   Cutoff,
   VisaBulletinData,
 } from "../api/visaBulletin";
-import { daysBetween, formatMonthYear } from "./dates";
+import { daysBetween, formatMonthYear, signedChange } from "./dates";
 
 // The Visa Bulletin pages' categories and chargeability areas, their names in
 // plain English, and the arithmetic on cutoff dates. The keys are the ones
@@ -333,6 +333,9 @@ export interface Movement {
   to: [month: string, cutoff: Cutoff];
   /** Whole months it moved forward (negative: back), when both are dates */
   months: number | null;
+  /** Whether every bulletin from `from` to `to` gave the same cutoff: two
+   * ends that are both "C" can have had a date in between */
+  steady: boolean;
 }
 
 /** How far the cutoff moved in the months before the newest bulletin of a
@@ -350,20 +353,32 @@ export function getMovement(series: Series, back: number): Movement | null {
       isDate(from[1]) && isDate(to[1])
         ? monthsBetweenDates(from[1], to[1])
         : null,
+    steady: series
+      .filter(([month]) => month >= fromMonth)
+      .every(([, cutoff]) => cutoff === to[1]),
   };
 }
 
+/** Which way the line moved from one cutoff to a later one: 1 forward, -1
+ * back, 0 not at all. "Current" is the front of the line and "Unavailable"
+ * its back, so a date that becomes current moved forward, and a current
+ * category that gets a date again moved back. */
+export function cutoffDirection(from: Cutoff, to: Cutoff): number {
+  const rank = (cutoff: Cutoff) =>
+    cutoff === "C" ? 1 : cutoff === "U" ? -1 : 0;
+  if (isDate(from) && isDate(to)) return Math.sign(daysBetween(from, to));
+  return Math.sign(rank(to) - rank(from));
+}
+
 /** The change line under a cutoff figure (Stat): its text and its Mantine
- * colour. A date moves forward or back: the line says "+1 month since Sep" or
- * "−3 months since Sep", or "same as in Sep". A move of under half a month
- * would round to no months, so it is given in days. When either cutoff is
- * "C" or "U" the line says what it was then, "was current in Sep" or "was
- * Jan 1, 2025 in Sep". Null when the series has only one bulletin.
- *
- * Forward is good news for those waiting, so a move forward is teal and one
- * back red: the opposite of NVC's days (pages/nvc.tsx), where a longer time
- * is red. Neither is a mistake. */
-export function latestChange(
+ * colour (signs and colours: signedChange in components/dates.ts). A date
+ * moves forward or back: the line says "+1 month since Sep" or "−3 months
+ * since Sep", or "same as in Sep". A move of under half a month would round
+ * to no months, so it is given in days. When either cutoff is "C" or "U" the
+ * line says what it was then, "was current in Sep" or "was Jan 1, 2025 in
+ * Sep", coloured by which way the line moved (cutoffDirection). Null when
+ * the series has only one bulletin. */
+export function cutoffChange(
   series: Series,
 ): { text: string; color: string } | null {
   if (series.length < 2) return null;
@@ -377,6 +392,7 @@ export function latestChange(
       : formatMonthYear(monthStart(previousMonth));
   if (cutoff === previous)
     return { text: `same as in ${since}`, color: "dimmed" };
+  const direction = cutoffDirection(previous, cutoff);
   if (isDate(cutoff) && isDate(previous)) {
     const days = daysBetween(previous, cutoff);
     const months = monthsBetweenDates(previous, cutoff);
@@ -384,13 +400,14 @@ export function latestChange(
       months === 0
         ? `${Math.abs(days)} ${Math.abs(days) === 1 ? "day" : "days"}`
         : formatMonths(months);
-    return {
-      text: `${days > 0 ? "+" : "−"}${amount} since ${since}`,
-      color: days > 0 ? "teal.9" : "red.9",
-    };
+    return signedChange(direction, `${amount} since ${since}`);
   }
   const was = isDate(previous)
     ? formatCutoff(previous)
     : formatCutoff(previous).toLowerCase();
-  return { text: `was ${was} in ${since}`, color: "dimmed" };
+  // what it was needs no sign: only the colour says which way it moved
+  return {
+    text: `was ${was} in ${since}`,
+    color: signedChange(direction, "").color,
+  };
 }

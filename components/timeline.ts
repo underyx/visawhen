@@ -15,12 +15,14 @@ import {
   formatDateRange,
   formatMonthYear,
   formatShortDate,
+  signedChange,
 } from "./dates";
 import { formatIvMonth, monthsBehind } from "./consulates";
 import { DOL_PROCESSING_TIMES_URL, GLOBAL_VISA_WAIT_TIMES_URL } from "./links";
 import { front, getStall, reviewRange } from "./nvcReview";
 import type { Movement } from "./visaBulletin";
 import {
+  cutoffDirection,
   formatBulletinMonth,
   formatCutoff,
   formatMonths as formatWholeMonths,
@@ -696,7 +698,7 @@ export interface OfficeOption {
   verdict: "longer" | "shorter" | "close" | null;
 }
 
-/** The change line under a cutoff (latestChange): its text and colour */
+/** The change line under a cutoff (cutoffChange): its text and colour */
 export interface CutoffChange {
   text: string;
   color: string;
@@ -1804,20 +1806,8 @@ function priorityDateStage(
   return { ...base, basis, headline };
 }
 
-/** A move as "+8 months", "−3 months" or "0 months" */
-function signedMonths(months: number): string {
-  const sign = months > 0 ? "+" : months < 0 ? "−" : "";
-  return `${sign}${formatWholeMonths(months)}`;
-}
-
-/** A move forward is good news for those waiting (teal) and one back is bad
- * (red): the opposite of NVC's days, as latestChange says */
-function moveColor(months: number): string {
-  if (months === 0) return "dimmed";
-  return months > 0 ? "teal.9" : "red.9";
-}
-
-/** The "Moved in 12 months" box of a timeline page's cutoff strip */
+/** The "Final Action Date moved in 12 months" box of a timeline page's
+ * cutoff strip */
 export interface MovementStat {
   /** The move, "+8 months", or null when it cannot be counted; then
    * `notShown` says why, in the figure's place */
@@ -1830,32 +1820,50 @@ export interface MovementStat {
 }
 
 /** How far the Final Action Date moved in the last 12 months, for the box
- * next to the cutoffs. A cutoff that was Current or Unavailable a year ago
+ * next to the cutoffs (signs and colours: signedChange in
+ * components/dates.ts). A cutoff that was Current or Unavailable a year ago
  * (or is now) has no distance to count, so the box says what it was then
- * instead. */
+ * instead, coloured by which way the line moved (cutoffDirection), or, when
+ * it has not changed since, that it has been so all year. */
 export function movementStat(cell: BulletinCell): MovementStat {
   const { year, fiveYears } = cell;
-  const fiveYearLine =
+  const fiveYearMove =
     fiveYears !== null && fiveYears.months !== null
-      ? {
-          line: `${signedMonths(fiveYears.months)} in 5 years`,
-          lineColor: moveColor(fiveYears.months),
-        }
-      : { line: null, lineColor: "dimmed" };
+      ? signedChange(
+          fiveYears.months,
+          `${formatWholeMonths(fiveYears.months)} in 5 years`,
+        )
+      : null;
+  const fiveYearLine = {
+    line: fiveYearMove?.text ?? null,
+    lineColor: fiveYearMove?.color ?? "dimmed",
+  };
   if (year === null)
     return { value: null, notShown: "Not known yet", ...fiveYearLine };
   if (year.months === null) {
-    const was = year.from[1];
+    const [, was] = year.from;
+    const [, now] = year.to;
+    if (year.steady)
+      return {
+        value: null,
+        notShown: `${formatCutoff(was)} all year`,
+        line: null,
+        lineColor: "dimmed",
+      };
     return {
       value: null,
       notShown: `was ${
         isDate(was) ? formatCutoff(was) : formatCutoff(was).toLowerCase()
       }`,
       line: "a year ago",
-      lineColor: "dimmed",
+      lineColor: signedChange(cutoffDirection(was, now), "").color,
     };
   }
-  return { value: signedMonths(year.months), notShown: null, ...fiveYearLine };
+  return {
+    value: signedChange(year.months, formatWholeMonths(year.months)).text,
+    notShown: null,
+    ...fiveYearLine,
+  };
 }
 
 function noteStage(

@@ -24,13 +24,13 @@ import {
   CATEGORIES,
   chartAreas,
   ChartKey,
+  cutoffChange,
   formatBulletinMonth,
   formatCutoff,
   formatMonths,
   getMovement,
   getSeries,
   isDate,
-  latestChange,
   monthsBetweenDates,
   monthStart,
   Movement,
@@ -161,12 +161,12 @@ interface CutoffStatProps {
 }
 
 /** One chart's cutoff in the newest bulletin, as a box, with how it moved
- * since the bulletin before under it (latestChange) */
+ * since the bulletin before under it (cutoffChange) */
 function CutoffStat({ label, series, month }: CutoffStatProps) {
   const newest = last(series);
   if (newest === undefined || newest[0] !== month)
     return <Stat label={label} value="Not given" line={null} />;
-  const change = latestChange(series);
+  const change = cutoffChange(series);
   return (
     <Stat
       label={label}

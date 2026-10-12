@@ -182,7 +182,7 @@ function CutoffStrip({ cell }: { cell: BulletinCell }) {
         lineColor={cell.filingChange?.color}
       />
       <Stat
-        label="Moved in 12 months"
+        label="Final Action Date moved in 12 months"
         value={movement.value ?? <NotShown>{movement.notShown}</NotShown>}
         line={movement.line}
         lineColor={movement.lineColor}
