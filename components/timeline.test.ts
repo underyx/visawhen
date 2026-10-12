@@ -415,10 +415,9 @@ describe("estimateTimeline", () => {
       i485?.headline,
       "USCIS’s median: 6.0 months, once your date is current",
     );
-    assert.equal(
-      i485?.basis[0],
-      "USCIS can approve the I-485 only once your priority date is current, so your wait depends on it. The median counts only cases whose dates were already current.",
-    );
+    assert.deepEqual(i485?.basis, [
+      "USCIS can approve the I-485 only once your priority date is current, so your wait depends on it. USCIS’s median counts only cases whose dates were already current.",
+    ]);
     assert.equal(stage(SPOUSE_ABROAD, {}, "documents").headline, "");
   });
 
@@ -840,7 +839,7 @@ describe("movementStat", () => {
     // the same at both ends, with a date in between, is not all year
     assert.deepEqual(movementStat(cell(moved("C", "C", null, false))), {
       value: null,
-      notShown: "was current",
+      notShown: "was current too",
       line: "a year ago",
       lineColor: "dimmed",
     });

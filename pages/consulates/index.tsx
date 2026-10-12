@@ -293,7 +293,7 @@ export default function ConsulateSelect({
           Department&rsquo;s own figures.
         </Text>
         <Text size="xs" c="dimmed">
-          Not listed: the post is not in that update. See notice: visa services
+          Not listed: the post is not in that update. Notice: visa services
           there are paused, limited or moved; its page says more. Few immigrant
           visas: the State Department lists it as current, but it issued fewer
           than {FEW_IMMIGRANT_VISAS} family or employment immigrant visas in

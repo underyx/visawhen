@@ -1030,7 +1030,12 @@ function uscisStage(
       basis: [
         PRIORITY_DATE_TEXT[spec.form]?.[spec.category] ??
           "The wait depends on your priority date.",
-        "The next step counts from your priority date, not from this decision.",
+        // after an I-485 the next steps count from its filing, as usual
+        ...(spec.form === "I-130"
+          ? [
+              "The next step counts from your priority date, not from this decision.",
+            ]
+          : []),
       ],
     };
   if (range.suppressed === "too few decisions")
@@ -1854,11 +1859,14 @@ export function movementStat(cell: BulletinCell): MovementStat {
         line: null,
         lineColor: "dimmed",
       };
+    // Current or Unavailable at both ends, with dates in between: "was
+    // current" alone would read as if it no longer is
+    const wasText = isDate(was)
+      ? formatCutoff(was)
+      : formatCutoff(was).toLowerCase();
     return {
       value: null,
-      notShown: `was ${
-        isDate(was) ? formatCutoff(was) : formatCutoff(was).toLowerCase()
-      }`,
+      notShown: `was ${wasText}${was === now ? " too" : ""}`,
       line: "a year ago",
       lineColor: signedChange(cutoffDirection(was, now), "").color,
     };

@@ -625,7 +625,7 @@ export function previousLine(
 /** What a post's row in the consulate list shows at its right: a badge, and
  * under it a small line, the post's visas per month ("rate") or "few
  * immigrant visas" ("few"). The badge must agree with what the post's own
- * page leads with: "See notice" where a notice means the tool's months are
+ * page leads with: "Notice" where a notice means the tool's months are
  * no queue (`overridden`: scheduleOverrideFor() in policy.ts, decided as the
  * page decides its title); "Not listed" where the tool does not list the
  * post (`month` undefined); "No month given" where it lists it with N/A
@@ -652,7 +652,7 @@ export function postListBadge({
     quiet: false,
     line: "rate" as const,
   });
-  if (overridden) return plain("See notice");
+  if (overridden) return plain("Notice");
   if (month === undefined) return plain("Not listed");
   if (month === null) return plain("No month given");
   if (monthsBehind(asOf, month) > 0) return plain(formatShortIvMonth(month));

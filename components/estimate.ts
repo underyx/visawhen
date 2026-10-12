@@ -137,7 +137,7 @@ export const PRIORITY_DATE_TEXT: Record<string, Record<string, string>> = {
   },
   "I-485": {
     employment:
-      "USCIS can approve the I-485 only once your priority date is current, so your wait depends on it. The median counts only cases whose dates were already current.",
+      "USCIS can approve the I-485 only once your priority date is current, so your wait depends on it. USCIS’s median counts only cases whose dates were already current.",
   },
 };
 

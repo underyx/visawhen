@@ -84,7 +84,7 @@ describe("postListBadge", () => {
     for (const month of ["2026-02", "2026-09", null, undefined])
       assert.deepEqual(
         postListBadge({ ...row, month, overridden: true, toolIssued: 0 }),
-        rate("See notice"),
+        rate("Notice"),
       );
   });
   it("quiets a current post that issues few of the tool's visas", () => {
