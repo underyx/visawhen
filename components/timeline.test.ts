@@ -159,6 +159,7 @@ const DATA: TimelineData = {
 const SPOUSE_ABROAD = pathBySlug("spouse-abroad") as PathSpec;
 const FIANCE = pathBySlug("fiance") as PathSpec;
 const OTHER_FAMILY = pathBySlug("other-family") as PathSpec;
+const EMPLOYMENT = pathBySlug("employment") as PathSpec;
 
 function stage(
   path: PathSpec,
@@ -380,9 +381,43 @@ describe("estimateTimeline", () => {
     const { stages } = estimateTimeline(FIANCE, DATA, EMPTY_INPUTS, null);
     const ead = stages.find(({ spec }) => spec.id === "i-765");
     assert.equal(plain(ead?.headline), "Most likely 4–6 months after you file");
+    // USCIS decides the I-130 first; the wait for the date comes after
+    const i130 = stage(OTHER_FAMILY, {}, "i-130");
     assert.equal(
-      stage(OTHER_FAMILY, {}, "i-130").headline,
-      "USCIS’s median: 43.3 months, once your date is current",
+      i130.headline,
+      "USCIS’s median: 43.3 months, then you wait for your priority date",
+    );
+    assert.equal(
+      i130.basis[0],
+      "USCIS’s approval is only the first step: when your relative can immigrate depends on the priority date.",
+    );
+    // an I-485 waits for the date before USCIS can decide it
+    const employment = estimateTimeline(
+      EMPLOYMENT,
+      {
+        ...DATA,
+        ranges: {
+          ...DATA.ranges,
+          "I-485/employment": range(
+            "employment",
+            "Employment",
+            6,
+            [3, 5, 6, 9, 12],
+            { priorityDate: true },
+          ),
+        },
+      },
+      EMPTY_INPUTS,
+      null,
+    );
+    const i485 = employment.stages.find(({ spec }) => spec.id === "i-485");
+    assert.equal(
+      i485?.headline,
+      "USCIS’s median: 6.0 months, once your date is current",
+    );
+    assert.equal(
+      i485?.basis[0],
+      "USCIS can approve the I-485 only once your priority date is current, so your wait depends on it. The median counts only cases whose dates were already current.",
     );
     assert.equal(stage(SPOUSE_ABROAD, {}, "documents").headline, "");
   });

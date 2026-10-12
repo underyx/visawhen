@@ -1019,13 +1019,17 @@ function uscisStage(
   if (range.priorityDate)
     return {
       ...base,
-      headline: `USCIS’s median: ${formatMedian(
-        range.median,
-      )}, once your date is current`,
+      // USCIS decides an I-130 whatever the priority date; the wait for the
+      // date comes after. An I-485 it can decide only once the date is
+      // current.
+      headline: `USCIS’s median: ${formatMedian(range.median)}, ${
+        spec.form === "I-130"
+          ? "then you wait for your priority date"
+          : "once your date is current"
+      }`,
       basis: [
-        PRIORITY_DATE_TEXT[spec.form]?.[spec.category]?.(
-          formatMedian(range.median),
-        ) ?? "The wait depends on your priority date.",
+        PRIORITY_DATE_TEXT[spec.form]?.[spec.category] ??
+          "The wait depends on your priority date.",
         "The next step counts from your priority date, not from this decision.",
       ],
     };

@@ -1,7 +1,11 @@
 import { Anchor, Stack, Text } from "@mantine/core";
 import Link from "next/link";
 import React from "react";
-import { type CategoryRange, PRIORITY_DATE_CUTOFFS } from "./estimate";
+import {
+  type CategoryRange,
+  PRIORITY_DATE_CUTOFFS,
+  PRIORITY_DATE_TEXT,
+} from "./estimate";
 import { ChipRow, NoteChip } from "./NoteChip";
 
 // The special cases of a USCIS form's page and of its office pages, as a
@@ -26,30 +30,6 @@ export interface CaseView {
    * category the reports say nothing about */
   who: string | null;
 }
-
-/** The "Priority date" note, per form and category of
- * PRIORITY_DATE_CATEGORIES: what USCIS's decision is, and is not, of the
- * wait. `before` ends where the cutoff dates link follows; `after` comes
- * after it. (The timeline's step reads PRIORITY_DATE_TEXT instead.) */
-const PRIORITY_DATE_NOTES: Record<
-  string,
-  Record<string, { before: string; after?: string }>
-> = {
-  "I-130": {
-    "all-other-relative": {
-      before:
-        "All Other Relative (F1–F4): USCIS's approval is only the first step. When your relative can immigrate depends on the priority date:",
-    },
-  },
-  "I-485": {
-    employment: {
-      before:
-        "Employment: USCIS can approve the I-485 only once your priority date is current, so your wait depends on it:",
-      after:
-        "The median is of cases USCIS decided, whose dates were already current.",
-    },
-  },
-};
 
 interface Options {
   /** The page's categories, all categories together last; the chip on who
@@ -107,23 +87,23 @@ export function uscisCases({
       label: "Priority date",
       note: (
         <Stack gap="xs">
-          {priorityDate.map((range) => {
-            const note = PRIORITY_DATE_NOTES[form]?.[range.key] ?? {
-              before: `${range.name}: the wait depends on your priority date:`,
-            };
-            return (
-              <Text size="sm" key={range.key}>
-                {note.before} see{" "}
-                <Anchor
-                  component={Link}
-                  href={PRIORITY_DATE_CUTOFFS[range.key] ?? "/visa-bulletin"}
-                >
-                  today&rsquo;s cutoff dates
-                </Anchor>
-                .{note.after !== undefined && ` ${note.after}`}
-              </Text>
-            );
-          })}
+          {priorityDate.map((range) => (
+            <Text size="sm" key={range.key}>
+              <Text span inherit fw={700}>
+                {range.name}:
+              </Text>{" "}
+              {PRIORITY_DATE_TEXT[form]?.[range.key] ??
+                "The wait depends on your priority date."}{" "}
+              See{" "}
+              <Anchor
+                component={Link}
+                href={PRIORITY_DATE_CUTOFFS[range.key] ?? "/visa-bulletin"}
+              >
+                today&rsquo;s cutoff dates
+              </Anchor>
+              .
+            </Text>
+          ))}
         </Stack>
       ),
     });
