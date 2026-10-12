@@ -210,11 +210,12 @@ export default function About({
       </Table.ScrollContainer>
       <Text>
         The numbers say how the agencies handle cases in general, not what will
-        happen to yours. What they tell you about your own case comes first.
+        happen to yours. What the agencies tell you about your own case comes
+        first.
       </Text>
       <Text size="sm">
-        Not covered: PERM and prevailing wage decisions are the Department of
-        Labor&rsquo;s: see{" "}
+        Not covered: PERM and prevailing wage decisions. The Department of Labor
+        makes them; see{" "}
         <Source href={DOL_PROCESSING_TIMES_URL}>its processing times</Source>.
         Appointment waits for visitor, student and other temporary visas are in
         the State Department&rsquo;s{" "}
