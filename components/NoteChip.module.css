@@ -1,12 +1,14 @@
 /* A chip that opens a note (NoteChip): a pill drawn as a button, an ink
  * outline and no icon (Bence found one needless). The text is the chips'
  * size, xs, and the padding is tight, so that a row of them holds as many
- * as it can on a 360px phone. */
+ * as it can on a 360px phone. The height is --vw-chip-height (global.css):
+ * a line of text that holds a chip after its words (a Stats box's line)
+ * reads it to centre the chip on the line. */
 .chip {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  min-height: 1.625rem;
+  min-height: var(--vw-chip-height);
   padding: 0.125rem 0.375rem;
   border: 1px solid var(--vw-ink);
   border-radius: 999px;

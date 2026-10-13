@@ -46,8 +46,9 @@ export function Stat({ label, value, line, lineColor = "dimmed" }: StatProps) {
       ) : (
         <div>{value}</div>
       )}
-      {/* a div: a chip's note opens inside the line */}
-      <Text size="xs" c={lineColor} component="div">
+      {/* a div: a chip's note opens inside the line. The line's size is
+          xs, which Stats.module.css counts on to centre a chip on it. */}
+      <Text size="xs" c={lineColor} component="div" className={classes.line}>
         {line ?? NO_LINE}
       </Text>
     </div>

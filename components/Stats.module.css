@@ -44,3 +44,35 @@
   line-height: 1.15;
   margin-top: 2px;
 }
+
+/* The line under the value: its text and, after the text, a chip when
+ * there is one (/nvc's "stalled" chip, NoteChip). The chip is taller than
+ * the text's line, so it is centred on the line and the rest of its height
+ * hangs over the line's top and bottom edges (negative margins) instead of
+ * stretching the line: the text stays level with the lines of the boxes
+ * beside it, which the chip used to push it down from. What hangs over
+ * goes into the box's bottom padding and the room under the value. Centred,
+ * not on the baseline: the chip's baseline is its icon's bottom edge, which
+ * sits lower than its text. A chip that does not fit after the text (a
+ * phone's narrow boxes) wraps under it, with room for what hangs over its
+ * top. */
+.line {
+  --chip-overhang: calc(
+    (
+        var(--vw-chip-height) - var(--mantine-font-size-xs) *
+          var(--mantine-line-height-xs)
+      ) / 2
+  );
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  /* at the top of the strip's row, which another box's wrapped chip can
+     make taller than this line */
+  align-content: start;
+  column-gap: 0.25em;
+  row-gap: calc(var(--chip-overhang) + 0.25rem);
+}
+
+.line > button {
+  margin-block: calc(-1 * var(--chip-overhang));
+}
