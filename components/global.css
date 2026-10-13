@@ -7,6 +7,10 @@
   --vw-stamp: #5b3a94;
   --vw-rule: #c9d2cd;
   --vw-highlight: #f7ecb5;
+  /* The height of a chip that opens a note (NoteChip). A line of smaller
+   * text that holds a chip (a Stats box's line) needs it too, to centre the
+   * chip on the line. */
+  --vw-chip-height: 1.625rem;
 }
 
 body {

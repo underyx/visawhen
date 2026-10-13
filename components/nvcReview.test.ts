@@ -34,11 +34,23 @@ describe("latest", () => {
 });
 
 describe("latestChange", () => {
-  it("compares the newest reading with the one before", () => {
+  it("compares the newest reading with the previous week's", () => {
     assert.deepEqual(latestChange(weekly("2026-01-05", [30, 33, 29])), {
       previous: ["2026-01-12", 33],
       days: -4,
+      weekly: true,
     });
+  });
+
+  it("takes a reading up to 10 days before as the previous week's", () => {
+    assert.equal(
+      latestChange({ "2026-01-05": 30, "2026-01-15": 33 })?.weekly,
+      true,
+    );
+    assert.equal(
+      latestChange({ "2026-01-05": 30, "2026-01-16": 33 })?.weekly,
+      false,
+    );
   });
 
   it("is null with a single reading", () => {
@@ -49,6 +61,7 @@ describe("latestChange", () => {
     assert.deepEqual(latestChange({ "2026-07-13": 33, "2026-09-21": 55 }), {
       previous: ["2026-07-13", 33],
       days: 22,
+      weekly: false,
     });
   });
 });
