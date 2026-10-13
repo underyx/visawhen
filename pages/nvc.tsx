@@ -97,11 +97,14 @@ interface QueueStatProps {
 }
 
 /** One queue's newest time, as a box, with how it changed since the reading
- * before under it: a longer time is bad news for those waiting, so it is in
- * red, and a shorter one in green. While the queue has stalled (getStall),
- * a chip in warning colours after the change opens a note on what the
- * stall means (Bence's design: the notice it replaced restated the change,
- * which itself stays plain text). */
+ * before under it, "vs. previous week" as the USCIS boxes' "vs. previous
+ * quarter" (Bence: a week, not the date; the date only when readings are
+ * missing in between, when the week before is not the reading before): a
+ * longer time is bad news for those waiting, so it is in red, and a
+ * shorter one in green. While the queue has stalled (getStall), a chip in
+ * warning colours after the change opens a note on what the stall means
+ * (Bence's design: the notice it replaced restated the change, which
+ * itself stays plain text). */
 function QueueStat({ label, series, latestDate, at, now }: QueueStatProps) {
   const [date, days] = latest(series);
   const change = latestChange(series);
@@ -111,11 +114,12 @@ function QueueStat({ label, series, latestDate, at, now }: QueueStatProps) {
   if (date !== latestDate) line = `as of ${formatShortDate(date)}`;
   else if (change !== null) {
     const since = formatMonthDay(change.previous[0]);
-    if (change.days === 0) line = `same as on ${since}`;
+    if (change.days === 0)
+      line = change.weekly ? "same as previous week" : `same as on ${since}`;
     else {
       const changed = `${change.days > 0 ? "+" : "−"}${formatDays(
         Math.abs(change.days),
-      )} since ${since}`;
+      )} ${change.weekly ? "vs. previous week" : `since ${since}`}`;
       lineColor = change.days > 0 ? "red.9" : "teal.9";
       // While the queue has stalled, the change is only how much older the
       // queue got: a chip after it opens a note on what that means.

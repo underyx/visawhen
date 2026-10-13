@@ -47,6 +47,10 @@ export type Reading = [string, number];
 
 /** Readings further apart than this are not consecutive weekly updates. */
 export const MAX_UPDATE_GAP_DAYS = 21;
+/** Readings this close are a week's update and the one before it (NVC's
+ * weekly readings come 5 to 9 days apart): the page then says "previous
+ * week" rather than the earlier reading's date (Bence's ask). */
+export const WEEK_APART_DAYS = 10;
 /** A front that moved no more than this between readings stood still. */
 export const STALL_DAYS = 3;
 /** NVC's pace is measured over at least this many days. */
@@ -98,16 +102,23 @@ export function latest(series: NvcSeries): Reading {
 }
 
 /** How the newest reading compares with the one before it: the reading
- * before, and the days the time grew by, negative when it shrank. Null when
- * there is only one reading. The two can be weeks apart, when readings are
- * missing in between, so the page says which date the change is since. */
+ * before, the days the time grew by, negative when it shrank, and whether
+ * the one before is the previous week's (WEEK_APART_DAYS). Null when there
+ * is only one reading. The two can be weeks apart, when readings are
+ * missing in between: the page then says which date the change is since,
+ * rather than "previous week". */
 export function latestChange(
   series: NvcSeries,
-): { previous: Reading; days: number } | null {
+): { previous: Reading; days: number; weekly: boolean } | null {
   const all = readings(series);
   if (all.length < 2) return null;
+  const newest = all[all.length - 1];
   const previous = all[all.length - 2];
-  return { previous, days: all[all.length - 1][1] - previous[1] };
+  return {
+    previous,
+    days: newest[1] - previous[1],
+    weekly: daysBetween(previous[0], newest[0]) <= WEEK_APART_DAYS,
+  };
 }
 
 /** Where the front stood over its latest readings, when it has barely moved:
