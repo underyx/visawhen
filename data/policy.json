@@ -17,7 +17,7 @@
           "url": "https://travel.state.gov/content/travel/en/News/visas-news/temporary-pause-of-visa-operations.html"
         }
       ],
-      "lastChecked": "2026-09-25"
+      "lastChecked": "2026-10-13"
     },
     {
       "id": "beirut-limited-services",
@@ -36,7 +36,7 @@
           "url": "https://travel.state.gov/content/travel/en/News/visas-news/limited-services-available-at-the-us-embassy-in-lebanon.html"
         }
       ],
-      "lastChecked": "2026-09-25"
+      "lastChecked": "2026-10-13"
     },
     {
       "id": "khartoum-no-consular-operations",
@@ -59,7 +59,7 @@
           "url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/list-of-posts.html"
         }
       ],
-      "lastChecked": "2026-09-25"
+      "lastChecked": "2026-10-13"
     },
     {
       "id": "jerusalem-tel-aviv-limited-services",
@@ -77,7 +77,7 @@
           "url": "https://travel.state.gov/content/travel/en/News/visas-news/limited-visa-services-available-at-us-embassy-in-jerusalem-and-branch-office-in-tel-aviv.html"
         }
       ],
-      "lastChecked": "2026-09-25"
+      "lastChecked": "2026-10-13"
     },
     {
       "id": "africa-regional-hubs",
@@ -124,7 +124,7 @@
           "url": "https://travel.state.gov/content/travel/en/News/visas-news/realignment-of-us-visa-services-in-africa-to-regional-hubs.html"
         }
       ],
-      "lastChecked": "2026-09-25"
+      "lastChecked": "2026-10-13"
     },
     {
       "id": "iv-interviews-postponed-public-charge-training",
@@ -132,7 +132,7 @@
       "title": "Immigrant visa interviews may be delayed",
       "label": "Interview delays",
       "summary": "News reports say many U.S. embassies delayed immigrant visa interviews from August 2026, while officers trained on new rules. We do not know if this has ended, so watch your email for any change to your interview.",
-      "body": "In August 2026, U.S. embassies and consulates reportedly postponed immigrant visa interviews while their consular officers were trained on new public charge guidance: rules on whether an applicant is likely to depend on public benefits. They emailed applicants with interviews booked that the interviews would be rescheduled. The State Department acknowledged the pause in a statement on August 25, but it has posted no notice about it on its website.\n\nOn August 26, a State Department statement quoted by Fox News said its training initiative started in early August. On August 27, the Associated Press quoted a State Department official saying that the pause began in early August and was not expected to last beyond early to mid-September. The official said the interviews affected, most of them scheduled for August, would be rescheduled for September, October and November.\n\nThe latest report we have found, from Reuters on September 8, said that processing had started again for Hungary and Poland while the pause continued elsewhere, and that it could last months, according to a person familiar with the matter. Reuters also said that the pause came after the August 21 court ruling against the 75-country pause, and that the government told a court interviews were rescheduled through August 31. We have found no report on whether the pause is still in effect.\n\nIf your interview was postponed, or is coming up, check your email and the embassy's website: NVC and embassies may reschedule interviews, including ones already booked.",
+      "body": "In August 2026, U.S. embassies and consulates reportedly postponed immigrant visa interviews while their consular officers were trained on new public charge guidance: rules on whether an applicant is likely to depend on public benefits. They emailed applicants with interviews booked that the interviews would be rescheduled. The State Department acknowledged the pause in a statement on August 25, but it has posted no notice about it on its website.\n\nOn August 26, a State Department statement quoted by Fox News said its training initiative started in early August. On August 27, the Associated Press quoted a State Department official saying that the pause began in early August and was not expected to last beyond early to mid-September. The official said the interviews affected, most of them scheduled for August, would be rescheduled for September, October and November.\n\nThe latest report we have found, from Reuters on September 8, said that processing had started again for Hungary and Poland while the pause continued elsewhere, and that it could last months, according to a person familiar with the matter. Reuters also said that the pause came after the August 21 court ruling against the 75-country pause, and that the government told a court interviews were rescheduled through August 31. On September 10, the State Department sent a cable, published by AILA, telling all embassies and consulates to immediately resume processing and issuing immigrant visas and diversity visas after the court rulings. The cable, as reported, does not mention the training pause or interviews. We have found no report on whether the pause on interviews is still in effect.\n\nIf your interview was postponed, or is coming up, check your email and the embassy's website: NVC and embassies may reschedule interviews, including ones already booked.",
       "scope": {
         "allConsulatePages": true,
         "exceptPosts": ["budapest", "krakow", "warsaw"],
@@ -158,9 +158,13 @@
         {
           "label": "Reuters, via Yahoo News: US resumes immigrant visa processing for Hungary, Poland as pause remains elsewhere (September 8, 2026)",
           "url": "https://www.yahoo.com/news/articles/exclusive-us-resumes-immigrant-visa-211243675.html"
+        },
+        {
+          "label": "AILA: DOS Cable on the Vacatur of Immigrant Visa and Diversity Visa Issuance Pauses (September 10, 2026)",
+          "url": "https://www.aila.org/library/dos-cable-on-the-vacatur-of-immigrant-visa-and-diversity-visa-issuance-pauses"
         }
       ],
-      "lastChecked": "2026-09-25"
+      "lastChecked": "2026-10-13"
     },
     {
       "id": "pp-10998-suspension",
@@ -274,7 +278,7 @@
           "url": "https://travel.state.gov/content/travel/en/News/visas-news/suspension-of-visa-issuance-to-foreign-nationals-to-protect-the-security-of-the-united-states.html"
         }
       ],
-      "lastChecked": "2026-09-25"
+      "lastChecked": "2026-10-13"
     },
     {
       "id": "iv-pause-75-countries",
@@ -292,7 +296,7 @@
           "url": "https://travel.state.gov/content/travel/en/News/visas-news/immigrant-visa-processing-updates-for-nationalities-at-high-risk-of-public-benefits-usage.html"
         }
       ],
-      "lastChecked": "2026-09-24"
+      "lastChecked": "2026-10-13"
     },
     {
       "id": "dv-issuance-pause",
@@ -318,7 +322,7 @@
           "url": "https://www.bal.com/immigration-news/united-states-state-department-update-on-diversity-visa-issuance-pause/"
         }
       ],
-      "lastChecked": "2026-09-25"
+      "lastChecked": "2026-10-13"
     },
     {
       "id": "india-eb-2-limit-fy2026",
@@ -340,7 +344,7 @@
           "url": "https://travel.state.gov/content/travel/en/News/visas-news/india-per-country-limit-reached-in-the-eb-2-category.html"
         }
       ],
-      "lastChecked": "2026-09-25"
+      "lastChecked": "2026-10-13"
     },
     {
       "id": "india-eb-5-unreserved-limit-fy2026",
@@ -362,7 +366,7 @@
           "url": "https://travel.state.gov/content/travel/en/News/visas-news/india-per-country-limit-reached-in-the-eb-5-unreserved-category.html"
         }
       ],
-      "lastChecked": "2026-09-25"
+      "lastChecked": "2026-10-13"
     },
     {
       "id": "uscis-public-charge-2026",
@@ -401,7 +405,7 @@
           "url": "https://www.jurist.org/news/2026/09/two-separate-lawsuits-challenge-trump-administrations-revised-public-charge-rule-for-immigrants/"
         }
       ],
-      "lastChecked": "2026-09-26"
+      "lastChecked": "2026-10-13"
     }
   ]
 }
