@@ -26,8 +26,13 @@ committed it:
   quarterly report (data/uscis/forms.json) posts nothing: by the time it
   comes out, the monthly posts have covered its months.
 
-Every title links to the page on visawhen.com and pings a role. The webhook
-URL comes from the DISCORD_WEBHOOK_URL environment variable, a GitHub Actions
+Each message is a card (a Discord embed): the title, linking to the page on
+visawhen.com, with a line per number, in the site's violet. Over the card
+comes one plain line that repeats the numbers and pings the role: a phone's
+notification shows a message's text, not its card, and shows markdown as
+typed, so the line has none. (Discord's newer layout, Components V2, would
+suit the card better but its messages show nothing in notifications, an open
+Discord issue as of October 2026.) The webhook URL comes from the DISCORD_WEBHOOK_URL environment variable, a GitHub Actions
 secret of the same name (Discord: the channel's settings, Integrations,
 Webhooks, Copy Webhook URL). Without it, the messages are only printed and
 the run ends green, so that forks and runs before the secret is set do not
@@ -85,6 +90,8 @@ NVC_MUCH_DAYS = 3
 # N-400: a change of this share of the number before is much worse or much
 # better
 N400_MUCH_SHARE = 0.05
+# The card's colour: the site's stamp violet (pages/_app.tsx)
+COLOR = 0x6C47AA
 
 
 @dataclass(frozen=True)
@@ -299,30 +306,55 @@ def role_to_ping(known: dict[str, str], name: str) -> str | None:
     return role_id
 
 
-def render(message: Message, page: str, role_id: str | None) -> str:
-    # The URL in angle brackets, so that Discord adds no preview card
-    title = f"[{message.title}](<{page}>)"
+def plain_line(message: Message, role_id: str | None) -> str:
+    """The message's text, shown over the card and as the notification on a
+    phone: one line with every number, no markdown (a notification shows it
+    as typed), the role mention last."""
+    numbers = ", ".join(f"{label} {line}" for label, line in message.lines)
+    text = f"{message.title}: {numbers}"
     if role_id is not None:
-        title += f" <@&{role_id}>"
-    parts = [title]
-    for label, line in message.lines:
-        parts += ["", label, line]
-    return "\n".join(parts)
+        text += f" <@&{role_id}>"
+    return text
 
 
-def post(webhook_url: str, content: str, role_id: str | None) -> bool:
-    """POST the message to the webhook; whether Discord accepted it. Prints
-    what went wrong without the URL, which is a secret."""
-    payload = {
-        "content": content,
+def card(message: Message, page: str) -> dict[str, Any]:
+    """The message's embed: the title linking to the page, then a field per
+    number. The fields are not inline: three columns do not fit a phone."""
+    return {
+        "title": message.title,
+        "url": page,
+        "color": COLOR,
+        "fields": [{"name": label, "value": line, "inline": False} for label, line in message.lines],
+    }
+
+
+def payload(message: Message, page: str, role_id: str | None) -> dict[str, Any]:
+    """What is POSTed to the webhook."""
+    return {
+        "content": plain_line(message, role_id),
+        "embeds": [card(message, page)],
         # Only that role can be pinged, whatever else the text says
         "allowed_mentions": {"parse": [], "roles": [] if role_id is None else [role_id]},
     }
+
+
+def describe(body: dict[str, Any]) -> str:
+    """The payload as text, for the log."""
+    lines = [body["content"]]
+    for embed in body["embeds"]:
+        lines.append(f"[{embed['title']}]({embed['url']})")
+        lines += [f"  {field['name']}: {field['value']}" for field in embed["fields"]]
+    return "\n".join(lines)
+
+
+def post(webhook_url: str, body: dict[str, Any]) -> bool:
+    """POST the message to the webhook; whether Discord accepted it. Prints
+    what went wrong without the URL, which is a secret."""
     # wait=true makes Discord answer 200 with the message instead of 204 on
     # success, so that a refused message is told apart
     request = urllib.request.Request(
         f"{webhook_url}?wait=true",
-        data=json.dumps(payload).encode(),
+        data=json.dumps(body).encode(),
         headers={"Content-Type": "application/json", "User-Agent": "visawhen-bot (+https://github.com/underyx/visawhen)"},
         method="POST",
     )
@@ -330,16 +362,16 @@ def post(webhook_url: str, content: str, role_id: str | None) -> bool:
         try:
             with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
                 status = response.status
-                body = response.read().decode(errors="replace")
+                answer = response.read().decode(errors="replace")
         except urllib.error.HTTPError as error:
             status = error.code
-            body = error.read().decode(errors="replace")
+            answer = error.read().decode(errors="replace")
         except (urllib.error.URLError, TimeoutError, OSError) as error:
             print(f"The request to Discord failed: {type(error).__name__}", file=sys.stderr)
             return False
         if status == 429 and attempt == 0:
             try:
-                retry_after = float(json.loads(body).get("retry_after", 1))
+                retry_after = float(json.loads(answer).get("retry_after", 1))
             except (ValueError, AttributeError):
                 retry_after = 1.0
             retry_after = min(max(retry_after, 1.0), MAX_RETRY_AFTER)
@@ -348,7 +380,7 @@ def post(webhook_url: str, content: str, role_id: str | None) -> bool:
             continue
         break
     if status != 200:
-        print(f"Discord answered HTTP {status}: {body[:500]}", file=sys.stderr)
+        print(f"Discord answered HTTP {status}: {answer[:500]}", file=sys.stderr)
         return False
     print("Posted to Discord")
     return True
@@ -383,14 +415,14 @@ def main() -> int:
             print(f"{source.name}: nothing newer than before")
             continue
         role_id = role_to_ping(known_roles, source.role)
-        content = render(message, source.page, role_id)
-        print(f"{source.name}:\n{content}\n")
+        body = payload(message, source.page, role_id)
+        print(f"{source.name}:\n{describe(body)}\n")
         if args.dry_run:
             continue
         if not webhook_url:
             print(f"::notice::{WEBHOOK_ENV} is not set, so the message above was not posted to Discord")
             continue
-        if post(webhook_url, content, role_id):
+        if post(webhook_url, body):
             posted += 1
         else:
             failed = True
