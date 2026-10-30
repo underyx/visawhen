@@ -3,6 +3,6 @@
   "private": true,
   "description": "The CLI .github/workflows/deploy.yml runs, pinned with package-lock.json. Kept apart from the site's Yarn project so its large dependency tree stays out of .yarn/cache; Dependabot updates it.",
   "dependencies": {
-    "wrangler": "4.136.3"
+    "wrangler": "4.152.0"
   }
 }
