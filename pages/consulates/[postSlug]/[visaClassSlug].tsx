@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GetStaticPaths, GetStaticProps } from "next";
+import { type GetStaticPaths, type GetStaticProps } from "next";
 import React from "react";
 import { findLast, sumBy } from "lodash";
 import {
@@ -13,8 +13,8 @@ import {
   getRecentIssuancesByClass,
   getVisaClass,
   getVisaClassSlugsForPost,
-  IssuancesRow,
-  VisaType,
+  type IssuancesRow,
+  type VisaType,
 } from "../../../api/consulates";
 import Head from "next/head";
 import ConsulateChart from "../../../components/ConsulateChart";
@@ -30,7 +30,7 @@ import {
   IMMIGRANT_COUNTERPARTS,
   IV_CATEGORY_BY_CLASS,
   IV_POSTS_ELSEWHERE,
-  IvSchedule,
+  type IvSchedule,
   NVC_NONIMMIGRANT_CLASSES,
 } from "../../../components/consulates";
 import IvScheduleCard, {

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { RefObject, useEffect, useRef, useState } from "react";
+import { type RefObject, useEffect, useRef, useState } from "react";
 import { DiscordIcon } from "./icons";
 import { DISCORD_URL } from "./links";
 import { Container, Flex, Image, Text } from "@mantine/core";

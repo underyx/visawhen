@@ -12,7 +12,7 @@ import {
 } from "@mantine/core";
 import { useInputState } from "@mantine/hooks";
 import { groupBy, sortBy } from "lodash";
-import { GetStaticProps } from "next";
+import { type GetStaticProps } from "next";
 import Head from "next/head";
 import React, { useMemo } from "react";
 import { getActiveForms, getData, newestQuarter } from "../../api/uscis";

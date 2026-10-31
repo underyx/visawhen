@@ -9,17 +9,17 @@ import {
   formatMonth,
   formatShortIvMonth,
   IV_CATEGORIES,
-  IvCategory,
-  IvPostElsewhere,
-  IvSchedule,
+  type IvCategory,
+  type IvPostElsewhere,
+  type IvSchedule,
   monthsBehind,
-  PreviousMonth,
+  type PreviousMonth,
   previousLine,
 } from "./consulates";
 import { daysBetween, formatShortDate, useToday } from "./Freshness";
 import { AFRICA_HUBS_URL, EMBASSIES_URL, IV_POSTS_URL } from "./links";
 import MoreDetails from "./MoreDetails";
-import { hasEnded, overridesUpdate, PolicyEntry } from "./policy";
+import { hasEnded, overridesUpdate, type PolicyEntry } from "./policy";
 import { NotShown, Stat, Stats } from "./Stats";
 import TemporaryNotice from "./TemporaryNotice";
 /** State updates the tool monthly, so an update older than this means we

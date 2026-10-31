@@ -1,4 +1,4 @@
-import { NvcSeries } from "../api/nvc";
+import { type NvcSeries } from "../api/nvc";
 import {
   addDays,
   daysBetween,
@@ -6,7 +6,7 @@ import {
   formatShortDate,
 } from "./Freshness";
 import { NVC_TIMEFRAMES_URL } from "./links";
-import { Gap, gaps, readings } from "./nvcReview";
+import { type Gap, gaps, readings } from "./nvcReview";
 
 import { Paper } from "@mantine/core";
 import { curveMonotoneX } from "@visx/curve";

@@ -15,7 +15,7 @@ import {
 } from "@mantine/core";
 import { useInputState } from "@mantine/hooks";
 import { sortBy } from "lodash";
-import { GetStaticPaths, GetStaticProps } from "next";
+import { type GetStaticPaths, type GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import React, { useId, useMemo, useState } from "react";
@@ -24,11 +24,11 @@ import {
   getActiveOffices,
   getData,
   getMonthlyData,
-  Variant,
+  type Variant,
 } from "../../../api/uscis";
 import {
   categoryRanges,
-  CategoryRange,
+  type CategoryRange,
   clearingSuppressed,
   formatMedian,
   formatRangeMonths,
@@ -44,7 +44,7 @@ import {
   cleanData,
   formatCount,
   formViews,
-  FormView,
+  type FormView,
   LEADING_OFFICE_CATEGORY,
   officeCategoryName,
   officeCategoryPoints,
@@ -53,7 +53,7 @@ import {
   openingOfficeCategory,
   quarterLabel,
   republishedMedianQuarters,
-  Span,
+  type Span,
   toPoints,
 } from "../../../components/uscis";
 import { OutcomesChart, WaitChart } from "../../../components/UscisChart";
@@ -62,7 +62,7 @@ import UscisStats, { RangeText } from "../../../components/UscisStats";
 import UscisMonths, { MONTHS_ID } from "../../../components/UscisMonths";
 import {
   monthlyNumbers,
-  MonthlyNumbers,
+  type MonthlyNumbers,
 } from "../../../components/monthlyNumbers";
 import DiscordUpdates, {
   FORM_ALERTS,

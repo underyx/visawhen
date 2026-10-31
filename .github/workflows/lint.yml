@@ -1,7 +1,7 @@
-# ESLint, the TypeScript check and the unit tests. next build type-checks
-# too, but since Next.js 16 it no longer runs ESLint. This is a workflow of
-# its own rather than steps in build.yml, so that a lint error or a failing
-# test does not hold back the data workflows' deploys.
+# bun lint, the TypeScript check and the unit tests. next build type-checks
+# too, but since Next.js 16 it no longer lints. This is a workflow of its own
+# rather than steps in build.yml, so that a lint error or a failing test does
+# not hold back the data workflows' deploys.
 name: Lint
 
 on:
@@ -23,11 +23,19 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
           persist-credentials: false
+      # The linter is built into Bun, so it needs no packages. No stable Bun
+      # release has it yet, so .bun-version says "canary", the build of Bun's
+      # newest commit. Once a stable release has it, put that version there;
+      # Dependabot does not update .bun-version, so bump it by hand.
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: .bun-version
+      # --no-script: run the linter itself, not package.json's lint script
+      - run: bun lint --no-script
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24"
-      # skip-build: sqlite3's native module is not needed to lint
+      # skip-build: sqlite3's native module is not needed to typecheck or test
       - run: yarn install --mode=skip-build
-      - run: yarn lint
       - run: yarn typecheck
       - run: yarn test

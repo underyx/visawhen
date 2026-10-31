@@ -10,7 +10,7 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { GetStaticPaths, GetStaticProps } from "next";
+import { type GetStaticPaths, type GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import React, { useId, useState } from "react";
@@ -23,7 +23,7 @@ import {
 import {
   categoryMovedQuarters,
   categoryRanges,
-  CategoryRange,
+  type CategoryRange,
   casesMovedQuarters,
   CLEARING_COMPARISON_FACTOR,
   clearingSuppressed,
@@ -39,7 +39,7 @@ import {
 import {
   ALL_CATEGORIES,
   approximately,
-  ChartBreak,
+  type ChartBreak,
   cleanData,
   formatCount,
   formatMonths,
@@ -51,7 +51,7 @@ import {
   officeCategoryWho,
   officePointOptions,
   openingOfficeCategory,
-  QuarterPoint,
+  type QuarterPoint,
   quarterLabel,
   rarelyApproves,
   SERVICE_CENTER_FORMS,

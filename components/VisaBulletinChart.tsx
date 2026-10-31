@@ -11,7 +11,7 @@ import {
   lonePoints,
   Plot,
   RangeButtons,
-  Series as ChartSeries,
+  type Series as ChartSeries,
   thin,
   TooltipLine,
   useChartWidth,
@@ -22,12 +22,12 @@ import { VISA_BULLETIN_URL } from "./links";
 import {
   addMonthsToMonth,
   CHARTS,
-  ChartKey,
+  type ChartKey,
   formatBulletinMonth,
   formatCutoff,
   isDate,
   monthStart,
-  Series,
+  type Series,
 } from "./visaBulletin";
 
 interface Props {

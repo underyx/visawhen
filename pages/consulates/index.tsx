@@ -9,7 +9,7 @@ import {
   Title,
 } from "@mantine/core";
 import { sortBy } from "lodash";
-import { GetStaticProps } from "next";
+import { type GetStaticProps } from "next";
 import Head from "next/head";
 import React, { useMemo } from "react";
 import {
@@ -20,9 +20,9 @@ import {
   getRecentIssuancesByPost,
   getRecentToolIssuancesByPost,
   getRecentWindow,
-  PostRow,
-  RecentPostIssuancesRow,
-  RecentWindow,
+  type PostRow,
+  type RecentPostIssuancesRow,
+  type RecentWindow,
 } from "../../api/consulates";
 import {
   FEW_IMMIGRANT_VISAS,

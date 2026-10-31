@@ -1,10 +1,10 @@
 import { Anchor, Box, Button, Stack, Text, Title } from "@mantine/core";
 import { findLast, last } from "lodash";
-import { GetStaticPaths, GetStaticProps } from "next";
+import { type GetStaticPaths, type GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import React from "react";
-import { Cutoff, getData } from "../../../api/visaBulletin";
+import { type Cutoff, getData } from "../../../api/visaBulletin";
 import { ChevronLeftIcon } from "../../../components/icons";
 import { ListRow, ListRows } from "../../../components/ListRow";
 import MoreDetails from "../../../components/MoreDetails";
@@ -16,14 +16,14 @@ import VisaBulletinChart from "../../../components/VisaBulletinChart";
 import { breadcrumbList } from "../../../components/structuredData";
 import {
   addMonthsToMonth,
-  Area,
+  type Area,
   areaBySlug,
   bornInText,
-  Category,
+  type Category,
   categoryBySlug,
   CATEGORIES,
   chartAreas,
-  ChartKey,
+  type ChartKey,
   cutoffChange,
   formatBulletinMonth,
   formatCutoff,
@@ -33,11 +33,11 @@ import {
   isDate,
   monthsBetweenDates,
   monthStart,
-  Movement,
+  type Movement,
   newestMonth,
   pagePath,
   PRIORITY_DATE_DEFINITION,
-  Series,
+  type Series,
 } from "../../../components/visaBulletin";
 import { daysBetween, useToday } from "../../../components/Freshness";
 import TemporaryNotice from "../../../components/TemporaryNotice";

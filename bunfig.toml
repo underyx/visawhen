@@ -1,0 +1,91 @@
+# bun lint (https://bun.com/docs/lint) replaced ESLint. With no rules of its
+# own it already runs ESLint's and typescript-eslint's recommended rules, plus
+# rules-of-hooks, exhaustive-deps and jsx-key. The rules below add what
+# eslint-config-next (core-web-vitals) turned on beyond those, so that the
+# switch did not lose coverage, and the import rule the unit tests rely on.
+[lint]
+ignorePatterns = [
+  ".pnp.cjs",
+  ".pnp.loader.mjs",
+  ".yarn/",
+  "next-env.d.ts",
+  # the data scrapers' Python environments (Jupyter ships JavaScript)
+  "data/**/.venv/",
+]
+
+[lint.rules]
+# The .ts modules are loaded by Node as they are in `yarn test` (see
+# scripts/ts-hooks.mjs), which strips types but keeps every import, so an
+# import of a type alone has to say so. (ESLint checked only .ts files; bun
+# lint has no per-file rules, so the .tsx files follow the same style.)
+"@typescript-eslint/consistent-type-imports" = ["error", { fixStyle = "inline-type-imports" }]
+
+# eslint-plugin-react's recommended rules, minus the ones eslint-config-next
+# turns off (no-unknown-property, react-in-jsx-scope, prop-types,
+# jsx-no-target-blank); jsx-key is on by default.
+"react/display-name" = "error"
+"react/jsx-no-comment-textnodes" = "error"
+"react/jsx-no-duplicate-props" = "error"
+"react/jsx-no-undef" = "error"
+"react/jsx-uses-react" = "error"
+"react/jsx-uses-vars" = "error"
+"react/no-children-prop" = "error"
+"react/no-danger-with-children" = "error"
+"react/no-deprecated" = "error"
+"react/no-direct-mutation-state" = "error"
+"react/no-find-dom-node" = "error"
+"react/no-is-mounted" = "error"
+"react/no-render-return-value" = "error"
+"react/no-string-refs" = "error"
+"react/no-unescaped-entities" = "error"
+"react/require-render-return" = "error"
+
+# eslint-plugin-react-hooks' recommended React Compiler rules; rules-of-hooks
+# and exhaustive-deps are on by default.
+"react-hooks/config" = "error"
+"react-hooks/error-boundaries" = "error"
+"react-hooks/gating" = "error"
+"react-hooks/globals" = "error"
+"react-hooks/immutability" = "error"
+"react-hooks/preserve-manual-memoization" = "error"
+"react-hooks/purity" = "error"
+"react-hooks/refs" = "error"
+"react-hooks/set-state-in-effect" = "error"
+"react-hooks/set-state-in-render" = "error"
+"react-hooks/static-components" = "error"
+"react-hooks/use-memo" = "error"
+"react-hooks/incompatible-library" = "warn"
+"react-hooks/unsupported-syntax" = "warn"
+
+# @next/eslint-plugin-next's core-web-vitals config, except
+# no-location-assign-relative-destination, which bun lint does not have
+"@next/next/google-font-display" = "warn"
+"@next/next/google-font-preconnect" = "warn"
+"@next/next/next-script-for-ga" = "warn"
+"@next/next/no-async-client-component" = "warn"
+"@next/next/no-before-interactive-script-outside-document" = "warn"
+"@next/next/no-css-tags" = "warn"
+"@next/next/no-head-element" = "warn"
+"@next/next/no-img-element" = "warn"
+"@next/next/no-page-custom-font" = "warn"
+"@next/next/no-styled-jsx-in-document" = "warn"
+"@next/next/no-title-in-document-head" = "warn"
+"@next/next/no-typos" = "warn"
+"@next/next/no-unwanted-polyfillio" = "warn"
+"@next/next/inline-script-id" = "error"
+"@next/next/no-assign-module-variable" = "error"
+"@next/next/no-document-import-in-page" = "error"
+"@next/next/no-duplicate-head" = "error"
+"@next/next/no-head-import-in-document" = "error"
+"@next/next/no-html-link-for-pages" = "error"
+"@next/next/no-script-component-in-head" = "error"
+"@next/next/no-sync-scripts" = "error"
+
+# the rest of eslint-config-next
+"import/no-anonymous-default-export" = "warn"
+"jsx-a11y/alt-text" = ["warn", { elements = ["img"], img = ["Image"] }]
+"jsx-a11y/aria-props" = "warn"
+"jsx-a11y/aria-proptypes" = "warn"
+"jsx-a11y/aria-unsupported-elements" = "warn"
+"jsx-a11y/role-has-required-aria-props" = "warn"
+"jsx-a11y/role-supports-aria-props" = "warn"

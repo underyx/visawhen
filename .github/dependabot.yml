@@ -44,17 +44,10 @@ updates:
       - dependency-name: "@types/node"
         update-types:
           - "version-update:semver-major"
-      # ESLint 10 removed context.getFilename(), which eslint-plugin-react
-      # (via eslint-config-next) still calls, so `yarn lint` crashes on it
-      # (Dependabot PR #443). Lift this once eslint-config-next's plugins
-      # support ESLint 10.
-      - dependency-name: "eslint"
-        update-types:
-          - "version-update:semver-major"
-      # TypeScript 7 is the native compiler: typescript-eslint (via
-      # eslint-config-next) refuses to load with it, next build's type check
-      # fails, and the package pulls in a platform binary for every OS, which
-      # would all land in the committed .yarn/cache (Dependabot PR #442).
+      # TypeScript 7 is the native compiler: next build's type check fails
+      # with it, and the package pulls in a platform binary for every OS,
+      # which would all land in the committed .yarn/cache (Dependabot PR
+      # #442).
       - dependency-name: "typescript"
         update-types:
           - "version-update:semver-major"
