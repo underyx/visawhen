@@ -1,10 +1,9 @@
 dask-worker-space/
 pdfs/
 *.pkl
-*.nbconvert.ipynb
 .joblib_cache/
 *.sqlite
-# committed gzipped (baselines.ipynb); an old `bun run ensure-db` left it
+# committed gzipped (baselines.py); an old `bun run ensure-db` left it
 # decompressed next to the .gz
 dump/backlogs.ndjson
 .venv/

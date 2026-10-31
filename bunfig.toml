@@ -104,7 +104,7 @@ ignorePatterns = [
 # does by default. pre-commit runs it (.pre-commit-config.yaml).
 [fmt]
 ignorePatterns = [
-  # written by sqlite-diffable (data/consulates/baselines.ipynb)
+  # written by sqlite-diffable (data/consulates/baselines.py)
   "data/*/dump/",
   # written by npm and Dependabot
   ".github/deploy-tools/package-lock.json",

@@ -8,8 +8,6 @@ on:
 
 defaults:
   run:
-    # bash (rather than the runner's default `sh -e`) enables pipefail, so the
-    # `nbconvert | python` pipelines below fail when the notebook fails.
     shell: bash
     working-directory: data/consulates
 
@@ -63,23 +61,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-consulates-pdfs-
 
-      # The dev group is installed too: the notebooks import IPython, which
-      # comes with ipykernel.
       - name: Install dependencies
         run: uv sync --locked
 
-      # The notebooks are converted to scripts and streamed into python instead
-      # of being executed with `nbconvert --execute`: output shows up in the job
-      # log as it happens, and `::warning::` lines reach GitHub as annotations.
-      # The notebooks import display() from IPython themselves (it is only a
-      # builtin inside a kernel; outside one it prints the object's repr), and
-      # pipefail makes a failing conversion fail the step.
-      - name: Run visa-issuances notebook
-        run: |
-          uv run jupyter nbconvert --to script --stdout visa-issuances.ipynb | uv run python -u -
-      - name: Run baselines notebook
-        run: |
-          uv run jupyter nbconvert --to script --stdout baselines.ipynb | uv run python -u -
+      # -u: output shows up in the job log as it happens, and `::warning::`
+      # lines reach GitHub as annotations.
+      - name: Read the issuance PDFs
+        run: uv run python -u visa_issuances.py
+      - name: Write the database dump
+        run: uv run python -u baselines.py
 
       - name: Save joblib results
         if: always()

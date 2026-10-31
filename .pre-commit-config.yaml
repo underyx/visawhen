@@ -20,12 +20,7 @@ repos:
     hooks:
       - id: ruff-check
         args: [--fix, --exit-non-zero-on-fix]
-        types_or: [python, pyi, jupyter]
-
-  - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.9.1
-    hooks:
-      - id: nbqa-black
+        types_or: [python, pyi]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v2.4.0
@@ -45,8 +40,3 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
-
-  - repo: https://github.com/roy-ht/pre-commit-jupyter
-    rev: v1.2.1
-    hooks:
-      - id: jupyter-notebook-cleanup

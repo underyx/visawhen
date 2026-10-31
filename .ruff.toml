@@ -1,4 +1,4 @@
-include = ["*.py", "*.pyi", "**/pyproject.toml", "*.ipynb"]
+include = ["*.py", "*.pyi", "**/pyproject.toml"]
 target-version = "py311"
 
 [lint]
@@ -18,10 +18,7 @@ select = [
   "UP",
   "W",
 ]
-ignore = [
-  "E501",
-  "B018", # useless expressions are not so useless in Jupyter notebooks
-]
+ignore = ["E501"]
 
 [lint.isort]
 force-single-line = true

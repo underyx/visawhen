@@ -13,15 +13,9 @@ dependencies = [
   # the issuance tables are read from the PDFs' text layer; no more camelot
   # (ghostscript/OpenCV page rendering), which took ~0.5 s per page
   "pypdf>=6.16.2,<7",
-  "nbconvert>=7.17.1,<8",
   "joblib>=1.5.3,<2",
   "sqlite-diffable>=0.6,<0.7",
 ]
-
-[dependency-groups]
-# Also installed in CI: the notebooks import IPython's display(), which
-# ipykernel brings in.
-dev = ["ipykernel>=7.3.0,<8", "notebook>=7.6.2,<8", "jupyter>=1.1.1,<2"]
 
 [tool.ruff]
 extend = "../../.ruff.toml"

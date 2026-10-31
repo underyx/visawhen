@@ -245,7 +245,7 @@
 /consulates/bishkek/u1 /consulates/bishkek/su 301
 /consulates/managua/u1 /consulates/managua/su 301
 
-# Codes counted in a class of their own until the notebook merged them: the
+# Codes counted in a class of their own until data/consulates/baselines.py merged them: the
 # EB-5 set-asides of the EB-5 Reform and Integrity Act (NR, RR, NH, RH and RI)
 # and its new unreserved codes (NU, RU), with and without a 1, 2 or 3, into
 # EB-5, and CQ1, CQ2 and CQ3 into CQ. A rule per post, since the placeholder

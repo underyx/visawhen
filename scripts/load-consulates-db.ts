@@ -1,6 +1,6 @@
 // Builds data/consulates/consulates.sqlite from its dump in
 // data/consulates/dump/ (`bun run ensure-db`, before every build). The dump is
-// what sqlite-diffable writes (the consulate notebooks make it): per table,
+// what sqlite-diffable writes (data/consulates/baselines.py makes it): per table,
 // <table>.metadata.json with its columns and schema, and <table>.ndjson
 // (backlogs.ndjson.gz, gzipped) with one row per line as a JSON array.
 import { Database } from "bun:sqlite";
