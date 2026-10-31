@@ -25,7 +25,7 @@ The home page leads to a timeline page per common route through the process (`/t
 
 ## Running the site locally
 
-You need Node.js (the version in `.node-version`), which runs the site and the tests, [Bun](https://bun.com), which installs the packages (the version in `.bun-version`) and lints (`bun lint` is only in the canary for now: `bun upgrade --canary`), and [sqlite-diffable](https://github.com/simonw/sqlite-diffable) on your `PATH` (`pipx install sqlite-diffable` or `uv tool install sqlite-diffable`) to rebuild the consulates database from its dump.
+You need Node.js (the version in `.node-version`), which runs the site, [Bun](https://bun.com), which installs the packages (the version in `.bun-version`), runs the tests and lints (`bun lint` is only in the canary for now: `bun upgrade --canary`), and [sqlite-diffable](https://github.com/simonw/sqlite-diffable) on your `PATH` (`pipx install sqlite-diffable` or `uv tool install sqlite-diffable`) to rebuild the consulates database from its dump.
 
 ```sh
 bun install         # install dependencies
@@ -36,7 +36,7 @@ bun run typecheck   # tsc
 bun run test        # the unit tests
 ```
 
-The unit tests (`*.test.ts` next to the modules they test, run by Node's own test runner) cover the logic the pages rest on: the planning ranges and the rules that suppress them (`components/estimate.ts`), the NVC review range (`components/nvcReview.ts`), which policy notices a page shows (`components/policy.ts`), the USCIS figures and the chart notes (`components/uscis.ts`), the Visa Bulletin arithmetic, the search ranking and the redirects check. Node loads the TypeScript modules as they are, so a `.ts` module may not import a `.tsx` one, and must say `import type` for a type (`bun lint` checks that); the pure date helpers live in `components/dates.ts` for that reason, apart from the `useToday` hook in `components/Freshness.tsx`. The NVC backtest (`node --import ./scripts/register-ts-hooks.mjs data/nvc/backtest.mjs`) runs the same modules the same way.
+The unit tests (`*.test.ts` next to the modules they test, run by `bun test`, written with `node:test` and `node:assert`) cover the logic the pages rest on: the planning ranges and the rules that suppress them (`components/estimate.ts`), the NVC review range (`components/nvcReview.ts`), which policy notices a page shows (`components/policy.ts`), the USCIS figures and the chart notes (`components/uscis.ts`), the Visa Bulletin arithmetic, the search ranking and the redirects check. The NVC backtest (`bun data/nvc/backtest.mjs`) runs the same modules against NVC's published timeframes.
 
 ## Running the scrapers
 

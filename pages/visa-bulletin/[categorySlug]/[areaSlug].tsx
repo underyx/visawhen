@@ -1,5 +1,4 @@
 import { Anchor, Box, Button, Stack, Text, Title } from "@mantine/core";
-import { findLast, last } from "lodash";
 import { type GetStaticPaths, type GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
@@ -163,7 +162,7 @@ interface CutoffStatProps {
 /** One chart's cutoff in the newest bulletin, as a box, with how it moved
  * since the bulletin before under it (cutoffChange) */
 function CutoffStat({ label, series, month }: CutoffStatProps) {
-  const newest = last(series);
+  const newest = series.at(-1);
   if (newest === undefined || newest[0] !== month)
     return <Stat label={label} value="Not given" line={null} />;
   const change = cutoffChange(series);
@@ -261,7 +260,7 @@ function Movements({ series, month }: { series: Series; month: string }) {
     sentences.push(
       "No visas are left in this category this month, so the line is not moving.",
     );
-    const lastDated = findLast(series, ([, cutoff]) => isDate(cutoff));
+    const lastDated = series.findLast(([, cutoff]) => isDate(cutoff));
     if (lastDated !== undefined)
       sentences.push(
         `Its last cutoff date, in the ${formatBulletinMonth(
@@ -338,8 +337,8 @@ export default function VisaBulletinPage({
   otherAreas,
   otherCategories,
 }: Props) {
-  const finalAction = last(series.finalAction);
-  const filing = last(series.datesForFiling);
+  const finalAction = series.finalAction.at(-1);
+  const filing = series.datesForFiling.at(-1);
   const finalActionCutoff =
     finalAction?.[0] === month ? finalAction[1] : undefined;
   const filingCutoff = filing?.[0] === month ? filing[1] : undefined;

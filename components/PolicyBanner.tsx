@@ -1,3 +1,4 @@
+import { sortBy } from "./sortBy";
 import {
   Alert,
   Anchor,
@@ -7,7 +8,6 @@ import {
   Stack,
   Text,
 } from "@mantine/core";
-import { sortBy } from "lodash";
 import React from "react";
 import { daysBetween, formatShortDate, useToday } from "./Freshness";
 import MoreDetails from "./MoreDetails";

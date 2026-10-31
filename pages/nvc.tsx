@@ -3,7 +3,6 @@ import Head from "next/head";
 import { getData, type NvcData, type NvcSeries } from "../api/nvc";
 import React from "react";
 import NvcChart from "../components/NvcChart";
-import { jsonLdScriptProps } from "react-schemaorg";
 import { type Dataset } from "schema-dts";
 import { Anchor, Box, Stack, Text, Title } from "@mantine/core";
 import {
@@ -32,7 +31,11 @@ import {
   type ReviewRange,
 } from "../components/nvcReview";
 import { NVC_TIMEFRAMES_URL } from "../components/links";
-import { CREATOR, LICENSE_URL } from "../components/structuredData";
+import {
+  CREATOR,
+  jsonLdScriptProps,
+  LICENSE_URL,
+} from "../components/structuredData";
 import stampClasses from "../components/UscisStats.module.css";
 
 // The page leads with NVC's three times as figures, then the stamp: when

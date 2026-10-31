@@ -1,3 +1,4 @@
+import { sortBy } from "../../components/sortBy";
 import { SearchIcon } from "../../components/icons";
 import {
   Anchor,
@@ -11,7 +12,6 @@ import {
   Title,
 } from "@mantine/core";
 import { useInputState } from "@mantine/hooks";
-import { groupBy, sortBy } from "lodash";
 import { type GetStaticProps } from "next";
 import Head from "next/head";
 import React, { useMemo } from "react";
@@ -135,13 +135,22 @@ export default function UscisIndex({
         normalize(text).includes(normalizedTerm),
       ),
     );
-    const byCategory = groupBy(filtered, "category");
-    return sortBy(Object.entries(byCategory), ([category]) => {
+    const byCategory = new Map<string, typeof filtered>();
+    for (const item of filtered)
+      byCategory.set(item.category, [
+        ...(byCategory.get(item.category) ?? []),
+        item,
+      ]);
+    return sortBy([...byCategory], ([category]) => {
       const index = CATEGORY_ORDER.indexOf(category);
       return index === -1 ? CATEGORY_ORDER.length : index;
     }).map(([category, items]) => ({
       category,
-      items: sortBy(items, [({ pending }) => -(pending ?? 0), "form"]),
+      items: sortBy(
+        items,
+        ({ pending }) => -(pending ?? 0),
+        ({ form }) => form,
+      ),
     }));
   }, [forms, term]);
 

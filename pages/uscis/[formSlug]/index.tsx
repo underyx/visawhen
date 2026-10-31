@@ -1,3 +1,4 @@
+import { sortBy } from "../../../components/sortBy";
 import { ChevronLeftIcon, SearchIcon } from "../../../components/icons";
 import {
   Anchor,
@@ -14,7 +15,6 @@ import {
   Title,
 } from "@mantine/core";
 import { useInputState } from "@mantine/hooks";
-import { sortBy } from "lodash";
 import { type GetStaticPaths, type GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
@@ -383,12 +383,13 @@ export default function UscisForm({
     // the offices whole words find first ("ca" is California before
     // Carolina), then by the number each row shows: its decisions (or
     // approvals)
-    return sortBy(found, [
+    return sortBy(
+      found,
       ({ rank }) => rank,
       ({ office: { completions, approved } }) =>
         -(completions ?? approved ?? 0),
       ({ office: { name } }) => name,
-    ]).map(({ office }) => office);
+    ).map(({ office }) => office);
   }, [offices, term]);
 
   // "an I-130", "an N-400", "a G-325A"

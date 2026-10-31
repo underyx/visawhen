@@ -23,10 +23,8 @@ ignorePatterns = [
 ]
 
 [lint.rules]
-# The .ts modules are loaded by Node as they are in `yarn test` (see
-# scripts/ts-hooks.mjs), which strips types but keeps every import, so an
-# import of a type alone has to say so. (ESLint checked only .ts files; bun
-# lint has no per-file rules, so the .tsx files follow the same style.)
+# An import of a type alone says so, so that a tool that compiles one file at
+# a time (isolatedModules) can drop it without reading the module it names.
 "@typescript-eslint/consistent-type-imports" = ["error", { fixStyle = "inline-type-imports" }]
 
 # eslint-plugin-react's recommended rules, minus the ones eslint-config-next

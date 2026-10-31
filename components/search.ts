@@ -1,4 +1,8 @@
-import deburr from "lodash/deburr";
+/** The text with accents and other marks taken off its letters: "São Paulo" is
+ * "Sao Paulo". */
+function deburr(text: string): string {
+  return text.normalize("NFD").replace(/\p{M}/gu, "");
+}
 
 /** Text as the list pages' search boxes compare it: accents stripped, lower
  * case, letters and digits only. "São Paulo", "sao paulo" and "saopaulo" all

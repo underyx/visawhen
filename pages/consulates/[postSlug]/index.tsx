@@ -1,5 +1,5 @@
+import { sortBy } from "../../../components/sortBy";
 import { ChevronLeftIcon, SearchIcon } from "../../../components/icons";
-import { sortBy } from "lodash";
 import { type GetStaticPaths, type GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
@@ -160,10 +160,11 @@ function sortItems(
   visaClasses: VisaClassRow[],
   recentMap: Map<string, number>,
 ): VisaClassRow[] {
-  return sortBy(visaClasses, [
+  return sortBy(
+    visaClasses,
     ({ visaClassSlug }) => -(recentMap.get(visaClassSlug) ?? -1),
-    "visaClass",
-  ]);
+    ({ visaClass }) => visaClass,
+  );
 }
 
 export default function ConsulateSelect({
