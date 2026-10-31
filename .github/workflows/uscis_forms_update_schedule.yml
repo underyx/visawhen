@@ -7,10 +7,6 @@ on:
     - cron: 41 15 * * *
   workflow_dispatch:
 
-defaults:
-  run:
-    working-directory: data/uscis
-
 # Only the job that commits the data can push; the build and deploy jobs,
 # which run third-party code, get a read-only token.
 permissions:
@@ -27,14 +23,11 @@ jobs:
       updated: ${{ steps.commit.outputs.pushed }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Set up uv
-        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          python-version: "3.13"
-          # The dependency cache is keyed on the lockfile and saved by the
-          # action's post step, even when a later step fails.
-          enable-cache: true
-          cache-dependency-glob: data/uscis/uv.lock
+          bun-version-file: .bun-version
+      # --frozen-lockfile: fail rather than change bun.lock
+      - run: bun install --frozen-lockfile
       # The ~150 quarterly reports are re-fetched through the Wayback Machine
       # when uscis.gov blocks us; keep them between runs. The key includes the
       # run id so every run saves a fresh cache while restore-keys picks up the
@@ -46,11 +39,8 @@ jobs:
           key: ${{ runner.os }}-uscis-reports-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-uscis-reports-
-      - name: Install dependencies
-        run: uv sync --locked
-      # -u: unbuffered, so the log shows each line when it happens
       - name: Run script
-        run: uv run python -u forms.py
+        run: bun data/uscis/forms.ts
       - name: Save downloaded reports
         if: always()
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -59,8 +49,6 @@ jobs:
           key: ${{ runner.os }}-uscis-reports-${{ github.run_id }}
       - name: Commit changes
         id: commit
-        # The whole repository, not just this job's working directory
-        working-directory: .
         env:
           MESSAGE: Update USCIS forms data
           ACTOR: ${{ github.actor }}

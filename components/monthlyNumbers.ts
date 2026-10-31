@@ -2,7 +2,7 @@ import type { MonthlyData, MonthlyRow } from "../api/uscis";
 import { formatMonthYear } from "./dates";
 import { ALL_CATEGORIES, flowCheck, type QuarterPoint } from "./uscis";
 
-// USCIS's monthly Application Processing Data report (data/uscis/monthly.py):
+// USCIS's monthly Application Processing Data report (data/uscis/monthly.ts):
 // newer than the quarterly all-forms report the rest of a form's page is
 // built on, but for six forms only, and nationwide. Where it has the numbers
 // of a page's view, the cards show its newest month instead of the newest

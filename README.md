@@ -6,7 +6,7 @@ Data on US visa wait times at the National Visa Center and at US embassies/consu
 
 The site is a static [Next.js](https://nextjs.org) export: `next build` renders every page (one per consulate and visa class, one per USCIS form and field office) to `out/`, which GitHub Actions deploys to Cloudflare Workers on every push to `main` (`.github/workflows/deploy.yml`, which also describes how visawhen.com is served). Only `main` is deployed.
 
-Pull requests run pre-commit, `bun lint`, `tsc`, the unit tests and a full build, with a read-only token and no secrets; one that touches `data/uscis` also rebuilds `forms.json` from the reports cached on `main` (`forms.py --offline`) and fails when it differs from the committed file.
+Pull requests run pre-commit, `bun lint`, `tsc`, the unit tests and a full build, with a read-only token and no secrets; one that touches `data/uscis`, `data/lib` or the packages also rebuilds `forms.json` from the reports cached on `main` (`forms.ts --offline`) and fails when it differs from the committed file.
 
 The data lives in this repository and is refreshed by scheduled workflows that commit their results and trigger a deploy:
 
@@ -15,9 +15,9 @@ The data lives in this repository and is refreshed by scheduled workflows that c
 | NVC wait times             | State's NVC timeframes page                  | `data/nvc/main.ts`                       | `data/nvc/data.json`                      |
 | Consulate interview queues | State's IV Scheduling Status Tool            | `data/consulates/iv_schedule.ts --fetch` | `data/consulates/iv_schedule.json`        |
 | Consulate visa issuances   | the State Department's monthly issuance PDFs | `data/consulates/*.py`                   | `data/consulates/dump/` (sqlite-diffable) |
-| USCIS form processing      | USCIS's quarterly reports                    | `data/uscis/forms.py`                    | `data/uscis/forms.json`                   |
-| USCIS monthly numbers      | USCIS's monthly Application Processing Data  | `data/uscis/monthly.py`                  | `data/uscis/monthly.json`                 |
-| Visa Bulletin cutoff dates | State's monthly Visa Bulletins               | `data/visa_bulletin/bulletin.py`         | `data/visa_bulletin/data.json`            |
+| USCIS form processing      | USCIS's quarterly reports                    | `data/uscis/forms.ts`                    | `data/uscis/forms.json`                   |
+| USCIS monthly numbers      | USCIS's monthly Application Processing Data  | `data/uscis/monthly.ts`                  | `data/uscis/monthly.json`                 |
+| Visa Bulletin cutoff dates | State's monthly Visa Bulletins               | `data/visa_bulletin/bulletin.ts`         | `data/visa_bulletin/data.json`            |
 
 The NVC and interview-queue scrapers run in the same workflow (`nvc_update_schedule.yml`), daily and hourly on Mondays; the others run daily.
 
@@ -36,7 +36,7 @@ bun run typecheck   # tsc
 bun run test        # the unit tests
 ```
 
-The unit tests (`*.test.ts` next to the modules they test, run by `bun test`, written with `node:test` and `node:assert`) cover the logic the pages rest on: the planning ranges and the rules that suppress them (`components/estimate.ts`), the NVC review range (`components/nvcReview.ts`), which policy notices a page shows (`components/policy.ts`), the USCIS figures and the chart notes (`components/uscis.ts`), the Visa Bulletin arithmetic, the search ranking and the redirects check. The NVC backtest (`bun data/nvc/backtest.mjs`) runs the same modules against NVC's published timeframes.
+The unit tests (`*.test.ts` next to the modules they test, run by `bun test`, written with `node:test` and `node:assert`) cover the logic the pages rest on: the planning ranges and the rules that suppress them (`components/estimate.ts`), the NVC review range (`components/nvcReview.ts`), which policy notices a page shows (`components/policy.ts`), the USCIS figures and the chart notes (`components/uscis.ts`), the Visa Bulletin arithmetic, the search ranking and the redirects check, and the scrapers' parsers (`data/**/*.test.ts`), including the CSV, XLSX and PDF readers in `data/lib/`. The NVC backtest (`bun data/nvc/backtest.mjs`) runs the same modules against NVC's published timeframes.
 
 ## Running the scrapers
 
@@ -44,8 +44,8 @@ The scrapers are moving from Python to TypeScript. The TypeScript ones run with 
 
 ```sh
 bun data/nvc/main.ts
-cd data/uscis && uv run python forms.py          # add --offline to reparse the cached reports only
-cd data/uscis && uv run python monthly.py        # or --from-file report.csv --url https://www.uscis.gov/...
+bun data/uscis/forms.ts                          # add --offline to reparse the cached reports only
+bun data/uscis/monthly.ts                        # or --from-file report.csv --url https://www.uscis.gov/...
 cd data/consulates && uv run python visa_issuances.py   # writes all_months.pkl
 cd data/consulates && uv run python baselines.py        # reads it, writes consulates.sqlite and dump/
 bun data/consulates/iv_schedule.ts --fetch   # or --from-file page.html, for a page saved from a browser
@@ -60,13 +60,13 @@ travel.state.gov sits behind Cloudflare, which answers scripts with a 403 challe
 2. the same path on adoption.state.gov, which serves the same pages and PDFs without Cloudflare in front of it. It is not advertised and could go away, which is why it is not the first choice;
 3. the Wayback Machine: the NVC and interview-queue scrapers look for captures of the page on either host, the issuance script for captures of the travel.state.gov listing page only.
 
-They identify themselves with the user agent `visawhen-bot (+https://github.com/underyx/visawhen)`. Every reading is keyed by the date on the page itself ("As of 21-Sep-26", "Last Updated: September 23, 2026"), and a date already in the data is never overwritten, so a stale copy cannot replace newer data. After a run that added data, the NVC and interview-queue scrapers ask the Wayback Machine to capture the pages (Save Page Now), so the last fallback has something to fall back to; only then, not after every fetch, since the NVC workflow runs about 30 times on a Monday and an unchanged page needs no new capture. uscis.gov blocks scripts too; `forms.py` falls back to the Wayback Machine. See the docstring at the top of each script for the details.
+They identify themselves with the user agent `visawhen-bot (+https://github.com/underyx/visawhen)`. Every reading is keyed by the date on the page itself ("As of 21-Sep-26", "Last Updated: September 23, 2026"), and a date already in the data is never overwritten, so a stale copy cannot replace newer data. After a run that added data, the NVC and interview-queue scrapers ask the Wayback Machine to capture the pages (Save Page Now), so the last fallback has something to fall back to; only then, not after every fetch, since the NVC workflow runs about 30 times on a Monday and an unchanged page needs no new capture. uscis.gov blocks scripts too; `forms.ts` and `monthly.ts` fall back to the Wayback Machine. See the docstring at the top of each script for the details.
 
 The interview queues come from State's [IV Scheduling Status Tool](https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/iv-wait-times.html), which only ever shows its latest monthly update, so every snapshot in `data/consulates/iv_schedule.json` is history nobody else keeps. The snapshots before September 2026 were recovered from Wayback Machine captures of the tool, with `--from-file`. `--fetch` adds a snapshot only when State's update is newer than the newest one there, and refuses (and fails) a page that lists far fewer posts than the newest snapshot, such as a truncated one, since the site reads only the newest snapshot; a page older than the newest snapshot or more than 45 days old may be a stale copy, so it then tries the next source too. `--from-file` adds any update it does not have yet, whatever it lists.
 
 ### USCIS monthly numbers
 
-Every month since November 2022, USCIS publishes for Congress a short "Application Processing Data" report: for the I-130, I-360, I-485 (by category), I-751, I-765 and N-400, the applications received, approved, denied and pending, those pending over six months, and the average processing time of the month's decisions. It comes out about four weeks after the month, two months sooner than the quarterly reports. Where it has a row for what a form's page shows (all of those forms' categories except the I-130's, I-765's and N-400's single ones, which it does not split out), the cards at the top of the page show its newest month instead of the newest quarter, and a table under the quarterly chart lists its last six months, so that visitors see the newest numbers without having to know which report they come from. On a single category it does not split out (the page of the N-400 opens on its civilian one), the cards keep the category's newest quarter, and a line under them and the table give the whole form's months. Its counts land within a few percent of the quarterly reports' but are not the same. Its average processing time is an average over the month's decisions, not the median the estimates use, so the pages do not show it. `monthly.py` adds each month once, keyed by the month the report names, from uscis.gov or else the Wayback Machine.
+Every month since November 2022, USCIS publishes for Congress a short "Application Processing Data" report: for the I-130, I-360, I-485 (by category), I-751, I-765 and N-400, the applications received, approved, denied and pending, those pending over six months, and the average processing time of the month's decisions. It comes out about four weeks after the month, two months sooner than the quarterly reports. Where it has a row for what a form's page shows (all of those forms' categories except the I-130's, I-765's and N-400's single ones, which it does not split out), the cards at the top of the page show its newest month instead of the newest quarter, and a table under the quarterly chart lists its last six months, so that visitors see the newest numbers without having to know which report they come from. On a single category it does not split out (the page of the N-400 opens on its civilian one), the cards keep the category's newest quarter, and a line under them and the table give the whole form's months. Its counts land within a few percent of the quarterly reports' but are not the same. Its average processing time is an average over the month's decisions, not the median the estimates use, so the pages do not show it. `monthly.ts` adds each month once, keyed by the month the report names, from uscis.gov or else the Wayback Machine.
 
 ### Visa Bulletins
 
