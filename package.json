@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "yarn ensure-db && next dev --webpack",
-    "build": "yarn ensure-db && next build --webpack && next-sitemap && node scripts/check-redirects.mjs",
-    "export": "yarn build",
+    "dev": "bun run ensure-db && next dev --webpack",
+    "build": "bun run ensure-db && next build --webpack && next-sitemap && node scripts/check-redirects.mjs",
+    "export": "bun run build",
     "lint": "bun lint --no-script",
     "typecheck": "tsc --noEmit",
     "test": "node --import ./scripts/register-ts-hooks.mjs --test 'components/*.test.ts' 'api/*.test.ts' 'scripts/*.test.mjs'",
@@ -39,16 +39,13 @@
     "postcss-simple-vars": "^7.0.1",
     "typescript": "^6.0.3"
   },
-  "dependenciesMeta": {
-    "sqlite3": {
-      "built": true
-    }
-  },
   "browserslist": [
     ">1%",
     "not dead",
     "not ie 11",
     "not op_mini all"
   ],
-  "packageManager": "yarn@4.18.0"
+  "trustedDependencies": [
+    "sqlite3"
+  ]
 }

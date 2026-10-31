@@ -1,3 +1,15 @@
+# bun install (https://bun.com/docs/pm/cli/install). Install scripts run only
+# for the packages in package.json's trustedDependencies (sqlite3, which needs
+# its native module).
+[install]
+# Take only releases at least a week old, like Dependabot's cooldown in
+# .github/dependabot.yml, so that a compromised release has likely been caught
+# and pulled first.
+minimumReleaseAge = "7d"
+# node_modules laid out as npm does; the lockfile's configVersion 0 means the
+# same, but saying so keeps it from changing under a newer Bun.
+linker = "hoisted"
+
 # bun lint (https://bun.com/docs/lint) replaced ESLint. With no rules of its
 # own it already runs ESLint's and typescript-eslint's recommended rules, plus
 # rules-of-hooks, exhaustive-deps and jsx-key. The rules below add what
@@ -5,9 +17,6 @@
 # switch did not lose coverage, and the import rule the unit tests rely on.
 [lint]
 ignorePatterns = [
-  ".pnp.cjs",
-  ".pnp.loader.mjs",
-  ".yarn/",
   "next-env.d.ts",
   # the data scrapers' Python environments (Jupyter ships JavaScript)
   "data/**/.venv/",

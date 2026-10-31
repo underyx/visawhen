@@ -4,6 +4,6 @@ pdfs/
 *.nbconvert.ipynb
 .joblib_cache/
 *.sqlite
-# committed gzipped; `yarn ensure-db` decompresses it
+# committed gzipped; `bun run ensure-db` decompresses it
 dump/backlogs.ndjson
 .venv/

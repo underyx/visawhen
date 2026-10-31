@@ -25,18 +25,18 @@ The home page leads to a timeline page per common route through the process (`/t
 
 ## Running the site locally
 
-You need Node.js (the version in `.node-version`), Yarn (bundled in `.yarn/releases`, so `yarn` just works), [Bun](https://bun.com) (for `bun lint`; `.bun-version` says which, and until a stable release has the linter that is the canary: `bun upgrade --canary`) and [sqlite-diffable](https://github.com/simonw/sqlite-diffable) on your `PATH` (`pipx install sqlite-diffable` or `uv tool install sqlite-diffable`) to rebuild the consulates database from its dump.
+You need Node.js (the version in `.node-version`), which runs the site and the tests, [Bun](https://bun.com), which installs the packages (the version in `.bun-version`) and lints (`bun lint` is only in the canary for now: `bun upgrade --canary`), and [sqlite-diffable](https://github.com/simonw/sqlite-diffable) on your `PATH` (`pipx install sqlite-diffable` or `uv tool install sqlite-diffable`) to rebuild the consulates database from its dump.
 
 ```sh
-yarn            # install dependencies
-yarn dev        # rebuilds data/consulates/consulates.sqlite, then serves the site on http://localhost:3000
-yarn build      # the static export, into out/
-yarn lint       # bun lint
-yarn typecheck  # tsc
-yarn test       # the unit tests
+bun install         # install dependencies
+bun run dev         # rebuilds data/consulates/consulates.sqlite, then serves the site on http://localhost:3000
+bun run build       # the static export, into out/
+bun lint            # lint
+bun run typecheck   # tsc
+bun run test        # the unit tests
 ```
 
-The unit tests (`*.test.ts` next to the modules they test, run by Node's own test runner) cover the logic the pages rest on: the planning ranges and the rules that suppress them (`components/estimate.ts`), the NVC review range (`components/nvcReview.ts`), which policy notices a page shows (`components/policy.ts`), the USCIS figures and the chart notes (`components/uscis.ts`), the Visa Bulletin arithmetic, the search ranking and the redirects check. Node loads the TypeScript modules as they are, so a `.ts` module may not import a `.tsx` one, and must say `import type` for a type (`bun lint` checks that); the pure date helpers live in `components/dates.ts` for that reason, apart from the `useToday` hook in `components/Freshness.tsx`. The NVC backtest (`yarn node data/nvc/backtest.mjs`) runs the same modules the same way.
+The unit tests (`*.test.ts` next to the modules they test, run by Node's own test runner) cover the logic the pages rest on: the planning ranges and the rules that suppress them (`components/estimate.ts`), the NVC review range (`components/nvcReview.ts`), which policy notices a page shows (`components/policy.ts`), the USCIS figures and the chart notes (`components/uscis.ts`), the Visa Bulletin arithmetic, the search ranking and the redirects check. Node loads the TypeScript modules as they are, so a `.ts` module may not import a `.tsx` one, and must say `import type` for a type (`bun lint` checks that); the pure date helpers live in `components/dates.ts` for that reason, apart from the `useToday` hook in `components/Freshness.tsx`. The NVC backtest (`node --import ./scripts/register-ts-hooks.mjs data/nvc/backtest.mjs`) runs the same modules the same way.
 
 ## Running the scrapers
 
@@ -74,7 +74,7 @@ Every month since November 2022, USCIS publishes for Congress a short "Applicati
 
 ### Consulate visa classes
 
-State's monthly issuance reports give every row a visa class code. `baselines.ipynb` keeps immigrant (IV) and nonimmigrant (NIV) classes apart, since some codes mean different things in the two reports (IV E2 is EB-2, NIV E2 a treaty investor), and maps the detailed immigrant codes State used until January 2021 (DV1, DV2 and DV3) onto the categories it has reported since (DV), so that each page's series runs across the change. Codes State adds later go the same way: the EB-5 set-aside codes (RR, RR1, NH and so on) are counted in EB-5, and the notebook warns when a code with and without a trailing digit (CQ and CQ1) would be counted apart. The descriptions of the classes the notebook names or merges, and of any whose description in the Google Sheet needs fixing, are in `data/consulates/visa_descriptions.csv`, which wins over the sheet; the others come from the sheet. When a class or post page goes away, a rule in `public/_redirects` sends it to its replacement. Cloudflare keeps 2,000 rules without a placeholder or splat and 100 with, but counts every rule after the first one with a placeholder or splat as one with, and skips what goes past the limits without failing the deploy; it also follows a matching rule even where a page exists. So every rule without a placeholder must come first, and `yarn build` runs `scripts/check-redirects.mjs`, which drops any rule that matches a page and fails the build on a rule without a placeholder after one with, or past either limit.
+State's monthly issuance reports give every row a visa class code. `baselines.ipynb` keeps immigrant (IV) and nonimmigrant (NIV) classes apart, since some codes mean different things in the two reports (IV E2 is EB-2, NIV E2 a treaty investor), and maps the detailed immigrant codes State used until January 2021 (DV1, DV2 and DV3) onto the categories it has reported since (DV), so that each page's series runs across the change. Codes State adds later go the same way: the EB-5 set-aside codes (RR, RR1, NH and so on) are counted in EB-5, and the notebook warns when a code with and without a trailing digit (CQ and CQ1) would be counted apart. The descriptions of the classes the notebook names or merges, and of any whose description in the Google Sheet needs fixing, are in `data/consulates/visa_descriptions.csv`, which wins over the sheet; the others come from the sheet. When a class or post page goes away, a rule in `public/_redirects` sends it to its replacement. Cloudflare keeps 2,000 rules without a placeholder or splat and 100 with, but counts every rule after the first one with a placeholder or splat as one with, and skips what goes past the limits without failing the deploy; it also follows a matching rule even where a page exists. So every rule without a placeholder must come first, and `bun run build` runs `scripts/check-redirects.mjs`, which drops any rule that matches a page and fails the build on a rule without a placeholder after one with, or past either limit.
 
 The consulate list shows and searches each post's country, from `POST_COUNTRIES` in `api/searchTerms.ts`, which is written by hand; the build fails on a post that has none, so add one when State reports a new post. The same file has the plain-language names and search words of the USCIS forms ("work permit" for the I-765).
 
