@@ -344,8 +344,11 @@ function ReviewEstimate({ today, series }: ReviewEstimateProps) {
   );
 }
 
-/** With NVC's full name too, which some people search for instead */
-const TITLE = "National Visa Center (NVC) wait times";
+/** In the words people search with: "NVC timeframes" (State's own name for
+ * these numbers) and "NVC processing times" far more often than "wait times"
+ * (Search Console, Oct. 2026), and NVC's full name, which some search for
+ * instead */
+const TITLE = "NVC timeframes: National Visa Center processing times";
 
 export default function NvcBacklog({ data }: Props) {
   const today = useToday();

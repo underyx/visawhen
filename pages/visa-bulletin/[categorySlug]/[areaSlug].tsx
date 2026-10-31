@@ -351,7 +351,8 @@ export default function VisaBulletinPage({
         .map(([, cutoff]) => cutoff)
         .filter(isDate),
     ).size >= 2;
-  const title = `${category.name} Visa Bulletin dates: ${area.name}`;
+  // "priority date" is what people search for ("eb3 priority date india")
+  const title = `${category.name} Visa Bulletin priority dates: ${area.name}`;
   const path = pagePath(category, area);
   const description = `${
     category.name
