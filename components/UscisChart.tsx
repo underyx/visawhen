@@ -1,7 +1,6 @@
 import { Paper } from "@mantine/core";
 import { scaleBand, scaleLinear } from "@visx/scale";
 import { LinePath } from "@visx/shape";
-import numeral from "numeral";
 import React, { useState } from "react";
 import {
   ChartHeader,
@@ -156,9 +155,14 @@ interface Line {
   values: (number | null)[];
 }
 
+const COMPACT = new Intl.NumberFormat("en-US", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
 /** Ticks for a y-axis of counts, as "1.2k" */
 function formatCountTick(value: number): string {
-  return numeral(value).format("0.[0]a");
+  return COMPACT.format(value).toLowerCase();
 }
 
 /** What a chart's dashed lines and diamonds mean, one note each */

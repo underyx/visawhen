@@ -8,7 +8,6 @@ import {
   Title,
 } from "@mantine/core";
 import { type GetStaticProps } from "next";
-import { jsonLdScriptProps } from "react-schemaorg";
 import { type Dataset } from "schema-dts";
 import Head from "next/head";
 import Link from "next/link";
@@ -16,7 +15,11 @@ import React, { useState } from "react";
 import { type BulletinChart, getData } from "../../api/visaBulletin";
 import { VISA_BULLETIN_URL } from "../../components/links";
 import MoreDetails from "../../components/MoreDetails";
-import { CREATOR, LICENSE_URL } from "../../components/structuredData";
+import {
+  CREATOR,
+  jsonLdScriptProps,
+  LICENSE_URL,
+} from "../../components/structuredData";
 import {
   type Area,
   CATEGORIES,

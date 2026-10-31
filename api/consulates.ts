@@ -1,5 +1,4 @@
 import { readFile } from "fs/promises";
-import { groupBy, mapValues } from "lodash";
 import { join } from "path";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
@@ -254,7 +253,15 @@ export async function getRecentToolIssuancesByPost(): Promise<
   `,
     from,
   );
-  return mapValues(groupBy(rows, "postSlug"), countToolClassIssuances);
+  const byPost = new Map<string, typeof rows>();
+  for (const row of rows)
+    byPost.set(row.postSlug, [...(byPost.get(row.postSlug) ?? []), row]);
+  return Object.fromEntries(
+    [...byPost].map(([postSlug, postRows]) => [
+      postSlug,
+      countToolClassIssuances(postRows),
+    ]),
+  );
 }
 
 export interface PostActivity {

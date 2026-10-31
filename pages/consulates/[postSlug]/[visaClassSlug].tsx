@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { type GetStaticPaths, type GetStaticProps } from "next";
 import React from "react";
-import { findLast, sumBy } from "lodash";
 import {
   getIvSchedule,
   getIvScheduleAsOf,
@@ -118,6 +117,11 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
+/** The visas issued in the months of these rows, together */
+function sumIssuances(rows: { issuances: number }[]): number {
+  return rows.reduce((sum, { issuances }) => sum + issuances, 0);
+}
+
 export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
   if (
     params === undefined ||
@@ -154,15 +158,15 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       visaClassSlug,
       issuances,
       recent: {
-        last12: sumBy(last12Rows, "issuances"),
-        prev12: sumBy(issuances.slice(-24, -12), "issuances"),
+        last12: sumIssuances(last12Rows),
+        prev12: sumIssuances(issuances.slice(-24, -12)),
         from: last12Rows[0].month,
         to: last12Rows[last12Rows.length - 1].month,
-        newest: sumBy(last12Rows.slice(-RECENT_MONTHS), "issuances"),
-        rest: sumBy(last12Rows.slice(0, -RECENT_MONTHS), "issuances"),
+        newest: sumIssuances(last12Rows.slice(-RECENT_MONTHS)),
+        rest: sumIssuances(last12Rows.slice(0, -RECENT_MONTHS)),
       },
       lastIssuedMonth:
-        findLast(issuances, (row) => row.issuances > 0)?.month ?? null,
+        issuances.findLast((row) => row.issuances > 0)?.month ?? null,
       postName: post.post,
       visaClassName: visaClass.visaClass,
       visaType: visaClass.visaType,

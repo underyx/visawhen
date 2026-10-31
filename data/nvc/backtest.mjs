@@ -1,7 +1,7 @@
 // Backtest the /nvc document review range (components/nvcReview.ts) against
 // NVC's own timeframes, running the site's code itself:
 //
-//   node --import ./scripts/register-ts-hooks.mjs data/nvc/backtest.mjs [YYYY-MM-DD ...]
+//   bun data/nvc/backtest.mjs [YYYY-MM-DD ...]
 //
 // For each day with a reading at most 14 days old, documents are submitted
 // that day and the range is worked out from the readings published up to
@@ -13,14 +13,11 @@
 // fell in the range. Dates given on the command line print the range for
 // documents submitted that day, from the readings up to it.
 import { readFileSync } from "node:fs";
-import { register } from "node:module";
+// The site's own TypeScript modules, which Bun loads as they are
+import { addDays, daysBetween } from "../../components/dates.ts";
+import { front, reviewRange } from "../../components/nvcReview.ts";
 
 const root = new URL("../../", import.meta.url);
-
-// The site's TypeScript modules, loaded as they are (see scripts/ts-hooks.mjs)
-register("./scripts/ts-hooks.mjs", root);
-const { addDays, daysBetween } = await import("../../components/dates.ts");
-const { reviewRange, front } = await import("../../components/nvcReview.ts");
 
 const all = Object.entries(
   JSON.parse(readFileSync(new URL("data/nvc/data.json", root), "utf-8")).review,

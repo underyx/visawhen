@@ -1,9 +1,40 @@
-import { jsonLdScriptProps } from "react-schemaorg";
-import type { BreadcrumbList, Person, WebSite } from "schema-dts";
+import type {
+  BreadcrumbList,
+  Person,
+  Thing,
+  WebSite,
+  WithContext,
+} from "schema-dts";
 
 // schema.org data for search engines, in <script type="application/ld+json">
 // tags. Spread the result of one of these functions into a <script> that is
 // a direct child of next/head's <Head>.
+
+/** Props for a <script> tag that holds the item as JSON-LD. Characters that
+ * could end the tag or start markup ("<", ">", "&" and quotes) are written as
+ * HTML entities, as JSON-LD allows, and null values are left out. */
+export function jsonLdScriptProps<T extends Thing>(item: WithContext<T>) {
+  return {
+    type: "application/ld+json",
+    dangerouslySetInnerHTML: {
+      __html: JSON.stringify(item, (_, value: unknown) =>
+        value === null
+          ? undefined
+          : typeof value === "string"
+          ? value.replace(/[&<>"']/g, (c) => HTML_ENTITIES[c])
+          : value,
+      ),
+    },
+  };
+}
+
+const HTML_ENTITIES: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&apos;",
+};
 
 export const SITE_URL = "https://visawhen.com";
 

@@ -1,3 +1,4 @@
+import { sortBy } from "../../components/sortBy";
 import { SearchIcon } from "../../components/icons";
 import {
   Badge,
@@ -8,7 +9,6 @@ import {
   TextInput,
   Title,
 } from "@mantine/core";
-import { sortBy } from "lodash";
 import { type GetStaticProps } from "next";
 import Head from "next/head";
 import React, { useMemo } from "react";
@@ -98,11 +98,12 @@ function sortItems(
   recentMap: Map<string, number>,
   ivMonths: Props["ivMonths"],
 ): Post[] {
-  return sortBy(posts, [
+  return sortBy(
+    posts,
     ({ postSlug }) => (ivMonths[postSlug] === undefined ? 1 : 0),
     ({ postSlug }) => -(recentMap.get(postSlug) ?? -1),
-    "post",
-  ]);
+    ({ post }) => post,
+  );
 }
 
 interface PostBadgeProps {
