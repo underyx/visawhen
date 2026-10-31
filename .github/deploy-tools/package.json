@@ -1,8 +1,9 @@
 {
   "name": "visawhen-deploy-tools",
   "private": true,
-  "description": "The CLI .github/workflows/deploy.yml runs, pinned with package-lock.json. Kept apart from the site's packages so that the build never loads it; Dependabot updates it.",
+  "description": "The CLI .github/workflows/deploy.yml runs, pinned with bun.lock. Kept apart from the site's packages so that the build never loads it; Dependabot updates it. No package may run install scripts.",
   "dependencies": {
     "wrangler": "4.152.0"
-  }
+  },
+  "trustedDependencies": []
 }

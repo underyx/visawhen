@@ -102,6 +102,4 @@ ignorePatterns = ["next-env.d.ts"]
 ignorePatterns = [
   # written by data/consulates/visa_issuances.ts in the format of sqlite-diffable
   "data/*/dump/",
-  # written by npm and Dependabot
-  ".github/deploy-tools/package-lock.json",
 ]

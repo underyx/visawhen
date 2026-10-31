@@ -39,9 +39,8 @@ updates:
         patterns:
           - "*"
     ignore:
-      # @types/node stays on Node.js 24, whose APIs Bun implements and which
-      # the deploy job runs wrangler on; a new major of the types would
-      # describe APIs that neither has.
+      # @types/node stays on Node.js 24, whose APIs Bun implements; a new
+      # major of the types would describe APIs that Bun may not have.
       - dependency-name: "@types/node"
         update-types:
           - "version-update:semver-major"
@@ -53,7 +52,7 @@ updates:
 
   # wrangler, which .github/workflows/deploy.yml runs with the deploy token in
   # its environment.
-  - package-ecosystem: "npm"
+  - package-ecosystem: "bun"
     directory: "/.github/deploy-tools"
     schedule:
       interval: "weekly"
