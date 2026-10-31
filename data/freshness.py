@@ -3,6 +3,7 @@ open per source whose data has gone stale.
 
     python3 data/freshness.py                # report only
     python3 data/freshness.py --github       # also open, update and close the issues
+    python3 data/freshness.py --json out.json  # also write the report as JSON rows
 
 The scheduled scrapers treat "the source is unreachable" and "nothing new yet"
 alike (a warning, and a green run), so a scraper that silently stops finding
@@ -34,6 +35,12 @@ newest date with how often the source publishes:
   days after the oldest check of an entry that has not ended, a week ahead,
   as the build's warning does.
 
+With --json, the report is also written to a file as a list of rows, one per
+source: its name, newest data, the day it turns stale, its status ("stale",
+"due soon" within DUE_SOON_DAYS of that day, or "current") and the workflow
+that updates it. The weekly upkeep routine reads it to refresh the data
+freshness report.
+
 With --github, a stale source gets an issue labelled "stale-data", titled
 "Stale data: <source>", whose text is updated on every run (an edit, which
 notifies no one), and the issue is closed with a comment once the source has
@@ -63,6 +70,8 @@ DATA = Path(__file__).parent
 # Links in the issues are absolute, so that they also work in notifications
 REPOSITORY_URL = f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/{os.environ.get('GITHUB_REPOSITORY', 'underyx/visawhen')}"
 LABEL = "stale-data"
+# --json calls a source "due soon" this many days before it turns stale
+DUE_SOON_DAYS = 7
 TITLE_PREFIX = "Stale data: "
 
 
@@ -78,6 +87,8 @@ class Freshness:
     cadence: str
     # Where to look when it is stale, as Markdown
     where: str
+    # The workflow file that updates the data, or None when it is kept by hand
+    workflow: str | None = None
 
 
 def end_of_month(year: int, month: int) -> date:
@@ -99,6 +110,7 @@ def nvc() -> Freshness:
             "page is as of. Compare with [NVC's page](https://travel.state.gov/content/travel/en/us-visas/"
             "immigrate/nvc-timeframes.html)."
         ),
+        workflow="nvc_update_schedule.yml",
     )
 
 
@@ -121,6 +133,7 @@ def iv_schedule() -> Freshness:
             "has a newer update, the log says why it was not added; the page can also be saved from a browser and "
             "added with `iv_schedule.py --from-file`."
         ),
+        workflow="nvc_update_schedule.yml",
     )
 
 
@@ -144,6 +157,7 @@ def uscis_forms() -> Freshness:
             "immigration-and-citizenship-data) page lists the next quarter; if it does, the workflow's log says "
             "why it was not added."
         ),
+        workflow="uscis_forms_update_schedule.yml",
     )
 
 
@@ -168,6 +182,7 @@ def uscis_monthly() -> Freshness:
             "it does, the workflow's log says why it was not added; the report can also be saved from a browser and "
             "added with `monthly.py --from-file`."
         ),
+        workflow="uscis_monthly_update_schedule.yml",
     )
 
 
@@ -194,6 +209,7 @@ def visa_bulletin() -> Freshness:
             "lists a newer bulletin, the log says why it was not added; the page can also be saved from a browser and "
             "added with `bulletin.py --from-file`."
         ),
+        workflow="visa_bulletin_update_schedule.yml",
     )
 
 
@@ -218,6 +234,7 @@ def consulate_issuances() -> Freshness:
             "visa-law0/visa-statistics/immigrant-visa-statistics/monthly-immigrant-visa-issuances.html) list a "
             "newer month; if they do, the workflow's log says why it was not added."
         ),
+        workflow="consulate_update_schedule.yml",
     )
 
 
@@ -245,6 +262,29 @@ def policy_notices(today: date) -> Freshness:
 
 
 CHECKS: list[Callable[[], Freshness]] = [nvc, iv_schedule, uscis_forms, uscis_monthly, visa_bulletin, consulate_issuances]
+
+
+def status(freshness: Freshness, today: date) -> str:
+    if today >= freshness.stale_from:
+        return "stale"
+    if (freshness.stale_from - today).days <= DUE_SOON_DAYS:
+        return "due soon"
+    return "current"
+
+
+def report_rows(results: list[tuple[Freshness, bool]], today: date) -> list[dict[str, str | None]]:
+    """The --json report: one row per source."""
+    return [
+        {
+            "source": freshness.source,
+            "newest": freshness.newest,
+            "stale_from": None if freshness.stale_from == date.max else freshness.stale_from.isoformat(),
+            "status": status(freshness, today),
+            "workflow": freshness.workflow,
+            "checked": today.isoformat(),
+        }
+        for freshness, _ in results
+    ]
 
 
 def issue_body(freshness: Freshness, today: date, run_url: str | None) -> str:
@@ -313,6 +353,7 @@ def sync_issues(results: list[tuple[Freshness, bool]], today: date, run_url: str
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--github", action="store_true", help="open, update and close the stale-data issues")
+    parser.add_argument("--json", type=Path, metavar="PATH", help="also write the report to PATH as JSON rows")
     parser.add_argument("--today", type=date.fromisoformat, help="check as of this day (default: today, UTC)")
     args = parser.parse_args()
     today: date = args.today or datetime.now(UTC).date()
@@ -328,6 +369,10 @@ def main() -> int:
         )
         if stale:
             print(f"::warning::{freshness.source} data is stale: the newest is {freshness.newest}")
+
+    if args.json:
+        args.json.write_text(json.dumps(report_rows(results, today), indent=2) + "\n")
+        print(f"Wrote {args.json}")
 
     if args.github:
         run_id = os.environ.get("GITHUB_RUN_ID")
