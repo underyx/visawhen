@@ -771,7 +771,7 @@
               "denied": 360,
               "key": "all",
               "pending": 3181,
-              "processingTime": 5.0,
+              "processingTime": 5,
               "received": 840,
               "title": "Application for Replacement/Initial Nonimmigrant Arrival-Departure Document"
             }
@@ -1567,7 +1567,7 @@
               "denied": 17524,
               "key": "all",
               "pending": 77910,
-              "processingTime": 3.0,
+              "processingTime": 3,
               "received": 88378,
               "title": "Petition for a Nonimmigrant Worker"
             }
@@ -1618,7 +1618,7 @@
               "denied": 22170,
               "key": "all",
               "pending": 84969,
-              "processingTime": 2.0,
+              "processingTime": 2,
               "received": 145196,
               "title": "Petition for a Nonimmigrant Worker"
             }
@@ -2025,7 +2025,7 @@
               "pending": 13845,
               "processingTime": null,
               "received": 11155,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2042,7 +2042,7 @@
               "pending": 16430,
               "processingTime": null,
               "received": 12787,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2059,7 +2059,7 @@
               "pending": 20111,
               "processingTime": null,
               "received": 12856,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2076,7 +2076,7 @@
               "pending": 19551,
               "processingTime": null,
               "received": 11596,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2093,7 +2093,7 @@
               "pending": 18506,
               "processingTime": null,
               "received": 11230,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2110,7 +2110,7 @@
               "pending": 19799,
               "processingTime": null,
               "received": 12175,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2127,7 +2127,7 @@
               "pending": 19438,
               "processingTime": null,
               "received": 13222,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2144,7 +2144,7 @@
               "pending": 14543,
               "processingTime": null,
               "received": 12439,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2161,7 +2161,7 @@
               "pending": 13069,
               "processingTime": null,
               "received": 12446,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2178,7 +2178,7 @@
               "pending": 15767,
               "processingTime": null,
               "received": 13159,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2195,7 +2195,7 @@
               "pending": 18592,
               "processingTime": null,
               "received": 14263,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2212,7 +2212,7 @@
               "pending": 14385,
               "processingTime": null,
               "received": 13017,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2229,7 +2229,7 @@
               "pending": 15847,
               "processingTime": null,
               "received": 12836,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2246,7 +2246,7 @@
               "pending": 20276,
               "processingTime": null,
               "received": 13200,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2263,7 +2263,7 @@
               "pending": 21021,
               "processingTime": null,
               "received": 12315,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2280,7 +2280,7 @@
               "pending": 24764,
               "processingTime": null,
               "received": 11480,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2297,7 +2297,7 @@
               "pending": 28587,
               "processingTime": null,
               "received": 11460,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2314,7 +2314,7 @@
               "pending": 28224,
               "processingTime": null,
               "received": 12321,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2331,7 +2331,7 @@
               "pending": 30353,
               "processingTime": null,
               "received": 12702,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2348,7 +2348,7 @@
               "pending": 29814,
               "processingTime": null,
               "received": 11012,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2365,7 +2365,7 @@
               "pending": 25249,
               "processingTime": null,
               "received": 10334,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2382,7 +2382,7 @@
               "pending": 21585,
               "processingTime": null,
               "received": 11276,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2399,7 +2399,7 @@
               "pending": 19073,
               "processingTime": null,
               "received": 11914,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2416,7 +2416,7 @@
               "pending": 17973,
               "processingTime": null,
               "received": 11750,
-              "title": "Fianc\u00e9e Petitions"
+              "title": "Fiancée Petitions"
             }
           ]
         },
@@ -2433,7 +2433,7 @@
               "pending": 18969,
               "processingTime": null,
               "received": 11533,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2450,7 +2450,7 @@
               "pending": 18875,
               "processingTime": null,
               "received": 12033,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2467,7 +2467,7 @@
               "pending": 18789,
               "processingTime": null,
               "received": 7073,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2484,7 +2484,7 @@
               "pending": 21060,
               "processingTime": null,
               "received": 8096,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2499,9 +2499,9 @@
               "denied": 1275,
               "key": "all",
               "pending": 20371,
-              "processingTime": 8.0,
+              "processingTime": 8,
               "received": 3283,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2518,7 +2518,7 @@
               "pending": 21106,
               "processingTime": 8.1,
               "received": 10856,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2533,9 +2533,9 @@
               "denied": 1761,
               "key": "all",
               "pending": 27437,
-              "processingTime": 8.0,
+              "processingTime": 8,
               "received": 12637,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2550,9 +2550,9 @@
               "denied": 2265,
               "key": "all",
               "pending": 30408,
-              "processingTime": 8.0,
+              "processingTime": 8,
               "received": 10965,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2569,7 +2569,7 @@
               "pending": 36842,
               "processingTime": 9.3,
               "received": 11287,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2586,7 +2586,7 @@
               "pending": 42907,
               "processingTime": 10.8,
               "received": 12021,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2603,7 +2603,7 @@
               "pending": 50103,
               "processingTime": 12.9,
               "received": 12686,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2618,9 +2618,9 @@
               "denied": 1972,
               "key": "all",
               "pending": 55425,
-              "processingTime": 14.0,
+              "processingTime": 14,
               "received": 12124,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2637,7 +2637,7 @@
               "pending": 58479,
               "processingTime": 14.5,
               "received": 11423,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2654,7 +2654,7 @@
               "pending": 57295,
               "processingTime": 14.5,
               "received": 11896,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2671,7 +2671,7 @@
               "pending": 51506,
               "processingTime": 13.3,
               "received": 11036,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2688,7 +2688,7 @@
               "pending": 45143,
               "processingTime": 12.2,
               "received": 9920,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2705,7 +2705,7 @@
               "pending": 39185,
               "processingTime": 10.4547831,
               "received": 9689,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2722,7 +2722,7 @@
               "pending": 30137,
               "processingTime": 8.5479358,
               "received": 10938,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2739,7 +2739,7 @@
               "pending": 22328,
               "processingTime": null,
               "received": 11537,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2756,7 +2756,7 @@
               "pending": 23920,
               "processingTime": 5.5561583,
               "received": 10966,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2773,7 +2773,7 @@
               "pending": 28839,
               "processingTime": 6.1,
               "received": 11609,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2790,7 +2790,7 @@
               "pending": 31019,
               "processingTime": 5.7,
               "received": 12269,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2807,7 +2807,7 @@
               "pending": 36053,
               "processingTime": 7.2,
               "received": 11903,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2824,7 +2824,7 @@
               "pending": 38599,
               "processingTime": 7.9,
               "received": 10958,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2841,7 +2841,7 @@
               "pending": 36875,
               "processingTime": 7.5,
               "received": 9385,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2858,7 +2858,7 @@
               "pending": 34676,
               "processingTime": 7.5,
               "received": 8676,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         },
@@ -2873,9 +2873,9 @@
               "denied": 2307,
               "key": "all",
               "pending": 35871,
-              "processingTime": 9.0,
+              "processingTime": 9,
               "received": 9737,
-              "title": "Petition for Alien Fianc\u00e9(e)"
+              "title": "Petition for Alien Fiancé(e)"
             }
           ]
         }
@@ -2934,7 +2934,7 @@
         "2026-Q1": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q2_v1.xlsx",
         "2026-Q2": "https://www.uscis.gov/sites/default/files/document/data/quarterly_all_forms_fy2026_q3_v1.xlsx"
       },
-      "title": "Petition for Alien Fianc\u00e9(e)"
+      "title": "Petition for Alien Fiancé(e)"
     },
     {
       "category": "Family Based",
@@ -9514,6 +9514,26 @@
               "pending": null,
               "received": 28,
               "withheld": ["denied", "pending"]
+            },
+            "2019-Q4": {
+              "approved": 0,
+              "categories": {
+                "all-other-relative": {
+                  "approved": null,
+                  "denied": null,
+                  "pending": null,
+                  "received": null
+                },
+                "immediate-relative": {
+                  "approved": 0,
+                  "denied": 0,
+                  "pending": 0,
+                  "received": 0
+                }
+              },
+              "denied": 0,
+              "pending": 0,
+              "received": 0
             },
             "2020-Q1": {
               "approved": 0,
@@ -16680,6 +16700,26 @@
               "pending": 0,
               "received": 19,
               "withheld": ["denied"]
+            },
+            "2019-Q4": {
+              "approved": 0,
+              "categories": {
+                "all-other-relative": {
+                  "approved": null,
+                  "denied": null,
+                  "pending": null,
+                  "received": null
+                },
+                "immediate-relative": {
+                  "approved": 0,
+                  "denied": 0,
+                  "pending": 0,
+                  "received": 0
+                }
+              },
+              "denied": 0,
+              "pending": 0,
+              "received": 0
             },
             "2020-Q1": {
               "approved": 0,
@@ -64263,6 +64303,28 @@
               "received": 59,
               "withheld": ["denied", "pending"]
             },
+            "2019-Q4": {
+              "approved": 0,
+              "categories": {
+                "all-other-relative": {
+                  "approved": null,
+                  "denied": null,
+                  "pending": null,
+                  "received": null
+                },
+                "immediate-relative": {
+                  "approved": 0,
+                  "denied": 0,
+                  "pending": null,
+                  "received": 0,
+                  "withheld": ["pending"]
+                }
+              },
+              "denied": 0,
+              "pending": null,
+              "received": 0,
+              "withheld": ["pending"]
+            },
             "2020-Q1": {
               "approved": 0,
               "categories": {
@@ -65675,6 +65737,26 @@
               "denied": 0,
               "pending": 0,
               "received": 18
+            },
+            "2019-Q4": {
+              "approved": 0,
+              "categories": {
+                "all-other-relative": {
+                  "approved": null,
+                  "denied": null,
+                  "pending": null,
+                  "received": null
+                },
+                "immediate-relative": {
+                  "approved": 0,
+                  "denied": 0,
+                  "pending": 0,
+                  "received": 0
+                }
+              },
+              "denied": 0,
+              "pending": 0,
+              "received": 0
             },
             "2020-Q1": {
               "approved": 0,
@@ -115480,7 +115562,7 @@
               "denied": 21250,
               "key": "all",
               "pending": 1699329,
-              "processingTime": 11.0,
+              "processingTime": 11,
               "received": 228500,
               "title": "Petition for Alien Relative"
             }
@@ -115497,7 +115579,7 @@
               "denied": 28828,
               "key": "all",
               "pending": 1808240,
-              "processingTime": 14.0,
+              "processingTime": 14,
               "received": 231099,
               "title": "Petition for Alien Relative"
             }
@@ -115737,7 +115819,7 @@
               "denied": 13156,
               "key": "all-other-relative",
               "pending": 1555603,
-              "processingTime": 38.0,
+              "processingTime": 38,
               "received": 51382,
               "title": "Petition for Alien Relative (All Other Relative)"
             }
@@ -115763,7 +115845,7 @@
               "denied": 10968,
               "key": "all-other-relative",
               "pending": 1576284,
-              "processingTime": 38.0,
+              "processingTime": 38,
               "received": 47649,
               "title": "Petition for Alien Relative (All Other Relative)"
             }
@@ -115806,7 +115888,7 @@
               "denied": 16661,
               "key": "immediate-relative",
               "pending": 786723,
-              "processingTime": 13.0,
+              "processingTime": 13,
               "received": 126417,
               "title": "Petition for Alien Relative (Immediate Relative)"
             },
@@ -116696,7 +116778,7 @@
               "denied": 475,
               "key": "travel-document",
               "pending": 35589,
-              "processingTime": 7.0,
+              "processingTime": 7,
               "received": 20510,
               "title": "Application for Travel Document"
             },
@@ -116766,7 +116848,7 @@
               "denied": 930,
               "key": "travel-document",
               "pending": 54047,
-              "processingTime": 8.0,
+              "processingTime": 8,
               "received": 19527,
               "title": "Application for Travel Document"
             },
@@ -118254,7 +118336,7 @@
               "denied": 3630,
               "key": "all",
               "pending": 90647,
-              "processingTime": 11.0,
+              "processingTime": 11,
               "received": 41767,
               "title": "Immigrant Petition for Alien Workers"
             }
@@ -119156,7 +119238,7 @@
               "denied": 10,
               "key": "all",
               "pending": 466,
-              "processingTime": 65.0,
+              "processingTime": 65,
               "received": 15,
               "title": "Application for Waiver of Passport and/or Visa"
             }
@@ -119230,7 +119312,7 @@
               "denied": 10,
               "key": "all",
               "pending": 414,
-              "processingTime": 71.0,
+              "processingTime": 71,
               "received": null,
               "title": "Application for Waiver of Passport and/or Visa",
               "withheld": ["received"]
@@ -119871,7 +119953,7 @@
               "denied": 5033,
               "key": "all",
               "pending": 23761,
-              "processingTime": 2.0,
+              "processingTime": 2,
               "received": 12201,
               "title": "Notice of Appeal or Motion"
             }
@@ -119905,7 +119987,7 @@
               "denied": 4655,
               "key": "all",
               "pending": 26452,
-              "processingTime": 2.0,
+              "processingTime": 2,
               "received": 9736,
               "title": "Notice of Appeal or Motion"
             }
@@ -120558,7 +120640,7 @@
               "denied": 1788,
               "key": "all",
               "pending": 77221,
-              "processingTime": 9.0,
+              "processingTime": 9,
               "received": 16051,
               "title": "Petition for Amerasian, Widow(er), or Special Immigrant"
             }
@@ -120575,7 +120657,7 @@
               "denied": 2078,
               "key": "all",
               "pending": 82981,
-              "processingTime": 8.0,
+              "processingTime": 8,
               "received": 22326,
               "title": "Petition for Amerasian, Widow(er), or Special Immigrant"
             }
@@ -120609,7 +120691,7 @@
               "denied": 1863,
               "key": "all",
               "pending": 94854,
-              "processingTime": 8.0,
+              "processingTime": 8,
               "received": 20257,
               "title": "Petition for Amerasian, Widow(er), or Special Immigrant"
             }
@@ -120779,7 +120861,7 @@
               "denied": 2086,
               "key": "all",
               "pending": 217571,
-              "processingTime": 4.0,
+              "processingTime": 4,
               "received": 29336,
               "title": "Petition for Amerasian, Widow(er), or Special Immigrant"
             }
@@ -120796,7 +120878,7 @@
               "denied": 2386,
               "key": "all",
               "pending": 232676,
-              "processingTime": 5.0,
+              "processingTime": 5,
               "received": 34849,
               "title": "Petition for Amerasian, Widow(er), or Special Immigrant"
             }
@@ -290747,7 +290829,7 @@
               "denied": 249,
               "key": "asylum",
               "pending": 71340,
-              "processingTime": 13.0,
+              "processingTime": 13,
               "received": 9768,
               "title": "Application to Register Permanent Residence or Adjust Status (Asylum)"
             },
@@ -290853,7 +290935,7 @@
               "denied": 11599,
               "key": "family",
               "pending": 339070,
-              "processingTime": 13.0,
+              "processingTime": 13,
               "received": 91036,
               "title": "Application to Register Permanent Residence or Adjust Status (Family)"
             },
@@ -290942,7 +291024,7 @@
               "denied": 181,
               "key": "refugee",
               "pending": 24983,
-              "processingTime": 14.0,
+              "processingTime": 14,
               "received": 3527,
               "title": "Application to Register Permanent Residence or Adjust Status (Refugee)"
             },
@@ -291022,7 +291104,7 @@
               "denied": 887,
               "key": "other",
               "pending": 50255,
-              "processingTime": 15.0,
+              "processingTime": 15,
               "received": 10244,
               "title": "Application to Register Permanent Residence or Adjust Status (Other)"
             }
@@ -291137,7 +291219,7 @@
               "denied": 554,
               "key": "cuban",
               "pending": 16236,
-              "processingTime": 4.0,
+              "processingTime": 4,
               "received": 9558,
               "title": "Application to Register Permanent Residence or Adjust Status (Cuban)"
             },
@@ -291234,7 +291316,7 @@
               "denied": 3445,
               "key": "employment",
               "pending": 205065,
-              "processingTime": 10.0,
+              "processingTime": 10,
               "received": 44181,
               "title": "Application to Register Permanent Residence or Adjust Status (Employment)"
             },
@@ -291367,7 +291449,7 @@
               "denied": 531,
               "key": "asylum",
               "pending": 53193,
-              "processingTime": 24.0,
+              "processingTime": 24,
               "received": 14549,
               "title": "Application to Register Permanent Residence or Adjust Status (Asylum)"
             },
@@ -291420,7 +291502,7 @@
               "denied": 4448,
               "key": "employment",
               "pending": 171697,
-              "processingTime": 8.0,
+              "processingTime": 8,
               "received": 17858,
               "title": "Application to Register Permanent Residence or Adjust Status (Employment)"
             },
@@ -291748,7 +291830,7 @@
               "denied": 407,
               "key": "refugee",
               "pending": 43532,
-              "processingTime": 8.0,
+              "processingTime": 8,
               "received": 16725,
               "title": "Application to Register Permanent Residence or Adjust Status (Refugee)"
             },
@@ -291801,7 +291883,7 @@
               "denied": 695,
               "key": "asylum",
               "pending": 68389,
-              "processingTime": 10.0,
+              "processingTime": 10,
               "received": 19340,
               "title": "Application to Register Permanent Residence or Adjust Status (Asylum)"
             },
@@ -291890,7 +291972,7 @@
               "denied": 879,
               "key": "other",
               "pending": 46287,
-              "processingTime": 21.0,
+              "processingTime": 21,
               "received": 4731,
               "title": "Application to Register Permanent Residence or Adjust Status (Other)"
             }
@@ -291907,7 +291989,7 @@
               "denied": 18619,
               "key": "family",
               "pending": 543486,
-              "processingTime": 6.0,
+              "processingTime": 6,
               "received": 124297,
               "title": "Application to Register Permanent Residence or Adjust Status (Family)"
             },
@@ -292049,7 +292131,7 @@
               "denied": 197,
               "key": "asylum",
               "pending": 113567,
-              "processingTime": 22.0,
+              "processingTime": 22,
               "received": 12195,
               "title": "Application to Register Permanent Residence or Adjust Status (Asylum)"
             },
@@ -292093,7 +292175,7 @@
               "denied": 12240,
               "key": "family",
               "pending": 611067,
-              "processingTime": 7.0,
+              "processingTime": 7,
               "received": 95175,
               "title": "Application to Register Permanent Residence or Adjust Status (Family)"
             },
@@ -292102,7 +292184,7 @@
               "denied": 3160,
               "key": "employment",
               "pending": 268408,
-              "processingTime": 6.0,
+              "processingTime": 6,
               "received": 97501,
               "title": "Application to Register Permanent Residence or Adjust Status (Employment)"
             },
@@ -292138,7 +292220,7 @@
               "denied": 614,
               "key": "other",
               "pending": 62718,
-              "processingTime": 21.0,
+              "processingTime": 21,
               "received": 12074,
               "title": "Application to Register Permanent Residence or Adjust Status (Other)"
             }
@@ -292715,7 +292797,7 @@
               "denied": 130,
               "key": "legacy",
               "pending": 13044,
-              "processingTime": 30.0,
+              "processingTime": 30,
               "received": 98,
               "title": "Immigrant Petition by Alien Investor"
             }
@@ -292749,7 +292831,7 @@
               "denied": 266,
               "key": "legacy",
               "pending": 13008,
-              "processingTime": 49.0,
+              "processingTime": 49,
               "received": 456,
               "title": "Immigrant Petition by Alien Investor"
             }
@@ -293070,7 +293152,7 @@
               "denied": null,
               "key": "standalone",
               "pending": 516,
-              "processingTime": 12.0,
+              "processingTime": 12,
               "received": 94,
               "title": "Immigrant Petition by Standalone Investor",
               "withheld": ["denied"]
@@ -293097,7 +293179,7 @@
               "denied": null,
               "key": "standalone",
               "pending": 574,
-              "processingTime": 25.0,
+              "processingTime": 25,
               "received": 96,
               "title": "Immigrant Petition by Standalone Investor",
               "withheld": ["approved"]
@@ -293408,7 +293490,7 @@
               "denied": null,
               "key": "all",
               "pending": 6922,
-              "processingTime": 12.0,
+              "processingTime": 12,
               "received": 1359,
               "title": "Immigrant Petition by Regional Center Investor",
               "withheld": ["denied"]
@@ -294101,7 +294183,7 @@
               "denied": 21414,
               "key": "all",
               "pending": 242863,
-              "processingTime": 7.0,
+              "processingTime": 7,
               "received": 61186,
               "title": "Application To Extend/Change Nonimmigrant Status"
             }
@@ -294220,7 +294302,7 @@
               "denied": 11624,
               "key": "all",
               "pending": 57840,
-              "processingTime": 10.0,
+              "processingTime": 10,
               "received": 61390,
               "title": "Application To Extend/Change Nonimmigrant Status"
             }
@@ -296754,7 +296836,7 @@
               "denied": 921,
               "key": "all",
               "pending": 71985,
-              "processingTime": 24.0,
+              "processingTime": 24,
               "received": 8545,
               "title": "Application for Provisional Unlawful Presence Waiver"
             }
@@ -297499,7 +297581,7 @@
               "denied": 505,
               "key": "all",
               "pending": 14563,
-              "processingTime": 9.0,
+              "processingTime": 9,
               "received": 5138,
               "title": "Refugee/Asylee Relative Petition"
             }
@@ -298278,7 +298360,7 @@
               "denied": 1698,
               "key": "all",
               "pending": 204760,
-              "processingTime": 12.0,
+              "processingTime": 12,
               "received": 53009,
               "title": "Petition to Remove Conditions on Residence"
             }
@@ -298414,7 +298496,7 @@
               "denied": 1391,
               "key": "all",
               "pending": 225264,
-              "processingTime": 20.0,
+              "processingTime": 20,
               "received": 41716,
               "title": "Petition to Remove Conditions on Residence"
             }
@@ -298618,7 +298700,7 @@
               "denied": 727,
               "key": "all",
               "pending": 299880,
-              "processingTime": 25.0,
+              "processingTime": 25,
               "received": 42372,
               "title": "Petition to Remove Conditions on Residence"
             }
@@ -299193,7 +299275,7 @@
               "denied": 35835,
               "key": "all",
               "pending": 728090,
-              "processingTime": 3.0,
+              "processingTime": 3,
               "received": 470736,
               "title": "Application for Employment Authorization"
             }
@@ -299244,7 +299326,7 @@
               "denied": 65838,
               "key": "all",
               "pending": 1482697,
-              "processingTime": 5.0,
+              "processingTime": 5,
               "received": 690175,
               "title": "Application for Employment Authorization"
             }
@@ -299816,7 +299898,7 @@
               "denied": 18900,
               "key": "all-other",
               "pending": 606045,
-              "processingTime": 1.0,
+              "processingTime": 1,
               "received": 431379,
               "title": "Application for Employment Authorization (All Other)"
             }
@@ -299842,7 +299924,7 @@
               "denied": 8520,
               "key": "adjustment-of-status",
               "pending": 191393,
-              "processingTime": 2.0,
+              "processingTime": 2,
               "received": 195971,
               "title": "Application for Employment Authorization (Adjustment Of Status)"
             },
@@ -300589,7 +300671,7 @@
               "denied": 33,
               "key": "all",
               "pending": 357,
-              "processingTime": 3.0,
+              "processingTime": 3,
               "received": 436,
               "title": "Petition to Classify Convention Adoptee as an Immediate Relative"
             }
@@ -301178,7 +301260,7 @@
               "denied": 69,
               "key": "all",
               "pending": 400,
-              "processingTime": 4.0,
+              "processingTime": 4,
               "received": 125,
               "title": "Application for Family Unity Benefits"
             }
@@ -301280,7 +301362,7 @@
               "denied": 13,
               "key": "all",
               "pending": 388,
-              "processingTime": 9.0,
+              "processingTime": 9,
               "received": 90,
               "title": "Application for Family Unity Benefits"
             }
@@ -302122,7 +302204,7 @@
               "denied": 176,
               "key": "all",
               "pending": 125049,
-              "processingTime": 3.0,
+              "processingTime": 3,
               "received": 133019,
               "title": "Application for Temporary Protected Status"
             }
@@ -302411,7 +302493,7 @@
               "denied": 1363,
               "key": "all",
               "pending": 1173699,
-              "processingTime": 7.0,
+              "processingTime": 7,
               "received": 183767,
               "title": "Application for Temporary Protected Status"
             }
@@ -303952,7 +304034,7 @@
               "denied": 291,
               "key": "all",
               "pending": 5636,
-              "processingTime": 5.0,
+              "processingTime": 5,
               "received": 1768,
               "title": "Application for Action on an Approved Application or Petition"
             }
@@ -304122,7 +304204,7 @@
               "denied": 417,
               "key": "all",
               "pending": 25949,
-              "processingTime": 3.0,
+              "processingTime": 3,
               "received": 11005,
               "title": "Application for Action on an Approved Application or Petition"
             }
@@ -304224,7 +304306,7 @@
               "denied": 1639,
               "key": "all",
               "pending": 12241,
-              "processingTime": 6.0,
+              "processingTime": 6,
               "received": 4926,
               "title": "Application for Action on an Approved Application or Petition"
             }
@@ -304241,7 +304323,7 @@
               "denied": 791,
               "key": "all",
               "pending": 10967,
-              "processingTime": 4.0,
+              "processingTime": 4,
               "received": 4486,
               "title": "Application for Action on an Approved Application or Petition"
             }
@@ -304934,7 +305016,7 @@
               "denied": 46,
               "key": "all",
               "pending": 11160,
-              "processingTime": 36.0,
+              "processingTime": 36,
               "received": 1249,
               "title": "Petition by Investor to Remove Conditions on Permanent Resident Status"
             }
@@ -304951,7 +305033,7 @@
               "denied": 87,
               "key": "all",
               "pending": 11448,
-              "processingTime": 37.0,
+              "processingTime": 37,
               "received": 794,
               "title": "Petition by Investor to Remove Conditions on Permanent Resident Status"
             }
@@ -308679,7 +308761,7 @@
               "denied": 2320,
               "key": "all",
               "pending": 888550,
-              "processingTime": 1.0,
+              "processingTime": 1,
               "received": 267380,
               "title": "Application to Replace Permanent Resident Card"
             }
@@ -308934,7 +309016,7 @@
               "denied": 9167,
               "key": "all",
               "pending": 522778,
-              "processingTime": 9.0,
+              "processingTime": 9,
               "received": 166639,
               "title": "Application to Replace Permanent Resident Card"
             }
@@ -309798,7 +309880,7 @@
               "denied": 324,
               "key": "all",
               "pending": 37216,
-              "processingTime": 17.0,
+              "processingTime": 17,
               "received": 8596,
               "title": "Application for T Nonimmigrant Status"
             }
@@ -310475,7 +310557,7 @@
               "denied": 1538,
               "key": "all",
               "pending": 271726,
-              "processingTime": 59.0,
+              "processingTime": 59,
               "received": 8765,
               "title": "Petition for U Nonimmigrant Status"
             }
@@ -310577,7 +310659,7 @@
               "denied": 1463,
               "key": "all",
               "pending": 314834,
-              "processingTime": 58.0,
+              "processingTime": 58,
               "received": 13028,
               "title": "Petition for U Nonimmigrant Status"
             }
@@ -310747,7 +310829,7 @@
               "denied": 1769,
               "key": "all",
               "pending": 412815,
-              "processingTime": 27.0,
+              "processingTime": 27,
               "received": 11344,
               "title": "Petition for U Nonimmigrant Status"
             }
@@ -311223,7 +311305,7 @@
               "denied": 12,
               "key": "all",
               "pending": 157,
-              "processingTime": 39.0,
+              "processingTime": 39,
               "received": null,
               "title": "Application For Regional Center Designation Under the Immigrant Investor Program",
               "withheld": ["received"]
@@ -312922,7 +313004,7 @@
               "denied": 32,
               "key": "all",
               "pending": 2017,
-              "processingTime": 21.0,
+              "processingTime": 21,
               "received": 144,
               "title": "Petition for Qualifying Family Member of a U-1 Nonimmigrant"
             }
@@ -312939,7 +313021,7 @@
               "denied": 75,
               "key": "all",
               "pending": 1874,
-              "processingTime": 28.0,
+              "processingTime": 28,
               "received": 143,
               "title": "Petition for Qualifying Family Member of a U-1 Nonimmigrant"
             }
@@ -312956,7 +313038,7 @@
               "denied": 58,
               "key": "all",
               "pending": 1872,
-              "processingTime": 28.0,
+              "processingTime": 28,
               "received": 252,
               "title": "Petition for Qualifying Family Member of a U-1 Nonimmigrant"
             }
@@ -312990,7 +313072,7 @@
               "denied": 36,
               "key": "all",
               "pending": 2265,
-              "processingTime": 26.0,
+              "processingTime": 26,
               "received": 414,
               "title": "Petition for Qualifying Family Member of a U-1 Nonimmigrant"
             }
@@ -313256,7 +313338,7 @@
               "denied": null,
               "key": "all",
               "pending": 231,
-              "processingTime": 9.0,
+              "processingTime": 9,
               "received": 25,
               "title": "Application for Regional Center Designation",
               "withheld": ["denied"]
@@ -313370,7 +313452,7 @@
               "denied": null,
               "key": "all",
               "pending": 82,
-              "processingTime": 11.0,
+              "processingTime": 11,
               "received": 12,
               "title": "Application for Regional Center Designation",
               "withheld": ["denied"]
@@ -415279,7 +415361,7 @@
               "denied": 182,
               "key": "military",
               "pending": 5956,
-              "processingTime": 12.0,
+              "processingTime": 12,
               "received": 2056,
               "title": "Application for Naturalization (Military)"
             },
@@ -415305,7 +415387,7 @@
               "denied": 226,
               "key": "military",
               "pending": 6055,
-              "processingTime": 11.0,
+              "processingTime": 11,
               "received": 2608,
               "title": "Application for Naturalization (Military)"
             },
@@ -415331,7 +415413,7 @@
               "denied": 203,
               "key": "military",
               "pending": 6312,
-              "processingTime": 11.0,
+              "processingTime": 11,
               "received": 2432,
               "title": "Application for Naturalization (Military)"
             },
@@ -415357,7 +415439,7 @@
               "denied": 255,
               "key": "military",
               "pending": 6386,
-              "processingTime": 9.0,
+              "processingTime": 9,
               "received": 2721,
               "title": "Application for Naturalization (Military)"
             },
@@ -415366,7 +415448,7 @@
               "denied": 31695,
               "key": "civilian",
               "pending": 543838,
-              "processingTime": 9.0,
+              "processingTime": 9,
               "received": 194819,
               "title": "Application for Naturalization"
             }
@@ -415591,7 +415673,7 @@
               "denied": 185,
               "key": "military",
               "pending": 7197,
-              "processingTime": 2.0,
+              "processingTime": 2,
               "received": 4275,
               "title": "Application for Naturalization (Military)"
             },
@@ -417420,7 +417502,7 @@
               "denied": 727,
               "key": "all",
               "pending": 23758,
-              "processingTime": 6.0,
+              "processingTime": 6,
               "received": 8810,
               "title": "Application for Replacement Naturalization/Citizenship Document"
             }
@@ -417638,7 +417720,7 @@
               "denied": 1077,
               "key": "all",
               "pending": 47231,
-              "processingTime": 6.0,
+              "processingTime": 6,
               "received": 18177,
               "title": "Application for Certificate of Citizenship"
             }
@@ -417757,7 +417839,7 @@
               "denied": 1188,
               "key": "all",
               "pending": 70819,
-              "processingTime": 7.0,
+              "processingTime": 7,
               "received": 19199,
               "title": "Application for Certificate of Citizenship"
             }

@@ -295,7 +295,7 @@ const REPUBLISHED_MEDIAN_MIN_SERIES = 10;
 
 /** The quarters whose all-forms report repeats the quarter before's medians
  * (REPUBLISHED_MEDIAN_SHARE): those medians say nothing about the quarter,
- * and the pages treat them as not published and say why. forms.py drops
+ * and the pages treat them as not published and say why. forms.ts drops
  * them and lists the quarters in forms.json, where this can no longer find
  * them; for a forms.json written before it did, this finds them itself. */
 export function republishedMedianQuarters(data: UscisData): string[] {
@@ -341,7 +341,7 @@ function findRepublishedMedians(forms: Form[]): string[] {
 /** A pending count of 0 in a quarter that received applications is USCIS's
  * "-" in its pending column: for the I-870 and I-899 (worksheets it keeps
  * no pile of) and the I-956G and I-956H it means it did not count them, not
- * that none are waiting. forms.py reads "-" that way; forms.json has it as 0
+ * that none are waiting. forms.ts reads "-" that way; forms.json has it as 0
  * for the quarters it read before. */
 function unknownPending<T extends QuarterCounts>(counts: T): T {
   return counts.pending === 0 && (counts.received ?? 0) > 0

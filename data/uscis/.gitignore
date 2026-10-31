@@ -1,4 +1,2 @@
-__pycache__/
-# raw quarterly reports downloaded by forms.py; cached between workflow runs
+# raw quarterly reports downloaded by forms.ts; cached between workflow runs
 reports/
-.venv/

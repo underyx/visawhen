@@ -151,7 +151,7 @@ def uscis_forms() -> Freshness:
             f"stale 120 days after the next quarter ended on {next_end.isoformat()}."
         ),
         where=(
-            "The scraper is `data/uscis/forms.py`, run by the "
+            "The scraper is `data/uscis/forms.ts`, run by the "
             f"[Update USCIS forms data]({REPOSITORY_URL}/actions/workflows/uscis_forms_update_schedule.yml) workflow. Check "
             "whether USCIS's [Immigration and Citizenship Data](https://www.uscis.gov/tools/reports-and-studies/"
             "immigration-and-citizenship-data) page lists the next quarter; if it does, the workflow's log says "
@@ -175,12 +175,12 @@ def uscis_monthly() -> Freshness:
             f"ends, so the data counts as stale 60 days after the next month ended on {next_end.isoformat()}."
         ),
         where=(
-            "The scraper is `data/uscis/monthly.py`, run by the "
+            "The scraper is `data/uscis/monthly.ts`, run by the "
             f"[Update USCIS monthly data]({REPOSITORY_URL}/actions/workflows/uscis_monthly_update_schedule.yml) workflow. "
             "Check whether USCIS's [Immigration and Citizenship Data](https://www.uscis.gov/tools/reports-and-studies/"
             "immigration-and-citizenship-data?query=Appropriations&items_per_page=100) page lists the next month; if "
             "it does, the workflow's log says why it was not added; the report can also be saved from a browser and "
-            "added with `monthly.py --from-file`."
+            "added with `monthly.ts --from-file`."
         ),
         workflow="uscis_monthly_update_schedule.yml",
     )

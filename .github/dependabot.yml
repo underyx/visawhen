@@ -64,13 +64,12 @@ updates:
         patterns:
           - "*"
 
-  # The scrapers' Python projects, one uv.lock each. They only run on a
-  # schedule in their workflows, so an update that breaks one shows up in
-  # that workflow's run, not on the site.
+  # The consulate scraper's Python project. It only runs on a schedule in
+  # its workflow, so an update that breaks it shows up in that workflow's
+  # run, not on the site.
   - package-ecosystem: "uv"
     directories:
       - "/data/consulates"
-      - "/data/uscis"
     schedule:
       interval: "weekly"
     cooldown:

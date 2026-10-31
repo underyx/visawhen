@@ -1,7 +1,8 @@
-# For pull requests that touch data/uscis (such as Dependabot's updates of the
-# parsers' packages): rebuild forms.json from the reports that the scheduled
-# workflow (uscis_forms_update_schedule.yml) cached on main, with
-# `forms.py --offline`, and fail when it differs from the committed forms.json.
+# For pull requests that touch data/uscis, the readers in data/lib or the
+# packages (such as Dependabot's updates of unpdf): rebuild forms.json from
+# the reports that the scheduled workflow (uscis_forms_update_schedule.yml)
+# cached on main, with `forms.ts --offline`, and fail when it differs from
+# the committed forms.json.
 # A pull request that changes the parsed data on purpose commits the
 # regenerated forms.json with it.
 name: Check the USCIS forms parser
@@ -10,14 +11,13 @@ on:
   pull_request:
     paths:
       - "data/uscis/**"
+      - "data/lib/**"
+      - "package.json"
+      - "bun.lock"
       - ".github/workflows/uscis_forms_check.yml"
 
 permissions:
   contents: read
-
-defaults:
-  run:
-    working-directory: data/uscis
 
 jobs:
   check-forms:
@@ -27,12 +27,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Set up uv
-        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          python-version: "3.13"
-          enable-cache: true
-          cache-dependency-glob: data/uscis/uv.lock
+          bun-version-file: .bun-version
+      # --frozen-lockfile: fail rather than change bun.lock
+      - run: bun install --frozen-lockfile
       # A pull request can read the caches of its base branch; it only
       # restores here and never saves.
       - name: Restore downloaded reports
@@ -42,15 +41,13 @@ jobs:
           key: ${{ runner.os }}-uscis-reports-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-uscis-reports-
-      - name: Install dependencies
-        run: uv sync --locked
       # Without every report forms.json cites (no cache yet, or one from
       # before a report was added), the rebuild would differ for that reason
       # alone.
       - name: Check that every report is cached
         id: cache
         run: |
-          if uv run python -c 'import sys, forms; sys.exit(0 if forms.cache_is_complete() else 1)'; then
+          if bun data/uscis/forms.ts --check-cache; then
             echo "complete=true" >> "$GITHUB_OUTPUT"
           else
             echo "complete=false" >> "$GITHUB_OUTPUT"
@@ -58,11 +55,11 @@ jobs:
           fi
       - name: Rebuild forms.json
         if: steps.cache.outputs.complete == 'true'
-        run: uv run python -u forms.py --offline
+        run: bun data/uscis/forms.ts --offline
       - name: Compare with the committed forms.json
         if: steps.cache.outputs.complete == 'true'
         run: |
-          if ! git diff --exit-code --stat -- forms.json; then
-            echo "::error file=data/uscis/forms.json::forms.py --offline does not rebuild the committed forms.json from the cached reports; run it and commit the result if the change is intended"
+          if ! git diff --exit-code --stat -- data/uscis/forms.json; then
+            echo "::error file=data/uscis/forms.json::forms.ts --offline does not rebuild the committed forms.json from the cached reports; run it and commit the result if the change is intended"
             exit 1
           fi
