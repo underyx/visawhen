@@ -416,21 +416,21 @@ export default function IvScheduleCard({
     schedule === null
       ? []
       : wholePost
-      ? [
-          {
-            label:
-              "All three categories: immediate relatives, family preference and employment",
-            cutoff: schedule.relative,
-            previous: previousWhole
-              ? previousMonth(schedule, "relative")
-              : null,
-          },
-        ]
-      : categories.map((category) => ({
-          label: CATEGORY_LABELS[category],
-          cutoff: schedule[category],
-          previous: previousMonth(schedule, category),
-        }));
+        ? [
+            {
+              label:
+                "All three categories: immediate relatives, family preference and employment",
+              cutoff: schedule.relative,
+              previous: previousWhole
+                ? previousMonth(schedule, "relative")
+                : null,
+            },
+          ]
+        : categories.map((category) => ({
+            label: CATEGORY_LABELS[category],
+            cutoff: schedule[category],
+            previous: previousMonth(schedule, category),
+          }));
   const cutoffs = schedule === null ? [] : listedCutoffs(schedule);
   // An override that ends later applies in the prerendered page, which
   // cannot know today's date, and on the client until it ends; after that it

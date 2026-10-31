@@ -54,8 +54,8 @@ export function sourcePattern(source) {
       part === "*"
         ? ".*"
         : part.startsWith(":")
-        ? "[^/]+"
-        : part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+          ? "[^/]+"
+          : part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
     )
     .join("");
   return new RegExp(`^${pattern}$`);

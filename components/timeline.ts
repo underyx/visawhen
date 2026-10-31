@@ -813,8 +813,8 @@ export function inputsFromHash(
           ? value
           : ""
         : isIsoDate(value)
-        ? value.slice(0, 7)
-        : validMonth(value, null) ?? "";
+          ? value.slice(0, 7)
+          : (validMonth(value, null) ?? "");
   }
   if (inputs.milestone === "") inputs.date = "";
   return inputs;
@@ -1415,8 +1415,8 @@ function nvcReviewStage(
           today > end.high
             ? "Most likely reviewed already"
             : today >= end.low
-            ? `Most likely by ${formatShortDate(end.high)}`
-            : `Most likely ${formatDateRange(end)}`,
+              ? `Most likely by ${formatShortDate(end.high)}`
+              : `Most likely ${formatDateRange(end)}`,
       };
     }
   }
@@ -1611,12 +1611,12 @@ function interviewStage(
             pace.moved < pace.over ? "growing" : "shrinking"
           }.`
         : pace.moved === 0
-        ? `It was the same month in the update of ${formatShortDate(
-            pace.from[0],
-          )}, so the queue has not moved forward in ${pace.over} months.`
-        : `In the update of ${formatShortDate(
-            pace.from[0],
-          )}, it was ${from}, so the month has moved back.`,
+          ? `It was the same month in the update of ${formatShortDate(
+              pace.from[0],
+            )}, so the queue has not moved forward in ${pace.over} months.`
+          : `In the update of ${formatShortDate(
+              pace.from[0],
+            )}, it was ${from}, so the month has moved back.`,
     );
   }
   basis.push(
@@ -1672,8 +1672,8 @@ function interviewStage(
               : formatDateRange({ low: low.pace, high: high.pace })
           }${high.capped ? ", or later" : ""}.`
         : pace !== null && pace.moved <= 0
-        ? " The month has not moved forward in the last year, so it could take much longer."
-        : ""
+          ? " The month has not moved forward in the last year, so it could take much longer."
+          : ""
     }`,
   );
   const days = {

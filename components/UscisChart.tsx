@@ -574,16 +574,14 @@ export function WaitChart({
       offScale(index) ? clippedAt : values[start + index],
     ),
   };
-  const officials = processingTimeSeries.map(
-    (series, index): Line => ({
-      series: {
-        name: officialName(series),
-        color: EXTRA_COLORS[index % EXTRA_COLORS.length],
-        mark: "dashed",
-      },
-      values: shown.map((point) => point.processingTimes[series.key] ?? null),
-    }),
-  );
+  const officials = processingTimeSeries.map((series, index): Line => ({
+    series: {
+      name: officialName(series),
+      color: EXTRA_COLORS[index % EXTRA_COLORS.length],
+      mark: "dashed",
+    },
+    values: shown.map((point) => point.processingTimes[series.key] ?? null),
+  }));
   const lines = [estimate, ...officials];
   const y = scaleLinear({
     domain: [

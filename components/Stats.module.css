@@ -61,7 +61,8 @@
     (
         var(--vw-chip-height) - var(--mantine-font-size-xs) *
           var(--mantine-line-height-xs)
-      ) / 2
+      ) /
+      2
   );
   display: flex;
   flex-wrap: wrap;

@@ -335,8 +335,8 @@ export default function ConsulateSelect({
             monthsBehind(ivSchedule.asOf, relativeCutoff) > 0
               ? `mostly ${formatShortIvMonth(relativeCutoff)} cases`
               : listsPostAsCurrent(ivSchedule)
-              ? "listed as current"
-              : "immediate relatives listed as current"
+                ? "listed as current"
+                : "immediate relatives listed as current"
           }`;
     description =
       describeRelativeQueue(postName, ivSchedule) ?? issuedDescription;

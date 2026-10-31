@@ -55,8 +55,8 @@ function ChangeStat({
     change === null || change === "unchanged"
       ? "dimmed"
       : isIncrease === higherIsBetter
-      ? "teal.9"
-      : "red.9";
+        ? "teal.9"
+        : "red.9";
   return (
     <Stat
       {...props}
@@ -89,8 +89,8 @@ function clearingUnknown(point: QuarterPoint, period: Span): string | null {
     return point.approved === null && point.denied === null
       ? "USCIS did not publish the decisions"
       : point.approved === null
-      ? "USCIS did not publish the approvals"
-      : "USCIS did not publish the denials";
+        ? "USCIS did not publish the approvals"
+        : "USCIS did not publish the denials";
   if (point.completions === 0) return `no decisions that ${period}`;
   return null;
 }
@@ -162,14 +162,14 @@ export default function UscisStats({
   );
   const notShown = rarelyApproved
     ? "the office almost never approves these"
-    : backlogSuppressed ?? clearingUnknown(current, period);
+    : (backlogSuppressed ?? clearingUnknown(current, period));
   // which decisions USCIS withheld as too few to disclose, when it did
   const withheld =
     current.approved === null && current.denied === null
       ? "Approvals and denials"
       : current.approved === null
-      ? "Approvals"
-      : "Denials";
+        ? "Approvals"
+        : "Denials";
   const [withheldLow, withheldHigh] = WITHHELD_RANGE;
   return (
     <Stack gap="lg">
@@ -246,21 +246,21 @@ export default function UscisStats({
             notShown !== null
               ? null
               : moved === "in"
-              ? "includes cases moved or routed here"
-              : moved === "out"
-              ? "after USCIS moved cases away"
-              : trend === null ||
-                previous?.waitMonths === null ||
-                previous?.waitMonths === undefined
-              ? null
-              : trend === "rising"
-              ? `up from ${formatMonths(previous.waitMonths)}`
-              : trend === "easing"
-              ? `down from ${formatMonths(previous.waitMonths)}`
-              : formatMonths(previous.waitMonths) ===
-                formatMonths(current.waitMonths)
-              ? `same as the ${period} before`
-              : `about the same (was ${formatMonths(previous.waitMonths)})`
+                ? "includes cases moved or routed here"
+                : moved === "out"
+                  ? "after USCIS moved cases away"
+                  : trend === null ||
+                      previous?.waitMonths === null ||
+                      previous?.waitMonths === undefined
+                    ? null
+                    : trend === "rising"
+                      ? `up from ${formatMonths(previous.waitMonths)}`
+                      : trend === "easing"
+                        ? `down from ${formatMonths(previous.waitMonths)}`
+                        : formatMonths(previous.waitMonths) ===
+                            formatMonths(current.waitMonths)
+                          ? `same as the ${period} before`
+                          : `about the same (was ${formatMonths(previous.waitMonths)})`
           }
           lineColor="dimmed"
         />
@@ -356,8 +356,8 @@ export default function UscisStats({
               previousStalled
                 ? stalledBefore(period)
                 : tooSmallToCompare(previous?.completions, current.completions)
-                ? tooFewToCompare(period)
-                : null
+                  ? tooFewToCompare(period)
+                  : null
             }
           />
         )}
@@ -390,14 +390,14 @@ export default function UscisStats({
                   ? `USCIS withheld the ${withheld.toLowerCase()} as too few`
                   : `range: USCIS withheld the ${withheld.toLowerCase()} as too few (${withheldLow} to ${withheldHigh})`
                 : current.approvalRate === null ||
-                  previous === undefined ||
-                  previous.approvalRate === null
-                ? null
-                : previousStalled
-                ? stalledBefore(period)
-                : previous.approximate
-                ? `the ${period} before's is approximate`
-                : `too few decisions to compare with the ${period} before`
+                    previous === undefined ||
+                    previous.approvalRate === null
+                  ? null
+                  : previousStalled
+                    ? stalledBefore(period)
+                    : previous.approximate
+                      ? `the ${period} before's is approximate`
+                      : `too few decisions to compare with the ${period} before`
             }
           />
         )}

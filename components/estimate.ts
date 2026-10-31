@@ -252,8 +252,8 @@ export function categoryRanges(form: Form): CategoryRange[] {
       const level = shock
         ? "high"
         : premium && pressure === "low"
-        ? "typical"
-        : pressure;
+          ? "typical"
+          : pressure;
       return {
         key: variant.key,
         title: variant.title,
@@ -267,8 +267,8 @@ export function categoryRanges(form: Form): CategoryRange[] {
           completions === null || completions < MIN_DECISIONS
             ? "too few decisions"
             : ratio !== null && ratio < STALLED_RATIO
-            ? "nearly stopped"
-            : null,
+              ? "nearly stopped"
+              : null,
         priorityDate: (PRIORITY_DATE_CATEGORIES[form.form] ?? []).includes(
           variant.key,
         ),

@@ -159,10 +159,10 @@ function PostBadge({
         {line === "few"
           ? "few immigrant visas"
           : issuances > 0
-          ? formatMonthlyRate(issuances / 12)
-          : lastIssued === undefined
-          ? "none issued"
-          : `none since ${formatMonth(lastIssued)}`}
+            ? formatMonthlyRate(issuances / 12)
+            : lastIssued === undefined
+              ? "none issued"
+              : `none since ${formatMonth(lastIssued)}`}
       </Text>
     </Stack>
   );

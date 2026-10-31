@@ -33,19 +33,18 @@ repos:
       - id: mypy
         additional_dependencies: [types-requests]
 
-  # Prettier stays at 3.0.0: newer versions reformat every nested ternary. The
-  # hook is the one pre-commit/mirrors-prettier v3.0.0 defines, kept here
-  # since that repository is archived.
+  # bun fmt formats the JavaScript, TypeScript, CSS, JSON, YAML, TOML and
+  # Markdown files, as Prettier does (settings in bunfig.toml's [fmt]). It
+  # takes a fraction of a second, so it runs on the whole repository.
+  # --no-script: run the formatter, not a package.json script of that name.
   - repo: local
     hooks:
-      - id: prettier
-        name: prettier
-        entry: prettier --write --list-different --ignore-unknown
-        language: node
-        types: [text]
-        additional_dependencies: ["prettier@3.0.0"]
-        # written by npm and Dependabot
-        exclude: ^[.]github/deploy-tools/package-lock[.]json$
+      - id: bun-fmt
+        name: bun fmt
+        entry: bun fmt --no-script
+        language: system
+        pass_filenames: false
+        always_run: true
 
   - repo: https://github.com/roy-ht/pre-commit-jupyter
     rev: v1.2.1

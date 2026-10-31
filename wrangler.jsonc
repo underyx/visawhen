@@ -17,10 +17,10 @@
     // redirects /nvc.html and /index.html too; nothing links to those forms.
     "html_handling": "auto-trailing-slash",
     // Serve out/404.html with a 404 status for unknown paths.
-    "not_found_handling": "404-page"
+    "not_found_handling": "404-page",
   },
   "observability": {
-    "enabled": true
+    "enabled": true,
   },
   // A route rather than a custom domain: the Worker answers every request to
   // visawhen.com, so the zone's DNS records for it only need to be proxied;
@@ -32,5 +32,5 @@
   "routes": [{ "pattern": "visawhen.com/*", "zone_name": "visawhen.com" }],
   // Also serves visawhen.<account>.workers.dev, kept out of search results by
   // public/_headers.
-  "workers_dev": true
+  "workers_dev": true,
 }
