@@ -1,11 +1,10 @@
 const { execFileSync } = require("node:child_process");
 const { createHash } = require("node:crypto");
-const path = require("node:path");
 
 // The files under data/ that the pages' scripts import (components/policy.ts
 // imports data/policy.json). The rest of data/ reaches the pages only through
 // getStaticProps, as page HTML and /_next/data JSON, never through their
-// scripts; ClientDataCheck below fails the build otherwise.
+// scripts; the turbopack rule below fails the build otherwise.
 const CLIENT_DATA = ["data/policy.json"];
 
 /**
@@ -50,30 +49,6 @@ function buildId() {
   return hash.slice(0, 20);
 }
 
-/** Fails the build when the pages' scripts import a file under data/ that is
- * not in CLIENT_DATA: the build id would not change with it. */
-class ClientDataCheck {
-  apply(compiler) {
-    const dataDir = path.join(__dirname, "data") + path.sep;
-    const allowed = new Set(
-      CLIENT_DATA.map((file) => path.join(__dirname, file)),
-    );
-    compiler.hooks.thisCompilation.tap("ClientDataCheck", (compilation) => {
-      compilation.hooks.finishModules.tap("ClientDataCheck", (modules) => {
-        for (const webpackModule of modules) {
-          const file = webpackModule.resource?.split("?")[0];
-          if (!file?.startsWith(dataDir) || allowed.has(file)) continue;
-          const name = path.relative(__dirname, file);
-          const message =
-            `${name} is imported by the pages' scripts; add it to CLIENT_DATA` +
-            " in next.config.js so that the build id changes with it";
-          compilation.errors.push(new compiler.webpack.WebpackError(message));
-        }
-      });
-    });
-  }
-}
-
 /** @type {import('next').NextConfig} */
 const CONFIG = {
   // The site is a fully static export: `next build` writes it to out/, which
@@ -85,9 +60,28 @@ const CONFIG = {
   // Stop `next dev` from dropping generated AGENTS.md/CLAUDE.md into the repo.
   agentRules: false,
   generateBuildId: buildId,
-  webpack(config, { isServer }) {
-    if (!isServer) config.plugins.push(new ClientDataCheck());
-    return config;
+  turbopack: {
+    rules: {
+      // A file under data/ that the pages' scripts import, but CLIENT_DATA
+      // does not list, fails the build (scripts/client-data-check.cjs): the
+      // build id would not change with it.
+      "*.json": {
+        condition: {
+          all: [
+            "browser",
+            { path: /(^|[\\/])data[\\/]/ },
+            {
+              not: {
+                any: CLIENT_DATA.map((file) => ({
+                  path: new RegExp(`${file.replaceAll(".", "\\.")}$`),
+                })),
+              },
+            },
+          ],
+        },
+        loaders: [require.resolve("./scripts/client-data-check.cjs")],
+      },
+    },
   },
 };
 
