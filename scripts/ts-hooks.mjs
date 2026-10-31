@@ -13,8 +13,8 @@
 //
 // Only .ts modules can be loaded this way: Node strips types but does not
 // compile JSX, and a type-only import in a .ts module has to say `import
-// type` (ESLint enforces that for .ts files), or Node would look for an
-// export that does not exist.
+// type` (bun lint enforces that), or Node would look for an export that
+// does not exist.
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 

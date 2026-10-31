@@ -1,11 +1,15 @@
 import { Stack, Text } from "@mantine/core";
 import React from "react";
-import { CategoryRange, formatMedian, formatRangeMonths } from "./estimate";
+import {
+  type CategoryRange,
+  formatMedian,
+  formatRangeMonths,
+} from "./estimate";
 import { addMonths, formatMonthRange, useToday } from "./Freshness";
 import { WarningIcon } from "./icons";
 import MoreDetails from "./MoreDetails";
 import { NoteChip } from "./NoteChip";
-import { NotShown, Stat, StatProps, Stats } from "./Stats";
+import { NotShown, Stat, type StatProps, Stats } from "./Stats";
 import {
   approvalRatesComparable,
   approximately,
@@ -17,8 +21,8 @@ import {
   formatPointChange,
   MIN_CHANGE_BASE,
   pendingChangeReliable,
-  QuarterPoint,
-  Span,
+  type QuarterPoint,
+  type Span,
   stalled,
   WITHHELD_ESTIMATE,
   WITHHELD_RANGE,

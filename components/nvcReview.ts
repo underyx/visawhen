@@ -202,7 +202,8 @@ export function reviewRange(
       };
   }
   const ends = [queueDate, ...(pace === null ? [] : [pace.date])].sort();
-  let [low, high] = [ends[0], ends[ends.length - 1]];
+  const low = ends[0];
+  let high = ends[ends.length - 1];
 
   // bursts: a still week among the readings of the last six weeks
   const recent = all.filter(

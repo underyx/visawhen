@@ -1,6 +1,6 @@
 import { ChevronLeftIcon, SearchIcon } from "../../../components/icons";
 import { sortBy } from "lodash";
-import { GetStaticPaths, GetStaticProps } from "next";
+import { type GetStaticPaths, type GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import React, { useMemo } from "react";
@@ -15,9 +15,9 @@ import {
   getRecentIssuancesByClass,
   getRecentWindow,
   getVisaClassSlugsForPost,
-  RecentVisaClassIssuancesRow,
-  RecentWindow,
-  VisaClassRow,
+  type RecentVisaClassIssuancesRow,
+  type RecentWindow,
+  type VisaClassRow,
 } from "../../../api/consulates";
 import { checkPolicies } from "../../../api/policy";
 import {
@@ -33,7 +33,7 @@ import {
   formatShortIvMonth,
   IV_CATEGORIES,
   IV_POSTS_ELSEWHERE,
-  IvSchedule,
+  type IvSchedule,
   monthsBehind,
   summarizeInactivity,
   summarizeIvPostElsewhere,

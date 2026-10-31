@@ -6,7 +6,7 @@ Data on US visa wait times at the National Visa Center and at US embassies/consu
 
 The site is a static [Next.js](https://nextjs.org) export: `next build` renders every page (one per consulate and visa class, one per USCIS form and field office) to `out/`, which GitHub Actions deploys to Cloudflare Workers on every push to `main` (`.github/workflows/deploy.yml`, which also describes how visawhen.com is served). Only `main` is deployed.
 
-Pull requests run pre-commit, ESLint, `tsc`, the unit tests and a full build, with a read-only token and no secrets; one that touches `data/uscis` also rebuilds `forms.json` from the reports cached on `main` (`forms.py --offline`) and fails when it differs from the committed file.
+Pull requests run pre-commit, `bun lint`, `tsc`, the unit tests and a full build, with a read-only token and no secrets; one that touches `data/uscis` also rebuilds `forms.json` from the reports cached on `main` (`forms.py --offline`) and fails when it differs from the committed file.
 
 The data lives in this repository and is refreshed by scheduled workflows that commit their results and trigger a deploy:
 
@@ -25,18 +25,18 @@ The home page leads to a timeline page per common route through the process (`/t
 
 ## Running the site locally
 
-You need Node.js (the version in `.node-version`), Yarn (bundled in `.yarn/releases`, so `yarn` just works) and [sqlite-diffable](https://github.com/simonw/sqlite-diffable) on your `PATH` (`pipx install sqlite-diffable` or `uv tool install sqlite-diffable`) to rebuild the consulates database from its dump.
+You need Node.js (the version in `.node-version`), Yarn (bundled in `.yarn/releases`, so `yarn` just works), [Bun](https://bun.com) (for `bun lint`; `.bun-version` says which, and until a stable release has the linter that is the canary: `bun upgrade --canary`) and [sqlite-diffable](https://github.com/simonw/sqlite-diffable) on your `PATH` (`pipx install sqlite-diffable` or `uv tool install sqlite-diffable`) to rebuild the consulates database from its dump.
 
 ```sh
 yarn            # install dependencies
 yarn dev        # rebuilds data/consulates/consulates.sqlite, then serves the site on http://localhost:3000
 yarn build      # the static export, into out/
-yarn lint       # eslint
+yarn lint       # bun lint
 yarn typecheck  # tsc
 yarn test       # the unit tests
 ```
 
-The unit tests (`*.test.ts` next to the modules they test, run by Node's own test runner) cover the logic the pages rest on: the planning ranges and the rules that suppress them (`components/estimate.ts`), the NVC review range (`components/nvcReview.ts`), which policy notices a page shows (`components/policy.ts`), the USCIS figures and the chart notes (`components/uscis.ts`), the Visa Bulletin arithmetic, the search ranking and the redirects check. Node loads the TypeScript modules as they are, so a `.ts` module may not import a `.tsx` one, and must say `import type` for a type (ESLint checks that); the pure date helpers live in `components/dates.ts` for that reason, apart from the `useToday` hook in `components/Freshness.tsx`. The NVC backtest (`yarn node data/nvc/backtest.mjs`) runs the same modules the same way.
+The unit tests (`*.test.ts` next to the modules they test, run by Node's own test runner) cover the logic the pages rest on: the planning ranges and the rules that suppress them (`components/estimate.ts`), the NVC review range (`components/nvcReview.ts`), which policy notices a page shows (`components/policy.ts`), the USCIS figures and the chart notes (`components/uscis.ts`), the Visa Bulletin arithmetic, the search ranking and the redirects check. Node loads the TypeScript modules as they are, so a `.ts` module may not import a `.tsx` one, and must say `import type` for a type (`bun lint` checks that); the pure date helpers live in `components/dates.ts` for that reason, apart from the `useToday` hook in `components/Freshness.tsx`. The NVC backtest (`yarn node data/nvc/backtest.mjs`) runs the same modules the same way.
 
 ## Running the scrapers
 

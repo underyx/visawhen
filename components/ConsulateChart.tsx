@@ -1,4 +1,4 @@
-import { IssuancesRow, VisaType } from "../api/consulates";
+import { type IssuancesRow, type VisaType } from "../api/consulates";
 import { formatCount, formatMonth } from "./consulates";
 import { ISSUANCE_STATISTICS_URLS } from "./links";
 

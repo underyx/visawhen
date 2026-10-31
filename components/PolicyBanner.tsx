@@ -13,12 +13,12 @@ import { daysBetween, formatShortDate, useToday } from "./Freshness";
 import MoreDetails from "./MoreDetails";
 import { ChipRow, NoteChip } from "./NoteChip";
 import {
-  ConsulatePage,
+  type ConsulatePage,
   hasEnded,
   hasStarted,
   isUnchecked,
   namesPage,
-  PolicyEntry,
+  type PolicyEntry,
   policiesFor,
   staysOpen,
 } from "./policy";

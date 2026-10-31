@@ -1,5 +1,5 @@
 import { Anchor, Box, Stack, Table, Text, Title } from "@mantine/core";
-import { GetStaticProps } from "next";
+import { type GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import React from "react";

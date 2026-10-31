@@ -1,10 +1,10 @@
-import { GetStaticProps } from "next";
+import { type GetStaticProps } from "next";
 import Head from "next/head";
-import { getData, NvcData, NvcSeries } from "../api/nvc";
+import { getData, type NvcData, type NvcSeries } from "../api/nvc";
 import React from "react";
 import NvcChart from "../components/NvcChart";
 import { jsonLdScriptProps } from "react-schemaorg";
-import { Dataset } from "schema-dts";
+import { type Dataset } from "schema-dts";
 import { Anchor, Box, Stack, Text, Title } from "@mantine/core";
 import {
   addDays,
@@ -28,7 +28,7 @@ import {
   latest,
   latestChange,
   reviewRange,
-  ReviewRange,
+  type ReviewRange,
 } from "../components/nvcReview";
 import { NVC_TIMEFRAMES_URL } from "../components/links";
 import { CREATOR, LICENSE_URL } from "../components/structuredData";

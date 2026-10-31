@@ -13,7 +13,7 @@ import {
   ON_MARKS,
   Plot,
   RangeButtons,
-  Series,
+  type Series,
   thin,
   TooltipLine,
   useChartWidth,
@@ -23,11 +23,11 @@ import {
 import {
   approximately,
   CHART_QUARTERS,
-  ChartBreak,
+  type ChartBreak,
   formatCount,
   formatMonths,
-  ProcessingTimeSeries,
-  QuarterPoint,
+  type ProcessingTimeSeries,
+  type QuarterPoint,
 } from "./uscis";
 import { USCIS_DATA_URL } from "./links";
 
