@@ -1,0 +1,41 @@
+# Temporary: collects the USCIS reports cached on main and the monthly CSVs
+# as an artifact, to check the TypeScript ports against. Removed again.
+name: Collect USCIS fixtures
+on:
+  push:
+    branches: [claude/project-thread-rlqorl]
+permissions:
+  contents: read
+jobs:
+  collect:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Restore downloaded reports
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: data/uscis/reports/
+          key: ${{ runner.os }}-uscis-reports-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-uscis-reports-
+      - name: Download the monthly reports and the listing pages
+        run: |
+          mkdir -p fixtures/monthly fixtures/listing
+          UA="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+          python3 -c "import json; [print(m, r['url']) for m, r in json.load(open('data/uscis/monthly.json'))['months'].items()]" |
+          while read -r month url; do
+            curl -s -m 60 -A "$UA" -o "fixtures/monthly/$month.csv" -w "$month %{http_code}\n" "$url" || true
+            sleep 1
+          done
+          curl -s -m 60 -A "$UA" -o fixtures/listing/monthly.html -w "monthly listing %{http_code}\n" "https://www.uscis.gov/tools/reports-and-studies/immigration-and-citizenship-data?query=Appropriations&items_per_page=100" || true
+          curl -s -m 60 -A "$UA" -o fixtures/listing/forms.html -w "forms listing %{http_code}\n" "https://www.uscis.gov/tools/reports-and-studies/immigration-and-citizenship-data" || true
+      - run: ls -R data/uscis/reports | head -50; du -sh data/uscis/reports fixtures
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: uscis-fixtures
+          path: |
+            data/uscis/reports/
+            fixtures/
+          retention-days: 3
