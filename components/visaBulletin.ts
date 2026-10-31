@@ -7,7 +7,7 @@ import { daysBetween, formatMonthYear, signedChange } from "./dates";
 
 // The Visa Bulletin pages' categories and chargeability areas, their names in
 // plain English, and the arithmetic on cutoff dates. The keys are the ones
-// data/visa_bulletin/bulletin.py writes.
+// data/visa_bulletin/bulletin.ts writes.
 
 export interface Category {
   /** The key in data.json, "EW" */
