@@ -62,19 +62,19 @@ type Point =
 /** The readings and the gaps between them, oldest first */
 function chartPoints(series: NvcSeries): Point[] {
   const points: Point[] = [
-    ...readings(series).map(
-      ([date, days]): Point => ({ date, days, gap: null }),
-    ),
-    ...gaps(series).map(
-      (gap): Point => ({
-        date: addDays(
-          gap.from[0],
-          Math.round(daysBetween(gap.from[0], gap.to[0]) / 2),
-        ),
-        days: null,
-        gap,
-      }),
-    ),
+    ...readings(series).map(([date, days]): Point => ({
+      date,
+      days,
+      gap: null,
+    })),
+    ...gaps(series).map((gap): Point => ({
+      date: addDays(
+        gap.from[0],
+        Math.round(daysBetween(gap.from[0], gap.to[0]) / 2),
+      ),
+      days: null,
+      gap,
+    })),
   ];
   return points.sort((a, b) => a.date.localeCompare(b.date));
 }

@@ -223,8 +223,8 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
       key === ALL_CATEGORIES
         ? headlineRange(ranges, form.form)
         : sameNationally.includes(key)
-        ? ranges.find((range) => range.key === key) ?? null
-        : null;
+          ? (ranges.find((range) => range.key === key) ?? null)
+          : null;
     // The field offices' piles against the range: where they would take
     // longer to clear than both the top of the most likely range and the
     // national pile the range was calibrated on, the range understates
@@ -405,8 +405,8 @@ function RangeWarning({
     caveat === null
       ? `USCIS decided ${fewer}% fewer of these cases in ${nationalLabel} than usual. Plan for the later end of the range.`
       : shock === null
-      ? "The field offices have so many of these cases waiting that your case may take longer than this range."
-      : "USCIS is deciding far fewer of these cases than usual, and the field offices have so many waiting that your case may take longer than this range.";
+        ? "The field offices have so many of these cases waiting that your case may take longer than this range."
+        : "USCIS is deciding far fewer of these cases than usual, and the field offices have so many waiting that your case may take longer than this range.";
   return (
     <TemporaryNotice>
       <Stack gap="xs">
@@ -483,7 +483,7 @@ export default function UscisOffice({
   }`;
   const viewWaitsForVisas = isTotal
     ? waitsForVisas
-    : view.nationalRange?.priorityDate ?? false;
+    : (view.nationalRange?.priorityDate ?? false);
   // the lines on the charts at the quarters in which USCIS moved cases
   const breaks: ChartBreak[] = view.moved.flatMap((quarter) => {
     const point = points.find((candidate) => candidate.quarter === quarter);
@@ -496,8 +496,8 @@ export default function UscisOffice({
           direction === "out"
             ? "cases moved out"
             : view.routed.includes(quarter)
-            ? "cases moved or routed in"
-            : "cases moved in",
+              ? "cases moved or routed in"
+              : "cases moved in",
         text: `In ${point.label}, USCIS moved ${isTotal ? "" : "these "}cases ${
           direction === "in" ? "to" : "away from"
         } ${officePhrase}${
@@ -525,8 +525,8 @@ export default function UscisOffice({
           openingCurrent.completions,
         )}`
       : openingCurrent.approved !== null
-      ? `approved ${formatCount(openingCurrent.approved)}`
-      : null;
+        ? `approved ${formatCount(openingCurrent.approved)}`
+        : null;
   const openingRange = opening.nationalRange;
   const description = `${
     isCenter ? `USCIS's ${fullName}` : `The ${fullName} USCIS office`
@@ -746,11 +746,11 @@ export default function UscisOffice({
                         {row.rarelyApproved
                           ? "not shown: almost none approved"
                           : clearingSuppressed(point) !== null
-                          ? "not shown: too few decisions"
-                          : approximately(
-                              formatMonths(point.waitMonths),
-                              point.approximate,
-                            )}
+                            ? "not shown: too few decisions"
+                            : approximately(
+                                formatMonths(point.waitMonths),
+                                point.approximate,
+                              )}
                         {rowMoved !== null &&
                           !row.rarelyApproved &&
                           clearingSuppressed(point) === null && (

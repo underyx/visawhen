@@ -179,8 +179,8 @@ export function flowCheck(points: QuarterPoint[]): QuarterPoint[] {
       steps[index] === null
         ? "unknown"
         : steps[index]
-        ? "inconsistent"
-        : "consistent",
+          ? "inconsistent"
+          : "consistent",
     suspect: odd[index] || (steps[index] === true && !odd[index - 1]),
   }));
 }
@@ -243,12 +243,12 @@ export function toPoints(
         !approximate || !boundedWithheld
           ? null
           : approved === null && denied !== null
-          ? [low / (low + denied), high / (high + denied)]
-          : approved !== null && denied === null
-          ? approved === 0
-            ? [0, 0]
-            : [approved / (approved + high), approved / (approved + low)]
-          : null;
+            ? [low / (low + denied), high / (high + denied)]
+            : approved !== null && denied === null
+              ? approved === 0
+                ? [0, 0]
+                : [approved / (approved + high), approved / (approved + low)]
+              : null;
       const processingTimes: Record<string, number> = {};
       for (const variant of quarter?.variants ?? [])
         if (variant.processingTime !== null)

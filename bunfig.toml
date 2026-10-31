@@ -25,7 +25,10 @@ ignorePatterns = [
 [lint.rules]
 # An import of a type alone says so, so that a tool that compiles one file at
 # a time (isolatedModules) can drop it without reading the module it names.
-"@typescript-eslint/consistent-type-imports" = ["error", { fixStyle = "inline-type-imports" }]
+"@typescript-eslint/consistent-type-imports" = [
+  "error",
+  { fixStyle = "inline-type-imports" },
+]
 
 # eslint-plugin-react's recommended rules, minus the ones eslint-config-next
 # turns off (no-unknown-property, react-in-jsx-scope, prop-types,
@@ -96,3 +99,13 @@ ignorePatterns = [
 "jsx-a11y/aria-unsupported-elements" = "warn"
 "jsx-a11y/role-has-required-aria-props" = "warn"
 "jsx-a11y/role-supports-aria-props" = "warn"
+
+# bun fmt (https://bun.com/docs/fmt) replaced Prettier: it formats as Prettier
+# does by default. pre-commit runs it (.pre-commit-config.yaml).
+[fmt]
+ignorePatterns = [
+  # written by sqlite-diffable (data/consulates/baselines.ipynb)
+  "data/*/dump/",
+  # written by npm and Dependabot
+  ".github/deploy-tools/package-lock.json",
+]

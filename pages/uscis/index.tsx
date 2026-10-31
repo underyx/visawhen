@@ -98,11 +98,11 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
         headline !== null
           ? formatRangeMonths(headline.q[1], headline.q[3], "mo")
           : ranges.some(
-              ({ priorityDate, suppressed }) =>
-                priorityDate && suppressed === null,
-            )
-          ? "priority date"
-          : null,
+                ({ priorityDate, suppressed }) =>
+                  priorityDate && suppressed === null,
+              )
+            ? "priority date"
+            : null,
       badgeCategory:
         headline !== null && headline.name !== form.form ? headline.name : null,
       officeCount: form.offices.length,

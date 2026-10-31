@@ -233,8 +233,8 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
         officeCategory === undefined || key === officeCategory.key
           ? null
           : opening === undefined
-          ? "all categories"
-          : officeCategoryName(opening.category),
+            ? "all categories"
+            : officeCategoryName(opening.category),
       pending: current?.pending ?? null,
       completions: current?.completions ?? null,
       approximate: current?.approximate ?? false,
@@ -343,7 +343,7 @@ export default function UscisForm({
   // a category USCIS's months do not split out (the N-400's civilians): the
   // cards keep its quarters, and the whole form's months are shown besides
   const formMonths =
-    recent === null && !isTotal ? monthly[ALL_CATEGORIES] ?? null : null;
+    recent === null && !isTotal ? (monthly[ALL_CATEGORIES] ?? null) : null;
   const months = recent ?? formMonths;
   const newestMonth =
     formMonths === null
@@ -359,12 +359,12 @@ export default function UscisForm({
   const viewRange =
     views.length === 1
       ? headline
-      : ranges.find(
+      : (ranges.find(
           (range) =>
             range.key === view.key &&
             !range.priorityDate &&
             range.suppressed === null,
-        ) ?? null;
+        ) ?? null);
   const backlogSuppressed = clearingSuppressed(current);
   // quarters the chart leaves the time to clear the backlog out of
   const clearingGaps = points.some(

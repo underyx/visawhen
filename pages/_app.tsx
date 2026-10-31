@@ -107,15 +107,15 @@ const theme = createTheme({
               },
             }
           : props.color === "gray"
-          ? { root: { "--alert-bg": "var(--mantine-color-body)" } }
-          : props.color === "blue"
-          ? {
-              root: {
-                "--alert-bg": "var(--mantine-color-ink-0)",
-                "--alert-color": "var(--vw-ink)",
-              },
-            }
-          : { root: {} },
+            ? { root: { "--alert-bg": "var(--mantine-color-body)" } }
+            : props.color === "blue"
+              ? {
+                  root: {
+                    "--alert-bg": "var(--mantine-color-ink-0)",
+                    "--alert-color": "var(--vw-ink)",
+                  },
+                }
+              : { root: {} },
     }),
     // sentence case: capitals are for the form numbers the badges carry
     Badge: Badge.extend({

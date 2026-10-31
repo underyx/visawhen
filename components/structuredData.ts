@@ -21,8 +21,8 @@ export function jsonLdScriptProps<T extends Thing>(item: WithContext<T>) {
         value === null
           ? undefined
           : typeof value === "string"
-          ? value.replace(/[&<>"']/g, (c) => HTML_ENTITIES[c])
-          : value,
+            ? value.replace(/[&<>"']/g, (c) => HTML_ENTITIES[c])
+            : value,
       ),
     },
   };

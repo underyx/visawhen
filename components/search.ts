@@ -78,8 +78,8 @@ export function rankPlace(
       nameWords.length < 2 || !initials.startsWith(term)
         ? null
         : initials === term
-        ? 0
-        : 1,
+          ? 0
+          : 1,
       rankAtWord(nameWords, term),
       ...regionWords.map((region) =>
         rankAtWord([...nameWords, ...region], term),
