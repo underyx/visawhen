@@ -53,7 +53,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       # Tells a Discord channel the N-400's new monthly numbers, when the
-      # commit above added a month (see data/notify.py). Only this step sees
+      # commit above added a month (see data/notify.ts). Only this step sees
       # the webhook URL; without the secret it prints the message and ends
       # green. It pings the "n400-watch" role of the DISCORD_ROLES repository
       # variable. A refused post fails the job, but the build and deploy
@@ -63,7 +63,7 @@ jobs:
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           DISCORD_ROLES: ${{ vars.DISCORD_ROLES || secrets.DISCORD_ROLES }}
-        run: python3 -u data/notify.py
+        run: bun data/notify.ts
 
   build:
     # !cancelled(): build what was committed even when a report did not parse

@@ -26,7 +26,7 @@
 // Exit codes: 0 when new data was added or when every source is simply
 // unavailable or stale (a `::warning::` annotation is printed in the latter
 // case, and the freshness workflow opens an issue once the data gets too
-// old, see data/freshness.py); 1 when a page was served but no longer matches
+// old, see data/freshness.ts); 1 when a page was served but no longer matches
 // our patterns and no source had anything new, or on any other error.
 import { join } from "node:path";
 import {

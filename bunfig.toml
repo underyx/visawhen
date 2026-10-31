@@ -16,11 +16,7 @@ linker = "hoisted"
 # eslint-config-next (core-web-vitals) turned on beyond those, so that the
 # switch did not lose coverage, and the import rule the unit tests rely on.
 [lint]
-ignorePatterns = [
-  "next-env.d.ts",
-  # the data scrapers' Python environments (Jupyter ships JavaScript)
-  "data/**/.venv/",
-]
+ignorePatterns = ["next-env.d.ts"]
 
 [lint.rules]
 # An import of a type alone says so, so that a tool that compiles one file at

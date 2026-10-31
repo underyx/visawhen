@@ -46,7 +46,7 @@
 // Exit codes: 0 when a snapshot was added, when there was nothing newer, or
 // when --fetch could not reach any source (a `::warning::` annotation is
 // printed then; the freshness workflow opens an issue once the newest
-// snapshot gets too old, see data/freshness.py); 1 when the page no longer
+// snapshot gets too old, see data/freshness.ts); 1 when the page no longer
 // parses (for --fetch: some source served a page and none served one that
 // parses and lists enough posts), a post name matches no site post slug (add
 // it to ALIASES), or a file cannot be read, in which case nothing is written.

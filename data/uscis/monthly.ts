@@ -37,7 +37,7 @@
 // Exit codes: 0 when months were added, when there was nothing new, or when
 // no source could be reached (a `::warning::` annotation is printed then; the
 // freshness workflow opens an issue once the newest month gets too old, see
-// data/freshness.py); 1 when a report was served but does not parse, in
+// data/freshness.ts); 1 when a report was served but does not parse, in
 // which case the months that did parse are still written, or when a file
 // cannot be read.
 import { join } from "node:path";

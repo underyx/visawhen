@@ -17,7 +17,7 @@
 //   slug.
 // * backlogs: issuances per post, visa class and month, 0 for a month
 //   without a row. The name is from when the table also held a pre-COVID
-//   backlog estimate; the site and data/freshness.py read it as "backlogs".
+//   backlog estimate; the site and data/freshness.ts read it as "backlogs".
 //
 // The listing pages and the PDFs come from, in order:
 //
