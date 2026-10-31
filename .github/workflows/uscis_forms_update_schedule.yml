@@ -59,12 +59,22 @@ jobs:
           key: ${{ runner.os }}-uscis-reports-${{ github.run_id }}
       - name: Commit changes
         id: commit
-        uses: EndBug/add-and-commit@cc9c08ba6c8df3b93a8f2db63e89b98368ae2ae8 # v11.1.1
-        with:
-          message: Update USCIS forms data
-          # The default (`git fetch --tags --force`) pulls the whole history of
-          # the 100 MB data dumps into the shallow clone: 3-4 minutes per run.
-          fetch: false
+        # The whole repository, not just this job's working directory
+        working-directory: .
+        env:
+          MESSAGE: Update USCIS forms data
+          ACTOR: ${{ github.actor }}
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing changed"
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git -c user.name="$ACTOR" -c user.email="$ACTOR@users.noreply.github.com" \
+            commit --quiet --message "$MESSAGE"
+          git push origin "HEAD:$GITHUB_REF_NAME"
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
       - id: head_commit
         run: echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
