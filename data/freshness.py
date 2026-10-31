@@ -203,11 +203,11 @@ def visa_bulletin() -> Freshness:
             "Visa Bulletin pages warn about it from then on too."
         ),
         where=(
-            "The scraper is `data/visa_bulletin/bulletin.py`, run by the "
+            "The scraper is `data/visa_bulletin/bulletin.ts`, run by the "
             f"[Update Visa Bulletin data]({REPOSITORY_URL}/actions/workflows/visa_bulletin_update_schedule.yml) workflow. "
             "If State's [Visa Bulletin page](https://travel.state.gov/content/travel/en/legal/visa-law0/visa-bulletin.html) "
             "lists a newer bulletin, the log says why it was not added; the page can also be saved from a browser and "
-            "added with `bulletin.py --from-file`."
+            "added with `bulletin.ts --from-file`."
         ),
         workflow="visa_bulletin_update_schedule.yml",
     )

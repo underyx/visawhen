@@ -40,7 +40,7 @@ The unit tests (`*.test.ts` next to the modules they test, run by `bun test`, wr
 
 ## Running the scrapers
 
-Each scraper is its own [uv](https://docs.astral.sh/uv/) project under `data/`:
+The scrapers are moving from Python to TypeScript. The TypeScript ones run with Bun from the repository root, after `bun install`, and share the helpers in `data/lib/`; each Python one is its own [uv](https://docs.astral.sh/uv/) project under `data/`:
 
 ```sh
 cd data/nvc && uv run python main.py
@@ -49,7 +49,7 @@ cd data/uscis && uv run python monthly.py        # or --from-file report.csv --u
 cd data/consulates && uv run python visa_issuances.py   # writes all_months.pkl
 cd data/consulates && uv run python baselines.py        # reads it, writes consulates.sqlite and dump/
 cd data/consulates && uv run python iv_schedule.py --fetch   # or --from-file page.html, for a page saved from a browser
-cd data/visa_bulletin && uv run python bulletin.py          # or --from-file page.html --month 2026-10
+bun data/visa_bulletin/bulletin.ts   # or --from-file page.html --month 2026-10
 ```
 
 ### Where the State Department data comes from
@@ -70,7 +70,7 @@ Every month since November 2022, USCIS publishes for Congress a short "Applicati
 
 ### Visa Bulletins
 
-`bulletin.py` keeps every monthly Visa Bulletin since October 2015, the first with both of today's charts: Final Action Dates and Dates for Filing. For each family and employment category and each chargeability area, `data.json` has the cutoff date, or `C` (current) or `U` (unavailable). The bulletins come from the same three sources as the other State Department data, in the same order. State publishes each bulletin once, around the middle of the month before, so a month already in `data.json` is never fetched again. A row, column or cell the script does not know fails the run instead of being skipped, so that a change in State's tables is noticed: add the new label to the patterns at the top of the script. The pages under `/visa-bulletin` show the newest bulletin and how far each category's Final Action Date moved in the last 12 months and 5 years.
+`bulletin.ts` keeps every monthly Visa Bulletin since October 2015, the first with both of today's charts: Final Action Dates and Dates for Filing. For each family and employment category and each chargeability area, `data.json` has the cutoff date, or `C` (current) or `U` (unavailable). The bulletins come from the same three sources as the other State Department data, in the same order. State publishes each bulletin once, around the middle of the month before, so a month already in `data.json` is never fetched again. A row, column or cell the script does not know fails the run instead of being skipped, so that a change in State's tables is noticed: add the new label to the patterns at the top of the script. The pages under `/visa-bulletin` show the newest bulletin and how far each category's Final Action Date moved in the last 12 months and 5 years.
 
 ### Consulate visa classes
 
