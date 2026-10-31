@@ -20,21 +20,21 @@ updates:
         patterns:
           - "*"
 
-  - package-ecosystem: "npm"
+  - package-ecosystem: "bun"
     directory: "/"
     schedule:
       interval: "weekly"
     cooldown:
       default-days: 7
     groups:
-      npm-minor-and-patch:
+      minor-and-patch:
         update-types:
           - "minor"
           - "patch"
       # Most security updates are of packages the site only depends on
       # through others (tar, undici, js-yaml); without a group they come one
       # pull request each.
-      npm-security:
+      security:
         applies-to: "security-updates"
         patterns:
           - "*"
@@ -45,9 +45,7 @@ updates:
         update-types:
           - "version-update:semver-major"
       # TypeScript 7 is the native compiler: next build's type check fails
-      # with it, and the package pulls in a platform binary for every OS,
-      # which would all land in the committed .yarn/cache (Dependabot PR
-      # #442).
+      # with it (Dependabot PR #442).
       - dependency-name: "typescript"
         update-types:
           - "version-update:semver-major"

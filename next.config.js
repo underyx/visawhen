@@ -19,13 +19,13 @@ const CLIENT_DATA = ["data/policy.json"];
  *
  * This cannot break client-side navigation from a page loaded before a deploy.
  * The id changes whenever anything the scripts are built from changes: the
- * code, the config files, package.json, yarn.lock and the committed packages,
- * and CLIENT_DATA. So while the id stays the same, the scripts stay the same,
- * and an old page's scripts reading the new deploy's /_next/data/<id>/*.json
- * do exactly what the new page's scripts do: they show the newer data. When
- * the id changes, an old page asks for /_next/data/<old id>/..., which the new
- * deploy does not have, and Next.js falls back to a full page load, as it did
- * after every deploy before. /_next/static/<id>/_buildManifest.js, cached as
+ * code, the config files, package.json and bun.lock (which pins every
+ * package), and CLIENT_DATA. So while the id stays the same, the scripts stay
+ * the same, and an old page's scripts reading the new deploy's
+ * /_next/data/<id>/*.json do exactly what the new page's scripts do: they
+ * show the newer data. When the id changes, an old page asks for
+ * /_next/data/<old id>/..., which the new deploy does not have, and Next.js
+ * falls back to a full page load, as it did after every deploy before. /_next/static/<id>/_buildManifest.js, cached as
  * immutable, likewise changes only with the scripts, and so with the id.
  *
  * Without git (a build from a tarball), Next.js makes up a random id.

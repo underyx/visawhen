@@ -45,15 +45,20 @@ jobs:
           # A new cache whenever packages or source files change; a data-only
           # commit reuses the cache as it is. (hashFiles takes globs, not
           # regular expressions.)
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/yarn.lock') }}-${{ hashFiles('**/*.js', '**/*.mjs', '**/*.ts', '**/*.tsx', '**/*.css', '!.yarn/**', '!**/node_modules/**') }}
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('bun.lock') }}-${{ hashFiles('**/*.js', '**/*.mjs', '**/*.ts', '**/*.tsx', '**/*.css', '!**/node_modules/**') }}
           # If source files changed but packages didn't, rebuild from a prior cache.
           restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/yarn.lock') }}-
+            ${{ runner.os }}-nextjs-${{ hashFiles('bun.lock') }}-
 
       # The version data/consulates/uv.lock pins, which wrote the dump
       - run: pipx install sqlite-diffable==0.6
-      - run: yarn
-      - run: yarn export
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: .bun-version
+      # --frozen-lockfile: fail rather than change bun.lock. Install scripts
+      # run only for package.json's trustedDependencies (sqlite3).
+      - run: bun install --frozen-lockfile
+      - run: bun run export
 
       # out/version.txt says which commit a host is serving; deploy.yml reads
       # it so that an older build never replaces a newer one.

@@ -24,18 +24,25 @@ jobs:
           ref: ${{ inputs.ref }}
           persist-credentials: false
       # The linter is built into Bun, so it needs no packages. No stable Bun
-      # release has it yet, so .bun-version says "canary", the build of Bun's
-      # newest commit. Once a stable release has it, put that version there;
-      # Dependabot does not update .bun-version, so bump it by hand.
+      # release has it yet, so it runs on the canary, the build of Bun's newest
+      # commit. Once a stable release has it, drop these two steps, run
+      # `bun lint --no-script` after the install below, and put that release
+      # in .bun-version.
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: canary
+      # --no-script: run the linter itself, not package.json's lint script
+      - run: bun lint --no-script
+      # The Bun that installs the packages, here and in build.yml. Dependabot
+      # does not update .bun-version, so bump it by hand.
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version-file: .bun-version
-      # --no-script: run the linter itself, not package.json's lint script
-      - run: bun lint --no-script
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24"
-      # skip-build: sqlite3's native module is not needed to typecheck or test
-      - run: yarn install --mode=skip-build
-      - run: yarn typecheck
-      - run: yarn test
+      # --frozen-lockfile: fail rather than change bun.lock. --ignore-scripts:
+      # sqlite3's native module is not needed to typecheck or test.
+      - run: bun install --frozen-lockfile --ignore-scripts
+      - run: bun run typecheck
+      - run: bun run test

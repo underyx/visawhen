@@ -1,7 +1,7 @@
 // Backtest the /nvc document review range (components/nvcReview.ts) against
 // NVC's own timeframes, running the site's code itself:
 //
-//   yarn node data/nvc/backtest.mjs [YYYY-MM-DD ...]
+//   node --import ./scripts/register-ts-hooks.mjs data/nvc/backtest.mjs [YYYY-MM-DD ...]
 //
 // For each day with a reading at most 14 days old, documents are submitted
 // that day and the range is worked out from the readings published up to
