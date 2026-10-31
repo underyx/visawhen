@@ -34,10 +34,6 @@ jobs:
           fetch-depth: 0
           filter: blob:none
 
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: "24"
-
       - name: Cache Next.js build
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -50,14 +46,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('bun.lock') }}-
 
-      # The version data/consulates/uv.lock pins, which wrote the dump
-      - run: pipx install sqlite-diffable==0.6
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version-file: .bun-version
-      # --frozen-lockfile: fail rather than change bun.lock. Install scripts
-      # run only for package.json's trustedDependencies (sqlite3).
+      # --frozen-lockfile: fail rather than change bun.lock. No package runs
+      # an install script: package.json's trustedDependencies is empty.
       - run: bun install --frozen-lockfile
+      # Next.js runs on Bun (`bun --bun next build`, see package.json), and
+      # scripts/load-consulates-db.ts loads the consulates database with
+      # bun:sqlite, so the build needs no Node.js and no Python.
       - run: bun run export
 
       # out/version.txt says which commit a host is serving; deploy.yml reads
