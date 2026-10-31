@@ -11,7 +11,8 @@
 /* No side padding from the shell on phones: the Container's own gutter is
  * enough there, and the two together left under 300px for the text on a
  * small phone. Doubled class to win over Mantine's own rule. */
-@media (max-width: $mantine-breakpoint-sm) {
+@media (max-width: 48em) {
+  /* Mantine's sm breakpoint */
   .main.main {
     padding-inline: 0;
   }
@@ -29,7 +30,8 @@
   grid-template-columns: 1fr;
 }
 
-@media (min-width: $mantine-breakpoint-sm) {
+@media (min-width: 48em) {
+  /* Mantine's sm breakpoint */
   .footerGrid {
     grid-template-columns: 3fr 2fr;
     gap: calc(var(--mantine-spacing-xl) * 1.5);

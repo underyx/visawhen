@@ -38,7 +38,8 @@ import {
   PRIORITY_DATE_DEFINITION,
   type Series,
 } from "../../../components/visaBulletin";
-import { daysBetween, useToday } from "../../../components/Freshness";
+import { daysBetween } from "../../../components/dates";
+import { useToday } from "../../../components/Freshness";
 import TemporaryNotice from "../../../components/TemporaryNotice";
 
 // The page leads with the newest bulletin's two cutoffs as figures, each

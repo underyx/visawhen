@@ -1,21 +1,5 @@
 import { useSyncExternalStore } from "react";
 
-// Today's date, for showing how fresh the data is. The date helpers that
-// used to live here are in dates.ts, which has no React in it, so that the
-// logic modules and their tests can import them; they are re-exported here
-// so that the pages' imports keep working.
-export {
-  addDays,
-  addMonths,
-  daysBetween,
-  formatDate,
-  formatDateRange,
-  formatMonthDay,
-  formatMonthRange,
-  formatMonthYear,
-  formatShortDate,
-} from "./dates";
-
 // Today never changes while the page is open, as far as these pages care.
 const subscribe = () => () => {};
 const getToday = () => new Date().toISOString().slice(0, 10);

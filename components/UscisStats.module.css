@@ -8,7 +8,8 @@
   padding-block: var(--mantine-spacing-sm);
 }
 
-@media (min-width: $mantine-breakpoint-sm) {
+@media (min-width: 48em) {
+  /* Mantine's sm breakpoint */
   .estimate {
     grid-template-columns: auto 1fr;
     gap: calc(var(--mantine-spacing-xl) * 1.25);

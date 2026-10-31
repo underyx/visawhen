@@ -9,7 +9,8 @@ import {
   Text,
 } from "@mantine/core";
 import React from "react";
-import { daysBetween, formatShortDate, useToday } from "./Freshness";
+import { daysBetween, formatShortDate } from "./dates";
+import { useToday } from "./Freshness";
 import MoreDetails from "./MoreDetails";
 import { ChipRow, NoteChip } from "./NoteChip";
 import {

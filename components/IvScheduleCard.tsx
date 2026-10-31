@@ -16,7 +16,8 @@ import {
   type PreviousMonth,
   previousLine,
 } from "./consulates";
-import { daysBetween, formatShortDate, useToday } from "./Freshness";
+import { daysBetween, formatShortDate } from "./dates";
+import { useToday } from "./Freshness";
 import { AFRICA_HUBS_URL, EMBASSIES_URL, IV_POSTS_URL } from "./links";
 import MoreDetails from "./MoreDetails";
 import { hasEnded, overridesUpdate, type PolicyEntry } from "./policy";

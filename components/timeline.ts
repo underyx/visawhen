@@ -63,7 +63,7 @@ export type PathSlug =
   | "temporary";
 
 /** Something the visitor can say has happened, with the date it did */
-export interface Milestone {
+interface Milestone {
   id: string;
   /** As the "Where is your case?" list shows it: "USCIS approved the I-130" */
   label: string;
@@ -1456,7 +1456,7 @@ const MIN_PACE_DAYS = 90;
  * estimate: beyond that it is a guess about a different year. */
 const PACE_CAP_MONTHS = 36;
 
-export interface QueuePace {
+interface QueuePace {
   /** The update the pace is measured from: its date and month */
   from: [asOf: string, month: string];
   /** Months the post's month moved forward (negative: back) */
@@ -1817,7 +1817,7 @@ function priorityDateStage(
 
 /** The "Final Action Date moved in 12 months" box of a timeline page's
  * cutoff strip */
-export interface MovementStat {
+interface MovementStat {
   /** The move, "+8 months", or null when it cannot be counted; then
    * `notShown` says why, in the figure's place */
   value: string | null;

@@ -8,7 +8,8 @@
   max-width: 44rem;
 }
 
-@media (min-width: $mantine-breakpoint-sm) {
+@media (min-width: 48em) {
+  /* Mantine's sm breakpoint */
   .inputs {
     grid-template-columns: 1fr 1fr;
   }

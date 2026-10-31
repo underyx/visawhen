@@ -109,7 +109,7 @@ export function planningRange(median: number, level: PressureLevel): number[] {
 /** Categories (Variant.key, per form) whose wait depends on the visitor's
  * priority date and the Visa Bulletin, not on USCIS's pace, so a range from
  * the median would mislead. */
-export const PRIORITY_DATE_CATEGORIES: Record<string, string[]> = {
+const PRIORITY_DATE_CATEGORIES: Record<string, string[]> = {
   "I-130": ["all-other-relative"],
   "I-485": ["employment"],
 };
@@ -323,7 +323,7 @@ export function formatMedian(months: number): string {
   return `${months.toFixed(1)} months`;
 }
 
-export const TOO_FEW_DECISIONS = "too few decisions";
+const TOO_FEW_DECISIONS = "too few decisions";
 
 /** The fewest cases an office's pile has to change by to count as USCIS
  * moving cases (casesMovedQuarters). */

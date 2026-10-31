@@ -16,7 +16,7 @@ import { ChipRow, NoteChip } from "./NoteChip";
 // note says only what the page does not show already (Bence). Nothing when
 // no chip applies.
 
-export interface Case {
+interface Case {
   label: string;
   note: React.ReactNode;
 }

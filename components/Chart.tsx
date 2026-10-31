@@ -12,9 +12,9 @@ import classes from "./Chart.module.css";
  * scripts measure their box: the box's width on a 390px phone, less the
  * page's and the box's padding. On other screens the HTML's chart is scaled
  * to fit until then. */
-export const HTML_WIDTH = 324;
+const HTML_WIDTH = 324;
 
-export interface Margin {
+interface Margin {
   top: number;
   right: number;
   bottom: number;
