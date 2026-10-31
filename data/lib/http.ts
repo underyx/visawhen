@@ -48,7 +48,8 @@ export function get(
   } = {},
 ): Promise<Response> {
   return fetch(withParams(url, options.params), {
-    headers: { ...HEADERS, ...options.headers },
+    // headers replace HEADERS rather than add to them
+    headers: options.headers ?? HEADERS,
     signal: AbortSignal.timeout(options.timeoutMs ?? TIMEOUT_MS),
     redirect: options.redirect ?? "follow",
   });
@@ -107,16 +108,22 @@ export async function waybackGet(
     timeoutMs?: number;
     backoffMs?: (attempt: number) => number;
   } = {},
-): Promise<{ url: string; status: number; text: string } | null> {
+): Promise<{
+  url: string;
+  status: number;
+  body: Uint8Array;
+  text: string;
+} | null> {
   const attempts = options.attempts ?? 3;
   const backoffMs = options.backoffMs ?? ((attempt) => 5000 * attempt);
   const fullUrl = withParams(url, options.params);
   for (let attempt = 1; attempt <= attempts; attempt++) {
     try {
       const response = await get(fullUrl, { timeoutMs: options.timeoutMs });
-      const text = await response.text();
+      const body = new Uint8Array(await response.arrayBuffer());
       if (response.status === 200) {
-        return { url: response.url, status: response.status, text };
+        const text = new TextDecoder().decode(body);
+        return { url: response.url, status: response.status, body, text };
       }
       console.log(
         `Wayback returned HTTP ${response.status} (${attempt}/${attempts}) for ${response.url}`,
@@ -169,8 +176,9 @@ export async function cdx(
 }
 
 /** Ask the Wayback Machine to capture url now, so that the fallback has
- * something to fall back to. Best effort: a failure is a warning. */
-export async function savePageNow(url: string): Promise<void> {
+ * something to fall back to; the capture's timestamp, or null. Best effort:
+ * a failure is a warning. */
+export async function savePageNow(url: string): Promise<string | null> {
   let response: Response;
   try {
     response = await get(`https://web.archive.org/save/${url}`, {
@@ -182,7 +190,7 @@ export async function savePageNow(url: string): Promise<void> {
     console.log(
       `::warning::Save Page Now failed for ${url}: ${errorMessage(error)}`,
     );
-    return;
+    return null;
   }
   const location =
     response.headers.get("Location") ||
@@ -193,7 +201,8 @@ export async function savePageNow(url: string): Promise<void> {
     console.log(
       `::warning::Save Page Now did not capture ${url} (HTTP ${response.status})`,
     );
-    return;
+    return null;
   }
   console.log(`Save Page Now captured ${url} as ${match[1]}`);
+  return match[1];
 }

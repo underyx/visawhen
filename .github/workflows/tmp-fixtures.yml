@@ -14,6 +14,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Restore downloaded reports
+        if: false
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: data/uscis/reports/
@@ -26,8 +27,10 @@ jobs:
           UA="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
           python3 -c "import json; [print(m, r['url']) for m, r in json.load(open('data/uscis/monthly.json'))['months'].items()]" |
           while read -r month url; do
-            curl -s -m 60 -A "$UA" -o "fixtures/monthly/$month.csv" -w "$month %{http_code}\n" "$url" || true
-            sleep 1
+            y=${month%-*}; m=$((10#${month#*-})); if [ $m -eq 12 ]; then y=$((y+1)); m=1; else m=$((m+1)); fi
+            near=$(printf "%04d%02d01" $y $m)
+            curl -s -L -m 90 -o "fixtures/monthly/$month.csv" -w "$month %{http_code}\n" "https://web.archive.org/web/${near}id_/$url" || true
+            sleep 2
           done
           curl -s -m 60 -A "$UA" -o fixtures/listing/monthly.html -w "monthly listing %{http_code}\n" "https://www.uscis.gov/tools/reports-and-studies/immigration-and-citizenship-data?query=Appropriations&items_per_page=100" || true
           curl -s -m 60 -A "$UA" -o fixtures/listing/forms.html -w "forms listing %{http_code}\n" "https://www.uscis.gov/tools/reports-and-studies/immigration-and-citizenship-data" || true
