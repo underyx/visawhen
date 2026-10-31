@@ -350,7 +350,7 @@ export async function getMonthlyIssuances(
   return rows.map((row) => ({ ...row, month: toIsoMonth(row.month) }));
 }
 
-/** data/consulates/iv_schedule.json, written by iv_schedule.py */
+/** data/consulates/iv_schedule.json, written by iv_schedule.ts */
 interface IvScheduleData {
   source: string;
   /** State's updates by date, "2026-09-23", each by post slug */

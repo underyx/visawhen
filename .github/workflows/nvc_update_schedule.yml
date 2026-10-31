@@ -13,10 +13,6 @@ on:
     - cron: 38 8 * * 0,2-6
   workflow_dispatch:
 
-defaults:
-  run:
-    working-directory: data/nvc
-
 # Only the job that commits the data can push; the build and deploy jobs,
 # which run third-party code, get a read-only token.
 permissions:
@@ -33,35 +29,23 @@ jobs:
       updated: ${{ steps.commit.outputs.pushed }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Set up uv
-        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          python-version: "3.13"
-          # The dependency cache is keyed on the lockfile and saved by the
-          # action's post step, even when a later step fails.
-          enable-cache: true
-          cache-dependency-glob: data/nvc/uv.lock
-      - name: Install dependencies
-        run: uv sync --locked
-      - name: Run script
-        run: uv run python -u main.py
+          bun-version-file: .bun-version
+      # --frozen-lockfile: fail rather than change bun.lock
+      - run: bun install --frozen-lockfile
+      - name: Fetch the NVC timeframes
+        run: bun data/nvc/main.ts
       # Adds a snapshot only when State's "Last Updated" date is newer than the
-      # newest one in iv_schedule.json. It needs three packages, not the whole
-      # consulates project (pandas, pypdf, joblib...). It runs, and whatever
-      # either step wrote is committed, even when the other step failed; the
-      # job still fails then.
+      # newest one in iv_schedule.json. It runs, and whatever either step wrote
+      # is committed, even when the other step failed; the job still fails
+      # then.
       - name: Fetch the interview-queue snapshot
         if: ${{ !cancelled() }}
-        working-directory: data/consulates
-        run: >-
-          uv run --no-project
-          --with 'requests>=2.34.2,<3' --with 'beautifulsoup4>=4.15.0,<5' --with 'lxml>=6.1.2,<7'
-          python -u iv_schedule.py --fetch
+        run: bun data/consulates/iv_schedule.ts --fetch
       - name: Commit changes
         id: commit
         if: ${{ !cancelled() }}
-        # The whole repository, not just this job's working directory
-        working-directory: .
         env:
           MESSAGE: Update NVC and interview-queue data
           ACTOR: ${{ github.actor }}
@@ -90,7 +74,6 @@ jobs:
       # by then. Standard library only, so the runner's own Python does.
       - name: Post the changes to Discord
         if: ${{ !cancelled() && steps.commit.outputs.pushed == 'true' }}
-        working-directory: .
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           DISCORD_ROLES: ${{ vars.DISCORD_ROLES || secrets.DISCORD_ROLES }}
