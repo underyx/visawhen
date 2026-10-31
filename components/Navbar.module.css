@@ -95,7 +95,8 @@
 /* On a phone the four links just fit beside the logo (322px at 360px wide)
  * once the Discord button is gone; narrower phones scroll the strip. This
  * comes after the .discord rule above, which it overrides. */
-@media (max-width: $mantine-breakpoint-xs) {
+@media (max-width: 36em) {
+  /* Mantine's xs breakpoint */
   .links {
     gap: 10px;
   }

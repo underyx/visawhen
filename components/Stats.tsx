@@ -11,7 +11,7 @@ const NO_LINE = " ";
 
 /** A box's big figure. Not a heading: screen readers' heading lists would
  * read "5.2 years" and "78%" as section titles. */
-export function StatValue({ children }: React.PropsWithChildren) {
+function StatValue({ children }: React.PropsWithChildren) {
   return <Text className={classes.boxValue}>{children}</Text>;
 }
 

@@ -12,7 +12,7 @@ import { getData as getNvcData } from "../api/nvc";
 import { getData as getUscisData, newestQuarter } from "../api/uscis";
 import { getData as getVisaBulletinData } from "../api/visaBulletin";
 import { formatLongMonth } from "../components/consulates";
-import { formatShortDate } from "../components/Freshness";
+import { formatShortDate } from "../components/dates";
 import {
   DOL_PROCESSING_TIMES_URL,
   GLOBAL_VISA_WAIT_TIMES_URL,

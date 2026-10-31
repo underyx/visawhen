@@ -12,8 +12,8 @@ import {
   formatDateRange,
   formatMonthDay,
   formatShortDate,
-  useToday,
-} from "../components/Freshness";
+} from "../components/dates";
+import { useToday } from "../components/Freshness";
 import MoreDetails from "../components/MoreDetails";
 import DiscordUpdates from "../components/DiscordUpdates";
 import { NoteChip } from "../components/NoteChip";

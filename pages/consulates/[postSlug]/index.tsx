@@ -53,11 +53,8 @@ import {
   overridesUpdate,
   scheduleOverrideFor,
 } from "../../../components/policy";
-import {
-  formatDate,
-  formatShortDate,
-  useToday,
-} from "../../../components/Freshness";
+import { formatDate, formatShortDate } from "../../../components/dates";
+import { useToday } from "../../../components/Freshness";
 import { normalize } from "../../../components/search";
 import SearchStatus from "../../../components/SearchStatus";
 import { POST_COUNTRIES } from "../../../api/searchTerms";

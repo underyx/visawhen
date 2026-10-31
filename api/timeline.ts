@@ -39,7 +39,7 @@ import {
   getSeries,
   newestMonth,
 } from "../components/visaBulletin";
-import { daysBetween } from "../components/Freshness";
+import { daysBetween } from "../components/dates";
 import type {
   BulletinOptions,
   OfficeOption,

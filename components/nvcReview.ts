@@ -46,24 +46,24 @@ import { addDays, daysBetween } from "./dates";
 export type Reading = [string, number];
 
 /** Readings further apart than this are not consecutive weekly updates. */
-export const MAX_UPDATE_GAP_DAYS = 21;
+const MAX_UPDATE_GAP_DAYS = 21;
 /** Readings this close are a week's update and the one before it (NVC's
  * weekly readings come 5 to 9 days apart): the page then says "previous
  * week" rather than the earlier reading's date (Bence's ask). */
-export const WEEK_APART_DAYS = 10;
+const WEEK_APART_DAYS = 10;
 /** A front that moved no more than this between readings stood still. */
-export const STALL_DAYS = 3;
+const STALL_DAYS = 3;
 /** NVC's pace is measured over at least this many days. */
-export const PACE_WINDOW_DAYS = 28;
+const PACE_WINDOW_DAYS = 28;
 /** The window, six weeks, in which a still week means NVC moves in bursts,
  * and whose longest review time the range then reaches to. */
-export const BURST_WINDOW_DAYS = 42;
+const BURST_WINDOW_DAYS = 42;
 /** A queue whose review time is this many days longer than at the start of
  * the pace window is growing. */
-export const GROWTH_DAYS = 7;
+const GROWTH_DAYS = 7;
 /** The margin on each side: a week, or this share of the wait. */
-export const MARGIN_DAYS = 7;
-export const MARGIN_SHARE = 0.4;
+const MARGIN_DAYS = 7;
+const MARGIN_SHARE = 0.4;
 /** A pace below this many days of submissions per day is no pace at all. */
 const MIN_PACE = 0.05;
 

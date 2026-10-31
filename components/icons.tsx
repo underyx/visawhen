@@ -26,14 +26,6 @@ function StrokeIcon({ children, ...props }: IconProps) {
   );
 }
 
-export function ChevronRightIcon(props: IconProps) {
-  return (
-    <StrokeIcon {...props}>
-      <path d="m9 6 6 6-6 6" />
-    </StrokeIcon>
-  );
-}
-
 export function ChevronLeftIcon(props: IconProps) {
   return (
     <StrokeIcon {...props}>

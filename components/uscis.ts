@@ -70,7 +70,7 @@ export const WITHHELD_RANGE: [number, number] = [1, 9];
 /** Forms whose per-office reports leave far more than WITHHELD_RANGE
  * unaccounted for per "D" in some quarters, so that a withheld count has no
  * known bound there. */
-export const UNBOUNDED_WITHHELD_FORMS = ["I-130"];
+const UNBOUNDED_WITHHELD_FORMS = ["I-130"];
 
 /** How far a pending count may land from the quarter before's plus the
  * quarter's filings minus its decisions before the change is called out of
@@ -514,7 +514,7 @@ export function approvalRatesComparable(
 
 /** Beyond this many months, the time to clear a backlog is off the pages'
  * scale ("240+ months"), and a change in it means nothing. */
-export const CLEARING_SCALE_MONTHS = 240;
+const CLEARING_SCALE_MONTHS = 240;
 
 /** Which way the time to clear the backlog moved since the quarter before:
  * more than 10% either way counts. Null when either side is unknown, or
@@ -559,7 +559,7 @@ export interface ChartBreak {
 
 /** A short name for a category of a form: the parenthetical of its row title
  * ("Immediate Relative"), or whatever the title adds to the form's own. */
-export function variantLabel(title: string, formTitle: string): string {
+function variantLabel(title: string, formTitle: string): string {
   // a trailing parenthetical after a space; "Fiancé(e)" is not a category
   const parenthetical = /\s\(([^()]*)\)\s*$/.exec(title);
   if (parenthetical !== null) return parenthetical[1];

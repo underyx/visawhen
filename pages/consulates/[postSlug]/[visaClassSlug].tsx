@@ -426,7 +426,7 @@ export default function ConsulateStats({
   // A class the post has not issued in two years leaves the page little to
   // show but that, and there are thousands of such pages. They ask search
   // engines not to list them, so that the site's results are its pages with
-  // numbers, and the sitemap leaves them out (next-sitemap.config.js).
+  // numbers, and the sitemap leaves them out (scripts/sitemap.ts).
   // Visitors still reach them from the post's page.
   const noindex = recent.last12 === 0 && recent.prev12 === 0;
   // The interview card for the classes State's scheduling tool covers, and

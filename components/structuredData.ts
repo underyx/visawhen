@@ -36,7 +36,7 @@ const HTML_ENTITIES: Record<string, string> = {
   "'": "&apos;",
 };
 
-export const SITE_URL = "https://visawhen.com";
+const SITE_URL = "https://visawhen.com";
 
 /** Who makes the site, as its datasets name him */
 export const CREATOR: Person = {

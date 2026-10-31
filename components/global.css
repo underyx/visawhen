@@ -96,7 +96,8 @@ a.mantine-Anchor-root:hover {
 
 /* On a phone the column's long descriptions would take nearly the whole
  * screen and leave no room for the figures, so it wraps at a fixed width. */
-@media (max-width: $mantine-breakpoint-sm) {
+@media (max-width: 48em) {
+  /* Mantine's sm breakpoint */
   .vw-sticky-column th:first-child,
   .vw-sticky-column td:first-child {
     width: 11rem;

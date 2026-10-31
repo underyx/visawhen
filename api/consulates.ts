@@ -37,7 +37,7 @@ function openDb(): Promise<Db> {
   return Promise.resolve(db);
 }
 
-export interface SlugPairRow {
+interface SlugPairRow {
   postSlug: string;
   visaClassSlug: string;
 }

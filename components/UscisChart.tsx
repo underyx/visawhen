@@ -475,7 +475,7 @@ const SPIKE_FACTOR = 3;
  * other quarter, and drawn to scale they flattened every other quarter into
  * a line at zero. The newest quarter is never clipped: when it is the spike,
  * that is the news, so nothing is. */
-export function spikeCeiling(values: (number | null)[]): number | null {
+function spikeCeiling(values: (number | null)[]): number | null {
   const known = values
     .filter((value): value is number => value !== null)
     .sort((a, b) => b - a);

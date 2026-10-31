@@ -11,7 +11,8 @@
   overflow: hidden;
 }
 
-@media (min-width: $mantine-breakpoint-sm) {
+@media (min-width: 48em) {
+  /* Mantine's sm breakpoint */
   .boxes {
     grid-template-columns: repeat(var(--stat-columns, 4), 1fr);
   }

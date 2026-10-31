@@ -5,7 +5,8 @@ import {
   formatMedian,
   formatRangeMonths,
 } from "./estimate";
-import { addMonths, formatMonthRange, useToday } from "./Freshness";
+import { addMonths, formatMonthRange } from "./dates";
+import { useToday } from "./Freshness";
 import { WarningIcon } from "./icons";
 import MoreDetails from "./MoreDetails";
 import { NoteChip } from "./NoteChip";
