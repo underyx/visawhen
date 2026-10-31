@@ -1,0 +1,4 @@
+# bun install for the deploy tools; the same rules as the site's bunfig.toml.
+[install]
+minimumReleaseAge = "7d"
+linker = "hoisted"

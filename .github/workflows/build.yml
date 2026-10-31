@@ -79,7 +79,9 @@ jobs:
           path: |
             out.tar.gz
             wrangler.jsonc
+            .bun-version
             .github/deploy-tools/package.json
-            .github/deploy-tools/package-lock.json
+            .github/deploy-tools/bun.lock
+            .github/deploy-tools/bunfig.toml
           # .github is a hidden directory, which upload-artifact skips by default
           include-hidden-files: true
