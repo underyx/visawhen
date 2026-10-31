@@ -64,6 +64,9 @@ import {
   monthlyNumbers,
   MonthlyNumbers,
 } from "../../../components/monthlyNumbers";
+import DiscordUpdates, {
+  FORM_ALERTS,
+} from "../../../components/DiscordUpdates";
 import MoreDetails from "../../../components/MoreDetails";
 import { PolicyNews } from "../../../components/PolicyBanner";
 import { breadcrumbList } from "../../../components/structuredData";
@@ -502,6 +505,9 @@ export default function UscisForm({
             All categories together have newer numbers, to {newestMonth.label}:{" "}
             <Anchor href={`#${MONTHS_ID}`}>see them month by month</Anchor>.
           </Text>
+        )}
+        {FORM_ALERTS[form] !== undefined && (
+          <DiscordUpdates when={FORM_ALERTS[form]} />
         )}
         <Stack gap="xs" className="vw-rows">
           <PolicyNews page={`/uscis/${slug}`} />

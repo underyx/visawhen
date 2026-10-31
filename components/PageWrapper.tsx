@@ -1,6 +1,7 @@
 import { Anchor, AppShell, Container, Text } from "@mantine/core";
 import Link from "next/link";
 import React from "react";
+import { DiscordFooterLine } from "./DiscordUpdates";
 import Navbar from "./Navbar";
 import classes from "./PageWrapper.module.css";
 
@@ -15,15 +16,18 @@ export default function PageWrapper({ children }: React.PropsWithChildren) {
         <Container component="footer">
           <div className={classes.footer}>
             <div className={classes.footerGrid}>
-              <Text size="sm" maw="62ch">
-                VisaWhen is an independent project, not affiliated with USCIS,
-                the State Department or any other government agency, and nothing
-                on it is legal advice.{" "}
-                <Anchor component={Link} href="/about">
-                  Where the data comes from
-                </Anchor>
-                .
-              </Text>
+              <div>
+                <Text size="sm" maw="62ch">
+                  VisaWhen is an independent project, not affiliated with USCIS,
+                  the State Department or any other government agency, and
+                  nothing on it is legal advice.{" "}
+                  <Anchor component={Link} href="/about">
+                    Where the data comes from
+                  </Anchor>
+                  .
+                </Text>
+                <DiscordFooterLine />
+              </div>
               <div>
                 <Text size="sm">
                   Hey, I&rsquo;m{" "}

@@ -16,6 +16,7 @@ import {
   useToday,
 } from "../components/Freshness";
 import MoreDetails from "../components/MoreDetails";
+import DiscordUpdates from "../components/DiscordUpdates";
 import { NoteChip } from "../components/NoteChip";
 import NvcAudience from "../components/NvcAudience";
 import { PolicyNews } from "../components/PolicyBanner";
@@ -456,6 +457,7 @@ export default function NvcBacklog({ data }: Props) {
           />
         </Stats>
         {!reviewStale && <ReviewEstimate today={today} series={data.review} />}
+        <DiscordUpdates when="when NVC posts new times" />
       </Stack>
       <Stack gap="xs">
         <PolicyNews page="/nvc" />
