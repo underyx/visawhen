@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "bun run ensure-db && bun --bun next dev --webpack",
-    "build": "bun run ensure-db && bun --bun next build --webpack && bun scripts/sitemap.ts && bun scripts/check-redirects.mjs",
+    "dev": "bun run ensure-db && bun --bun next dev",
+    "build": "bun run ensure-db && bun --bun next build && bun scripts/sitemap.ts && bun scripts/check-redirects.mjs",
     "export": "bun run build",
     "lint": "bun lint --no-script",
     "typecheck": "bun --bun tsc --noEmit",
