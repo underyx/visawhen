@@ -69,7 +69,6 @@ updates:
   # that workflow's run, not on the site.
   - package-ecosystem: "uv"
     directories:
-      - "/data/nvc"
       - "/data/consulates"
       - "/data/uscis"
     schedule:

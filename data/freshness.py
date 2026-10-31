@@ -104,7 +104,7 @@ def nvc() -> Freshness:
         stale_from=date.fromisoformat(newest) + timedelta(days=14),
         cadence="NVC updates its timeframes page weekly, so the data counts as stale 14 days after its newest reading.",
         where=(
-            "The scraper is `data/nvc/main.py`, run by the "
+            "The scraper is `data/nvc/main.ts`, run by the "
             f"[Update NVC and interview-queue data]({REPOSITORY_URL}/actions/workflows/nvc_update_schedule.yml) workflow. Its log says which sources "
             "answered (travel.state.gov, the adoption.state.gov mirror, the Wayback Machine) and what date each "
             "page is as of. Compare with [NVC's page](https://travel.state.gov/content/travel/en/us-visas/"
@@ -127,11 +127,11 @@ def iv_schedule() -> Freshness:
             "newest snapshot is more than 45 days old; the consulate pages warn about it from then on too."
         ),
         where=(
-            "The scraper is `data/consulates/iv_schedule.py --fetch`, run by the "
+            "The scraper is `data/consulates/iv_schedule.ts --fetch`, run by the "
             f"[Update NVC and interview-queue data]({REPOSITORY_URL}/actions/workflows/nvc_update_schedule.yml) workflow. If the "
             "[tool](https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/iv-wait-times.html) "
             "has a newer update, the log says why it was not added; the page can also be saved from a browser and "
-            "added with `iv_schedule.py --from-file`."
+            "added with `iv_schedule.ts --from-file`."
         ),
         workflow="nvc_update_schedule.yml",
     )

@@ -12,8 +12,8 @@ The data lives in this repository and is refreshed by scheduled workflows that c
 
 | Data                       | Source                                       | Scraper                                  | Output                                    |
 | -------------------------- | -------------------------------------------- | ---------------------------------------- | ----------------------------------------- |
-| NVC wait times             | State's NVC timeframes page                  | `data/nvc/main.py`                       | `data/nvc/data.json`                      |
-| Consulate interview queues | State's IV Scheduling Status Tool            | `data/consulates/iv_schedule.py --fetch` | `data/consulates/iv_schedule.json`        |
+| NVC wait times             | State's NVC timeframes page                  | `data/nvc/main.ts`                       | `data/nvc/data.json`                      |
+| Consulate interview queues | State's IV Scheduling Status Tool            | `data/consulates/iv_schedule.ts --fetch` | `data/consulates/iv_schedule.json`        |
 | Consulate visa issuances   | the State Department's monthly issuance PDFs | `data/consulates/*.py`                   | `data/consulates/dump/` (sqlite-diffable) |
 | USCIS form processing      | USCIS's quarterly reports                    | `data/uscis/forms.py`                    | `data/uscis/forms.json`                   |
 | USCIS monthly numbers      | USCIS's monthly Application Processing Data  | `data/uscis/monthly.py`                  | `data/uscis/monthly.json`                 |
@@ -43,12 +43,12 @@ The unit tests (`*.test.ts` next to the modules they test, run by `bun test`, wr
 The scrapers are moving from Python to TypeScript. The TypeScript ones run with Bun from the repository root, after `bun install`, and share the helpers in `data/lib/`; each Python one is its own [uv](https://docs.astral.sh/uv/) project under `data/`:
 
 ```sh
-cd data/nvc && uv run python main.py
+bun data/nvc/main.ts
 cd data/uscis && uv run python forms.py          # add --offline to reparse the cached reports only
 cd data/uscis && uv run python monthly.py        # or --from-file report.csv --url https://www.uscis.gov/...
 cd data/consulates && uv run python visa_issuances.py   # writes all_months.pkl
 cd data/consulates && uv run python baselines.py        # reads it, writes consulates.sqlite and dump/
-cd data/consulates && uv run python iv_schedule.py --fetch   # or --from-file page.html, for a page saved from a browser
+bun data/consulates/iv_schedule.ts --fetch   # or --from-file page.html, for a page saved from a browser
 bun data/visa_bulletin/bulletin.ts   # or --from-file page.html --month 2026-10
 ```
 
