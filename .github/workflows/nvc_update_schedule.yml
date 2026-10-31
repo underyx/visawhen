@@ -47,7 +47,7 @@ jobs:
         run: uv run python -u main.py
       # Adds a snapshot only when State's "Last Updated" date is newer than the
       # newest one in iv_schedule.json. It needs three packages, not the whole
-      # consulates project (pandas, pypdf, jupyter...). It runs, and whatever
+      # consulates project (pandas, pypdf, joblib...). It runs, and whatever
       # either step wrote is committed, even when the other step failed; the
       # job still fails then.
       - name: Fetch the interview-queue snapshot
