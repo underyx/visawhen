@@ -63,22 +63,3 @@ updates:
       deploy-tools:
         patterns:
           - "*"
-
-  # The consulate scraper's Python project. It only runs on a schedule in
-  # its workflow, so an update that breaks it shows up in that workflow's
-  # run, not on the site.
-  - package-ecosystem: "uv"
-    directories:
-      - "/data/consulates"
-    schedule:
-      interval: "weekly"
-    cooldown:
-      default-days: 7
-    groups:
-      uv:
-        patterns:
-          - "*"
-      uv-security:
-        applies-to: "security-updates"
-        patterns:
-          - "*"

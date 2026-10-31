@@ -228,7 +228,7 @@ def consulate_issuances() -> Freshness:
             "as stale 240 days after the end of the newest month."
         ),
         where=(
-            "The scrapers are `visa_issuances.py` and `baselines.py` in `data/consulates/`, run by the "
+            "The scraper is `data/consulates/visa_issuances.ts`, run by the "
             f"[Update consulates data]({REPOSITORY_URL}/actions/workflows/consulate_update_schedule.yml) workflow. Check whether "
             "State's [monthly immigrant visa issuance statistics](https://travel.state.gov/content/travel/en/legal/"
             "visa-law0/visa-statistics/immigrant-visa-statistics/monthly-immigrant-visa-issuances.html) list a "

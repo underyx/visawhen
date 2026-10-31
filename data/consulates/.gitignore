@@ -1,9 +1,5 @@
-dask-worker-space/
 pdfs/
-*.pkl
-.joblib_cache/
 *.sqlite
-# committed gzipped (baselines.py); an old `bun run ensure-db` left it
+# committed gzipped (visa_issuances.ts); an old `bun run ensure-db` left it
 # decompressed next to the .gz
 dump/backlogs.ndjson
-.venv/

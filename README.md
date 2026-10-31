@@ -14,7 +14,7 @@ The data lives in this repository and is refreshed by scheduled workflows that c
 | -------------------------- | -------------------------------------------- | ---------------------------------------- | ----------------------------------------- |
 | NVC wait times             | State's NVC timeframes page                  | `data/nvc/main.ts`                       | `data/nvc/data.json`                      |
 | Consulate interview queues | State's IV Scheduling Status Tool            | `data/consulates/iv_schedule.ts --fetch` | `data/consulates/iv_schedule.json`        |
-| Consulate visa issuances   | the State Department's monthly issuance PDFs | `data/consulates/*.py`                   | `data/consulates/dump/` (sqlite-diffable) |
+| Consulate visa issuances   | the State Department's monthly issuance PDFs | `data/consulates/visa_issuances.ts`      | `data/consulates/dump/` (sqlite-diffable) |
 | USCIS form processing      | USCIS's quarterly reports                    | `data/uscis/forms.ts`                    | `data/uscis/forms.json`                   |
 | USCIS monthly numbers      | USCIS's monthly Application Processing Data  | `data/uscis/monthly.ts`                  | `data/uscis/monthly.json`                 |
 | Visa Bulletin cutoff dates | State's monthly Visa Bulletins               | `data/visa_bulletin/bulletin.ts`         | `data/visa_bulletin/data.json`            |
@@ -40,14 +40,13 @@ The unit tests (`*.test.ts` next to the modules they test, run by `bun test`, wr
 
 ## Running the scrapers
 
-The scrapers are moving from Python to TypeScript. The TypeScript ones run with Bun from the repository root, after `bun install`, and share the helpers in `data/lib/`; each Python one is its own [uv](https://docs.astral.sh/uv/) project under `data/`:
+The scrapers are TypeScript. They run with Bun from the repository root, after `bun install`, and share the helpers in `data/lib/`:
 
 ```sh
 bun data/nvc/main.ts
 bun data/uscis/forms.ts                          # add --offline to reparse the cached reports only
 bun data/uscis/monthly.ts                        # or --from-file report.csv --url https://www.uscis.gov/...
-cd data/consulates && uv run python visa_issuances.py   # writes all_months.pkl
-cd data/consulates && uv run python baselines.py        # reads it, writes consulates.sqlite and dump/
+bun data/consulates/visa_issuances.ts                   # writes dump/; --offline reads the downloaded PDFs only
 bun data/consulates/iv_schedule.ts --fetch   # or --from-file page.html, for a page saved from a browser
 bun data/visa_bulletin/bulletin.ts   # or --from-file page.html --month 2026-10
 ```
@@ -74,7 +73,7 @@ Every month since November 2022, USCIS publishes for Congress a short "Applicati
 
 ### Consulate visa classes
 
-State's monthly issuance reports give every row a visa class code. `baselines.py` keeps immigrant (IV) and nonimmigrant (NIV) classes apart, since some codes mean different things in the two reports (IV E2 is EB-2, NIV E2 a treaty investor), and maps the detailed immigrant codes State used until January 2021 (DV1, DV2 and DV3) onto the categories it has reported since (DV), so that each page's series runs across the change. Codes State adds later go the same way: the EB-5 set-aside codes (RR, RR1, NH and so on) are counted in EB-5, and the script warns when a code with and without a trailing digit (CQ and CQ1) would be counted apart. The descriptions of the classes the script names or merges, and of any whose description in the Google Sheet needs fixing, are in `data/consulates/visa_descriptions.csv`, which wins over the sheet; the others come from the sheet. When a class or post page goes away, a rule in `public/_redirects` sends it to its replacement. Cloudflare keeps 2,000 rules without a placeholder or splat and 100 with, but counts every rule after the first one with a placeholder or splat as one with, and skips what goes past the limits without failing the deploy; it also follows a matching rule even where a page exists. So every rule without a placeholder must come first, and `bun run build` runs `scripts/check-redirects.mjs`, which drops any rule that matches a page and fails the build on a rule without a placeholder after one with, or past either limit.
+State's monthly issuance reports give every row a visa class code. `visa_issuances.ts` keeps immigrant (IV) and nonimmigrant (NIV) classes apart, since some codes mean different things in the two reports (IV E2 is EB-2, NIV E2 a treaty investor), and maps the detailed immigrant codes State used until January 2021 (DV1, DV2 and DV3) onto the categories it has reported since (DV), so that each page's series runs across the change. Codes State adds later go the same way: the EB-5 set-aside codes (RR, RR1, NH and so on) are counted in EB-5, and the script warns when a code with and without a trailing digit (CQ and CQ1) would be counted apart. The descriptions of the classes the script names or merges, and of any whose description in the Google Sheet needs fixing, are in `data/consulates/visa_descriptions.csv`, which wins over the sheet; the others come from the sheet. When a class or post page goes away, a rule in `public/_redirects` sends it to its replacement. Cloudflare keeps 2,000 rules without a placeholder or splat and 100 with, but counts every rule after the first one with a placeholder or splat as one with, and skips what goes past the limits without failing the deploy; it also follows a matching rule even where a page exists. So every rule without a placeholder must come first, and `bun run build` runs `scripts/check-redirects.mjs`, which drops any rule that matches a page and fails the build on a rule without a placeholder after one with, or past either limit.
 
 The consulate list shows and searches each post's country, from `POST_COUNTRIES` in `api/searchTerms.ts`, which is written by hand; the build fails on a post that has none, so add one when State reports a new post. The same file has the plain-language names and search words of the USCIS forms ("work permit" for the I-765).
 
