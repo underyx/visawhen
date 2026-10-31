@@ -25,7 +25,7 @@ The home page leads to a timeline page per common route through the process (`/t
 
 ## Running the site locally
 
-You need Node.js (the version in `.node-version`), which runs the site, [Bun](https://bun.com), which installs the packages (the version in `.bun-version`), runs the tests and lints (`bun lint` is only in the canary for now: `bun upgrade --canary`), and [sqlite-diffable](https://github.com/simonw/sqlite-diffable) on your `PATH` (`pipx install sqlite-diffable` or `uv tool install sqlite-diffable`) to rebuild the consulates database from its dump.
+You need [Bun](https://bun.com) (the version in `.bun-version`), which installs the packages, runs Next.js and the tests, and lints (`bun lint` is only in the canary for now: `bun upgrade --canary`). Node.js is not needed. `bun run dev` and `bun run build` first rebuild `data/consulates/consulates.sqlite` from its dump (`scripts/load-consulates-db.ts`, with Bun's built-in SQLite).
 
 ```sh
 bun install         # install dependencies

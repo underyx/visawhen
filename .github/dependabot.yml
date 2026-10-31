@@ -39,8 +39,9 @@ updates:
         patterns:
           - "*"
     ignore:
-      # @types/node follows the Node.js major in .node-version (24); a new
-      # major of the types would describe APIs that Node.js does not have.
+      # @types/node stays on Node.js 24, whose APIs Bun implements and which
+      # the deploy job runs wrangler on; a new major of the types would
+      # describe APIs that neither has.
       - dependency-name: "@types/node"
         update-types:
           - "version-update:semver-major"

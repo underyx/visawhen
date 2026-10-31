@@ -1,7 +1,6 @@
+import { Database, type SQLQueryBindings } from "bun:sqlite";
 import { readFile } from "fs/promises";
 import { join } from "path";
-import sqlite3 from "sqlite3";
-import { open } from "sqlite";
 import {
   countToolClassIssuances,
   type IvCategory,
@@ -11,33 +10,31 @@ import {
 
 const dataDir = join(process.cwd(), "data");
 
-type Db = Awaited<ReturnType<typeof open>>;
-let dbPromise: Promise<Db> | undefined;
+/** The consulates database, as the functions below read it */
+interface Db {
+  all<T>(sql: string, ...params: SQLQueryBindings[]): Promise<T>;
+  get<T>(sql: string, ...params: SQLQueryBindings[]): Promise<T | undefined>;
+}
+let db: Db | undefined;
 
-// One connection per process, opened lazily. `next build` renders the ~15,000
-// consulate pages in parallel worker processes, each of which gets its own
-// connection; before this every getStaticProps call opened a fresh one.
+// One read-only connection per process, opened lazily. `next build` renders
+// the ~15,000 consulate pages in parallel worker processes, each of which gets
+// its own connection. scripts/load-consulates-db.ts builds the database and
+// its index from the dump (`bun run ensure-db`).
 function openDb(): Promise<Db> {
-  if (dbPromise === undefined) {
-    dbPromise = open({
-      filename: join(dataDir, `consulates/consulates.sqlite`),
-      driver: sqlite3.Database,
-    }).then(async (db) => {
-      // The build workers race to create the indexes; wait for the lock
-      // instead of failing with SQLITE_BUSY.
-      db.configure("busyTimeout", 60_000);
-      // `yarn ensure-db` rebuilds the database from the dump, and
-      // sqlite-diffable does not recreate indexes, so every per-page query
-      // used to full-scan the 1.3M-row backlogs table. Creating them here
-      // takes a few seconds once and makes the page lookups instant.
-      await db.exec(`
-        CREATE INDEX IF NOT EXISTS backlogs_post_visa
-          ON backlogs("Post Slug", "Visa Class Slug");
-      `);
-      return db;
-    });
+  if (db === undefined) {
+    const database = new Database(
+      join(dataDir, "consulates/consulates.sqlite"),
+      { readonly: true },
+    );
+    db = {
+      all: async <T>(sql: string, ...params: SQLQueryBindings[]) =>
+        database.query(sql).all(...params) as T,
+      get: async <T>(sql: string, ...params: SQLQueryBindings[]) =>
+        (database.query(sql).get(...params) ?? undefined) as T | undefined,
+    };
   }
-  return dbPromise;
+  return Promise.resolve(db);
 }
 
 export interface SlugPairRow {
