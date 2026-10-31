@@ -253,7 +253,7 @@ export function checkPolicies({
     );
 
   // The pages drop a live entry UNCHECKED_DAYS after its last check. This
-  // says so a week ahead in any build's log; data/freshness.py opens an
+  // says so a week ahead in any build's log; data/freshness.ts opens an
   // issue from the same day, since the site builds only when the data or
   // the code changes.
   const today = new Date().toISOString().slice(0, 10);

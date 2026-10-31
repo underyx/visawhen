@@ -1,6 +1,6 @@
 # Opens one issue per data source whose newest data is older than that source's
 # publishing schedule allows, keeps it up to date and closes it when new data
-# arrives (see data/freshness.py). The scrapers' runs stay green when a source
+# arrives (see data/freshness.ts). The scrapers' runs stay green when a source
 # is unreachable or has nothing new, so without this a stalled source goes
 # unnoticed.
 name: Check data freshness
@@ -27,11 +27,14 @@ jobs:
         with:
           # the steps below pass the token to gh themselves
           persist-credentials: false
-      # Standard library only, so the runner's own Python does.
+      # Bun's built-in modules only, so no install
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: .bun-version
       - name: Check each source and sync the stale-data issues
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python3 -u data/freshness.py --github
+        run: bun data/freshness.ts --github
       # GitHub disables scheduled workflows in a public repository after 60
       # days without repository activity, and months can pass without a data
       # commit (USCIS publishes quarterly; NVC and consulate data have stalled
