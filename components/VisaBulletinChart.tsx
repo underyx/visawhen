@@ -7,17 +7,16 @@ import {
   ChartHeader,
   DASHES,
   Dot,
-  formatDateTick,
   lonePoints,
   Plot,
   RangeButtons,
   type Series as ChartSeries,
-  thin,
   TooltipLine,
   useChartWidth,
   XAxis,
   YAxis,
 } from "./Chart";
+import { dateTicks } from "./dateTicks";
 import { VISA_BULLETIN_URL } from "./links";
 import {
   addMonthsToMonth,
@@ -140,7 +139,11 @@ export default function VisaBulletinChart({ series, label }: Props) {
   const years = yTicks.every(
     (tick) => tick.getUTCMonth() === 0 && tick.getUTCDate() === 1,
   );
-  const xTicks = x.ticks(Math.max(2, Math.floor(plotWidth / 48)));
+  const xTicks = dateTicks(
+    new Date(monthStart(shown[0].month)),
+    new Date(monthStart(shown[shown.length - 1].month)),
+    x,
+  );
   return (
     <Paper withBorder p="md" mx={0} component="figure">
       <ChartHeader
@@ -191,16 +194,7 @@ export default function VisaBulletinChart({ series, label }: Props) {
               }
               left={MARGIN.left}
             />
-            <XAxis
-              ticks={thin(
-                xTicks.map((tick) => ({
-                  x: x(tick),
-                  label: formatDateTick(tick),
-                })),
-              )}
-              y={plotHeight}
-              width={plotWidth}
-            />
+            <XAxis ticks={xTicks} y={plotHeight} width={plotWidth} />
             {KEYS.map((key) => {
               const cutoffs = shown.map((bulletin) =>
                 cutoffDate(bulletin, key),

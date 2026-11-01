@@ -17,16 +17,15 @@ import {
   ChartHeader,
   DASHES,
   Dot,
-  formatDateTick,
   lonePoints,
   Plot,
   RangeButtons,
-  thin,
   TooltipLine,
   useChartWidth,
   XAxis,
   YAxis,
 } from "./Chart";
+import { dateTicks } from "./dateTicks";
 
 interface Props {
   series: NvcSeries;
@@ -160,7 +159,11 @@ export default function NvcChart({ id, series }: Props) {
   });
   const xs = points.map(({ date }) => x(new Date(date)));
   const lone = lonePoints(points.map(({ days }) => days));
-  const ticks = x.ticks(Math.max(2, Math.floor(plotWidth / 48)));
+  const ticks = dateTicks(
+    new Date(points[0].date),
+    new Date(points[points.length - 1].date),
+    x,
+  );
   return (
     <Paper withBorder p="md" mx={0} component="figure">
       <ChartHeader
@@ -194,16 +197,7 @@ export default function NvcChart({ id, series }: Props) {
               unit="days"
               left={MARGIN.left}
             />
-            <XAxis
-              ticks={thin(
-                ticks.map((tick) => ({
-                  x: x(tick),
-                  label: formatDateTick(tick),
-                })),
-              )}
-              y={plotHeight}
-              width={plotWidth}
-            />
+            <XAxis ticks={ticks} y={plotHeight} width={plotWidth} />
             <LinePath<Point>
               data={points}
               x={({ date }) => x(new Date(date))}

@@ -263,14 +263,6 @@ export function thin<T extends { x: number }>(ticks: T[], gap = 44): T[] {
   return ticks.filter((_, index) => (ticks.length - 1 - index) % every === 0);
 }
 
-/** A date tick as its year on January 1 and as its month otherwise:
- * "2025", "Apr" */
-export function formatDateTick(date: Date): string {
-  return date.getUTCMonth() === 0 && date.getUTCDate() === 1
-    ? String(date.getUTCFullYear())
-    : date.toLocaleDateString("en-US", { month: "short", timeZone: "UTC" });
-}
-
 export type Mark = "bar" | "line" | "dashed";
 
 /** Dashes of a dashed line */
