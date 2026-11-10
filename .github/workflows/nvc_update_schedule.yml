@@ -8,10 +8,20 @@ on:
     # check every 30 minutes on Monday in the update window
     - cron: 3/30 14-16 * * 1
     # check every hour on Monday outside the update window
-    - cron: 38 0-13,17-23 * * 1
+    - cron: 38 0-13,17-19,21-23 * * 1
     # check every day for the rest of the week
     - cron: 38 8 * * 0,2-6
+    # Monday and Tuesday evening. This run and the daily one above may also
+    # read Google's search results; see SEARCH below.
+    - cron: 38 20 * * 1,2
   workflow_dispatch:
+    inputs:
+      nvc_page_text:
+        description: >-
+          Text copied from State's NVC timeframes page, to add its numbers by
+          hand. Leave empty to fetch as usual.
+        type: string
+        required: false
 
 # Only the job that commits the data can push; the build and deploy jobs,
 # which run third-party code, get a read-only token.
@@ -34,8 +44,30 @@ jobs:
           bun-version-file: .bun-version
       # --frozen-lockfile: fail rather than change bun.lock
       - run: bun install --frozen-lockfile
+      # State's site answers the scraper with HTTP 403, so there are two
+      # more ways in. A run started by hand with the page's text adds that
+      # text's numbers. And a few runs a week pass --search, which reads the
+      # numbers from Google's search results once a new weekly reading is due
+      # and no other source has it: each search costs a serper.dev credit, so
+      # not the runs every half hour. Without the SERPER_API_KEY secret,
+      # --search does nothing.
       - name: Fetch the NVC timeframes
-        run: bun data/nvc/main.ts
+        env:
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
+          PAGE_TEXT: ${{ inputs.nvc_page_text }}
+          SEARCH: >-
+            ${{ github.event_name == 'workflow_dispatch'
+            || github.event.schedule == '38 8 * * 0,2-6'
+            || github.event.schedule == '38 20 * * 1,2' }}
+        run: |
+          if [ -n "$PAGE_TEXT" ]; then
+            printf '%s\n' "$PAGE_TEXT" > "$RUNNER_TEMP/nvc-page.txt"
+            bun data/nvc/main.ts --from-file "$RUNNER_TEMP/nvc-page.txt"
+          elif [ "$SEARCH" = "true" ]; then
+            bun data/nvc/main.ts --search
+          else
+            bun data/nvc/main.ts
+          fi
       # Adds a snapshot only when State's "Last Updated" date is newer than the
       # newest one in iv_schedule.json. It runs, and whatever either step wrote
       # is committed, even when the other step failed; the job still fails

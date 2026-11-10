@@ -112,7 +112,8 @@ function nvc(): Freshness {
     where:
       "The scraper is `data/nvc/main.ts`, run by the " +
       `[Update NVC and interview-queue data](${REPOSITORY_URL}/actions/workflows/nvc_update_schedule.yml) workflow. Its log says which sources ` +
-      "answered (travel.state.gov, the adoption.state.gov mirror, the Wayback Machine) and what date each " +
+      "answered (travel.state.gov, the adoption.state.gov mirror, the Wayback Machine, Google's search " +
+      "results) and what date each " +
       "page is as of. Compare with [NVC's page](https://travel.state.gov/content/travel/en/us-visas/" +
       "immigrate/nvc-timeframes.html).",
     workflow: "nvc_update_schedule.yml",
