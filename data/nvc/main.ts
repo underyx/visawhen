@@ -16,12 +16,17 @@
 //    quotes the sentence that was searched for, so one search per timeframe
 //    reads all three. The searches go through serper.dev and need
 //    SERPER_API_KEY; each costs one credit, so the first one alone decides
-//    whether Google's copy is newer than data.json, and the workflow passes
-//    --search on a few runs a week only.
+//    whether Google's copy is newer than data.json, and nothing is searched
+//    while the newest reading is less than a week old.
 //
 //     bun data/nvc/main.ts                        # the sources above, 1 to 3
 //     bun data/nvc/main.ts --search               # 1 to 4
+//     bun data/nvc/main.ts --search-only          # 4 alone
 //     bun data/nvc/main.ts --from-file page.html  # a saved page, or its text
+//
+// --search-only asks Google's search results and nothing else, so that the
+// workflow can check them every hour without asking State's site, which
+// answers 403, every hour as well.
 //
 // --from-file reads a page saved from a browser instead, or a text file with
 // the page's text pasted into it (the three sentences are enough), and adds
@@ -75,7 +80,10 @@ const LIVE_MAX_AGE_DAYS = 7;
 // the newest reading is this many days old
 const SEARCH_MIN_AGE_DAYS = 7;
 const SEARCH_URL = "https://google.serper.dev/search";
+const SEARCH_ACCOUNT_URL = "https://google.serper.dev/account";
 const SEARCH_TIMEOUT_MS = 30_000;
+// Fewer credits than this is a warning: about two months of searches
+const LOW_CREDITS = 250;
 // What each search asks Google for, in quotes: words of the timeframe's
 // sentence that never change, so that the text under the result quotes it.
 // The first is the one that decides whether Google's copy is new.
@@ -322,6 +330,36 @@ async function searchSnippet(name: TimeframeName): Promise<string | null> {
   return pageSnippets(body);
 }
 
+/** Say in the log how many search credits the key has left, which costs
+ * none, with a warning when the key is refused or the credits run low: paid
+ * credits expire, and without them the searches silently find nothing. */
+async function reportCredits(): Promise<void> {
+  try {
+    const response = await fetch(SEARCH_ACCOUNT_URL, {
+      headers: {
+        "User-Agent": USER_AGENT,
+        "X-API-KEY": process.env.SERPER_API_KEY ?? "",
+      },
+      signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS),
+    });
+    if (response.status !== 200) {
+      console.log(
+        `::warning::serper.dev did not accept SERPER_API_KEY (HTTP ${response.status}); the NVC searches will find nothing`,
+      );
+      return;
+    }
+    const { balance } = (await response.json()) as { balance?: number };
+    console.log(`Search credits left: ${balance}`);
+    if (typeof balance === "number" && balance < LOW_CREDITS) {
+      console.log(
+        `::warning::Only ${balance} serper.dev credits are left for the NVC searches`,
+      );
+    }
+  } catch (error) {
+    console.log(`Could not read the search credits: ${errorMessage(error)}`);
+  }
+}
+
 /** Merge what Google's search results quote from State's page. Returns
  * [changed, why nothing changed]. */
 export async function fetchSearch(
@@ -411,11 +449,38 @@ async function addFromFile(data: Data, path: string): Promise<number> {
   return 0;
 }
 
+/** --search-only: add what Google's search results quote, when a new weekly
+ * reading is due. Finding nothing is no warning: the workflow asks every
+ * hour until Google has read State's new page. */
+async function searchOnly(data: Data): Promise<number> {
+  const newest = latestAsOf(data);
+  if (daysSince(newest) < SEARCH_MIN_AGE_DAYS) {
+    console.log(
+      `No search: the newest reading, ${newest}, is less than ${SEARCH_MIN_AGE_DAYS} days old`,
+    );
+    return 0;
+  }
+  if (!process.env.SERPER_API_KEY) {
+    console.log("::notice::SERPER_API_KEY is not set, so no search");
+    return 0;
+  }
+  await reportCredits();
+  const [changed, reason] = await fetchSearch(data);
+  if (changed) {
+    await save(data);
+    console.log(`Wrote ${DATA_PATH}`);
+  } else {
+    console.log(`No new NVC data: ${reason}`);
+  }
+  return 0;
+}
+
 async function main(): Promise<number> {
   const { values } = parseArgs({
     options: {
       "from-file": { type: "string" },
       search: { type: "boolean" },
+      "search-only": { type: "boolean" },
     },
   });
   const data = await readJson<Data>(DATA_PATH);
@@ -423,6 +488,11 @@ async function main(): Promise<number> {
   if (values["from-file"] !== undefined) {
     return addFromFile(data, values["from-file"]);
   }
+  if (values["search-only"]) return searchOnly(data);
+
+  // On the daily run and on runs started by hand, whether or not a search
+  // is due, so that a key that stopped working is noticed within a day
+  if (values.search && process.env.SERPER_API_KEY) await reportCredits();
 
   const [liveUrl, liveParsed, unparseable] = await fetchLive();
 
