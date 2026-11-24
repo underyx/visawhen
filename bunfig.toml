@@ -4,8 +4,9 @@
 [install]
 # Take only releases at least a week old, like Dependabot's cooldown in
 # .github/dependabot.yml, so that a compromised release has likely been caught
-# and pulled first.
-minimumReleaseAge = "7d"
+# and pulled first. In seconds (7 days): the Bun that Dependabot runs does
+# not read "7d", and its weekly updates failed on it.
+minimumReleaseAge = 604800
 # node_modules laid out as npm does; the lockfile's configVersion 0 means the
 # same, but saying so keeps it from changing under a newer Bun.
 linker = "hoisted"
