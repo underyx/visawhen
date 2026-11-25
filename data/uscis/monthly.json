@@ -5464,6 +5464,122 @@
           }
         }
       }
+    },
+    "2026-10": {
+      "url": "https://www.uscis.gov/sites/default/files/document/data/appropriation_requirement_october_2026_v1.csv",
+      "forms": {
+        "I-130": {
+          "all": {
+            "title": "Petition for Alien Relative",
+            "received": 47268,
+            "approved": 24259,
+            "denied": 4017,
+            "pending": 2532762,
+            "pendingOver6Months": 2226593,
+            "averageMonths": 17.9
+          }
+        },
+        "I-360": {
+          "all": {
+            "title": "Petition for Amerasian, Widow(er), or Special Immigrant",
+            "received": 5330,
+            "approved": 3911,
+            "denied": 770,
+            "pending": 316806,
+            "pendingOver6Months": 275539,
+            "averageMonths": 10.6
+          }
+        },
+        "I-485": {
+          "asylum": {
+            "title": "Application to Register Permanent Residence or Adjust Status (Asylum)",
+            "received": 3288,
+            "approved": 710,
+            "denied": 116,
+            "pending": 147257,
+            "pendingOver6Months": 118333,
+            "averageMonths": 28.9
+          },
+          "cuban": {
+            "title": "Application to Register Permanent Residence or Adjust Status (Cuban)",
+            "received": 776,
+            "approved": 509,
+            "denied": 206,
+            "pending": 355173,
+            "pendingOver6Months": 349060,
+            "averageMonths": 24.4
+          },
+          "employment": {
+            "title": "Application to Register Permanent Residence or Adjust Status (Employment)",
+            "received": 26172,
+            "approved": 12721,
+            "denied": 1434,
+            "pending": 290705,
+            "pendingOver6Months": 196524,
+            "averageMonths": 10.8
+          },
+          "family": {
+            "title": "Application to Register Permanent Residence or Adjust Status (Family)",
+            "received": 20408,
+            "approved": 19985,
+            "denied": 4398,
+            "pending": 605334,
+            "pendingOver6Months": 456938,
+            "averageMonths": 11.5
+          },
+          "other": {
+            "title": "Application to Register Permanent Residence or Adjust Status (Other)",
+            "received": 2722,
+            "approved": 725,
+            "denied": 332,
+            "pending": 82396,
+            "pendingOver6Months": 62923,
+            "averageMonths": 24.7
+          },
+          "refugee": {
+            "title": "Application to Register Permanent Residence or Adjust Status (Refugee)",
+            "received": 1145,
+            "approved": 39,
+            "denied": 20,
+            "pending": 161646,
+            "pendingOver6Months": 143623,
+            "averageMonths": 47.6
+          }
+        },
+        "I-751": {
+          "all": {
+            "title": "Petition to Remove Conditions on Residence",
+            "received": 11657,
+            "approved": 2757,
+            "denied": 110,
+            "pending": 379117,
+            "pendingOver6Months": 294727,
+            "averageMonths": 24.5
+          }
+        },
+        "I-765": {
+          "all": {
+            "title": "Application for Employment Authorization",
+            "received": 138705,
+            "approved": 116723,
+            "denied": 27588,
+            "pending": 1889511,
+            "pendingOver6Months": 1331799,
+            "averageMonths": 7.1
+          }
+        },
+        "N-400": {
+          "all": {
+            "title": "Application for Naturalization",
+            "received": 46192,
+            "approved": 11006,
+            "denied": 4089,
+            "pending": 873390,
+            "pendingOver6Months": 573169,
+            "averageMonths": 14.1
+          }
+        }
+      }
     }
   }
 }
